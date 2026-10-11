@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 /** Shared chrome for /saved and /alerts. */
 export function ListPage({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-6 pb-24">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-6 pb-8">
       <header>
         <h1 className="text-2xl font-bold tracking-tight text-brand-navy">{title}</h1>
         <p className="text-sm text-muted-foreground">{intro}</p>

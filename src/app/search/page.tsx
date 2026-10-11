@@ -61,7 +61,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
 
 export default function SearchPage({ searchParams }: PageProps<"/search">) {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-4 pb-24">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-4 pb-8">
       <h1 className="sr-only">Compare prices across stores</h1>
       <Suspense fallback={<Skeleton className="h-14 w-full rounded-2xl" />}>
         <SearchContent searchParams={searchParams} />

@@ -195,3 +195,15 @@ test.describe("outbound redirect (/go)", () => {
     expect(new URL(popup.url()).searchParams.get("tag")).toBe("onecart-e2e-20");
   });
 });
+
+test("the Amazon Associates disclosure appears on every page", async ({ page }) => {
+  for (const route of ["/", "/search?q=wireless+earbuds", "/saved", "/alerts"]) {
+    await page.goto(route);
+    const footer = page.getByRole("contentinfo");
+    await footer.scrollIntoViewIfNeeded();
+    await expect(
+      footer.getByText("As an Amazon Associate I earn from qualifying purchases.", { exact: true }),
+      route,
+    ).toBeVisible();
+  }
+});

@@ -14,7 +14,7 @@ const VALUE_PROPS = [
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-24">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-8">
       <div className="flex flex-col gap-6">
         <h1 className="text-center text-4xl font-bold tracking-tight text-brand-navy">
           Find the best price.
