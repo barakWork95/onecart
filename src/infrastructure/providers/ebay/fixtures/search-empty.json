@@ -1,0 +1,6 @@
+{
+  "href": "https://api.ebay.com/buy/browse/v1/item_summary/search?q=zzzz&limit=50",
+  "total": 0,
+  "limit": 50,
+  "offset": 0
+}

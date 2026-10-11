@@ -1,0 +1,10 @@
+{
+  "errors": [
+    {
+      "errorId": 12001,
+      "domain": "API_BROWSE",
+      "category": "REQUEST",
+      "message": "The 'filter' value is invalid."
+    }
+  ]
+}

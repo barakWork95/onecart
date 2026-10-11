@@ -1,0 +1,58 @@
+"use client";
+
+import { Search, X } from "lucide-react";
+import Form from "next/form";
+import { useRef, useState } from "react";
+import { MAX_QUERY_LENGTH } from "@/domain/search/search-query";
+import { cn } from "@/lib/utils";
+
+/** GET form to /search — works without JS, client-side navigation with it. */
+export function SearchBox({
+  defaultValue = "",
+  autoFocus = false,
+  className,
+}: {
+  defaultValue?: string;
+  autoFocus?: boolean;
+  className?: string;
+}) {
+  const [value, setValue] = useState(defaultValue);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <Form action="/search" role="search" className={cn("relative", className)}>
+      <Search
+        className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-primary"
+        aria-hidden
+      />
+      <input
+        ref={inputRef}
+        name="q"
+        type="search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        required
+        maxLength={MAX_QUERY_LENGTH}
+        autoFocus={autoFocus}
+        dir="auto"
+        enterKeyHint="search"
+        placeholder="Search in English or Hebrew"
+        aria-label="Search products"
+        className="h-14 w-full rounded-2xl border border-border bg-card ps-12 pe-12 text-base font-medium text-foreground shadow-sm outline-none placeholder:font-normal placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/20 [&::-webkit-search-cancel-button]:hidden"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => {
+            setValue("");
+            inputRef.current?.focus();
+          }}
+          aria-label="Clear search"
+          className="absolute end-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
+        >
+          <X className="size-4" aria-hidden />
+        </button>
+      )}
+    </Form>
+  );
+}

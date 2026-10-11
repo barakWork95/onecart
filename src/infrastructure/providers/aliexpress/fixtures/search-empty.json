@@ -1,0 +1,9 @@
+{
+  "aliexpress_affiliate_product_query_response": {
+    "resp_result": {
+      "resp_code": 200,
+      "resp_msg": "Call succeeds",
+      "result": { "current_page_no": 1, "current_record_count": 0, "total_record_count": 0 }
+    }
+  }
+}

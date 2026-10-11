@@ -1,0 +1,7 @@
+{
+  "error_response": {
+    "code": "IncompleteSignature",
+    "msg": "The request signature does not conform to platform standards",
+    "request_id": "0b1d2c3e4f"
+  }
+}

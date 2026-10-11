@@ -1,0 +1,90 @@
+{
+  "href": "https://api.ebay.com/buy/browse/v1/item_summary/search?q=wireless%20earbuds&limit=50",
+  "total": 1834,
+  "limit": 50,
+  "offset": 0,
+  "itemSummaries": [
+    {
+      "itemId": "v1|395012345678|0",
+      "legacyItemId": "395012345678",
+      "title": "Soundcore by Anker Life P3  Noise Cancelling Earbuds Black",
+      "price": { "value": "34.50", "currency": "USD" },
+      "marketingPrice": {
+        "originalPrice": { "value": "49.99", "currency": "USD" },
+        "discountPercentage": "31",
+        "discountAmount": { "value": "15.49", "currency": "USD" }
+      },
+      "image": { "imageUrl": "https://i.ebayimg.com/images/g/lifep3/s-l225.jpg" },
+      "itemWebUrl": "https://www.ebay.com/itm/395012345678?hash=item5bf8e2a1ce:g:abc&amdata=enc%3A1",
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": { "value": "6.90", "currency": "USD" },
+          "minEstimatedDeliveryDate": "2026-10-25T07:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T07:00:00.000Z"
+        }
+      ],
+      "seller": { "username": "techdeals_us", "feedbackPercentage": "99.4", "feedbackScore": 15230 },
+      "condition": "New",
+      "conditionId": "1000",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"],
+      "itemLocation": { "country": "US" }
+    },
+    {
+      "itemId": "v1|395011112222|601234567890",
+      "legacyItemId": "395011112222",
+      "title": "Sony WH-CH720N Wireless Noise Canceling Headphones",
+      "price": { "value": "79.00", "currency": "USD" },
+      "image": { "imageUrl": "https://i.ebayimg.com/images/g/sony/s-l225.jpg" },
+      "shippingOptions": [
+        { "shippingCostType": "CALCULATED" },
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": { "value": "22.00", "currency": "USD" },
+          "minEstimatedDeliveryDate": "2026-10-14T07:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-16T07:00:00.000Z"
+        },
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": { "value": "15.00", "currency": "USD" },
+          "minEstimatedDeliveryDate": "2026-10-20T07:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-23T07:00:00.000Z"
+        }
+      ],
+      "seller": { "username": "sony_refurb" },
+      "conditionId": "1000",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|395033334444|0",
+      "legacyItemId": "395033334444",
+      "title": "Keychron K2 75% Wireless Mechanical Keyboard",
+      "price": { "value": "45.40", "currency": "USD" },
+      "shippingOptions": [
+        { "shippingCostType": "FIXED", "shippingCost": { "value": "0.00", "currency": "USD" } }
+      ],
+      "conditionId": "1000",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|395087654321|0",
+      "legacyItemId": "395087654321",
+      "title": "Anker Soundcore Space A40 Earbuds",
+      "price": { "value": "54.00", "currency": "USD" },
+      "conditionId": "1000",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|395099990000|0",
+      "legacyItemId": "395099990000",
+      "title": "Soundcore Life P3 — auction",
+      "price": { "value": "12.00", "currency": "USD" },
+      "buyingOptions": ["AUCTION"]
+    },
+    {
+      "itemId": "v1|395099990001|0",
+      "title": "Listing with a broken price",
+      "price": { "value": "", "currency": "USD" }
+    }
+  ]
+}

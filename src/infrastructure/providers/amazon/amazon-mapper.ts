@@ -1,0 +1,93 @@
+import { toIls, type FxRates } from "@/domain/pricing/fx-rates";
+import type { ImportTaxPolicy } from "@/domain/pricing/import-tax-policy";
+import { calculateLandedPrice } from "@/domain/pricing/landed-price-calculator";
+import { unifiedProductId, type IsoDateTime, type UnifiedProduct } from "@/domain/product/unified-product";
+import { moneyFromMajor, zeroMoney, type CurrencyCode } from "@/domain/shared/money";
+import { parseAmazonDelivery } from "@/infrastructure/providers/amazon/amazon-delivery";
+import type { AmazonRawProduct } from "@/infrastructure/providers/amazon/amazon-raw-schema";
+
+export interface AmazonMapContext {
+  readonly policy: ImportTaxPolicy;
+  readonly fx: FxRates;
+  readonly now: Date;
+  readonly fetchedAt: IsoDateTime;
+}
+
+/** Currency from the display price. amazon.com quotes "$" = USD; ILS appears when the shopper's currency is set. */
+function currencyOf(price: string | undefined): CurrencyCode | null {
+  const text = price?.trim() ?? "";
+  if (text.startsWith("$")) return "USD";
+  if (text.startsWith("₪") || text.toUpperCase().startsWith("ILS")) return "ILS";
+  if (text.startsWith("€")) return "EUR";
+  if (text.startsWith("£")) return "GBP";
+  return null;
+}
+
+function normalizeTitle(title: string): string {
+  return title.replace(/\s+/g, " ").trim();
+}
+
+/** Canonical https://www.amazon.com/dp/{ASIN} — drops ref/tracking/affiliate params. */
+function canonicalUrl(asin: string): string {
+  return `https://www.amazon.com/dp/${asin}`;
+}
+
+function cleanImage(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Pure: SerpApi Amazon item → UnifiedProduct, or null when it can't be priced honestly. */
+export function mapAmazonProduct(raw: AmazonRawProduct, ctx: AmazonMapContext): UnifiedProduct | null {
+  const currency = currencyOf(raw.price);
+  const title = normalizeTitle(raw.title);
+  if (!currency || raw.extracted_price === undefined || !title) return null;
+
+  const item = moneyFromMajor(raw.extracted_price, currency);
+  const delivery = parseAmazonDelivery(raw.delivery, item, ctx.now);
+
+  const price = calculateLandedPrice(
+    {
+      item,
+      shipping: delivery.shipping,
+      // "$X shipping & import fees deposit": X already covers taxes, so estimate none on top.
+      taxesCollectedAtCheckout: delivery.includesImportFees ? zeroMoney(currency) : null,
+    },
+    ctx.policy,
+    ctx.fx,
+  );
+
+  const original =
+    raw.extracted_old_price !== undefined && raw.extracted_old_price > raw.extracted_price
+      ? toIls(moneyFromMajor(raw.extracted_old_price, currency), ctx.fx)
+      : null;
+
+  return {
+    id: unifiedProductId("amazon", raw.asin),
+    provider: "amazon",
+    providerProductId: raw.asin,
+    title,
+    imageUrl: cleanImage(raw.thumbnail),
+    productUrl: canonicalUrl(raw.asin),
+    price,
+    originalPrice: original,
+    rating:
+      raw.rating !== undefined && raw.reviews !== undefined && raw.reviews > 0
+        ? { average: raw.rating, count: raw.reviews }
+        : null,
+    delivery: {
+      minDays: delivery.minDays,
+      maxDays: delivery.maxDays,
+      isFreeShipping: delivery.isFreeShipping,
+      methodLabel: null,
+    },
+    availability: "in_stock",
+    sellerName: null,
+    fetchedAt: ctx.fetchedAt,
+  };
+}

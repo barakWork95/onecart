@@ -1,0 +1,8 @@
+{
+  "error_response": {
+    "code": "ApiCallLimit",
+    "msg": "App Call Limited",
+    "sub_msg": "This ban will last for 1 more seconds",
+    "request_id": "0b1d2c3e50"
+  }
+}

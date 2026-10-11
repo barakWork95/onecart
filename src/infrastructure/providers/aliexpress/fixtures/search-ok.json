@@ -1,0 +1,64 @@
+{
+  "aliexpress_affiliate_product_query_response": {
+    "resp_result": {
+      "resp_code": 200,
+      "resp_msg": "Call succeeds",
+      "result": {
+        "current_page_no": 1,
+        "current_record_count": 5,
+        "total_record_count": 1840,
+        "products": {
+          "product": [
+            {
+              "product_id": 1005006271234567,
+              "product_title": "  SoundCore   Life P3 ANC Wireless Earbuds  ",
+              "product_detail_url": "https://www.aliexpress.com/item/1005006271234567.html?spm=a2g0o.productlist&aff_fcid=abc123",
+              "product_main_image_url": "//ae01.alicdn.com/kf/S8a1b2c3d4e5f.jpg",
+              "target_sale_price": "89.00",
+              "target_sale_price_currency": "ILS",
+              "target_original_price": "143.55",
+              "target_original_price_currency": "ILS",
+              "evaluate_rate": "96.8%",
+              "lastest_volume": 1420,
+              "shop_name": "Soundcore Official Store",
+              "promotion_link": "https://s.click.aliexpress.com/e/_DREDACTED"
+            },
+            {
+              "product_id": "1005007000000001",
+              "product_title": "75% Mechanical Keyboard Hot-Swappable Gasket Mount",
+              "product_detail_url": "https://www.aliexpress.com/item/1005007000000001.html",
+              "product_main_image_url": "https://ae01.alicdn.com/kf/Skeyboard.jpg",
+              "target_sale_price": "329.90",
+              "target_sale_price_currency": "ILS",
+              "target_original_price": "299.00",
+              "target_original_price_currency": "ILS",
+              "evaluate_rate": "94.1%",
+              "lastest_volume": 310
+            },
+            {
+              "product_id": 1005005123456789,
+              "product_title": "Magnetic Car Phone Mount",
+              "product_detail_url": "https://www.aliexpress.com/item/1005005123456789.html",
+              "target_sale_price": "12.50",
+              "target_sale_price_currency": "USD"
+            },
+            {
+              "product_id": 1005005000000002,
+              "product_title": "Listing with a missing price",
+              "product_detail_url": "https://www.aliexpress.com/item/1005005000000002.html",
+              "target_sale_price": "",
+              "target_sale_price_currency": "ILS"
+            },
+            {
+              "product_id": 1005005000000003,
+              "product_title": "Listing priced in an unsupported currency",
+              "product_detail_url": "https://www.aliexpress.com/item/1005005000000003.html",
+              "target_sale_price": "999.00",
+              "target_sale_price_currency": "RUB"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

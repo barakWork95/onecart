@@ -1,0 +1,19 @@
+{
+  "aliexpress_affiliate_link_generate_response": {
+    "resp_result": {
+      "resp_code": 200,
+      "resp_msg": "Call succeeds",
+      "result": {
+        "total_result_count": 1,
+        "promotion_links": {
+          "promotion_link": [
+            {
+              "promotion_link": "https://s.click.aliexpress.com/e/_DmLifeP3",
+              "source_value": "https://www.aliexpress.com/item/1005006271234567.html"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

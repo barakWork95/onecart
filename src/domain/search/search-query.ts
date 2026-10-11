@@ -1,0 +1,61 @@
+import type { Money } from "@/domain/shared/money";
+import type { ProviderId } from "@/domain/shared/provider";
+
+/** Longest query we accept from the user. */
+export const MAX_QUERY_LENGTH = 200;
+
+export const SEARCH_SORTS = ["landed_price_asc", "rating_desc", "delivery_fastest"] as const;
+export type SearchSort = (typeof SEARCH_SORTS)[number];
+
+export type QueryLanguage = "he" | "en";
+
+export interface SearchFilters {
+  readonly minTotal?: Money;
+  readonly maxTotal?: Money;
+  /** 0–5. */
+  readonly minRating?: number;
+  readonly freeShippingOnly?: boolean;
+}
+
+export interface DeliveryDestination {
+  readonly country: "IL";
+  /** Used for courier estimates only; never required. */
+  readonly city?: string;
+}
+
+export interface SearchQuery {
+  /** Exactly what the user typed (may be Hebrew). Shown back in the UI. */
+  readonly rawText: string;
+  readonly detectedLanguage: QueryLanguage;
+  /**
+   * English, lower-cased, whitespace-collapsed text sent to providers.
+   * Equal to the normalized `rawText` when the user typed English.
+   */
+  readonly normalizedText: string;
+  readonly sort: SearchSort;
+  /** Subset to query; empty/undefined means all enabled providers. */
+  readonly providers?: readonly ProviderId[];
+  readonly filters: SearchFilters;
+  readonly destination: DeliveryDestination;
+  /** 1-based. */
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+/** Lower-case, trim, collapse whitespace — so "Wireless  Earbuds " and "wireless earbuds" share a cache entry. */
+export function normalizeQueryText(text: string): string {
+  return text.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Redis key for a query's provider results. Only fields that change what
+ * providers return belong here — sort/filters/page are applied after the
+ * cache read, so they must NOT fragment the cache. Bump `v1` when the cached
+ * `UnifiedProduct` shape or the import-tax policy changes.
+ */
+export function searchCacheKey(
+  query: Pick<SearchQuery, "normalizedText" | "destination">,
+  provider: ProviderId,
+): string {
+  return `search:v1:${query.destination.country}:${provider}:${normalizeQueryText(query.normalizedText)}`;
+}

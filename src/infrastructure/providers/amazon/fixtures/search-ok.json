@@ -1,0 +1,80 @@
+{
+  "search_metadata": { "status": "Success" },
+  "search_information": { "total_results": "1,000+" },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B08KW1KR5H",
+      "sponsored": true,
+      "title": "Soundcore by Anker Life P3 Noise Cancelling Earbuds",
+      "link": "https://www.amazon.com/sspa/click?ie=UTF8&spc=MTo1&url=%2Fdp%2FB08KW1KR5H",
+      "link_clean": "https://www.amazon.com/dp/B08KW1KR5H/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61lifep3.jpg",
+      "rating": 4.5,
+      "reviews": 3150,
+      "price": "$29.99",
+      "extracted_price": 29.99,
+      "delivery": ["$8.40 delivery Thu, Oct 15"]
+    },
+    {
+      "position": 2,
+      "asin": "B08KW1KR5H",
+      "title": "Soundcore by Anker Life P3 Noise Cancelling Earbuds",
+      "link_clean": "https://www.amazon.com/dp/B08KW1KR5H/",
+      "price": "$29.99",
+      "extracted_price": 29.99,
+      "delivery": ["$8.40 delivery Thu, Oct 15"]
+    },
+    {
+      "position": 3,
+      "asin": "B0BS1QCFHX",
+      "title": "Sony WH-CH720N Noise Canceling Wireless Headphones",
+      "link_clean": "https://www.amazon.com/dp/B0BS1QCFHX/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41sony.jpg",
+      "rating": 4.4,
+      "reviews": 12840,
+      "price": "$89.99",
+      "extracted_price": 89.99,
+      "extracted_old_price": 149.99,
+      "delivery": ["$12.00 delivery Mon, Oct 19 - Fri, Oct 23", "Or fastest delivery Wed, Oct 14"]
+    },
+    {
+      "position": 4,
+      "asin": "B09B8V1LZ3",
+      "title": "Echo Dot (5th Gen) Smart Speaker",
+      "link_clean": "https://www.amazon.com/dp/B09B8V1LZ3/",
+      "rating": 4.7,
+      "reviews": 151200,
+      "price": "$49.99",
+      "extracted_price": 49.99,
+      "delivery": ["FREE delivery Wed, Oct 21 on $49 of eligible items"]
+    },
+    {
+      "position": 5,
+      "asin": "B0CABLE123",
+      "title": "USB-C to USB-C Cable 6ft",
+      "link_clean": "https://www.amazon.com/dp/B0CABLE123/",
+      "rating": 4.6,
+      "reviews": 980,
+      "price": "$9.99",
+      "extracted_price": 9.99,
+      "delivery": ["FREE delivery Wed, Oct 21 on $35 of items shipped by Amazon"]
+    },
+    {
+      "position": 6,
+      "asin": "B0KINDLE01",
+      "title": "Kindle Paperwhite 16GB",
+      "link_clean": "https://www.amazon.com/dp/B0KINDLE01/",
+      "price": "$159.99",
+      "extracted_price": 159.99,
+      "delivery": ["$31.42 shipping & import fees deposit to Israel"]
+    },
+    {
+      "position": 7,
+      "asin": "B0OPTIONS1",
+      "title": "Phone Case — see available options",
+      "link_clean": "https://www.amazon.com/dp/B0OPTIONS1/",
+      "options": "12 colors"
+    }
+  ]
+}
