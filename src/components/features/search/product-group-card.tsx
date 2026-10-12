@@ -1,7 +1,13 @@
-import { ArrowRight, Headphones, Star, Truck } from "lucide-react";
+import { ArrowRight, Headphones, Search, Star, Truck } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { CompareSheet } from "@/components/features/search/compare-sheet";
-import { discountPercent, outboundHref } from "@/components/features/search/group-view";
+import {
+  discountPercent,
+  outboundHref,
+  storeComparison,
+  type FindMatchesLink,
+} from "@/components/features/search/group-view";
 import { STORE_META } from "@/components/features/store-meta";
 import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
@@ -32,6 +38,25 @@ export interface CardUserState {
   readonly tracking: boolean;
 }
 
+/** "Available on 2 stores: Amazon ₪244 vs eBay ₪276 — best deal on Amazon", over three lines. */
+function StoreComparisonNote({ group }: { group: ProductGroup }) {
+  const comparison = storeComparison(group);
+  if (!comparison) return null;
+  return (
+    <p className="text-xs leading-relaxed">
+      <span className="block font-semibold text-primary">
+        {comparison.headline}
+        <span className="sr-only">:</span>
+      </span>{" "}
+      <span className="block text-muted-foreground">{comparison.prices}</span>{" "}
+      <span className="block font-semibold text-success">
+        <span className="sr-only">— </span>
+        {comparison.bestDeal}
+      </span>
+    </p>
+  );
+}
+
 /**
  * One product (grouped across stores) as a grid tile: a large square image,
  * then title and landed price as the two things the eye lands on.
@@ -40,15 +65,19 @@ export function ProductGroupCard({
   group,
   links,
   user = null,
+  findMatches = null,
 }: {
   group: ProductGroup;
   links: Readonly<Record<string, string>>;
   user?: CardUserState | null;
+  /** Single-store cards: a focused search that may find the item at another store. */
+  findMatches?: FindMatchesLink | null;
 }) {
   const best = bestOffer(group);
   const storeCount = group.offers.length;
   const discount = discountPercent(best);
   const storeName = STORE_META[best.provider].name;
+  const matchLabel = group.matchedBy === "title_similarity" ? "Similar item" : "Same item";
 
   return (
     <article
@@ -97,8 +126,13 @@ export function ProductGroupCard({
 
       <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
         <p className="truncate text-xs text-muted-foreground">
-          <span className="font-medium text-foreground/80">{storeName}</span>
-          {storeCount > 1 && ` · ${storeCount} stores`}
+          {storeCount > 1 ? (
+            <span className="font-medium text-foreground/80">
+              {matchLabel} · {storeCount} stores
+            </span>
+          ) : (
+            <span className="font-medium text-foreground/80">{storeName}</span>
+          )}
         </p>
         <h2
           id={`${group.id}-title`}
@@ -126,6 +160,7 @@ export function ProductGroupCard({
             </span>
           </p>
           <DeliveryNote group={group} />
+          <StoreComparisonNote group={group} />
         </div>
 
         <div className="pt-2 [&>*]:w-full">
@@ -144,6 +179,18 @@ export function ProductGroupCard({
               View deal {formatMoney(best.price.total)}
               <ArrowRight className="size-4" aria-hidden />
             </a>
+          )}
+          {storeCount === 1 && findMatches && (
+            // Not prefetched: the focused search can cost a store API call.
+            <Link
+              href={findMatches.href}
+              prefetch={false}
+              aria-label={`${findMatches.label}: search for ${group.title}`}
+              className="mt-1.5 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
+            >
+              <Search className="size-3.5" aria-hidden />
+              {findMatches.label}
+            </Link>
           )}
         </div>
       </div>

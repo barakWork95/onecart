@@ -543,6 +543,7 @@
     }
   ],
   "serpapi_pagination": {
-    "current": 2
+    "current": 2,
+    "next": "https://serpapi.com/search.json?amazon_domain=amazon.com&device=desktop&engine=amazon&k=wireless+headphones&language=en_US&page=3&shipping_location=IL"
   }
 }

@@ -20,6 +20,8 @@ import {
 export const EBAY_SEARCH_ENDPOINT = "https://api.ebay.com/buy/browse/v1/item_summary/search";
 const DEFAULT_TIMEOUT_MS = 4_000;
 const DEFAULT_LIMIT = 50;
+/** The Browse API rejects `offset + limit` past 10,000. */
+const MAX_RESULTS = 10_000;
 /** The Browse API truncates `q` past 100 characters; we cut it ourselves at a word boundary. */
 const MAX_QUERY_LENGTH = 100;
 /** eBay condition id for brand-new items — we compare new against new. */
@@ -99,9 +101,12 @@ export function createEbayProvider(config: EbayProviderConfig): ProductSearchPro
         AbortSignal.timeout(config.timeoutMs ?? DEFAULT_TIMEOUT_MS),
       ]);
       const country = query.destination.country;
+      const limit = config.limit ?? DEFAULT_LIMIT;
+      const offset = ((options.storePage ?? 1) - 1) * limit;
       const params = new URLSearchParams({
         q: truncateQuery(query.normalizedText),
-        limit: String(config.limit ?? DEFAULT_LIMIT),
+        limit: String(limit),
+        ...(offset > 0 ? { offset: String(offset) } : {}),
         filter: `buyingOptions:{FIXED_PRICE},conditionIds:{${CONDITION_NEW}},deliveryCountry:${country}`,
       });
       const url = `${config.endpoint ?? EBAY_SEARCH_ENDPOINT}?${params.toString()}`;
@@ -177,7 +182,9 @@ export function createEbayProvider(config: EbayProviderConfig): ProductSearchPro
       if (rawItems.length > 0 && schemaFailures === rawItems.length) {
         return err(providerError("parse_error", "ALL_ITEMS_INVALID", `${rawItems.length} items rejected`));
       }
-      return ok(products);
+      // `total` counts every match; the Browse API serves at most 10,000 of them.
+      const total = Math.min(parsed.data.total ?? 0, MAX_RESULTS);
+      return ok({ products, hasMore: offset + rawItems.length < total && rawItems.length > 0 });
     },
   };
 }

@@ -104,19 +104,64 @@ describe("eBay adapter — request", () => {
   });
 });
 
+describe("eBay adapter — store pages", () => {
+  const page = (storePage: number, body: unknown) => {
+    const ctx = setup(async () => json(body));
+    return {
+      ...ctx,
+      result: ctx.provider.search(QUERY, { signal: new AbortController().signal, storePage }),
+    };
+  };
+  const offsetOf = (fetchMock: jest.Mock) =>
+    new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get("offset");
+
+  it("asks for page N with offset (N−1) × limit; page 1 sends no offset", async () => {
+    const first = page(1, searchOk);
+    await first.result;
+    expect(offsetOf(first.fetchMock)).toBeNull();
+
+    const third = page(3, searchOk);
+    await third.result;
+    expect(offsetOf(third.fetchMock)).toBe("100");
+  });
+
+  it("reports more results while offset + items is below eBay's total", async () => {
+    const result = await page(1, { total: 1834, itemSummaries: searchOk.itemSummaries }).result;
+    expect(result.ok && result.value.hasMore).toBe(true);
+  });
+
+  it("reports the last page when the total is reached or nothing came back", async () => {
+    const { itemSummaries } = searchOk;
+    const last = await page(2, { total: 50 + itemSummaries.length, itemSummaries }).result;
+    expect(last.ok && last.value.hasMore).toBe(false);
+    const empty = await page(2, { total: 1834 }).result;
+    expect(empty.ok && empty.value.hasMore).toBe(false);
+  });
+
+  it("stops at the Browse API's 10,000-result ceiling", async () => {
+    const { itemSummaries } = searchOk;
+    const result = await page(200, { total: 40_000, itemSummaries: itemSummaries.slice(0, 1) }).result;
+    // offset 9,950 + 1 item < 10,000, so one more page is still allowed…
+    expect(result.ok && result.value.hasMore).toBe(true);
+    const full = await page(200, { total: 40_000, itemSummaries: Array(50).fill(itemSummaries[0]) }).result;
+    // …but offset 9,950 + 50 reaches it.
+    expect(full.ok && full.value.hasMore).toBe(false);
+  });
+});
+
 describe("eBay adapter — results", () => {
   it("maps fixed-price listings and drops auctions and malformed items", async () => {
     const result = await setup(async () => json(searchOk)).search();
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    expect(result.value.map((p) => p.providerProductId)).toEqual([
+    expect(result.value.products.map((p) => p.providerProductId)).toEqual([
       "395012345678",
       "395011112222-601234567890",
       "395033334444",
       "395087654321",
     ]);
-    const [p3, sony, keyboard, a40] = result.value;
+    const [p3, sony, keyboard, a40] = result.value.products;
     expect(p3).toMatchObject({
       price: { total: ils(153_18) },
       delivery: { minDays: 10, maxDays: 14 },
@@ -126,14 +171,17 @@ describe("eBay adapter — results", () => {
     expect(keyboard?.delivery.isFreeShipping).toBe(true);
     expect(a40?.price.shippingKnown).toBe(false);
     expect(
-      result.value.every(
+      result.value.products.every(
         (p) => p.productUrl.startsWith("https://www.ebay.com/itm/") && !p.productUrl.includes("?"),
       ),
     ).toBe(true);
   });
 
   it("returns an empty list when itemSummaries is absent", async () => {
-    expect(await setup(async () => json(searchEmpty)).search()).toEqual({ ok: true, value: [] });
+    expect(await setup(async () => json(searchEmpty)).search()).toEqual({
+      ok: true,
+      value: { products: [], hasMore: false },
+    });
   });
 
   it("does not treat legitimately skipped items as a contract change", async () => {
@@ -147,7 +195,10 @@ describe("eBay adapter — results", () => {
         },
       ],
     };
-    expect(await setup(async () => json(auctionsOnly)).search()).toEqual({ ok: true, value: [] });
+    expect(await setup(async () => json(auctionsOnly)).search()).toEqual({
+      ok: true,
+      value: { products: [], hasMore: false },
+    });
   });
 });
 
@@ -155,7 +206,7 @@ describe("eBay adapter — tokens", () => {
   it("refreshes the token once on 401 and retries", async () => {
     const responses = [json(errorInvalidToken, 401), json(searchEmpty)];
     const { tokens, fetchMock, search } = setup(async () => responses.shift() ?? json(searchEmpty));
-    expect(await search()).toEqual({ ok: true, value: [] });
+    expect(await search()).toEqual({ ok: true, value: { products: [], hasMore: false } });
     expect(tokens.invalidate).toHaveBeenCalledTimes(1);
     const authHeaders = fetchMock.mock.calls.map(
       ([, init]) => (init?.headers as Record<string, string>).Authorization,

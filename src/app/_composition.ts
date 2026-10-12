@@ -216,7 +216,7 @@ export type SearchPageResult =
       readonly response: SearchResponse;
       readonly translation: QueryTranslationInfo | null;
       readonly demoMode: boolean;
-      /** Offer id → signed `/go/...` href for every offer on this page. */
+      /** Offer id → signed `/go/...` href for every offer shown (all pages through this one). */
       readonly outboundLinks: Readonly<Record<string, string>>;
     };
 
@@ -227,7 +227,8 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
 
   const { searchProducts, translator, demoMode, linkCodec } = getServices();
   const { query, translation } = await buildSearchQuery(request.value, translator, consoleLogger);
-  const response = await searchProducts(query);
+  // Cumulative: "Load more" re-renders every card through the requested page.
+  const response = await searchProducts(query, { includeEarlierPages: true });
 
   const outboundLinks: Record<string, string> = {};
   for (const offer of response.groups.flatMap((g) => g.offers)) {
@@ -261,7 +262,11 @@ export async function offersFor(searchText: string): Promise<UnifiedProduct[] | 
   if (!request.ok) return [];
   const { searchProducts, translator } = getServices();
   const { query } = await buildSearchQuery(request.value, translator, consoleLogger);
-  const response = await searchProducts({ ...query, page: 1, pageSize: ALL_RESULTS_PAGE_SIZE });
+  // Include deeper store pages a shopper already loaded, without paying for new ones.
+  const response = await searchProducts(
+    { ...query, page: 1, pageSize: ALL_RESULTS_PAGE_SIZE },
+    { deeperStorePages: "cached" },
+  );
   const searched = response.providers.filter((p) => p.status !== "skipped");
   if (searched.length > 0 && searched.every((p) => ["timeout", "error", "circuit_open"].includes(p.status)))
     return null;

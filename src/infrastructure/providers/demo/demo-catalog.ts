@@ -249,4 +249,43 @@ export const DEMO_CATALOG: readonly DemoListing[] = [
     rating: { average: 4.5, count: 760 },
     seller: "Car Gadgets Store",
   },
+  ...generatedCables(),
 ];
+
+/**
+ * 30 distinct cables per store at Amazon and eBay, so "usb cable" spans more
+ * than one store page and exercises "Load more" in demo mode and E2E.
+ */
+function generatedCables(): DemoListing[] {
+  const cables: DemoListing[] = [];
+  for (let i = 0; i < 30; i++) {
+    const feet = 1 + (i % 6);
+    cables.push(
+      {
+        provider: "amazon",
+        sku: `B0CABLE${String(i).padStart(3, "0")}`,
+        title: `Braided USB-C Charging Cable AC${100 + i}, ${feet} ft`,
+        keywords: ["usb", "cable", "charger", "charging"],
+        price: { amount: 6 + i * 0.5, currency: "USD" },
+        shipping: { amount: 4.99, currency: "USD" },
+        deliveryDays: [6, 10],
+        methodLabel: "AmazonGlobal Standard",
+        rating: { average: 4.1 + (i % 9) / 10, count: 120 + i * 37 },
+        seller: "Amazon.com",
+      },
+      {
+        provider: "ebay",
+        sku: `40${String(1000 + i)}`,
+        title: `USB C Fast Charge Cable EC${200 + i} ${feet}ft Nylon`,
+        keywords: ["usb", "cable", "charger", "charging"],
+        price: { amount: 4 + i * 0.4, currency: "USD" },
+        shipping: { amount: 0, currency: "USD" },
+        deliveryDays: [9, 16],
+        methodLabel: "eBay International Standard",
+        rating: null,
+        seller: "cables-direct",
+      },
+    );
+  }
+  return cables;
+}

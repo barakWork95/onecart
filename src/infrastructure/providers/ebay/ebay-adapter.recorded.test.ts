@@ -35,8 +35,8 @@ describe("eBay adapter — recorded live response", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    expect(result.value).toHaveLength(recorded.itemSummaries.length);
-    for (const product of result.value) {
+    expect(result.value.products).toHaveLength(recorded.itemSummaries.length);
+    for (const product of result.value.products) {
       expect(product.price.listed.currency).toBe("ILS");
       expect(product.price.total.amountMinor).toBeGreaterThan(0);
       expect(product.price.shippingKnown).toBe(true);

@@ -64,6 +64,9 @@ function toProduct(
   };
 }
 
+/** Small enough that the generated "usb cable" catalog spans several store pages. */
+export const DEMO_STORE_PAGE_SIZE = 25;
+
 export interface DemoProviderConfig {
   readonly provider: ProviderId;
   readonly catalog: readonly DemoListing[];
@@ -81,12 +84,17 @@ export function createDemoProvider(config: DemoProviderConfig): ProductSearchPro
 
   return {
     id: config.provider,
-    async search(query) {
+    async search(query, options) {
       const wanted = stems(query.normalizedText);
       const fetchedAt = now().toISOString();
       const matches =
         wanted.length === 0 ? [] : listings.filter(({ terms }) => wanted.every((w) => terms.has(w)));
-      return ok(matches.map(({ listing }) => toProduct(listing, config.policy, config.fx, fetchedAt)));
+      const start = ((options.storePage ?? 1) - 1) * DEMO_STORE_PAGE_SIZE;
+      const page = matches.slice(start, start + DEMO_STORE_PAGE_SIZE);
+      return ok({
+        products: page.map(({ listing }) => toProduct(listing, config.policy, config.fx, fetchedAt)),
+        hasMore: start + DEMO_STORE_PAGE_SIZE < matches.length,
+      });
     },
   };
 }

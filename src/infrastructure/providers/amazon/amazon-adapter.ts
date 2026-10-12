@@ -60,6 +60,18 @@ function errorForStatus(status: number): ProviderError {
 interface PageItems {
   readonly organic: readonly unknown[];
   readonly featured: readonly unknown[];
+  readonly hasNext: boolean;
+}
+
+/**
+ * SerpApi pages behind one of our store pages. Page 1 is the first `pageCount`
+ * pages fetched together (with shipping to Israel one page yields only ~10
+ * priced items); every later store page is one more SerpApi page, so "Load
+ * more" costs exactly one credit.
+ */
+export function serpApiPagesFor(storePage: number, pageCount: number): number[] {
+  if (storePage <= 1) return Array.from({ length: pageCount }, (_, i) => i + 1);
+  return [pageCount + storePage - 1];
 }
 
 /** Amazon.com search via SerpApi's Amazon engine. */
@@ -111,10 +123,18 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
       return err({ ...errorForStatus(status), ...(parsed.data?.error ? { detail: parsed.data.error } : {}) });
     if (!parsed.success) return err(providerError("parse_error", "PARSE_ERROR", parsed.error.message));
 
-    const { error, organic_results: organic = [], featured_products: sections = [] } = parsed.data;
-    if (error && NO_RESULTS.test(error)) return ok({ organic: [], featured: [] });
+    const {
+      error,
+      organic_results: organic = [],
+      featured_products: sections = [],
+      serpapi_pagination: pagination,
+    } = parsed.data;
+    if (error && NO_RESULTS.test(error)) return ok({ organic: [], featured: [], hasNext: false });
     if (error) return err(providerError("upstream_error", "SERPAPI_ERROR", error));
-    return ok({ organic, featured: sections.flatMap((s) => s.products ?? []) });
+    // Confirmed live: `serpapi_pagination.next` is present exactly when Amazon has another page.
+    // Without it we assume none, so a malformed page never costs a credit on "Load more".
+    const hasNext = pagination?.next !== undefined;
+    return ok({ organic, featured: sections.flatMap((s) => s.products ?? []), hasNext });
   }
 
   return {
@@ -124,12 +144,13 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
       const signal = AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)]);
       // Pages in parallel: one round trip (~3–4s) instead of one per page.
       const pages = await Promise.all(
-        Array.from({ length: pageCount }, (_, i) => fetchPage(query, i + 1, signal)),
+        serpApiPagesFor(options.storePage ?? 1, pageCount).map((page) => fetchPage(query, page, signal)),
       );
-      // Page 1 decides success; later pages are a bonus and may fail quietly.
+      // The first page decides success; later pages are a bonus and may fail quietly.
       const first = pages[0];
       if (!first || !first.ok) return first ?? err(providerError("upstream_error", "NO_PAGES"));
       const fetched = pages.flatMap((p) => (p.ok ? [p.value] : []));
+      const hasMore = fetched[fetched.length - 1]?.hasNext ?? false;
 
       let fx: FxRates;
       try {
@@ -172,7 +193,7 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
       if (rawItems.length > 0 && schemaFailures === rawItems.length) {
         return err(providerError("parse_error", "ALL_ITEMS_INVALID", `${rawItems.length} items rejected`));
       }
-      return ok(products);
+      return ok({ products, hasMore });
     },
   };
 }

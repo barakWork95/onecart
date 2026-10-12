@@ -4,6 +4,8 @@ import type { ProviderId } from "@/domain/shared/provider";
 
 export interface CachedProviderResult {
   readonly products: readonly UnifiedProduct[];
+  /** The store had more results past this page when it was cached. */
+  readonly hasMore: boolean;
   readonly cachedAt: IsoDateTime;
 }
 

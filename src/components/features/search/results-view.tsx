@@ -1,5 +1,7 @@
 import { AlertTriangle, BadgeCheck, FlaskConical, Languages, SearchX } from "lucide-react";
 import type { QueryTranslationInfo } from "@/application/search/build-search-query";
+import { findMatchesLink } from "@/components/features/search/group-view";
+import { LoadMore } from "@/components/features/search/load-more";
 import { ProductGroupCard } from "@/components/features/search/product-group-card";
 import { SortChips } from "@/components/features/search/sort-chips";
 import { STORE_META } from "@/components/features/store-meta";
@@ -59,6 +61,16 @@ function PartialNotice({ failed }: { failed: readonly ProviderOutcome[] }) {
   );
 }
 
+/** The current URL's search, one results page further; filters and sort are kept. */
+export function nextPageHref(query: SearchResponse["query"], nextPage: number): string {
+  const params = new URLSearchParams({ q: query.rawText });
+  if (query.sort !== "relevance") params.set("sort", query.sort);
+  if (query.filters.maxTotal) params.set("max", String(Math.round(query.filters.maxTotal.amountMinor / 100)));
+  if (query.filters.freeShippingOnly) params.set("free", "1");
+  params.set("page", String(nextPage));
+  return `/search?${params.toString()}`;
+}
+
 function EmptyState({ title, body }: { title: string; body: string }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-border px-6 py-12 text-center">
@@ -86,8 +98,9 @@ export function ResultsView({
   outboundLinks,
   userLists = null,
 }: ResultsViewProps) {
-  const { query, groups, providers, totalOffers, isPartial } = response;
+  const { query, groups, providers, totalOffers, isPartial, pagination } = response;
   const searched = providers.filter((p) => p.status !== "skipped");
+  const connectedStores = searched.map((p) => p.provider);
   const failed = searched.filter((p) => FAILED_PROVIDER_STATUSES.includes(p.status));
   const allFailed = searched.length > 0 && failed.length === searched.length;
   const anyTaxEstimated = groups.some((g) => g.offers.some((o) => !o.price.taxesCollectedAtCheckout));
@@ -141,23 +154,33 @@ export function ResultsView({
           body={`No store had results for “${query.rawText}”. Try fewer or more general words.`}
         />
       ) : (
-        <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Products">
-          {groups.map((group) => (
-            <li key={group.id} className="min-w-0">
-              <ProductGroupCard
-                group={group}
-                links={outboundLinks}
-                user={
-                  userLists && {
-                    searchText: query.rawText,
-                    saved: userLists.savedIds.includes(group.offers[0].id),
-                    tracking: userLists.alertIds.includes(group.offers[0].id),
+        <>
+          <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Products">
+            {groups.map((group) => (
+              <li key={group.id} className="min-w-0">
+                <ProductGroupCard
+                  group={group}
+                  links={outboundLinks}
+                  findMatches={findMatchesLink(group, connectedStores, query.normalizedText)}
+                  user={
+                    userLists && {
+                      searchText: query.rawText,
+                      saved: userLists.savedIds.includes(group.offers[0].id),
+                      tracking: userLists.alertIds.includes(group.offers[0].id),
+                    }
                   }
-                }
-              />
-            </li>
-          ))}
-        </ol>
+                />
+              </li>
+            ))}
+          </ol>
+          <div className="flex flex-col items-center gap-3 pt-2">
+            <p className="text-sm text-muted-foreground">
+              Showing {groups.length} {groups.length === 1 ? "product" : "products"}
+              {!pagination.hasNextPage && groups.length > 0 && " — that's everything the stores returned"}
+            </p>
+            {pagination.hasNextPage && <LoadMore href={nextPageHref(query, pagination.page + 1)} />}
+          </div>
+        </>
       )}
     </section>
   );

@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ResultsView, type ResultsViewProps } from "@/components/features/search/results-view";
+import { nextPageHref, ResultsView, type ResultsViewProps } from "@/components/features/search/results-view";
 import { groupProducts } from "@/domain/search/product-group";
 import type { SearchQuery } from "@/domain/search/search-query";
 import type { ProviderOutcome, SearchResponse } from "@/domain/search/search-response";
@@ -102,7 +102,7 @@ describe("ResultsView", () => {
       "Soundcore Life P3 Earbuds",
     );
     expect(within(cards[0]!).getByText("₪89")).toBeInTheDocument();
-    expect(within(cards[0]!).getByText(/3 stores/)).toBeInTheDocument();
+    expect(within(cards[0]!).getByText("Same item · 3 stores")).toBeInTheDocument();
     expect(within(cards[0]!).getByText("total landed")).toBeInTheDocument();
   });
 
@@ -112,6 +112,60 @@ describe("ResultsView", () => {
     const deal = screen.getByRole("link", { name: /View deal ₪310/ });
     expect(deal).toHaveAttribute("href", "/go/ebay%3Ae?d=x&s=y");
     expect(deal).toHaveAttribute("rel", "nofollow sponsored noopener");
+  });
+
+  it("spells out the cross-store comparison and the best deal on a grouped card", () => {
+    renderView();
+    const [grouped] = within(screen.getByRole("list", { name: "Products" })).getAllByRole("article");
+    expect(
+      within(grouped!)
+        .getByText(/^Available on 3 stores/)
+        .closest("p"),
+    ).toHaveTextContent(
+      "Available on 3 stores: AliExpress ₪89 vs Temu ₪98 vs Amazon ₪142 — Best deal on AliExpress",
+    );
+  });
+
+  it("labels a title-only match as a similar item", () => {
+    const pillows = groupProducts([
+      makeProduct({ provider: "amazon", sku: "p1", title: "Cervical Memory Foam Pillow" }),
+      makeProduct({ provider: "ebay", sku: "p2", title: "Memory Foam Pillow, Cervical" }),
+    ]);
+    renderView({ response: response({ groups: pillows }) });
+    expect(screen.getByText("Similar item · 2 stores")).toBeInTheDocument();
+  });
+
+  it("offers a focused search at the other stores on a single-store card", () => {
+    renderView();
+    const find = screen.getByRole("link", { name: /^Find on other stores: search for Sony WH-CH720N/ });
+    expect(find).toHaveAttribute("href", "/search?q=Sony+WH-CH720N+Headphones");
+    // Grouped cards compare instead.
+    expect(screen.getAllByRole("link", { name: /^Find on/ })).toHaveLength(1);
+  });
+
+  it("names the other store when only one more is connected", () => {
+    renderView({ response: response({ providers: [ok("amazon"), ok("ebay")] }) });
+    expect(screen.getByRole("link", { name: /^Find on Amazon:/ })).toBeInTheDocument();
+  });
+
+  it("offers Load more for the next page, keeping sort and filters", () => {
+    renderView({
+      response: response({
+        query: { ...QUERY, page: 2, filters: { freeShippingOnly: true } },
+        pagination: { page: 2, pageSize: 20, totalResults: 64, hasNextPage: true },
+      }),
+    });
+    expect(screen.getByRole("link", { name: "Load more" })).toHaveAttribute(
+      "href",
+      nextPageHref({ ...QUERY, filters: { freeShippingOnly: true } }, 3),
+    );
+    expect(screen.getByText("Showing 2 products")).toBeInTheDocument();
+  });
+
+  it("says when every result is shown instead of offering more", () => {
+    renderView();
+    expect(screen.queryByRole("link", { name: "Load more" })).not.toBeInTheDocument();
+    expect(screen.getByText(/that's everything the stores returned/)).toBeInTheDocument();
   });
 
   it("marks the active sort chip and lets a second tap clear it back to best match", () => {
@@ -237,6 +291,28 @@ describe("ResultsView — wishlist buttons", () => {
   it("hides them when wishlists aren't available", () => {
     renderView({ userLists: null });
     expect(screen.queryByRole("button", { name: /^Save / })).not.toBeInTheDocument();
+  });
+});
+
+describe("nextPageHref", () => {
+  it("keeps the query, a non-default sort and every filter", () => {
+    const href = nextPageHref(
+      { ...QUERY, filters: { maxTotal: { amountMinor: 300_00, currency: "ILS" }, freeShippingOnly: true } },
+      3,
+    );
+    expect(Object.fromEntries(new URL(href, "https://x.test").searchParams)).toEqual({
+      q: "אוזניות אלחוטיות",
+      sort: "landed_price_asc",
+      max: "300",
+      free: "1",
+      page: "3",
+    });
+  });
+
+  it("leaves the default sort out of the URL", () => {
+    expect(nextPageHref({ ...QUERY, sort: "relevance" }, 2)).toBe(
+      `/search?q=${encodeURIComponent("אוזניות אלחוטיות").replace(/%20/g, "+")}&page=2`,
+    );
   });
 });
 

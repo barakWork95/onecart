@@ -3,7 +3,7 @@ import type { SearchQuery } from "@/domain/search/search-query";
 import { money } from "@/domain/shared/money";
 import { PROVIDER_IDS } from "@/domain/shared/provider";
 import { DEMO_CATALOG, DEMO_FX } from "@/infrastructure/providers/demo/demo-catalog";
-import { createDemoProvider } from "@/infrastructure/providers/demo/demo-provider";
+import { createDemoProvider, DEMO_STORE_PAGE_SIZE } from "@/infrastructure/providers/demo/demo-provider";
 
 const query = (normalizedText: string): SearchQuery => ({
   rawText: normalizedText,
@@ -28,7 +28,7 @@ const provider = (id: (typeof PROVIDER_IDS)[number]) =>
 const search = async (id: (typeof PROVIDER_IDS)[number], text: string) => {
   const result = await provider(id).search(query(text), { signal: new AbortController().signal });
   if (!result.ok) throw new Error("demo provider must not fail");
-  return result.value;
+  return result.value.products;
 };
 
 describe("createDemoProvider", () => {
@@ -104,7 +104,20 @@ describe("createDemoProvider", () => {
       fx: DEMO_FX,
     });
     const result = await custom.search(query("earbuds"), { signal: new AbortController().signal });
-    expect(result.ok && result.value[0]?.price.shippingKnown).toBe(false);
-    expect(result.ok && result.value[0]?.delivery.isFreeShipping).toBeNull();
+    expect(result.ok && result.value.products[0]?.price.shippingKnown).toBe(false);
+    expect(result.ok && result.value.products[0]?.delivery.isFreeShipping).toBeNull();
+  });
+});
+
+describe("createDemoProvider — store pages", () => {
+  it("serves matches in pages and says when more exist", async () => {
+    const signal = new AbortController().signal;
+    const amazon = provider("amazon");
+    const first = await amazon.search(query("usb cable"), { signal });
+    const second = await amazon.search(query("usb cable"), { signal, storePage: 2 });
+    expect(first.ok && first.value).toMatchObject({ hasMore: true });
+    expect(first.ok && first.value.products).toHaveLength(DEMO_STORE_PAGE_SIZE);
+    expect(second.ok && second.value.hasMore).toBe(false);
+    expect(second.ok && second.value.products).toHaveLength(30 - DEMO_STORE_PAGE_SIZE);
   });
 });

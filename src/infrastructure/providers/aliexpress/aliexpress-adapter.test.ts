@@ -53,8 +53,8 @@ function setup(
 
 describe("AliExpress adapter — request", () => {
   it("sends a correctly signed product query for Israel in ILS", async () => {
-    const { fetchMock, search } = setup(async () => jsonResponse(searchEmpty));
-    await search();
+    const { fetchMock, provider } = setup(async () => jsonResponse(searchEmpty));
+    await provider.search(QUERY, { signal: new AbortController().signal, storePage: 2 });
 
     const [input, init] = fetchMock.mock.calls[0] ?? [];
     const url = new URL(String(input));
@@ -101,18 +101,28 @@ describe("AliExpress adapter — successful responses", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.map((p) => p.id)).toEqual([
+    expect(result.value.products.map((p) => p.id)).toEqual([
       "aliexpress:1005006271234567",
       "aliexpress:1005007000000001",
       "aliexpress:1005005123456789",
     ]);
-    const [earbuds, keyboard, mount] = result.value;
+    const [earbuds, keyboard, mount] = result.value.products;
     expect(earbuds?.price.total).toEqual(money(89_00, "ILS"));
     expect(earbuds?.productUrl).toBe("https://www.aliexpress.com/item/1005006271234567.html");
     expect(keyboard?.price).toMatchObject({ importVat: money(59_38, "ILS"), total: money(389_28, "ILS") });
     expect(keyboard?.originalPrice).toBeNull();
     expect(mount?.price.listed).toEqual(money(12_50, "USD"));
-    expect(result.value.every((p) => p.fetchedAt === NOW.toISOString())).toBe(true);
+    expect(result.value.products.every((p) => p.fetchedAt === NOW.toISOString())).toBe(true);
+  });
+
+  it("reports more pages while page_no × page_size is below the total", async () => {
+    const { provider } = setup(async () => jsonResponse(searchOk));
+    const signal = new AbortController().signal;
+    const first = await provider.search(QUERY, { signal });
+    expect(first.ok && first.value.hasMore).toBe(true);
+    // 1840 results at 20 a page: page 92 is the last.
+    const last = await provider.search(QUERY, { signal, storePage: 92 });
+    expect(last.ok && last.value.hasMore).toBe(false);
   });
 
   it("never stores the affiliate promotion_link", async () => {
@@ -123,13 +133,13 @@ describe("AliExpress adapter — successful responses", () => {
 
   it("returns an empty list for a legitimate zero-result search", async () => {
     const { search } = setup(async () => jsonResponse(searchEmpty));
-    expect(await search()).toEqual({ ok: true, value: [] });
+    expect(await search()).toEqual({ ok: true, value: { products: [], hasMore: false } });
   });
 
   it("passes pricesIncludeImportVat through to the mapper", async () => {
     const { search } = setup(async () => jsonResponse(searchOk), { pricesIncludeImportVat: true });
     const result = await search();
-    expect(result.ok && result.value[1]?.price.taxesCollectedAtCheckout).toBe(true);
+    expect(result.ok && result.value.products[1]?.price.taxesCollectedAtCheckout).toBe(true);
   });
 });
 

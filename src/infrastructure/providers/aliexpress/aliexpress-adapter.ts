@@ -7,6 +7,8 @@ import type {
   ProductSearchProvider,
   ProviderError,
   ProviderErrorKind,
+  ProviderPage,
+  ProviderSearchOptions,
 } from "@/domain/search/product-search-provider";
 import type { SearchQuery } from "@/domain/search/search-query";
 import { err, ok, type Result } from "@/domain/shared/result";
@@ -44,8 +46,10 @@ export function createAliExpressProvider(config: AliExpressProviderConfig): Prod
 
   async function search(
     query: SearchQuery,
-    options: { readonly signal: AbortSignal },
-  ): Promise<Result<readonly UnifiedProduct[], ProviderError>> {
+    options: ProviderSearchOptions,
+  ): Promise<Result<ProviderPage, ProviderError>> {
+    const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE;
+    const pageNo = options.storePage ?? 1;
     const signal = AbortSignal.any([
       options.signal,
       AbortSignal.timeout(config.timeoutMs ?? DEFAULT_TIMEOUT_MS),
@@ -58,8 +62,8 @@ export function createAliExpressProvider(config: AliExpressProviderConfig): Prod
         ship_to_country: query.destination.country,
         target_currency: "ILS",
         target_language: "EN",
-        page_no: String(query.page),
-        page_size: String(config.pageSize ?? DEFAULT_PAGE_SIZE),
+        page_no: String(pageNo),
+        page_size: String(pageSize),
         ...(config.trackingId ? { tracking_id: config.trackingId } : {}),
       },
       config,
@@ -108,7 +112,8 @@ export function createAliExpressProvider(config: AliExpressProviderConfig): Prod
     if (rawProducts.length > 0 && products.length === 0) {
       return err(providerError("parse_error", "ALL_ITEMS_INVALID", `${rawProducts.length} items rejected`));
     }
-    return ok(products);
+    const total = result?.total_record_count ?? 0;
+    return ok({ products, hasMore: pageNo * pageSize < total && rawProducts.length > 0 });
   }
 
   return { id: "aliexpress", search };

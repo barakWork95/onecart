@@ -7,7 +7,7 @@ describe("createInMemorySearchCache", () => {
   it("expires entries after their TTL", async () => {
     const clock = { ms: 0 };
     const cache = createInMemorySearchCache(() => clock.ms);
-    const value = { products: [], cachedAt: "2026-10-11T00:00:00.000Z" };
+    const value = { products: [], hasMore: false, cachedAt: "2026-10-11T00:00:00.000Z" };
 
     await cache.set("k", value, 10);
     clock.ms = 9_999;
@@ -18,7 +18,7 @@ describe("createInMemorySearchCache", () => {
 
   it("uses the real clock by default", async () => {
     const cache = createInMemorySearchCache();
-    await cache.set("k", { products: [], cachedAt: "x" }, 60);
+    await cache.set("k", { products: [], hasMore: false, cachedAt: "x" }, 60);
     expect(await cache.get("k")).not.toBeNull();
     expect(await cache.get("other")).toBeNull();
   });

@@ -16,7 +16,11 @@ function fakeRedis(initial: Record<string, unknown> = {}) {
   return redis;
 }
 
-const entry: CachedProviderResult = { products: [makeProduct()], cachedAt: "2026-10-11T09:00:00.000Z" };
+const entry: CachedProviderResult = {
+  products: [makeProduct()],
+  hasMore: true,
+  cachedAt: "2026-10-11T09:00:00.000Z",
+};
 
 describe("createRedisSearchCache", () => {
   it("round-trips an entry and sets the TTL in seconds", async () => {
@@ -33,8 +37,8 @@ describe("createRedisSearchCache", () => {
 
   it("caches and returns an empty product list", async () => {
     const cache = createRedisSearchCache(fakeRedis());
-    await cache.set("k", { products: [], cachedAt: entry.cachedAt }, 60);
-    expect(await cache.get("k")).toEqual({ products: [], cachedAt: entry.cachedAt });
+    await cache.set("k", { products: [], hasMore: false, cachedAt: entry.cachedAt }, 60);
+    expect(await cache.get("k")).toEqual({ products: [], hasMore: false, cachedAt: entry.cachedAt });
   });
 
   it.each([

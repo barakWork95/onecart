@@ -3,6 +3,7 @@ import type { SearchQuery } from "@/domain/search/search-query";
 import { money } from "@/domain/shared/money";
 import {
   createAmazonProvider,
+  serpApiPagesFor,
   type AmazonProviderConfig,
 } from "@/infrastructure/providers/amazon/amazon-adapter";
 import { TEST_FX } from "@/test/fx";
@@ -75,14 +76,14 @@ describe("Amazon adapter — results", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    expect(result.value.map((p) => p.providerProductId)).toEqual([
+    expect(result.value.products.map((p) => p.providerProductId)).toEqual([
       "B08KW1KR5H",
       "B0BS1QCFHX",
       "B09B8V1LZ3",
       "B0CABLE123",
       "B0KINDLE01",
     ]);
-    const byAsin = Object.fromEntries(result.value.map((p) => [p.providerProductId, p]));
+    const byAsin = Object.fromEntries(result.value.products.map((p) => [p.providerProductId, p]));
 
     expect(byAsin.B08KW1KR5H?.price.total).toEqual(ils(142_04));
     expect(byAsin.B0BS1QCFHX).toMatchObject({
@@ -98,18 +99,21 @@ describe("Amazon adapter — results", () => {
     expect(byAsin.B0CABLE123?.price).toMatchObject({ shippingKnown: false, total: ils(36_96) });
     expect(byAsin.B0KINDLE01?.price).toMatchObject({ taxesCollectedAtCheckout: true, total: ils(708_21) });
     expect(
-      result.value.every((p) => p.productUrl === `https://www.amazon.com/dp/${p.providerProductId}`),
+      result.value.products.every((p) => p.productUrl === `https://www.amazon.com/dp/${p.providerProductId}`),
     ).toBe(true);
   });
 
   it("treats SerpApi's 'no results' message as an empty result, not an error", async () => {
-    expect(await setup(async () => json(searchNoResults)).search()).toEqual({ ok: true, value: [] });
+    expect(await setup(async () => json(searchNoResults)).search()).toEqual({
+      ok: true,
+      value: { products: [], hasMore: false },
+    });
   });
 
   it("returns an empty list when organic_results is absent", async () => {
     expect(await setup(async () => json({ search_metadata: { status: "Success" } })).search()).toEqual({
       ok: true,
-      value: [],
+      value: { products: [], hasMore: false },
     });
   });
 });
@@ -124,7 +128,10 @@ describe("Amazon adapter — pages and unpriced items", () => {
 
   it("treats a page of items with no Israel offer as 'no results', not a broken response", async () => {
     const body = { organic_results: [unpriced("B0UNPRICE1"), unpriced("B0UNPRICE2")] };
-    expect(await setup(async () => json(body)).search()).toEqual({ ok: true, value: [] });
+    expect(await setup(async () => json(body)).search()).toEqual({
+      ok: true,
+      value: { products: [], hasMore: false },
+    });
   });
 
   it("reads priced items from the featured carousels", async () => {
@@ -138,7 +145,7 @@ describe("Amazon adapter — pages and unpriced items", () => {
       ],
     };
     const result = await setup(async () => json(body)).search();
-    expect(result.ok && result.value.map((p) => p.providerProductId)).toEqual(["B0FEATURED"]);
+    expect(result.ok && result.value.products.map((p) => p.providerProductId)).toEqual(["B0FEATURED"]);
   });
 
   it("fetches extra pages in parallel and tolerates a failing later page", async () => {
@@ -150,7 +157,7 @@ describe("Amazon adapter — pages and unpriced items", () => {
       null,
       "2",
     ]);
-    expect(result.ok && result.value).toHaveLength(5);
+    expect(result.ok && result.value.products).toHaveLength(5);
   });
 
   it("fails when page 1 fails, even if later pages succeed", async () => {
@@ -174,6 +181,52 @@ describe("Amazon adapter — pages and unpriced items", () => {
   it("declares a longer deadline than the search-wide default, because SerpApi is slow", () => {
     expect(setup(async () => json(searchNoResults)).provider.timeoutMs).toBe(9_000);
     expect(setup(async () => json(searchNoResults), { timeoutMs: 5_000 }).provider.timeoutMs).toBe(5_000);
+  });
+});
+
+describe("Amazon adapter — store pages", () => {
+  const withNext = (next: boolean) => ({
+    ...searchOk,
+    serpapi_pagination: { current: 1, ...(next ? { next: "https://serpapi.com/search.json?page=2" } : {}) },
+  });
+  const pagesAsked = (fetchMock: jest.Mock) =>
+    fetchMock.mock.calls.map(([u]) => new URL(String(u)).searchParams.get("page") ?? "1");
+
+  it.each([
+    [1, 2, [1, 2]],
+    [2, 2, [3]],
+    [3, 2, [4]],
+    [1, 1, [1]],
+    [2, 1, [2]],
+    [0, 3, [1, 2, 3]],
+  ])("store page %i with %i first pages → SerpApi pages %j", (storePage, pageCount, expected) => {
+    expect(serpApiPagesFor(storePage, pageCount)).toEqual(expected);
+  });
+
+  it("spends exactly one SerpApi credit on a deeper store page", async () => {
+    const { fetchMock, provider } = setup(async () => json(withNext(true)));
+    await provider.search(QUERY, { signal: new AbortController().signal, storePage: 2 });
+    expect(pagesAsked(fetchMock)).toEqual(["3"]);
+  });
+
+  it("has more results exactly when SerpApi links a next page", async () => {
+    const signal = new AbortController().signal;
+    const more = await setup(async () => json(withNext(true)), { pages: 1 }).provider.search(QUERY, {
+      signal,
+    });
+    expect(more.ok && more.value.hasMore).toBe(true);
+    const last = await setup(async () => json(withNext(false)), { pages: 1 }).provider.search(QUERY, {
+      signal,
+    });
+    expect(last.ok && last.value.hasMore).toBe(false);
+    const unknown = await setup(async () => json(searchOk), { pages: 1 }).provider.search(QUERY, { signal });
+    expect(unknown.ok && unknown.value.hasMore).toBe(false);
+  });
+
+  it("reads hasMore from the last page of the first batch", async () => {
+    const { search } = setup(async (url) => json(withNext(url.searchParams.get("page") !== "2")));
+    const result = await search();
+    expect(result.ok && result.value.hasMore).toBe(false);
   });
 });
 

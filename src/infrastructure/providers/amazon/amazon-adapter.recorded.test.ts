@@ -45,8 +45,8 @@ describe("Amazon adapter — recorded live responses", () => {
     if (!result.ok) return;
     // 1 priced organic + 10 priced carousel entries (8 unique) = 9 products.
     // The old adapter ignored the carousels and returned only the 1.
-    expect(result.value).toHaveLength(9);
-    expect(result.value[0]?.providerProductId).toBe("B0HFMYDH5X");
+    expect(result.value.products).toHaveLength(9);
+    expect(result.value.products[0]?.providerProductId).toBe("B0HFMYDH5X");
   });
 
   it("fetches two pages in parallel by default for a fuller result set", async () => {
@@ -54,12 +54,14 @@ describe("Amazon adapter — recorded live responses", () => {
     const result = await amazon.search(QUERY, { signal: new AbortController().signal });
     expect(fetchMock).toHaveBeenCalledTimes(2);
     // Page 2 adds 7 priced organic + 5 carousel entries; 18 unique products in total.
-    expect(result.ok && result.value.length).toBe(18);
+    expect(result.ok && result.value.products.length).toBe(18);
     if (!result.ok) return;
-    expect(new Set(result.value.map((p) => p.id)).size).toBe(result.value.length);
-    expect(result.value.every((p) => p.price.total.currency === "ILS" && p.price.total.amountMinor > 0)).toBe(
-      true,
-    );
+    expect(new Set(result.value.products.map((p) => p.id)).size).toBe(result.value.products.length);
+    expect(
+      result.value.products.every((p) => p.price.total.currency === "ILS" && p.price.total.amountMinor > 0),
+    ).toBe(true);
+    // The live page 2 links a page 3.
+    expect(result.value.hasMore).toBe(true);
   });
 });
 
@@ -72,7 +74,7 @@ it("keeps Amazon's relevance order: organic results of every page before carouse
       .filter((i) => "extracted_price" in i)
       .map((i) => `amazon:${i.asin}`),
   );
-  const firstCarousel = result.value.findIndex((p) => !organicIds.has(p.id));
-  expect(result.value.slice(0, firstCarousel).every((p) => organicIds.has(p.id))).toBe(true);
-  expect(result.value.slice(firstCarousel).every((p) => !organicIds.has(p.id))).toBe(true);
+  const firstCarousel = result.value.products.findIndex((p) => !organicIds.has(p.id));
+  expect(result.value.products.slice(0, firstCarousel).every((p) => organicIds.has(p.id))).toBe(true);
+  expect(result.value.products.slice(firstCarousel).every((p) => !organicIds.has(p.id))).toBe(true);
 });

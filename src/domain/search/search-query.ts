@@ -53,14 +53,17 @@ export function normalizeQueryText(text: string): string {
 }
 
 /**
- * Redis key for a query's provider results. Only fields that change what
- * providers return belong here — sort/filters/page are applied after the
- * cache read, so they must NOT fragment the cache. Bump `v1` when the cached
- * `UnifiedProduct` shape or the import-tax policy changes.
+ * Redis key for one page of a provider's results for a query. Only fields that
+ * change what providers return belong here — sort/filters/page size are applied
+ * after the cache read, so they must NOT fragment the cache. Store page 1 has
+ * no suffix. Bump the version when the cached entry shape, `UnifiedProduct` or
+ * the import-tax policy changes (v2: entries carry `hasMore`).
  */
 export function searchCacheKey(
   query: Pick<SearchQuery, "normalizedText" | "destination">,
   provider: ProviderId,
+  storePage = 1,
 ): string {
-  return `search:v1:${query.destination.country}:${provider}:${normalizeQueryText(query.normalizedText)}`;
+  const base = `search:v2:${query.destination.country}:${provider}:${normalizeQueryText(query.normalizedText)}`;
+  return storePage > 1 ? `${base}:p${storePage}` : base;
 }

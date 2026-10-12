@@ -43,10 +43,13 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
       {/* Keyed so a new query remounts the box with the new text. */}
       <SearchBox key={q} defaultValue={q} autoFocus={!q} />
       {q ? (
-        // Keyed by the full query string so every new search shows the skeleton.
+        // Keyed by the query string so every new search shows the skeleton. `page` is left out:
+        // "Load more" keeps the cards on screen while the longer list renders.
         <Suspense
           key={new URLSearchParams(
-            Object.entries(params).flatMap(([k, v]) => (typeof v === "string" ? [[k, v]] : [])),
+            Object.entries(params).flatMap(([k, v]) =>
+              typeof v === "string" && k !== "page" ? [[k, v]] : [],
+            ),
           ).toString()}
           fallback={<ResultsSkeleton />}
         >

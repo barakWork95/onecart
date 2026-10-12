@@ -1,6 +1,11 @@
 import { createSearchProducts, type SearchProductsDeps } from "@/application/search/search-products";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
-import type { ProductSearchProvider, ProviderError } from "@/domain/search/product-search-provider";
+import type {
+  ProductSearchProvider,
+  ProviderError,
+  ProviderPage,
+  ProviderSearchOptions,
+} from "@/domain/search/product-search-provider";
 import type { CircuitBreakerStore, SearchResultCache } from "@/domain/search/ports";
 import { searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import { money } from "@/domain/shared/money";
@@ -9,8 +14,12 @@ import { err, ok, type Result } from "@/domain/shared/result";
 import { fakeCircuitBreakerStore, fakeSearchCache } from "@/test/fakes";
 import { makeProduct } from "@/test/product-factory";
 
-type CallResult = Result<readonly UnifiedProduct[], ProviderError>;
-type Behavior = (query: SearchQuery, signal: AbortSignal) => Promise<CallResult> | CallResult;
+type CallResult = Result<ProviderPage, ProviderError>;
+type Behavior = (
+  query: SearchQuery,
+  signal: AbortSignal,
+  storePage: number,
+) => Promise<CallResult> | CallResult;
 
 const QUERY: SearchQuery = {
   rawText: "wireless earbuds",
@@ -51,12 +60,15 @@ const HEADPHONES = makeProduct({
 });
 
 function fakeProvider(id: ProviderId, behavior: Behavior) {
-  const search = jest.fn((query: SearchQuery, options: { readonly signal: AbortSignal }) =>
-    Promise.resolve(behavior(query, options.signal)),
+  const search = jest.fn((query: SearchQuery, options: ProviderSearchOptions) =>
+    Promise.resolve(behavior(query, options.signal, options.storePage ?? 1)),
   );
   const provider: ProductSearchProvider = { id, search };
   return { provider, search };
 }
+
+const okPage = (products: readonly UnifiedProduct[], hasMore = false): CallResult =>
+  ok({ products, hasMore });
 
 const failure = (provider: ProviderId, kind: ProviderError["kind"], retryable = true): CallResult =>
   err({ provider, kind, code: `TEST_${kind.toUpperCase()}`, retryable });
@@ -91,13 +103,13 @@ describe("searchProducts — fan-out and grouping", () => {
     const temuStarted = new Promise<void>((resolve) => (temuCalled = resolve));
     const amazon = fakeProvider("amazon", async () => {
       await temuStarted;
-      return ok([EARBUDS.amazon, HEADPHONES]);
+      return okPage([EARBUDS.amazon, HEADPHONES]);
     });
     const temu = fakeProvider("temu", () => {
       temuCalled();
-      return ok([EARBUDS.temu]);
+      return okPage([EARBUDS.temu]);
     });
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
 
     const response = await setup([amazon.provider, temu.provider, ali.provider]).search(QUERY);
 
@@ -117,8 +129,8 @@ describe("searchProducts — fan-out and grouping", () => {
 
   it("by default keeps each store's own best-match order, interleaved across stores", async () => {
     // Amazon ranks headphones first; AliExpress ranks earbuds first. Both #1s beat any #2.
-    const amazon = fakeProvider("amazon", () => ok([HEADPHONES, EARBUDS.amazon]));
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const amazon = fakeProvider("amazon", () => okPage([HEADPHONES, EARBUDS.amazon]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const response = await setup([amazon.provider, ali.provider]).search({ ...QUERY, sort: "relevance" });
     // Earbuds group: best rank 0 (AliExpress) and 2 stores → ahead of headphones (rank 0, 1 store).
     expect(response.groups.map((g) => g.id)).toEqual(["grp:aliexpress:a1", "grp:amazon:z2"]);
@@ -132,7 +144,7 @@ describe("searchProducts — fan-out and grouping", () => {
       title: "Sony WH-1000XM5 Over-Ear",
       total: 900_00,
     });
-    const amazon = fakeProvider("amazon", () => ok([related]));
+    const amazon = fakeProvider("amazon", () => okPage([related]));
     const response = await setup([amazon.provider]).search({
       ...QUERY,
       normalizedText: "wireless headphones",
@@ -141,7 +153,7 @@ describe("searchProducts — fan-out and grouping", () => {
   });
 
   it("always asks providers for page 1 and paginates locally", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress, HEADPHONES]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress, HEADPHONES]));
     const response = await setup([ali.provider]).search({ ...QUERY, page: 2, pageSize: 1 });
 
     expect(ali.search.mock.calls[0]?.[0].page).toBe(1);
@@ -153,7 +165,7 @@ describe("searchProducts — fan-out and grouping", () => {
     const holder: { clock?: { ms: number } } = {};
     const slow = fakeProvider("ebay", () => {
       if (holder.clock) holder.clock.ms += 120;
-      return ok([]);
+      return okPage([]);
     });
     const ctx = setup([slow.provider]);
     holder.clock = ctx.clock;
@@ -168,7 +180,7 @@ describe("searchProducts — fan-out and grouping", () => {
 
 describe("searchProducts — resilience and partial results", () => {
   it("returns other stores' results when one store errors", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const ebay = fakeProvider("ebay", () => failure("ebay", "upstream_error"));
     const response = await setup([ali.provider, ebay.provider]).search(QUERY);
 
@@ -188,7 +200,7 @@ describe("searchProducts — resilience and partial results", () => {
       receivedSignal = signal;
       return never();
     });
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const response = await setup([stuck.provider, ali.provider]).search(QUERY);
 
     expect(outcome(response, "temu")).toMatchObject({ status: "timeout", errorCode: "TIMEOUT" });
@@ -201,7 +213,7 @@ describe("searchProducts — resilience and partial results", () => {
     const slow: ProductSearchProvider = {
       id: "amazon",
       timeoutMs: 500,
-      search: () => new Promise((resolve) => setTimeout(() => resolve(ok([EARBUDS.amazon])), 120)),
+      search: () => new Promise((resolve) => setTimeout(() => resolve(okPage([EARBUDS.amazon])), 120)),
     };
     const response = await setup([slow]).search(QUERY);
     expect(outcome(response, "amazon")?.status).toBe("ok");
@@ -223,7 +235,7 @@ describe("searchProducts — resilience and partial results", () => {
     ["with a non-Error value", () => Promise.reject("boom")],
   ])("contains an adapter that throws %s", async (_label, search) => {
     const bad: ProductSearchProvider = { id: "ebay", search };
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const response = await setup([bad, ali.provider]).search(QUERY);
     expect(outcome(response, "ebay")).toMatchObject({ status: "error", errorCode: "ADAPTER_THREW" });
     expect(outcome(response, "aliexpress")?.status).toBe("ok");
@@ -238,8 +250,8 @@ describe("searchProducts — resilience and partial results", () => {
   });
 
   it("skips providers excluded by the query without marking the response partial", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
-    const amazon = fakeProvider("amazon", () => ok([EARBUDS.amazon]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));
     const response = await setup([ali.provider, amazon.provider]).search({
       ...QUERY,
       providers: ["aliexpress"],
@@ -257,7 +269,7 @@ describe("searchProducts — resilience and partial results", () => {
   });
 
   it("treats an empty providers filter as 'all providers'", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     await setup([ali.provider]).search({ ...QUERY, providers: [] });
     expect(ali.search).toHaveBeenCalled();
   });
@@ -286,7 +298,7 @@ describe("searchProducts — resilience and partial results", () => {
 
 describe("searchProducts — caching", () => {
   it("serves repeat searches from cache, regardless of sort, filters, or page", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress, HEADPHONES]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress, HEADPHONES]));
     const { search } = setup([ali.provider]);
 
     await search(QUERY);
@@ -309,7 +321,7 @@ describe("searchProducts — caching", () => {
   });
 
   it("shares cache entries across differently-cased query text", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const { search } = setup([ali.provider]);
     await search(QUERY);
     await search({ ...QUERY, normalizedText: "  Wireless EARBUDS " });
@@ -317,19 +329,19 @@ describe("searchProducts — caching", () => {
   });
 
   it("writes results under the provider/country/query key with a 24h TTL by default", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const ctx = setup([ali.provider], { cacheTtlSeconds: undefined });
     const set = jest.spyOn(ctx.cache, "set");
     await ctx.search(QUERY);
     expect(set).toHaveBeenCalledWith(
       searchCacheKey(QUERY, "aliexpress"),
-      { products: [EARBUDS.aliexpress], cachedAt: new Date(ctx.clock.ms).toISOString() },
+      { products: [EARBUDS.aliexpress], hasMore: false, cachedAt: new Date(ctx.clock.ms).toISOString() },
       86_400,
     );
   });
 
   it("expires entries after the TTL", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const ctx = setup([ali.provider], { cacheTtlSeconds: 60 });
     await ctx.search(QUERY);
     ctx.clock.ms += 61_000;
@@ -338,7 +350,7 @@ describe("searchProducts — caching", () => {
   });
 
   it("caches a legitimate empty result", async () => {
-    const ebay = fakeProvider("ebay", () => ok([]));
+    const ebay = fakeProvider("ebay", () => okPage([]));
     const { search } = setup([ebay.provider]);
     expect(outcome(await search(QUERY), "ebay")?.status).toBe("empty");
     expect(outcome(await search(QUERY), "ebay")).toMatchObject({ status: "empty", fromCache: true });
@@ -358,7 +370,7 @@ describe("searchProducts — caching", () => {
       get: () => Promise.reject(new Error("redis down")),
       set: () => Promise.reject(new Error("redis down")),
     };
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const { search, logger } = setup([ali.provider], { cache: brokenCache });
 
     const response = await search(QUERY);
@@ -375,7 +387,7 @@ describe("searchProducts — caching", () => {
 
   it("logs non-Error cache failures too", async () => {
     const brokenCache: SearchResultCache = { get: () => Promise.reject("nope"), set: async () => undefined };
-    const ali = fakeProvider("aliexpress", () => ok([]));
+    const ali = fakeProvider("aliexpress", () => okPage([]));
     const { search, logger } = setup([ali.provider], { cache: brokenCache });
     await search(QUERY);
     expect(logger.warn).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ error: "nope" }));
@@ -406,7 +418,7 @@ describe("searchProducts — circuit breaker", () => {
   it("probes after the cooldown and closes again on success", async () => {
     let healthy = false;
     const ebay = fakeProvider("ebay", () =>
-      healthy ? ok([EARBUDS.amazon]) : failure("ebay", "upstream_error"),
+      healthy ? okPage([EARBUDS.amazon]) : failure("ebay", "upstream_error"),
     );
     const { search, clock, circuitBreaker } = setup([ebay.provider]);
 
@@ -435,7 +447,7 @@ describe("searchProducts — circuit breaker", () => {
 
   it("resets the failure count after a success", async () => {
     let fail = true;
-    const ebay = fakeProvider("ebay", () => (fail ? failure("ebay", "upstream_error") : ok([])));
+    const ebay = fakeProvider("ebay", () => (fail ? failure("ebay", "upstream_error") : okPage([])));
     const { search, circuitBreaker } = setup([ebay.provider], { cacheTtlSeconds: 0 });
 
     await search(QUERY);
@@ -445,7 +457,7 @@ describe("searchProducts — circuit breaker", () => {
   });
 
   it("skips the breaker write when the circuit is already clean", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([]));
+    const ali = fakeProvider("aliexpress", () => okPage([]));
     const store = fakeCircuitBreakerStore();
     await store.set("aliexpress", { status: "closed", consecutiveFailures: 0 });
     const set = jest.spyOn(store, "set");
@@ -469,7 +481,7 @@ describe("searchProducts — circuit breaker", () => {
       set: () => Promise.reject(new Error("redis down")),
     };
     const ebay = fakeProvider("ebay", () => failure("ebay", "upstream_error"));
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const { search, logger } = setup([ebay.provider, ali.provider], { circuitBreaker: brokenStore });
 
     const response = await search(QUERY);
@@ -488,8 +500,8 @@ describe("searchProducts — circuit breaker", () => {
 
 describe("searchProducts — filtering and sorting after merge", () => {
   it("applies filters per offer before grouping", async () => {
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
-    const amazon = fakeProvider("amazon", () => ok([EARBUDS.amazon, HEADPHONES]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon, HEADPHONES]));
     const response = await setup([ali.provider, amazon.provider]).search({
       ...QUERY,
       filters: { maxTotal: money(100_00, "ILS") },
@@ -500,7 +512,7 @@ describe("searchProducts — filtering and sorting after merge", () => {
 
   it("sorts groups per the query", async () => {
     const amazon = fakeProvider("amazon", () =>
-      ok([
+      okPage([
         makeProduct({
           provider: "amazon",
           sku: "slow",
@@ -530,7 +542,7 @@ describe("searchProducts — filtering and sorting after merge", () => {
 
   it("works with default policy, timeout, clock, and logger", async () => {
     const ebay = fakeProvider("ebay", () => failure("ebay", "upstream_error"));
-    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const search = createSearchProducts({
       providers: [ebay.provider, ali.provider],
       cache: fakeSearchCache(Date.now),
@@ -539,5 +551,158 @@ describe("searchProducts — filtering and sorting after merge", () => {
     const response = await search(QUERY);
     expect(response).toMatchObject({ isPartial: true, totalOffers: 1 });
     expect(Date.parse(response.generatedAt)).not.toBeNaN();
+  });
+});
+
+describe("searchProducts — paging through store results", () => {
+  /** `count` distinct, ungroupable products for one store page. */
+  const items = (provider: ProviderId, storePage: number, count: number) =>
+    Array.from({ length: count }, (_, i) =>
+      makeProduct({
+        provider,
+        sku: `${provider}-p${storePage}-${i}`,
+        title: `Gadget ${provider.slice(0, 2).toUpperCase()}${storePage}${String(i).padStart(2, "0")}X`,
+        total: 100_00 + i,
+      }),
+    );
+
+  /** A store with `pages` pages of `perPage` items each. */
+  function pagedStore(id: ProviderId, pages: number, perPage: number) {
+    return fakeProvider(id, (_query, _signal, storePage) =>
+      storePage <= pages ? okPage(items(id, storePage, perPage), storePage < pages) : okPage([]),
+    );
+  }
+
+  const storePagesAsked = (store: ReturnType<typeof fakeProvider>) =>
+    store.search.mock.calls.map(([, options]) => options.storePage ?? 1);
+
+  const PAGE = { ...QUERY, sort: "relevance" as const, pageSize: 4 };
+
+  it("never asks a store for a deeper page on results page 1, but says more exist", async () => {
+    const ebay = pagedStore("ebay", 3, 2);
+    const response = await setup([ebay.provider]).search(PAGE);
+    expect(storePagesAsked(ebay)).toEqual([1]);
+    expect(response.groups).toHaveLength(2);
+    expect(response.pagination).toMatchObject({ page: 1, totalResults: 2, hasNextPage: true });
+  });
+
+  it("serves later results pages from already-loaded results at no extra store call", async () => {
+    const ebay = pagedStore("ebay", 3, 10);
+    const response = await setup([ebay.provider]).search({ ...PAGE, page: 2 });
+    expect(storePagesAsked(ebay)).toEqual([1]);
+    expect(response.groups.map((g) => g.offers[0].providerProductId)).toEqual([
+      "ebay-p1-4",
+      "ebay-p1-5",
+      "ebay-p1-6",
+      "ebay-p1-7",
+    ]);
+    expect(response.pagination.hasNextPage).toBe(true);
+  });
+
+  it("fetches the next store page only when loaded results run out, only from stores with more", async () => {
+    const ebay = pagedStore("ebay", 3, 3);
+    const amazon = pagedStore("amazon", 1, 2);
+    const response = await setup([ebay.provider, amazon.provider]).search({ ...PAGE, page: 2 });
+    // 5 groups loaded; page 2 needs 8 (+1 to know about page 3): eBay pages 2 and 3 are fetched.
+    expect(storePagesAsked(ebay)).toEqual([1, 2, 3]);
+    expect(storePagesAsked(amazon)).toEqual([1]);
+    expect(response.groups).toHaveLength(4);
+    expect(response.pagination).toMatchObject({ totalResults: 11, hasNextPage: true });
+    expect(outcome(response, "ebay")).toMatchObject({ status: "ok", resultCount: 9, fromCache: false });
+  });
+
+  it("ranks deeper store pages after the earlier ones in best-match order", async () => {
+    const ebay = pagedStore("ebay", 2, 3);
+    const response = await setup([ebay.provider]).search({ ...PAGE, page: 2, pageSize: 3 });
+    expect(response.groups.map((g) => g.offers[0].providerProductId)).toEqual([
+      "ebay-p2-0",
+      "ebay-p2-1",
+      "ebay-p2-2",
+    ]);
+    expect(response.pagination.hasNextPage).toBe(false);
+  });
+
+  it("caches every store page, so paging back and forth never re-fetches", async () => {
+    const ebay = pagedStore("ebay", 3, 3);
+    const { search } = setup([ebay.provider]);
+    await search({ ...PAGE, page: 2 });
+    const again = await search({ ...PAGE, page: 2 });
+    await search({ ...PAGE, page: 1 });
+    expect(storePagesAsked(ebay)).toEqual([1, 2, 3]);
+    expect(outcome(again, "ebay")).toMatchObject({ fromCache: true, resultCount: 9 });
+  });
+
+  it("returns every group up to the page when asked to include earlier pages", async () => {
+    const ebay = pagedStore("ebay", 3, 3);
+    const response = await setup([ebay.provider]).search({ ...PAGE, page: 2 }, { includeEarlierPages: true });
+    expect(response.groups).toHaveLength(8);
+    expect(response.groups[0]?.offers[0].providerProductId).toBe("ebay-p1-0");
+  });
+
+  it("reads deeper pages from the cache only, in cached mode", async () => {
+    const ebay = pagedStore("ebay", 3, 3);
+    const { search } = setup([ebay.provider]);
+    await search({ ...PAGE, page: 2 }); // caches store pages 1–3
+    ebay.search.mockClear();
+
+    const all = await search({ ...PAGE, pageSize: 500 }, { deeperStorePages: "cached" });
+    expect(ebay.search).not.toHaveBeenCalled();
+    expect(all.groups).toHaveLength(9);
+
+    const fresh = pagedStore("ebay", 3, 3);
+    const uncached = await setup([fresh.provider]).search(
+      { ...PAGE, pageSize: 500 },
+      { deeperStorePages: "cached" },
+    );
+    expect(storePagesAsked(fresh)).toEqual([1]);
+    expect(uncached.groups).toHaveLength(3);
+  });
+
+  it("stops at the deepest allowed store page", async () => {
+    const ebay = pagedStore("ebay", 10, 2);
+    const response = await setup([ebay.provider], { maxStorePages: 2 }).search({ ...PAGE, page: 5 });
+    expect(storePagesAsked(ebay)).toEqual([1, 2]);
+    expect(response.groups).toEqual([]);
+    expect(response.pagination).toMatchObject({ totalResults: 4, hasNextPage: false });
+  });
+
+  it("keeps earlier results when a deeper page fails, without flagging the search partial", async () => {
+    const ebay = fakeProvider("ebay", (_q, _s, storePage) =>
+      storePage === 1 ? okPage(items("ebay", 1, 2), true) : failure("ebay", "upstream_error"),
+    );
+    const response = await setup([ebay.provider]).search({ ...PAGE, page: 2, pageSize: 2 });
+    expect(storePagesAsked(ebay)).toEqual([1, 2]);
+    expect(response.isPartial).toBe(false);
+    expect(outcome(response, "ebay")?.status).toBe("ok");
+    expect(response.pagination).toMatchObject({ totalResults: 2, hasNextPage: false });
+  });
+
+  it("drops an item a store repeats on a later page", async () => {
+    const [first, second] = items("ebay", 1, 2);
+    const ebay = fakeProvider("ebay", (_q, _s, storePage) =>
+      storePage === 1 && first && second ? okPage([first], true) : okPage([first!, second!]),
+    );
+    const response = await setup([ebay.provider]).search(
+      { ...PAGE, page: 2, pageSize: 1 },
+      {
+        includeEarlierPages: true,
+      },
+    );
+    expect(response.groups.map((g) => g.offers[0].id)).toEqual([first?.id, second?.id]);
+    expect(outcome(response, "ebay")?.resultCount).toBe(2);
+  });
+
+  it("treats cache entries without a paging flag as the last page", async () => {
+    const ebay = pagedStore("ebay", 3, 2);
+    const ctx = setup([ebay.provider]);
+    await ctx.cache.set(
+      searchCacheKey(PAGE, "ebay"),
+      // Shape written before paging existed.
+      JSON.parse(JSON.stringify({ products: items("ebay", 1, 2), cachedAt: "2026-10-01T00:00:00.000Z" })),
+      60,
+    );
+    const response = await ctx.search({ ...PAGE, page: 2 });
+    expect(ebay.search).not.toHaveBeenCalled();
+    expect(response.pagination.hasNextPage).toBe(false);
   });
 });

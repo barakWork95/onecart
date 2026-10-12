@@ -22,6 +22,23 @@ export interface ProviderError {
   readonly retryable: boolean;
 }
 
+/** One page of a store's own results, in the store's relevance order. */
+export interface ProviderPage {
+  readonly products: readonly UnifiedProduct[];
+  /** The store has results beyond this page (worth fetching on "Load more"). */
+  readonly hasMore: boolean;
+}
+
+export interface ProviderSearchOptions {
+  readonly signal: AbortSignal;
+  /**
+   * 1-based page of the store's own results. What one page holds is up to the
+   * adapter (eBay: 50 items; Amazon: page 1 is the first SerpApi pages fetched
+   * together, each later page is one more SerpApi page). Defaults to 1.
+   */
+  readonly storePage?: number;
+}
+
 /**
  * Port implemented by every provider adapter in `src/infrastructure/providers/*`.
  * Adapters must never throw for upstream failures — return `err(...)` instead,
@@ -34,8 +51,5 @@ export interface ProductSearchProvider {
    * takes ~3–4s per page). Omit to use the search-wide default.
    */
   readonly timeoutMs?: number;
-  search(
-    query: SearchQuery,
-    options: { readonly signal: AbortSignal },
-  ): Promise<Result<readonly UnifiedProduct[], ProviderError>>;
+  search(query: SearchQuery, options: ProviderSearchOptions): Promise<Result<ProviderPage, ProviderError>>;
 }

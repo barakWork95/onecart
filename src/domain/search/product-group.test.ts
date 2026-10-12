@@ -84,7 +84,7 @@ describe("groupProducts", () => {
     const b = makeProduct({
       provider: "temu",
       sku: "2",
-      title: "Soundcore Life P2 P3 Earbuds Bundle",
+      title: "Soundcore Life P2 P3 Earbuds Combo",
       total: 100_01,
     });
     const c = makeProduct({ provider: "ebay", sku: "3", title: "Soundcore Life P2 Earbuds", total: 100_02 });

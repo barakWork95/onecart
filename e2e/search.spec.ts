@@ -147,6 +147,57 @@ test.describe("search flow", () => {
     );
   });
 
+  test("a grouped card names every store's price and the best deal", async ({ page }) => {
+    await page.goto("/search?q=wireless+earbuds");
+    const lifeP3 = cards(page).nth(0);
+    await expect(lifeP3.getByText("Same item · 4 stores")).toBeVisible();
+    await expect(lifeP3.getByText(/^Available on 4 stores/).locator("..")).toHaveText(
+      /Available on 4 stores: AliExpress ₪89 vs Temu ₪98 vs .+ \+1 more — Best deal on AliExpress/,
+    );
+  });
+
+  test("a single-store card searches the other stores for its twin", async ({ page }) => {
+    await page.goto("/search?q=dashboard+mount");
+    await cards(page)
+      .nth(0)
+      .getByRole("link", { name: /^Find on other stores/ })
+      .click();
+    await expect(page).toHaveURL(/\/search\?q=Magnetic\+Car\+Phone\+Mount\+360\+Rotation\+Dashboard/);
+    await expect(page.getByRole("searchbox", { name: "Search products" })).toHaveValue(
+      "Magnetic Car Phone Mount 360 Rotation Dashboard",
+    );
+  });
+
+  test("Load more pages through loaded results, then deeper store pages, keeping the cards", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=usb+cable");
+    await expect(cards(page)).toHaveCount(20);
+    const firstTitle = await cards(page).nth(0).getByRole("heading", { level: 2 }).textContent();
+
+    const more = page.getByRole("link", { name: "Load more" });
+    await more.click();
+    await expect(page).toHaveURL(/page=2/);
+    await expect(cards(page)).toHaveCount(40);
+    await expect(page.getByText("Showing 40 products")).toBeVisible();
+    // Appended, not replaced: the first card is still first.
+    await expect(cards(page).nth(0).getByRole("heading", { level: 2 })).toHaveText(firstTitle ?? "");
+
+    // Store page 1 held 50 cables (25 per store); page 3 needs the stores' page 2.
+    await more.click();
+    await expect(page).toHaveURL(/page=3/);
+    await expect(cards(page)).toHaveCount(60);
+    await expect(page.getByText(/Showing 60 products — that's everything/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Load more" })).toHaveCount(0);
+  });
+
+  test("Load more keeps the active sort", async ({ page }) => {
+    await page.goto("/search?q=usb+cable&sort=landed_price_asc");
+    await page.getByRole("link", { name: "Load more" }).click();
+    await expect(page).toHaveURL(/sort=landed_price_asc&page=2/);
+    await expect(cards(page)).toHaveCount(40);
+  });
+
   test("shows a helpful empty state when nothing matches", async ({ page }) => {
     await page.goto("/search?q=espresso+machine");
     await expect(page.getByRole("heading", { name: "No matches" })).toBeVisible();

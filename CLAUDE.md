@@ -99,6 +99,7 @@ SearchBar (client) → /search?q=… (Server Component)
         circuit open? → status "circuit_open"
         else adapter.search() with timeout → Result
       merge → filter → group → sort (default: relevance = stores' own ranking, interleaved) → paginate
+      (results page needs more than the loaded store pages hold? → next store page per store, cached)
   → SearchResponse (with per-provider outcomes) → UI
 "Go" button → /go/[productId] route handler → affiliate URL → 302
 ```
@@ -202,8 +203,20 @@ SearchBar (client) → /search?q=… (Server Component)
      `AbortSignal` still can't hold the search.
 - A caller abort (the user navigated away) is reported as `timeout` but is **not** counted against
   the store's circuit breaker.
-- Providers are always asked for **page 1**. Grouping, filtering, sorting and pagination happen
-  after the merge.
+- Grouping, filtering, sorting and pagination happen after the merge.
+- **Paging ("Load more").** `?page=N` re-renders every card through page N (`includeEarlierPages`);
+  `page` is left out of the results `<Suspense>` key, so the cards already on screen stay put.
+  - A provider returns one **store page** (`ProviderPage { products, hasMore }`). eBay: 50 items
+    by `offset`. Amazon: store page 1 is the first `SERPAPI_AMAZON_PAGES` SerpApi pages; each
+    later store page is **one** more SerpApi page (one credit). `hasMore` comes from
+    `serpapi_pagination.next`.
+  - Results pages are served from the store pages already loaded. A deeper store page is fetched
+    only when they can't fill the requested page, only from stores with `hasMore`, and never on
+    results page 1 (`deeperStorePages` defaults to `none` there). The cap is
+    `DEFAULT_MAX_STORE_PAGES` (5).
+  - Every store page is cached on its own key (`…:p2`), so paging back and forth never re-fetches.
+    `offersFor()` (Save, alerts, cron) reads cached deeper pages but never pays for new ones.
+  - "Load more" and "Find on …" are `<Link prefetch={false}>`: a prefetch could spend SerpApi credits.
 - **Default sort is relevance**, so results follow what the user typed, like a store's own search.
   - The orchestrator records each offer's position in its store's results.
   - `sortGroups(…, "relevance", rankOf)` ranks each group by its best position, so every store's
@@ -223,18 +236,31 @@ SearchBar (client) → /search?q=… (Server Component)
   - A page of only unpriced items means "no results", not an error.
   - The recorded fixtures `fixtures/recorded-*.json` hold the real response shape.
 - Product matching is pure domain code (`src/domain/matching/`, `src/domain/search/product-group.ts`).
-  It is tuned for precision: a missed match is acceptable, a wrong match is a bug. Two offers match
-  only if all of these hold:
+  It is tuned for precision: a missed match is acceptable, a wrong match is a bug.
+  `tokenizeTitle()` reads model codes (`whch720n`), series numbers ("Flip 6"), variants per unit
+  (`6qt`, `128gb`, `6pk`, `7in1`, `gen2`), known brands, condition qualifiers (renewed, used,
+  bundle) and whether the title is an accessory ("Case for …", "for Sony …", replacement parts,
+  guides). Two offers match only if all of these hold:
   - they come from different stores;
-  - neither is an accessory of the other ("case for X" ≠ X);
-  - their item prices are within 3× of each other;
-  - if both titles have identifiers (model numbers, capacities), they share one and the titles
-    are at least 0.3 Dice-similar; otherwise the titles must be at least 0.8 similar.
+  - both or neither are accessories;
+  - their item prices are within 2.5× of each other;
+  - no conflict: different brands, model codes, variant values, series numbers or qualifiers;
+  - then one of: a shared model code with ≥ 50% containment (share of the shorter title found in
+    the longer; Amazon titles run 3× longer than eBay's); a shared series number or generation of
+    a branded item, no model codes, ≥ 80% containment; or ≥ 0.8 Dice title similarity
+    (`title_similarity`). Accessories only get the last one: their model code names the product
+    they fit. A model code on one side only, plus a brand, never matches.
+- `src/domain/matching/fixtures/recorded-results.json` holds real Amazon + eBay results for seven
+  queries; `recorded-results.test.ts` pins exactly which groups form. The previous matcher formed
+  22 cross-store groups there, ~20 of them wrong. Re-record when tuning, and check every new group
+  by hand.
 - Groups use complete linkage: a new offer must match **every** offer already in the group. A
   group has at most one offer per store. Add a test case to `product-matcher.test.ts` for every
   real mismatch you find.
-- `ProductGroup.matchedBy === "title_similarity"` is the weakest grouping. The UI should label it
-  "similar item", not "same item".
+- `ProductGroup.matchedBy === "title_similarity"` is the weakest grouping. The card labels it
+  "Similar item", others "Same item". Grouped cards spell out "Available on N stores: Amazon ₪X vs
+  eBay ₪Y — Best deal on …"; single-store cards offer "Find on <other store>", a focused search
+  built by `matchSearchText()`.
 - Application tests use the port fakes in `src/test/fakes.ts`, never infrastructure.
   `src/test/product-factory.ts` builds valid products.
 
@@ -289,10 +315,12 @@ SearchBar (client) → /search?q=… (Server Component)
 
 - The Redis key comes from `searchCacheKey()` in `domain/search/search-query.ts`. It is scoped per
   **provider**, **destination country** and **normalized English query text**.
-- Sort, filters and pagination are applied **after** the cache read. Never put them in the key.
+- Sort, filters and results pagination are applied **after** the cache read. Never put them in the
+  key; only the store page (what the store returned) is part of it.
 - The TTL comes from `SEARCH_CACHE_TTL_SECONDS` (default 24h). Translation results use their own
   longer-lived keys.
-- Bump the `v1` segment in the key whenever the `UnifiedProduct` shape changes.
+- Bump the `v2` segment in the key whenever the cached entry or `UnifiedProduct` shape changes.
+  Deeper store pages add a `:pN` suffix.
 - Never cache an error or an empty result from a failed call. Do cache a legitimate "0 results".
 - If Redis is unavailable, log it and continue uncached. A cache outage must not break search.
   Without Upstash env vars, the composition root uses `createInMemoryRedis()`, which is

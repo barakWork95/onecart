@@ -32,4 +32,6 @@ export const amazonSearchResponseSchema = z.object({
    * these are often the only priced, deliverable items on a page.
    */
   featured_products: z.array(z.object({ products: z.array(z.unknown()).optional() })).optional(),
+  /** `next` is present when Amazon has another results page. */
+  serpapi_pagination: z.object({ current: z.number().optional(), next: z.string().optional() }).optional(),
 });
