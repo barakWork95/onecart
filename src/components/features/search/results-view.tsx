@@ -102,6 +102,7 @@ export function ResultsView({
           <span className="font-semibold text-primary">
             {searched.length} {searched.length === 1 ? "store" : "stores"}
           </span>
+          {query.sort === "relevance" && <span> • Best match</span>}
         </p>
         <div className="flex gap-2">
           {demoMode && (
@@ -139,9 +140,9 @@ export function ResultsView({
           body={`No store had results for “${query.rawText}”. Try fewer or more general words.`}
         />
       ) : (
-        <ol className="flex flex-col gap-4" aria-label="Products">
+        <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Products">
           {groups.map((group) => (
-            <li key={group.id}>
+            <li key={group.id} className="min-w-0">
               <ProductGroupCard
                 group={group}
                 links={outboundLinks}

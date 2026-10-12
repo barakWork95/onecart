@@ -17,14 +17,15 @@ test.describe("search flow", () => {
     await expect(page.getByText("Demo data")).toBeVisible();
     await expect(page.getByRole("searchbox", { name: "Search products" })).toHaveValue("אוזניות אלחוטיות");
 
-    // Sorted by lowest landed total: Baseus ₪72, Life P3 ₪89, Space A40 ₪189.
+    // Default "best match": the stores' own ranking (Life P3 is #1 at every store).
+    await expect(page.getByText(/Best match/)).toBeVisible();
     await expect(cards(page)).toHaveCount(3);
     await expect(cards(page).getByRole("heading", { level: 2 })).toHaveText([
-      /Baseus Bowie M2\+/,
       /Soundcore Life P3/,
       /Soundcore Space A40/,
+      /Baseus Bowie M2\+/,
     ]);
-    const lifeP3 = cards(page).nth(1);
+    const lifeP3 = cards(page).nth(0);
     await expect(lifeP3.getByText("₪89", { exact: true })).toBeVisible();
 
     await lifeP3.getByRole("button", { name: /Compare 4 stores/ }).click();
@@ -45,6 +46,45 @@ test.describe("search flow", () => {
 
     await sheet.getByRole("button", { name: "Close comparison" }).click();
     await expect(sheet).toBeHidden();
+  });
+
+  test("results default to best match; a sort chip re-sorts and a second tap clears it", async ({ page }) => {
+    await page.goto("/search?q=wireless+earbuds");
+    const sortNav = page.getByRole("navigation", { name: "Sort results" });
+    await expect(sortNav.locator("[aria-current]")).toHaveCount(0);
+
+    const lowest = sortNav.getByRole("link", { name: "Lowest Price" });
+    await lowest.click();
+    await expect(page).toHaveURL(/sort=landed_price_asc/);
+    await expect(lowest).toHaveAttribute("aria-current", "true");
+    await expect(cards(page).getByRole("heading", { level: 2 })).toHaveText([
+      /Baseus Bowie M2\+/,
+      /Soundcore Life P3/,
+      /Soundcore Space A40/,
+    ]);
+
+    await lowest.click();
+    await expect(page).not.toHaveURL(/sort=/);
+    await expect(sortNav.locator("[aria-current]")).toHaveCount(0);
+    await expect(cards(page).getByRole("heading", { level: 2 })).toHaveText([
+      /Soundcore Life P3/,
+      /Soundcore Space A40/,
+      /Baseus Bowie M2\+/,
+    ]);
+  });
+
+  test("results show as a multi-column grid with large square images", async ({ page }) => {
+    await page.goto("/search?q=wireless+earbuds");
+    await expect(cards(page)).toHaveCount(3);
+    const boxes = await cards(page).evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect().toJSON() as DOMRect),
+    );
+    // At least two cards share a row (same top) at every viewport we test.
+    expect(new Set(boxes.map((b) => Math.round(b.top))).size).toBeLessThan(boxes.length);
+    const image = cards(page).first().locator("div.aspect-square");
+    const box = await image.boundingBox();
+    expect(box && Math.abs(box.width - box.height)).toBeLessThan(2);
+    expect(box?.width ?? 0).toBeGreaterThan(140);
   });
 
   test("sorting by fastest delivery reorders the groups and updates the URL", async ({ page }) => {

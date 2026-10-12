@@ -102,7 +102,8 @@ describe("ResultsView", () => {
       "Soundcore Life P3 Earbuds",
     );
     expect(within(cards[0]!).getByText("₪89")).toBeInTheDocument();
-    expect(within(cards[0]!).getByText(/2 other stores from ₪98/)).toBeInTheDocument();
+    expect(within(cards[0]!).getByText(/3 stores/)).toBeInTheDocument();
+    expect(within(cards[0]!).getByText("total landed")).toBeInTheDocument();
   });
 
   it("offers Compare for multi-store groups and a direct deal link for single-store ones", () => {
@@ -113,14 +114,34 @@ describe("ResultsView", () => {
     expect(deal).toHaveAttribute("rel", "nofollow sponsored noopener");
   });
 
-  it("links sort chips to shareable URLs and marks the active one", () => {
+  it("marks the active sort chip and lets a second tap clear it back to best match", () => {
     renderView();
     const nav = screen.getByRole("navigation", { name: "Sort results" });
-    expect(within(nav).getByRole("link", { name: "Lowest Price" })).toHaveAttribute("aria-current", "true");
+    const q = encodeURIComponent("אוזניות אלחוטיות").replace(/%20/g, "+");
+    const lowest = within(nav).getByRole("link", { name: "Lowest Price" });
+    expect(lowest).toHaveAttribute("aria-current", "true");
+    expect(lowest).toHaveAttribute("href", `/search?q=${q}`);
     expect(within(nav).getByRole("link", { name: "Fastest Delivery" })).toHaveAttribute(
       "href",
-      `/search?q=${encodeURIComponent("אוזניות אלחוטיות").replace(/%20/g, "+")}&sort=delivery_fastest`,
+      `/search?q=${q}&sort=delivery_fastest`,
     );
+  });
+
+  it("highlights no chip and says 'Best match' under the default relevance sort", () => {
+    renderView({ response: response({ query: { ...QUERY, sort: "relevance" } }) });
+    const nav = screen.getByRole("navigation", { name: "Sort results" });
+    expect(within(nav).queryByRole("link", { current: "true" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Best match/)).toBeInTheDocument();
+  });
+
+  it("lays products out as a grid of cards with the price prominent", () => {
+    renderView();
+    expect(screen.getByRole("list", { name: "Products" })).toHaveClass(
+      "grid",
+      "grid-cols-2",
+      "lg:grid-cols-3",
+    );
+    expect(screen.getByText("₪89")).toHaveClass("text-2xl", "font-extrabold");
   });
 
   it("explains when Hebrew couldn't be translated", () => {

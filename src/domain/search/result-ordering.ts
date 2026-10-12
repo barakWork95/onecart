@@ -35,7 +35,22 @@ function compareNullable(a: number | null, b: number | null, direction: 1 | -1):
   return (a - b) * direction;
 }
 
-const COMPARATORS: Record<SearchSort, (a: ProductGroup, b: ProductGroup) => number> = {
+/**
+ * Position of an offer in its own store's results (0 = the store's top match).
+ * Missing offers rank last.
+ */
+export type RelevanceRank = (offerId: string) => number | undefined;
+
+/** A group is as relevant as its best-ranked offer in any store. */
+function groupRank(group: ProductGroup, rankOf: RelevanceRank): number {
+  let best = Number.POSITIVE_INFINITY;
+  for (const offer of group.offers) best = Math.min(best, rankOf(offer.id) ?? Number.POSITIVE_INFINITY);
+  return best;
+}
+
+type Comparator = (a: ProductGroup, b: ProductGroup) => number;
+
+const COMPARATORS: Record<Exclude<SearchSort, "relevance">, Comparator> = {
   // More stores on a tie: a wider comparison is more useful to the shopper.
   landed_price_asc: (a, b) => byPrice(a, b) || b.offers.length - a.offers.length || byId(a, b),
   rating_desc: (a, b) =>
@@ -47,8 +62,25 @@ const COMPARATORS: Record<SearchSort, (a: ProductGroup, b: ProductGroup) => numb
     compareNullable(fastestDeliveryDays(a), fastestDeliveryDays(b), 1) || byPrice(a, b) || byId(a, b),
 };
 
-export function sortGroups(groups: readonly ProductGroup[], sort: SearchSort): ProductGroup[] {
-  return [...groups].sort(COMPARATORS[sort]);
+/**
+ * Relevance interleaves the stores' own rankings: every store's #1 result
+ * comes before any store's #2. Ties go to products found in more stores,
+ * then to the lower price. Without ranks, relevance falls back to price.
+ */
+function relevanceComparator(rankOf: RelevanceRank): Comparator {
+  return (a, b) =>
+    groupRank(a, rankOf) - groupRank(b, rankOf) ||
+    b.offers.length - a.offers.length ||
+    byPrice(a, b) ||
+    byId(a, b);
+}
+
+export function sortGroups(
+  groups: readonly ProductGroup[],
+  sort: SearchSort,
+  rankOf: RelevanceRank = () => undefined,
+): ProductGroup[] {
+  return [...groups].sort(sort === "relevance" ? relevanceComparator(rankOf) : COMPARATORS[sort]);
 }
 
 export function paginate<T>(

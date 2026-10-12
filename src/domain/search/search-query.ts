@@ -4,7 +4,12 @@ import type { ProviderId } from "@/domain/shared/provider";
 /** Longest query we accept from the user. */
 export const MAX_QUERY_LENGTH = 200;
 
-export const SEARCH_SORTS = ["landed_price_asc", "rating_desc", "delivery_fastest"] as const;
+/**
+ * `relevance` (the default) keeps each store's own best-match order, merged
+ * across stores; the others re-sort by our computed values.
+ */
+export const SEARCH_SORTS = ["relevance", "landed_price_asc", "delivery_fastest", "rating_desc"] as const;
+export const DEFAULT_SORT: SearchSort = "relevance";
 export type SearchSort = (typeof SEARCH_SORTS)[number];
 
 export type QueryLanguage = "he" | "en";

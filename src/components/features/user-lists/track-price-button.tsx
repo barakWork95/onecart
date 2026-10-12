@@ -23,12 +23,15 @@ export function TrackPriceButton({
   title,
   currentAgorot,
   initialTracking,
+  overlay = false,
 }: {
   productId: string;
   searchText: string;
   title: string;
   currentAgorot: number;
   initialTracking: boolean;
+  /** Styled to sit on top of a product image. */
+  overlay?: boolean;
 }) {
   const current = money(currentAgorot, "ILS");
   const [open, setOpen] = useState(false);
@@ -63,6 +66,8 @@ export function TrackPriceButton({
           tracking
             ? "border-primary bg-primary/10 text-primary"
             : "border-border bg-card text-muted-foreground hover:text-foreground",
+          overlay && "border-transparent shadow-sm backdrop-blur",
+          overlay && (tracking ? "bg-background/95" : "bg-background/85"),
         )}
       >
         <BellRing className={cn("size-4", tracking && "fill-current")} aria-hidden />

@@ -1,7 +1,7 @@
 # OneCart
 
-One search across Amazon, AliExpress, Temu and eBay, sorted by the **total landed price to
-Israel**. Every price includes item, shipping, estimated import VAT, customs and fees, in ₪.
+One search across Amazon, AliExpress, Temu and eBay, showing the **total landed price to
+Israel** for every product. Every price includes item, shipping, estimated import VAT, customs and fees, in ₪.
 Clicking through goes to the store via a signed affiliate redirect.
 
 Hebrew queries are translated before they reach the stores. Shoppers can save products and set

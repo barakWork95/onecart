@@ -103,6 +103,44 @@ describe("sortGroups", () => {
     ]);
   });
 
+  it("sorts by relevance by interleaving each store's own ranking", () => {
+    // Store positions: each group's best (lowest) position decides its place.
+    const ranks = new Map([
+      ["amazon:fast", 3],
+      ["aliexpress:cheap", 0],
+      ["temu:rated", 1],
+      ["ebay:rated2", 1],
+    ]);
+    // rated vs rated2 tie on rank 1 and store count, so the cheaper one (rated, ₪150) wins.
+    expect(
+      sortGroups(groups, "relevance", (id) => ranks.get(id)).map((g) => g.offers[0].providerProductId),
+    ).toEqual(["cheap", "rated", "rated2", "fast"]);
+  });
+
+  it("puts groups found in more stores first on a relevance tie, and unranked groups last", () => {
+    const tied = groupProducts([
+      makeProduct({ provider: "amazon", sku: "solo", title: "Solo Item Q9", total: 10_00 }),
+      makeProduct({ provider: "amazon", sku: "pair-a", title: "Pair Item K7", total: 100_00 }),
+      makeProduct({ provider: "ebay", sku: "pair-b", title: "Pair Item K7", total: 100_00 }),
+      makeProduct({ provider: "temu", sku: "unranked", title: "Another Thing M5", total: 1_00 }),
+    ]);
+    const ranks = new Map([
+      ["amazon:solo", 0],
+      ["ebay:pair-b", 0],
+    ]);
+    expect(sortGroups(tied, "relevance", (id) => ranks.get(id)).map((g) => g.id)).toEqual([
+      "grp:amazon:pair-a",
+      "grp:amazon:solo",
+      "grp:temu:unranked",
+    ]);
+  });
+
+  it("falls back to price order for relevance when no ranks are known", () => {
+    expect(sortGroups(groups, "relevance").map((g) => g.offers[0].providerProductId)).toEqual(
+      sortGroups(groups, "landed_price_asc").map((g) => g.offers[0].providerProductId),
+    );
+  });
+
   it("does not mutate its input", () => {
     const before = groups.map((g) => g.id);
     sortGroups(groups, "rating_desc");

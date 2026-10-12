@@ -4,7 +4,7 @@ import Link from "next/link";
 export function AppHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/75">
-      <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 rounded-lg" aria-label="OneCart home">
           <Image src="/brand/onecart-icon.png" alt="" width={34} height={28} priority />
           <span className="leading-tight">

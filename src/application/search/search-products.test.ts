@@ -115,6 +115,15 @@ describe("searchProducts — fan-out and grouping", () => {
     expect(response.pagination).toEqual({ page: 1, pageSize: 20, totalResults: 2, hasNextPage: false });
   });
 
+  it("by default keeps each store's own best-match order, interleaved across stores", async () => {
+    // Amazon ranks headphones first; AliExpress ranks earbuds first. Both #1s beat any #2.
+    const amazon = fakeProvider("amazon", () => ok([HEADPHONES, EARBUDS.amazon]));
+    const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress]));
+    const response = await setup([amazon.provider, ali.provider]).search({ ...QUERY, sort: "relevance" });
+    // Earbuds group: best rank 0 (AliExpress) and 2 stores → ahead of headphones (rank 0, 1 store).
+    expect(response.groups.map((g) => g.id)).toEqual(["grp:aliexpress:a1", "grp:amazon:z2"]);
+  });
+
   it("always asks providers for page 1 and paginates locally", async () => {
     const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress, HEADPHONES]));
     const response = await setup([ali.provider]).search({ ...QUERY, page: 2, pageSize: 1 });

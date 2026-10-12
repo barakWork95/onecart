@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { QueryTranslator, TranslationSource } from "@/domain/search/ports";
 import { detectQueryLanguage } from "@/domain/search/query-language";
 import {
+  DEFAULT_SORT,
   MAX_QUERY_LENGTH,
   normalizeQueryText,
   SEARCH_SORTS,
@@ -24,7 +25,7 @@ const first = (v: unknown) => (Array.isArray(v) ? v[0] : v);
  */
 const searchParamsSchema = z.object({
   q: z.preprocess(first, z.string().trim().min(1).max(MAX_QUERY_LENGTH)),
-  sort: z.preprocess(first, z.enum(SEARCH_SORTS)).catch("landed_price_asc"),
+  sort: z.preprocess(first, z.enum(SEARCH_SORTS)).catch(DEFAULT_SORT),
   page: z.preprocess(first, z.coerce.number().int().min(1).max(50)).catch(1),
   /** Max landed total in whole shekels. */
   max: z.preprocess(first, z.coerce.number().int().positive().max(1_000_000).optional()).catch(undefined),

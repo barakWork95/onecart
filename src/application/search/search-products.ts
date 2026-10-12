@@ -230,7 +230,10 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
       runs.flatMap((r) => r.products),
       query.filters,
     );
-    const groups = sortGroups(groupProducts(offers), query.sort);
+    // Each store returns its best matches first; remember those positions for relevance sorting.
+    const ranks = new Map<string, number>();
+    for (const run of runs) run.products.forEach((product, index) => ranks.set(product.id, index));
+    const groups = sortGroups(groupProducts(offers), query.sort, (id) => ranks.get(id));
     const { items, pagination } = paginate(groups, query.page, query.pageSize);
     const outcomes = runs.map((r) => r.outcome);
 

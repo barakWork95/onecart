@@ -10,11 +10,14 @@ export function SaveButton({
   searchText,
   title,
   initialSaved,
+  overlay = false,
 }: {
   productId: string;
   searchText: string;
   title: string;
   initialSaved: boolean;
+  /** Styled to sit on top of a product image. */
+  overlay?: boolean;
 }) {
   const [saved, setSaved] = useState(initialSaved);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +49,8 @@ export function SaveButton({
           saved
             ? "border-primary bg-primary/10 text-primary"
             : "border-border bg-card text-muted-foreground hover:text-foreground",
+          overlay && "border-transparent shadow-sm backdrop-blur",
+          overlay && (saved ? "bg-background/95" : "bg-background/85"),
         )}
       >
         <Bookmark className={cn("size-4", saved && "fill-current")} aria-hidden />

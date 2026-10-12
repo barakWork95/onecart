@@ -21,7 +21,7 @@ describe("parseSearchParams", () => {
   it("applies defaults for missing optional params", () => {
     expect(parseSearchParams({ q: "earbuds" })).toEqual({
       ok: true,
-      value: { text: "earbuds", sort: "landed_price_asc", page: 1, freeShippingOnly: false },
+      value: { text: "earbuds", sort: "relevance", page: 1, freeShippingOnly: false },
     });
   });
 
@@ -29,8 +29,13 @@ describe("parseSearchParams", () => {
     const result = parseSearchParams({ q: "earbuds", sort: "cheapest", page: "-2", max: "abc", free: "yes" });
     expect(result).toEqual({
       ok: true,
-      value: { text: "earbuds", sort: "landed_price_asc", page: 1, freeShippingOnly: false },
+      value: { text: "earbuds", sort: "relevance", page: 1, freeShippingOnly: false },
     });
+  });
+
+  it("accepts an explicit relevance sort", () => {
+    const result = parseSearchParams({ q: "earbuds", sort: "relevance" });
+    expect(result.ok && result.value.sort).toBe("relevance");
   });
 
   it("takes the first value of repeated params", () => {

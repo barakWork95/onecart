@@ -3,8 +3,9 @@
 # OneCart — CLAUDE.md
 
 OneCart is an e-commerce meta-search and deal aggregator for shoppers in Israel. One search queries
-Amazon, AliExpress, Temu and eBay, normalizes every result into a `UnifiedProduct`, and sorts by the
-**total landed price** in ₪: item, shipping, import VAT, customs and fees. "Go" sends the user to the
+Amazon, AliExpress, Temu and eBay, normalizes every result into a `UnifiedProduct`, and shows every
+product's **total landed price** in ₪: item, shipping, import VAT, customs and fees. Results default
+to best match; the landed price is one tap away as a sort. "Go" sends the user to the
 store through an affiliate redirect.
 
 The landed price is the product. A wrong total is a P0 bug. A missing provider is a P2 bug.
@@ -97,7 +98,7 @@ SearchBar (client) → /search?q=… (Server Component)
         cache hit? → use it
         circuit open? → status "circuit_open"
         else adapter.search() with timeout → Result
-      merge → filter → sort by price.total → paginate
+      merge → filter → group → sort (default: relevance = stores' own ranking, interleaved) → paginate
   → SearchResponse (with per-provider outcomes) → UI
 "Go" button → /go/[productId] route handler → affiliate URL → 302
 ```
@@ -191,6 +192,13 @@ SearchBar (client) → /search?q=… (Server Component)
   the store's circuit breaker.
 - Providers are always asked for **page 1**. Grouping, filtering, sorting and pagination happen
   after the merge.
+- **Default sort is relevance**, so results follow what the user typed, like a store's own search.
+  - The orchestrator records each offer's position in its store's results.
+  - `sortGroups(…, "relevance", rankOf)` ranks each group by its best position, so every store's
+    #1 comes before any #2.
+  - Ties go to groups found in more stores, then to the lower price.
+  - Price, delivery and rating are opt-in sorts. Tapping an active chip again clears it back to
+    relevance, which has no `sort` URL param.
 - Product matching is pure domain code (`src/domain/matching/`, `src/domain/search/product-group.ts`).
   It is tuned for precision: a missed match is acceptable, a wrong match is a bug. Two offers match
   only if all of these hold:
