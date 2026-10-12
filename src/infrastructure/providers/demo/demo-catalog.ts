@@ -84,6 +84,19 @@ export const DEMO_CATALOG: readonly DemoListing[] = [
     rating: null,
     seller: "techdeals_us",
   },
+  // A second eBay seller of the same earbuds: collapses into the Life P3 card's eBay tray.
+  {
+    provider: "ebay",
+    sku: "395012345679",
+    title: "Anker Soundcore Life P3 Wireless Earbuds Navy Blue",
+    keywords: [...EARBUDS, "anker"],
+    price: { amount: 37.9, currency: "USD" },
+    shipping: { amount: 6.9, currency: "USD" },
+    deliveryDays: [12, 16],
+    methodLabel: "eBay International Shipping",
+    rating: null,
+    seller: "audio-outlet",
+  },
 
   // Baseus Bowie M2+ — Temu and AliExpress
   {

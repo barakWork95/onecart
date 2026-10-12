@@ -17,10 +17,19 @@ export interface SearchIntent {
 
 export function searchIntent(normalizedText: string): SearchIntent {
   const tokens = tokenizeTitle(normalizedText);
-  const specific =
-    tokens.models.size > 0 ||
-    (tokens.brands.size > 0 && (tokens.numbers.size > 0 || tokens.variants.has("gen")));
+  const lineWords = [...tokens.words].filter((w) => !tokens.brandWords.has(w));
+  // A model code, or a brand plus what names the line ("airpods pro", "instant pot duo",
+  // "jbl flip 6"). A brand plus a category word ("sony headphones") counts too: the
+  // shopper still asked for Sony headphones before Sony accessories.
+  const specific = tokens.models.size > 0 || (tokens.brands.size > 0 && lineWords.length > 0);
   return { tokens, specific, wantsAccessory: tokens.isAccessory };
+}
+
+/** A query word found in a listing; "gen2" also matches a bare "2" ("AirPods Pro 2"). */
+function hasWord(tokens: TitleTokens, word: string): boolean {
+  if (tokens.words.has(word)) return true;
+  const gen = /^gen(\d+)$/.exec(word)?.[1];
+  return !!gen && tokens.numbers.has(gen);
 }
 
 /** Does a listing name the product the query names? */
@@ -28,13 +37,11 @@ export function matchesIntent(intent: SearchIntent, tokens: TitleTokens): boolea
   if (!intent.specific) return true;
   const q = intent.tokens;
   if (q.models.size > 0) return sharesModel(q.models, tokens.models);
-  // Brand + series: "jbl flip 6" needs the series number, and no other brand.
+  // Every word naming the line, and no other brand. The brand word itself may be
+  // missing: Amazon often drops it ("Duo 6 Qt 7-in-1 …" for an Instant Pot Duo).
   const brandOk = tokens.brands.size === 0 || [...q.brands].some((b) => tokens.brands.has(b));
-  const gen = q.variants.get("gen");
-  const seriesOk =
-    [...q.numbers].some((n) => tokens.numbers.has(n)) ||
-    (!!gen && [...gen].some((g) => tokens.variants.get("gen")?.has(g)));
-  return brandOk && seriesOk;
+  const lineWords = [...q.words].filter((w) => !q.brandWords.has(w));
+  return brandOk && lineWords.every((w) => hasWord(tokens, w));
 }
 
 export interface OfferClass {

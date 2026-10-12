@@ -1,0 +1,282 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "amazon_domain": "amazon.com",
+    "k": "airpods pro",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B0G4M8935M",
+      "sponsored": true,
+      "title": "4 Sizes of Ear Tip Replacement Compatible with AirPod Pro and AirPods Pro 2 Ear Tips with Portable Storage Box & Cleaning Kit, Noise Reduction Hole & Dense Dust Guard Screen(XS/S/M/L)-White",
+      "thumbnail": "https://m.media-amazon.com/images/I/615YIfmjZYL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 1200,
+      "price": "ILS 19.41",
+      "extracted_price": 19.41,
+      "old_price": "ILS 21.57",
+      "extracted_old_price": 21.57,
+      "delivery": ["ILS 52.78 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 19.41",
+          "extracted_primary_price": 19.41,
+          "old_primary_price": "ILS 21.57",
+          "extracted_old_primary_price": 21.57
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "asin": "B0H7LFKTJ9",
+      "sponsored": true,
+      "title": "4 Pairs Replacement Ear Tips for AirPods Pro 2nd/1st (Black)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61oshLrYxsL._AC_UY218_.jpg",
+      "price": "ILS 55.56",
+      "extracted_price": 55.56,
+      "delivery": ["ILS 52.96 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 55.56",
+          "extracted_primary_price": 55.56
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "asin": "B0C8PSMPTH",
+      "options": "See options",
+      "title": "Studio Pro Premium Wireless Over-Ear Headphones- Up to 40-Hour Battery Life, Active Noise Cancelling, Great for Travel & Commuting, USB-C Lossless Audio, Apple & Android Compatible - Sandstone",
+      "thumbnail": "https://m.media-amazon.com/images/I/51t0IE0zjaL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 28700,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B0GTNNJL7W",
+      "title": "OEM Single Left Earbuds Replacement for Pod Pro (2nd Generation), A3047, A3048, A3049. Genuine Left Ear Side Only, Compatible Original Air Pro 2 A2968 Charging Case (Left-A3047 A3048 A3049)",
+      "thumbnail": "https://m.media-amazon.com/images/I/51SBpXgqe0L._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 39,
+      "price": "ILS 271.92",
+      "extracted_price": 271.92,
+      "delivery": ["FREE delivery Tue, Nov 3 to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 271.92",
+          "extracted_primary_price": 271.92
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B0GZWDS4S1",
+      "title": "OEM Right Single Earbud for Pod Pro 3st Generation, Model A3063 A3064 3065, Genuine Right Earbud Only, Compatible with Original AirPods Pro 3 A3122 Charging Case",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Mz427TLNL._AC_UY218_.jpg",
+      "rating": 3.0,
+      "reviews": 4,
+      "price": "ILS 426.42",
+      "extracted_price": 426.42,
+      "delivery": ["FREE delivery Tue, Nov 3 to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 426.42",
+          "extracted_primary_price": 426.42
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B0F7M3HPBD",
+      "options": "See options",
+      "title": "QuietComfort Ultra Earbuds (2nd Gen) - Wireless Noise Cancelling Earbuds with Mic, Immersive Audio, USB-C Charging, Up to 6 Hours Battery, IPX4 Rating, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/513LCPDEWKL._AC_UY218_.jpg",
+      "rating": 4.0,
+      "reviews": 3500,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B0D9YZJ3V7",
+      "options": "See options",
+      "title": "Galaxy Buds 3 Pro AI True Wireless Bluetooth Earbuds, Noise Cancelling, Sound Optimization, Redesigned Comfort Fit, Silver [US Version, Amazon Exclusive, 2Yr Warranty]",
+      "thumbnail": "https://m.media-amazon.com/images/I/61zW8yc4hTL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 6600,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B0G1P2JL4L",
+      "options": "See options",
+      "title": "Galaxy Buds 4 Pro (2026) AI True Wireless Bluetooth Earbuds, White",
+      "thumbnail": "https://m.media-amazon.com/images/I/51Hg2oo0nHL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 2500,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "asin": "B0HJBJWD6J",
+      "options": "See options",
+      "title": "AirPods 5 with Wireless Charging Case with AppleCare+ (2 years)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Sd2lukS2L._AC_UY218_.jpg",
+      "rating": 5.0,
+      "reviews": 4,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 10,
+      "asin": "B0HJBFTL8S",
+      "options": "See options",
+      "title": "AirPods 5 Wireless Earbuds with AppleCare+ (2 years)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61kBdfuGiLL._AC_UY218_.jpg",
+      "rating": 5.0,
+      "reviews": 1,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0FQFB8FMG",
+      "options": "See options",
+      "title": "AirPods Pro 3 Wireless Earbuds with Active Noise Cancellation",
+      "thumbnail": "https://m.media-amazon.com/images/I/61solmQSSlL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 16300,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B0CP4CG1ZB",
+      "options": "See options",
+      "title": "AirPods Pro (2nd generation) with MagSafe Charging Case (USB-C) (Renewed)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 2500,
+      "price": "ILS 398.61",
+      "extracted_price": 398.61,
+      "purchase_options": [
+        {
+          "primary_price": "ILS 398.61",
+          "extracted_primary_price": 398.61,
+          "more_buying_choices": "ILS 367.71 (17+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0CP4CG1ZB/ref=sr_1_28_olp?keywords=airpods+pro&dib_tag=se&dib=eyJ2IjoiMSJ9.XLdfAOSO-4hgfF8igc3ppcfGnkK5_aHwGnw5qG88dT8CqmkZC2XPKQ0KbRb_9b24cB5HMsj5lp3pixS124MdZI5qp26tVv1Rbhmy4ZpP8VuKGqqlhWEo_cgIzvxKmcw7YbKo7vCG7ytC1CYf6_LPXvOYOEpipGpwrfqr2ZljYxbE4P0OfY_vvw9gftq53EC9eR-Kr44C8iBzbAf8Uf333OPOz1I6vEDb-LLRBTcozn0.NoptRxbMUYY3jA9zy591oMf3zWqoWWRjWRtQVv1dvbE&qid=1791808424&sr=8-28"
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B09JQMJHXY",
+      "options": "See options",
+      "title": "AirPods Pro (1st Generation) with MagSafe Charging Case",
+      "thumbnail": "https://m.media-amazon.com/images/I/71bhWgQK-cL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 147600,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B0DGJBQSJY",
+      "options": "See options",
+      "title": "AirPods Max Wireless Over-Ear Headphones, Pro-Level Active Noise Cancellation, Transparency Mode, Personalized Spatial Audio, USB-C Charging, Bluetooth Headphones for iPhone - Purple",
+      "thumbnail": "https://m.media-amazon.com/images/I/71tOG91oC6L._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 16600,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0BDHB9Y8H",
+      "options": "See options",
+      "title": "AirPods (3rd Generation) Wireless Ear Buds, Bluetooth Headphones, Personalized Spatial Audio, Sweat and Water Resistant, Lightning Charging Case Included, Up to 30 Hours of Battery Life",
+      "thumbnail": "https://m.media-amazon.com/images/I/61jcsHsFN8L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 26700,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0B844T634",
+      "title": "AirPods Pro Wireless Earbuds with MagSafe Charging Case (Renewed)",
+      "thumbnail": "https://m.media-amazon.com/images/I/41hofkZHlvL._AC_UY218_.jpg",
+      "rating": 3.4,
+      "reviews": 5100
+    },
+    {
+      "position": 17,
+      "asin": "B0DGJ7HYG1",
+      "options": "See options",
+      "title": "AirPods 4 Wireless Earbuds with Active Noise Cancellation",
+      "thumbnail": "https://m.media-amazon.com/images/I/61iBtxCUabL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 24600,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 18,
+      "asin": "B0DGHMNQ5Z",
+      "options": "See options",
+      "title": "AirPods 4 Wireless Earbuds",
+      "thumbnail": "https://m.media-amazon.com/images/I/61iBtxCUabL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 35500,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    }
+  ],
+  "featured_products": [],
+  "serpapi_pagination": {
+    "current": 2,
+    "next": "https://serpapi.com/search.json?amazon_domain=amazon.com&device=desktop&engine=amazon&k=airpods+pro&language=en_US&page=3&shipping_location=IL"
+  }
+}

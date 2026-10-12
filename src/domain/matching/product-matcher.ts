@@ -31,6 +31,18 @@ export interface MatchingPolicy {
   readonly minScoreWithoutModel: number;
   /** Max ratio between the two item prices; beyond it they're not the same product. */
   readonly maxPriceRatio: number;
+  /**
+   * Max price ratio between two listings of one product at the same store.
+   * Wider: sellers list colours, bundled cases and imports of one model
+   * (eBay's WH-1000XM5 ran ₪660–₪1,750).
+   */
+  readonly maxSameStorePriceRatio: number;
+  /** Two same-store listings without a shared model code collapse only on near-identical branded titles. */
+  readonly minSameStoreTitleScore: number;
+  /** Same store, same long model code (6+ characters): minimum containment. */
+  readonly minSameStoreContainment: number;
+  /** Same store, same brand and series number, no model codes: minimum containment. */
+  readonly minSameStoreSeriesContainment: number;
 }
 
 /**
@@ -44,6 +56,10 @@ export const DEFAULT_MATCHING_POLICY: MatchingPolicy = {
   minContainmentWithSeries: 0.8,
   minScoreWithoutModel: 0.8,
   maxPriceRatio: 2.5,
+  maxSameStorePriceRatio: 3,
+  minSameStoreTitleScore: 0.9,
+  minSameStoreContainment: 0.25,
+  minSameStoreSeriesContainment: 0.6,
 };
 
 /** Product plus its tokens, computed once per search instead of once per comparison. */
@@ -166,4 +182,55 @@ function scoreTitles(
   )
     return { basis: "model_number", score };
   return similar;
+}
+
+/**
+ * Two listings of one product at the same store (different sellers, colours,
+ * a bundled case), so they share one card. Stricter than across stores: a
+ * shared model code, or near-identical titles under a known brand. Accessories
+ * never collapse — a store's dozens of "ear pads for X" are different products.
+ */
+export function matchSameStore(
+  a: MatchCandidate,
+  b: MatchCandidate,
+  policy: MatchingPolicy = DEFAULT_MATCHING_POLICY,
+): MatchResult | null {
+  if (a.product.provider !== b.product.provider) return null;
+  if (a.tokens.isAccessory || b.tokens.isAccessory) return null;
+  if (priceRatio(a.product, b.product) > policy.maxSameStorePriceRatio) return null;
+  if (findConflict(a.tokens, b.tokens)) return null;
+  // One store's sellers word a model very differently ("NC Headset" vs "Noise Cancelling
+  // Headphones"); a long model code they share carries more weight than the wording.
+  const longCode = [...a.tokens.models].some(
+    (m) => m.length >= 6 && sharesModel(new Set([m]), b.tokens.models),
+  );
+  const contained = containment(a.tokens.words, b.tokens.words);
+  if (longCode && contained >= policy.minSameStoreContainment)
+    return { basis: "model_number", score: diceSimilarity(a.tokens.words, b.tokens.words) };
+  // Same series of a branded line without model codes ("JBL Flip 6 … Camouflage").
+  const noModels = a.tokens.models.size === 0 && b.tokens.models.size === 0;
+  if (noModels && sharesSeries(a.tokens, b.tokens) && contained >= policy.minSameStoreSeriesContainment)
+    return { basis: "model_number", score: diceSimilarity(a.tokens.words, b.tokens.words) };
+  const match = matchTitles(a.tokens, b.tokens, policy);
+  if (!match) return null;
+  if (match.basis === "model_number") return match;
+  const branded = a.tokens.brands.size > 0 || b.tokens.brands.size > 0;
+  return branded && match.score >= policy.minSameStoreTitleScore ? match : null;
+}
+
+/**
+ * Hard evidence two listings can't share a group, whatever else matches:
+ * accessory vs product, prices too far apart, or a conflicting brand, model,
+ * variant, series number or condition.
+ */
+export function blocksGrouping(
+  a: MatchCandidate,
+  b: MatchCandidate,
+  policy: MatchingPolicy = DEFAULT_MATCHING_POLICY,
+): boolean {
+  if (a.tokens.isAccessory !== b.tokens.isAccessory) return true;
+  const sameStore = a.product.provider === b.product.provider;
+  const limit = sameStore ? policy.maxSameStorePriceRatio : policy.maxPriceRatio;
+  if (priceRatio(a.product, b.product) > limit) return true;
+  return findConflict(a.tokens, b.tokens) !== null;
 }

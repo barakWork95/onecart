@@ -1,0 +1,222 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "amazon_domain": "amazon.com",
+    "k": "airpods pro",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B0FRB8FXK5",
+      "title": "Apple AirPods Pro (3nd Generation) (Renewed)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61solmQSSlL._AC_UY218_.jpg",
+      "rating": 4.1,
+      "reviews": 288
+    },
+    {
+      "position": 2,
+      "asin": "B0BJQWYLYN",
+      "title": "AirPods Pro (2nd Generation) (Renewed)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_UY218_.jpg",
+      "rating": 4.0,
+      "reviews": 3300
+    },
+    {
+      "position": 3,
+      "asin": "B0DGHWD7CT",
+      "title": "Airpods (4Th Generation) Airpods 4 Headset Wireless, W129187548 (Airpods 4 Headset Wireless in-Ear Calls/Music/Sport/Everyday Bluetooth White)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61DvMw16ITL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 15300,
+      "price": "ILS 388.13",
+      "extracted_price": 388.13,
+      "purchase_options": [
+        {
+          "primary_price": "ILS 388.13",
+          "extracted_primary_price": 388.13
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B0CHWRXH8B",
+      "options": "See options",
+      "title": "AirPods Pro (2nd Generation) Wireless Ear Buds with USB-C Charging, Up to 2X More Active Noise Cancelling Bluetooth Headphones, Transparency Mode, Adaptive, Personalized Spatial Audio, White",
+      "thumbnail": "https://m.media-amazon.com/images/I/51NRGHU2NoL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 28700,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B0C2WD567R",
+      "options": "See options",
+      "title": "Studio Buds + | True Wireless Noise Cancelling Earbuds, Enhanced Apple & Android Compatibility, Built-in Microphone, Sweat Resistant Bluetooth Headphones, Spatial Audio - Ivory",
+      "thumbnail": "https://m.media-amazon.com/images/I/41cd3IYIVZL._AC_UY218_.jpg",
+      "rating": 3.9,
+      "reviews": 7900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B0G1PJLWLZ",
+      "options": "See options",
+      "title": "Galaxy Buds 4 Pro (2026) AI True Wireless Bluetooth Earbuds, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51QEHqsjzPL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 2500,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B0DT2H17F6",
+      "options": "See options",
+      "title": "Powerbeats Pro 2 - Wireless Noise Cancelling Workout Earbuds with Secure- Fit Earhooks, Up to 45-Hour Battery with Charging Case, Sweat & Water Resistant, Heart Rate Monitoring - Quick Sand",
+      "thumbnail": "https://m.media-amazon.com/images/I/51gfNsXzcWL._AC_UY218_.jpg",
+      "rating": 4.1,
+      "reviews": 5700,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B07SKLLYTW",
+      "title": "AirPods 2 with Charging Case - White (Renewed)",
+      "thumbnail": "https://m.media-amazon.com/images/I/41XjE57VLvL._AC_UY218_.jpg",
+      "rating": 3.7,
+      "reviews": 19700
+    },
+    {
+      "position": 9,
+      "asin": "B0DJMCTZTS",
+      "title": "AirPods 4 with Active Noise Cancellation (Renewed)",
+      "thumbnail": "https://m.media-amazon.com/images/I/31gxVR1IZyL._AC_UY218_.jpg",
+      "rating": 3.3,
+      "reviews": 631
+    },
+    {
+      "position": 10,
+      "asin": "B0D1WXVQTN",
+      "options": "See options",
+      "title": "AirPods (3rd Generation) Wireless Ear Buds, Bluetooth Headphones, Personalized Spatial Audio, Sweat and Water Resistant, Lightning Charging Case Included, Up to 30 Hours of Battery Life",
+      "thumbnail": "https://m.media-amazon.com/images/I/61df2M5+OnL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 6200,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0GSXPXXC3",
+      "options": "See options",
+      "title": "AirPods Max 2 Wireless Headphones - Midnight w/ AppleCare+ (2 years)",
+      "thumbnail": "https://m.media-amazon.com/images/I/71yLAXoJ0+L._AC_UY218_.jpg",
+      "rating": 5.0,
+      "reviews": 13,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B0FHWNZLKT",
+      "options": "See options",
+      "title": "Ear (3) Wireless Earbuds Super Mic 45dB Hybrid Active Noise Cancelling Bluetooth Headphones Hi-Res 6 Mics, 12mm Dynamic Bass Boost, Dual Connect ANC Sport Ear Buds for iPhone Android, White",
+      "thumbnail": "https://m.media-amazon.com/images/I/71mToU0TGeL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 1100,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B0F61Q7FM3",
+      "title": "A2084 Left Earbud Replacement, Single Left Ear Side Only for Original Pod Pro 1st Gen, Compatible with OEM Pods Pro Charging Case A2190, Genuine A2083 Air Pros 1 L",
+      "thumbnail": "https://m.media-amazon.com/images/I/81qb07GYV4L._AC_UY218_.jpg",
+      "rating": 3.8,
+      "reviews": 181,
+      "price": "ILS 206.60",
+      "extracted_price": 206.6,
+      "delivery": ["FREE delivery Tue, Nov 3 to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 206.60",
+          "extracted_primary_price": 206.6,
+          "more_buying_choices": "ILS 154.47 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0F61Q7FM3/ref=sr_1_13_olp?keywords=airpods+pro&dib_tag=se&dib=eyJ2IjoiMSJ9.LXJhB_hGhDhQcqAu0tdUlC5AMqcTknA16BkSEP7-YYQ7UPg_D7ntj1QQvGV8xyXCPygsS6aEwEfeUzyUoAURs3jqBG5YWXF4_-ieHBj9clxb2HNGg61sHrzMytsuFozNq23kJm9VoNufvkx1fXx5aCM1JvOz6M3CDyVDOc391Mc7NnX3w6OKEvMdSo9D9psgWj7MgWy5JQe37fB8i6I8VOz4LPmN0Y1jRqjv0KZP-Pg.ubDZi3ilD63cEztGPex40OhfiYTrvW_PXqqXBPwRqbI&qid=1791808423&sr=8-13"
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B096SRYXMP",
+      "options": "See options",
+      "title": "Studio Buds - True Wireless Noise Cancelling Earbuds - Compatible with Apple & Android, Built-in Microphone, IPX4 Rating, Sweat Resistant Earphones, Class 1 Bluetooth Headphones - White",
+      "thumbnail": "https://m.media-amazon.com/images/I/41ijQEHFicS._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 89200,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0C1QWWZR4",
+      "options": "See options",
+      "title": "Tune Buds - Noise Cancelling Earbuds - Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51EZig0rEAL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 10700,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0C8PR4W22",
+      "options": "See options",
+      "title": "Studio Pro Premium Wireless Over-Ear Headphones- Up to 40-Hour Battery Life, Active Noise Cancelling, Great for Travel & Commuting, USB-C Lossless Audio, Apple & Android Compatible -Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61u-OaDSfQL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 28700,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    }
+  ],
+  "featured_products": [],
+  "serpapi_pagination": {
+    "current": 1,
+    "next": "https://serpapi.com/search.json?amazon_domain=amazon.com&device=desktop&engine=amazon&k=airpods+pro&language=en_US&page=2&shipping_location=IL"
+  }
+}

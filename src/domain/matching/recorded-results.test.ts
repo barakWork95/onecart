@@ -60,7 +60,7 @@ describe("grouping on recorded real results", () => {
 
   it("keeps every listing: groups partition the input", () => {
     for (const listings of Object.values(recorded.queries)) {
-      const offers = groupProducts(toProducts(listings)).flatMap((g) => g.offers.map((o) => o.id));
+      const offers = groupProducts(toProducts(listings)).flatMap((g) => g.listings.map((o) => o.id));
       expect(new Set(offers).size).toBe(listings.length);
     }
   });

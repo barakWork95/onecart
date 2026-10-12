@@ -345,6 +345,77 @@ describe("ResultsView — a store that won't ship to Israel", () => {
   });
 });
 
+describe("ResultsView — one card for a store's many listings", () => {
+  const xm5 = (sku: string, title: string, total: number) =>
+    makeProduct({ provider: "ebay", sku, title, total });
+  const listings = [
+    xm5("x1", "Sony WH-1000XM5 Noise Cancelling Wireless Headphones Black", 1012_00),
+    xm5("x2", "Sony WH-1000XM5SA Wireless Noise Canceling Headphones Silver", 1100_00),
+    xm5("x3", "Sony WH-1000XM5 PM Smoky Pink Wireless Noise Cancelling Headphones", 1400_00),
+  ];
+  const noOffer = {
+    id: "amazon:B09XS7JWHH",
+    provider: "amazon" as const,
+    providerProductId: "B09XS7JWHH",
+    title: "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black",
+    productUrl: "https://www.amazon.com/dp/B09XS7JWHH",
+    imageUrl: null,
+    reason: "no_offer_to_destination" as const,
+  };
+  const links = Object.fromEntries(listings.map((l) => [l.id, `/go/${l.id}`]));
+
+  it("shows eBay's lowest price and listing count against Amazon's “no offer”, with every listing in a tray", async () => {
+    const user = userEvent.setup();
+    const groups = groupProducts(listings, { unavailable: [noOffer] });
+    expect(groups).toHaveLength(1);
+    renderView({
+      response: response({ groups, providers: [ok("amazon"), ok("ebay")] }),
+      outboundLinks: links,
+    });
+
+    const card = screen.getByRole("article");
+    expect(within(card).getByText("eBay · 3 listings")).toBeInTheDocument();
+    expect(
+      within(card)
+        .getByText(/^Compared on 2 stores/)
+        .closest("p"),
+    ).toHaveTextContent(
+      "Compared on 2 stores: eBay from ₪1,012 (3 listings) vs Amazon: no offer to Israel — Only eBay ships it to Israel",
+    );
+
+    await user.click(within(card).getByRole("button", { name: /^Compare 2 stores for/ }));
+    const sheet = await screen.findByRole("dialog");
+    const tray = within(sheet).getByText("All 3 eBay listings");
+    expect(within(sheet).getByRole("list", { name: "eBay listings", hidden: true })).not.toBeVisible();
+    await user.click(tray);
+    const trayList = within(sheet).getByRole("list", { name: "eBay listings" });
+    expect(within(trayList).getAllByRole("listitem")).toHaveLength(3);
+    expect(
+      within(trayList).getByRole("link", { name: /^Go to eBay — ₪1,400: Sony WH-1000XM5 PM Smoky Pink/ }),
+    ).toHaveAttribute("href", "/go/ebay:x3");
+  });
+
+  it("opens a listings sheet for one store with several sellers and no other store", async () => {
+    const user = userEvent.setup();
+    renderView({
+      response: response({ groups: groupProducts(listings), providers: [ok("ebay")] }),
+      outboundLinks: links,
+    });
+    const card = screen.getByRole("article");
+    expect(
+      within(card)
+        .getByText(/^3 listings on eBay/)
+        .closest("p"),
+    ).toHaveTextContent("3 listings on eBay: from ₪1,012 to ₪1,400");
+    await user.click(
+      within(card).getByRole("button", {
+        name: "See 3 eBay listings for Sony WH-1000XM5 Noise Cancelling Wireless Headphones Black",
+      }),
+    );
+    expect(await screen.findByRole("heading", { name: /^3 eBay listings: / })).toBeInTheDocument();
+  });
+});
+
 describe("nextPageHref", () => {
   it("keeps the query, a non-default sort and every filter", () => {
     const href = nextPageHref(

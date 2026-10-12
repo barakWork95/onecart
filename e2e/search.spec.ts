@@ -32,7 +32,8 @@ test.describe("search flow", () => {
     const sheet = page.getByRole("dialog");
     await expect(sheet.getByRole("heading", { name: /Compare 4 stores:/ })).toBeVisible();
 
-    const rows = sheet.getByRole("listitem");
+    // One row per store; eBay's extra listings sit in a tray, not in this count.
+    const rows = sheet.locator("li[aria-label$=' offer']");
     await expect(rows).toHaveCount(4);
     await expect(rows.nth(0)).toContainText("AliExpress");
     await expect(rows.nth(0)).toContainText("Best price");
@@ -43,6 +44,15 @@ test.describe("search flow", () => {
     const go = rows.nth(0).getByRole("link", { name: /Go to AliExpress/ });
     await expect(go).toHaveAttribute("href", /^\/go\/aliexpress%3A\d+\?d=/);
     await expect(go).toHaveAttribute("target", "_blank");
+
+    // eBay's second seller of the same earbuds waits in a tray under eBay's best offer.
+    await sheet.getByText("All 2 eBay listings").click();
+    const ebayListings = sheet.getByRole("list", { name: "eBay listings" });
+    await expect(ebayListings.getByRole("listitem")).toHaveCount(2);
+    await expect(ebayListings.getByRole("link", { name: /^Go to eBay — .*Navy Blue/ })).toHaveAttribute(
+      "href",
+      /^\/go\/ebay%3A395012345679\?d=/,
+    );
 
     await sheet.getByRole("button", { name: "Close comparison" }).click();
     await expect(sheet).toBeHidden();

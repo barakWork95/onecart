@@ -1,7 +1,13 @@
 "use client";
 
-import { ArrowRightLeft, X } from "lucide-react";
-import { fastestOfferId, outboundHref, premiumOverBest } from "@/components/features/search/group-view";
+import { ArrowRightLeft, ChevronDown, X } from "lucide-react";
+import { Fragment } from "react";
+import {
+  comparisonScope,
+  fastestOfferId,
+  outboundHref,
+  premiumOverBest,
+} from "@/components/features/search/group-view";
 import { StoreChip } from "@/components/features/search/store-chip";
 import { STORE_META } from "@/components/features/store-meta";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,7 +21,7 @@ import {
 } from "@/components/ui/drawer";
 import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
-import type { ProductGroup } from "@/domain/search/product-group";
+import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import { formatDeliveryDays, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -142,6 +148,60 @@ function UnavailableRow({ listing, href }: { listing: UnavailableListing; href: 
   );
 }
 
+/**
+ * Every listing a store has of this product (sellers, colours, bundles), as an
+ * expandable tray under the store's best offer. Collapsed by default: the
+ * cheapest is already compared above.
+ */
+function ListingsTray({
+  provider,
+  listings,
+  links,
+}: {
+  provider: UnifiedProduct["provider"];
+  listings: readonly UnifiedProduct[];
+  links: Readonly<Record<string, string>>;
+}) {
+  const name = STORE_META[provider].name;
+  return (
+    <li className="pb-3">
+      <details className="group/tray rounded-2xl bg-secondary/60 open:bg-secondary">
+        <summary className="flex h-10 cursor-pointer list-none items-center justify-between gap-2 rounded-2xl px-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+          <span>
+            All {listings.length} {name} listings
+          </span>
+          <ChevronDown className="size-4 transition-transform group-open/tray:rotate-180" aria-hidden />
+        </summary>
+        <ul className="divide-y divide-border/70 px-3 pb-2" aria-label={`${name} listings`}>
+          {listings.map((listing) => (
+            <li key={listing.id} className="flex items-center gap-3 py-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-2 text-xs leading-snug text-foreground">{listing.title}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {[formatDeliveryDays(listing.delivery), shippingLabel(listing)].filter(Boolean).join(" • ")}
+                </p>
+              </div>
+              <p className="shrink-0 text-sm font-bold text-foreground">{formatMoney(listing.price.total)}</p>
+              <a
+                href={outboundHref(links, listing)}
+                target="_blank"
+                rel="nofollow sponsored noopener"
+                aria-label={`Go to ${name} — ${formatMoney(listing.price.total)}: ${listing.title}`}
+                className={cn(
+                  buttonVariants({ variant: "secondary", size: "sm" }),
+                  "h-8 shrink-0 rounded-lg px-3",
+                )}
+              >
+                Go
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </li>
+  );
+}
+
 /** "Compare (n)" button that opens the per-store landed-price breakdown as a bottom sheet. */
 export function CompareSheet({
   group,
@@ -151,16 +211,22 @@ export function CompareSheet({
   links: Readonly<Record<string, string>>;
 }) {
   const fastestId = fastestOfferId(group);
-  const storeCount = group.offers.length + group.unavailable.length;
+  const { stores: storeCount, listings: listingCount } = comparisonScope(group);
+  const singleStore = storeCount === 1;
+  const storeName = STORE_META[bestOffer(group).provider].name;
 
   return (
     <Drawer>
       <DrawerTrigger
         className={cn(buttonVariants({ size: "lg" }), "h-10 rounded-xl px-4 font-semibold")}
-        aria-label={`Compare ${storeCount} stores for ${group.title}`}
+        aria-label={
+          singleStore
+            ? `See ${listingCount} ${storeName} listings for ${group.title}`
+            : `Compare ${storeCount} stores for ${group.title}`
+        }
       >
         <ArrowRightLeft className="size-4" aria-hidden />
-        Compare ({storeCount})
+        {singleStore ? `${listingCount} listings` : `Compare (${storeCount})`}
       </DrawerTrigger>
       <DrawerContent className="mx-auto max-w-2xl rounded-t-3xl">
         <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted" aria-hidden />
@@ -174,7 +240,9 @@ export function CompareSheet({
                 </span>
               </p>
               <DrawerTitle className="mt-1 text-xl font-bold text-foreground">
-                Compare {storeCount} stores: {group.title}
+                {singleStore
+                  ? `${listingCount} ${storeName} listings: ${group.title}`
+                  : `Compare ${storeCount} stores: ${group.title}`}
               </DrawerTitle>
               <DrawerDescription className="mt-1 text-sm text-muted-foreground">
                 Shipping, estimated import VAT and duty included where stores quote them.
@@ -190,16 +258,23 @@ export function CompareSheet({
             </DrawerClose>
           </div>
           <ul className="mt-3 divide-y divide-border">
-            {group.offers.map((offer, index) => (
-              <OfferRow
-                key={offer.id}
-                group={group}
-                offer={offer}
-                index={index}
-                fastestId={fastestId}
-                href={outboundHref(links, offer)}
-              />
-            ))}
+            {group.offers.map((offer, index) => {
+              const listings = group.listings.filter((l) => l.provider === offer.provider);
+              return (
+                <Fragment key={offer.id}>
+                  <OfferRow
+                    group={group}
+                    offer={offer}
+                    index={index}
+                    fastestId={fastestId}
+                    href={outboundHref(links, offer)}
+                  />
+                  {listings.length > 1 && (
+                    <ListingsTray provider={offer.provider} listings={listings} links={links} />
+                  )}
+                </Fragment>
+              );
+            })}
             {group.unavailable.map((listing) => (
               <UnavailableRow key={listing.id} listing={listing} href={outboundHref(links, listing)} />
             ))}

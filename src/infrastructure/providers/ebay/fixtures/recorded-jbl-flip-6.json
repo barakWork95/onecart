@@ -1,0 +1,1749 @@
+{
+  "total": 477,
+  "limit": 50,
+  "offset": 0,
+  "itemSummaries": [
+    {
+      "itemId": "v1|146727439715|0",
+      "legacyItemId": "146727439715",
+      "title": "Battery for JBL Flip 6 JBLFLIP6BLUAM JBLFLIP6REDAM GSP-1S2P-F6D 3.7V ",
+      "price": {
+        "value": "77.62",
+        "currency": "ILS",
+        "convertedFromValue": "19.15",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/d-0AAeSwf4toga8Y/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/d-0AAeSwf4toga8Y/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|920032297541|0",
+      "legacyItemId": "920032297541",
+      "title": "For JBL FLIP 6 TL High Quality Type C USB Charger Interface Board",
+      "price": {
+        "value": "89.38",
+        "currency": "ILS",
+        "convertedFromValue": "41.79",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/tAgAAeSw-bxqzLuL/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/tAgAAeSw-bxqzLuL/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|168778641271|0",
+      "legacyItemId": "168778641271",
+      "title": "For JBL FLIP 6 TL High Quality Type C USB Charger Interface Board Connector",
+      "price": {
+        "value": "94.09",
+        "currency": "ILS",
+        "convertedFromValue": "43.99",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/tJgAAeSwl9JqyKH5/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/tJgAAeSwl9JqyKH5/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|336817373615|0",
+      "legacyItemId": "336817373615",
+      "title": "New JBL Flip 6 Portable Bluetooth Speaker Black Waterproof IP67 Wireless 12H",
+      "price": {
+        "value": "612.55",
+        "currency": "ILS",
+        "convertedFromValue": "199.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/uCcAAeSw-bhquqGq/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/uCcAAeSw-bhquqGq/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "101.54",
+            "currency": "ILS",
+            "convertedFromValue": "33.15",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|401697516001|0",
+      "legacyItemId": "401697516001",
+      "title": "Case For JBL Flip 7 6 5 Flip Essential 2 Tuner 2 UE Boom 3 2 Portable Speaker",
+      "price": {
+        "value": "60.76",
+        "currency": "ILS",
+        "convertedFromValue": "14.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/76kAAOSwIMRk-dHI/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/76kAAOSwIMRk-dHI/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "14.15",
+            "currency": "ILS",
+            "convertedFromValue": "3.49",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|313877876189|612603740227",
+      "legacyItemId": "313877876189",
+      "title": "1*EVA Hard Case For JBL Flip 6 Bluetooth Speaker Waterproof Storage Shoulder Bag",
+      "price": {
+        "value": "68.30",
+        "currency": "ILS",
+        "convertedFromValue": "22.30",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/mtcAAOSwrCNiDKUE/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/mtcAAOSwrCNiDKUE/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "9.16",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|225042773987|523926080496",
+      "legacyItemId": "225042773987",
+      "title": "JBL Flip 3, Flip 4, Flip 5, & 6 Bluetooth Speaker Display Stand Sound Enhancing",
+      "price": {
+        "value": "45.79",
+        "currency": "ILS",
+        "convertedFromValue": "14.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/hEIAAOSwWd1oXazj/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/hEIAAOSwWd1oXazj/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "61.10",
+            "currency": "ILS",
+            "convertedFromValue": "19.95",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|128080607880|0",
+      "legacyItemId": "128080607880",
+      "title": "Durable USB Charging Port Board Dock For JBL Flip 6 GG Bluetooth Speaker",
+      "price": {
+        "value": "67.49",
+        "currency": "ILS",
+        "convertedFromValue": "16.65",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/jDIAAeSwK7pqqP~L/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/jDIAAeSwK7pqqP~L/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "9.69",
+            "currency": "ILS",
+            "convertedFromValue": "2.39",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|407274901716|0",
+      "legacyItemId": "407274901716",
+      "title": "Durable USB Charging Port Board Dock For JBL Flip 6 GG Bluetooth Speaker",
+      "price": {
+        "value": "62.43",
+        "currency": "ILS",
+        "convertedFromValue": "29.19",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/bFQAAeSw-bxqxxxU/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/bFQAAeSw-bxqxxxU/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|920032288233|0",
+      "legacyItemId": "920032288233",
+      "title": "Charging Port Board Power Connector Dock For JBL Flip 6 GG Bluetooth Speaker",
+      "price": {
+        "value": "58.90",
+        "currency": "ILS",
+        "convertedFromValue": "27.54",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/i~0AAeSwUMlqzLsZ/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/i~0AAeSwUMlqzLsZ/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|920032305534|0",
+      "legacyItemId": "920032305534",
+      "title": "Power Charging Port For JBL Flip 6 V2 CS Bluetooth Speaker USB Board Repair",
+      "price": {
+        "value": "130.64",
+        "currency": "ILS",
+        "convertedFromValue": "61.08",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/v2wAAeSwUHVqzLz2/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/v2wAAeSwUHVqzLz2/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|860025250212|617169341782",
+      "legacyItemId": "860025250212",
+      "title": "For JBL Flip 6 Speaker Protective Case Portable Speaker EVA Protective Case",
+      "price": {
+        "value": "100.16",
+        "currency": "ILS",
+        "convertedFromValue": "32.70",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Y4kAAeSw2FhqyJeh/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/Y4kAAeSw2FhqyJeh/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "3.03",
+            "currency": "ILS",
+            "convertedFromValue": "0.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|397424904568|0",
+      "legacyItemId": "397424904568",
+      "title": "USB Replacement Charging Port Board For JBL Flip 6 GG Bluetooth Speaker",
+      "price": {
+        "value": "60.14",
+        "currency": "ILS",
+        "convertedFromValue": "28.12",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/x3gAAeSwPXZpS5H2/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/x3gAAeSwPXZpS5H2/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|318838111806|0",
+      "legacyItemId": "318838111806",
+      "title": "For JBL FLIP 6 TL Type C USB Charger Interface Board Supply Board Connector",
+      "price": {
+        "value": "107.48",
+        "currency": "ILS",
+        "convertedFromValue": "50.25",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/glcAAeSwsDVqnpUn/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/glcAAeSwsDVqnpUn/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|377453412363|0",
+      "legacyItemId": "377453412363",
+      "title": "High Quality Type C Charge Port USB Charging Port Board  For JBL FLIP 6 TL",
+      "price": {
+        "value": "94.09",
+        "currency": "ILS",
+        "convertedFromValue": "43.99",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ivcAAeSwoAJqkWKr/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ivcAAeSwoAJqkWKr/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.40",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|197921228495|0",
+      "legacyItemId": "197921228495",
+      "title": "JBL Flip 6 Speaker Holder – Secure Horizontal Stand Mount Cradle",
+      "price": {
+        "value": "55.90",
+        "currency": "ILS",
+        "convertedFromValue": "13.79",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/hB4AAeSwTXtpMMUr/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/hB4AAeSwTXtpMMUr/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "431.37",
+            "currency": "ILS",
+            "convertedFromValue": "106.42",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|206276006235|507001303403",
+      "legacyItemId": "206276006235",
+      "title": "Protective Cover For JBL Flip6 Speaker Silicone Case Outdoor Portable Audio Case",
+      "price": {
+        "value": "53.90",
+        "currency": "ILS",
+        "convertedFromValue": "25.20",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/g1kAAeSwKOdqBt0z/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/g1kAAeSwKOdqBt0z/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-05T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|355028969934|624300420275",
+      "legacyItemId": "355028969934",
+      "title": "For JBL Flip 6 Bluetooth Speaker Storage Bag / Silicone Protective Case Travel",
+      "price": {
+        "value": "50.87",
+        "currency": "ILS",
+        "convertedFromValue": "16.61",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/CR4AAOSwZTxk~tGS/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/CR4AAOSwZTxk~tGS/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.10",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|355622357088|624738265058",
+      "legacyItemId": "355622357088",
+      "title": "For JBL Flip 6 Bluetooth Speaker Travel Portable Protective Case / Storage Bag",
+      "price": {
+        "value": "57.53",
+        "currency": "ILS",
+        "convertedFromValue": "26.90",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/SBUAAOSw~8ZmFmLo/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/SBUAAOSw~8ZmFmLo/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "12.81",
+            "currency": "ILS",
+            "convertedFromValue": "5.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-22T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-20T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|920022763114|666777520171",
+      "legacyItemId": "920022763114",
+      "title": "Portable Speaker EVA Protective Case Speaker Protective Case for JBL Flip 6",
+      "price": {
+        "value": "61.09",
+        "currency": "ILS",
+        "convertedFromValue": "15.07",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/tLIAAeSwj8RqyJYT/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/tLIAAeSwj8RqyJYT/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "4.01",
+            "currency": "ILS",
+            "convertedFromValue": "0.99",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|920032266804|666789244782",
+      "legacyItemId": "920032266804",
+      "title": "Protective Skin Case With Shoulder Strap Speaker Cover For JBL Flip 6 Speaker",
+      "price": {
+        "value": "48.74",
+        "currency": "ILS",
+        "convertedFromValue": "22.79",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/xwYAAeSwc2FqzLhX/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/xwYAAeSwc2FqzLhX/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|398206463620|0",
+      "legacyItemId": "398206463620",
+      "title": "Charging Port Board Power Connector Dock For JBL Flip 6 GG Bluetooth Speaker",
+      "price": {
+        "value": "60.14",
+        "currency": "ILS",
+        "convertedFromValue": "28.12",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/hVoAAeSwvM9qYc1H/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/hVoAAeSwvM9qYc1H/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.46",
+            "currency": "ILS",
+            "convertedFromValue": "4.89",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|397631626104|0",
+      "legacyItemId": "397631626104",
+      "title": "Replacement Parts for JBL Flip 6 GG Speaker PCB Charge Port Headphones",
+      "price": {
+        "value": "121.26",
+        "currency": "ILS",
+        "convertedFromValue": "39.59",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/cdsAAeSwF9FpmGwv/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/cdsAAeSwF9FpmGwv/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-02T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|388750861626|0",
+      "legacyItemId": "388750861626",
+      "title": "For JBL Flip 7/6 Bluetooth Speaker Case with Single Shoulder Strap Accessories",
+      "price": {
+        "value": "34.82",
+        "currency": "ILS",
+        "convertedFromValue": "8.59",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/aY8AAeSwjvJogd8e/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/aY8AAeSwjvJogd8e/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "8.07",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|377535382392|0",
+      "legacyItemId": "377535382392",
+      "title": "USB Port Charging Replacement For JBL Flip 6 V2 CS Bluetooth Speaker Board",
+      "price": {
+        "value": "137.25",
+        "currency": "ILS",
+        "convertedFromValue": "64.17",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Xo8AAeSwfZZqvfLI/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/Xo8AAeSwfZZqvfLI/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "8.51",
+            "currency": "ILS",
+            "convertedFromValue": "3.98",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|297808179517|0",
+      "legacyItemId": "297808179517",
+      "title": "For JBL FLIP 7 6 5 4 3 ESSENTIAL 2 FLIP ESSENTIAL Speaker Fixed Bracket Holder",
+      "price": {
+        "value": "64.27",
+        "currency": "ILS",
+        "convertedFromValue": "30.05",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ao0AAeSwzktpLUD8/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ao0AAeSwzktpLUD8/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.40",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|407155344003|0",
+      "legacyItemId": "407155344003",
+      "title": "Charging Port Replacement Board For JBL Flip 6 V2 CS Bluetooth Speaker USB",
+      "price": {
+        "value": "133.38",
+        "currency": "ILS",
+        "convertedFromValue": "62.36",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/THoAAeSwhFRqhWTP/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/THoAAeSwhFRqhWTP/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|226055264618|0",
+      "legacyItemId": "226055264618",
+      "title": "Sound Enhancing Display Stand Holder for JBL Essential, Flip 5, Flip 6 Speaker",
+      "price": {
+        "value": "42.73",
+        "currency": "ILS",
+        "convertedFromValue": "13.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/YdQAAeSwDDBoXvSf/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/YdQAAeSwDDBoXvSf/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "54.98",
+            "currency": "ILS",
+            "convertedFromValue": "17.95",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|398424777783|0",
+      "legacyItemId": "398424777783",
+      "title": "JBL Flip 6 Portable Wireless Bluetooth Speaker Camouflage Camo Design",
+      "price": {
+        "value": "551.32",
+        "currency": "ILS",
+        "convertedFromValue": "180.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/DfgAAeSwVgFqtBbO/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/DfgAAeSwVgFqtBbO/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|366631882799|0",
+      "legacyItemId": "366631882799",
+      "title": "For JBL FLIP 6 TL High Quality Type C USB Charger Interface Board",
+      "price": {
+        "value": "99.63",
+        "currency": "ILS",
+        "convertedFromValue": "46.58",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/kMoAAeSw2ZtqkBWN/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/kMoAAeSw2ZtqkBWN/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "8.53",
+            "currency": "ILS",
+            "convertedFromValue": "3.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|172155552888|0",
+      "legacyItemId": "172155552888",
+      "title": "JBL Flip Essential 2 Portable Waterproof IPX7 Wireless Bluetooth Travel Speaker",
+      "price": {
+        "value": "275.51",
+        "currency": "ILS",
+        "convertedFromValue": "89.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/KS4AAeSwLLVpZvDW/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/KS4AAeSwLLVpZvDW/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "226.65",
+            "currency": "ILS",
+            "convertedFromValue": "74.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|198445917991|0",
+      "legacyItemId": "198445917991",
+      "title": "For JBL FLIP 6 TL High Quality Type C Charge Port Socket Jack Power Connector",
+      "price": {
+        "value": "98.34",
+        "currency": "ILS",
+        "convertedFromValue": "45.98",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/alMAAeSwQJtqOR1Y/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/alMAAeSwQJtqOR1Y/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|298244271950|0",
+      "legacyItemId": "298244271950",
+      "title": "Travel Case for JBL Flip7/6 Speaker with Shoulder Strap for Convenience",
+      "price": {
+        "value": "35.22",
+        "currency": "ILS",
+        "convertedFromValue": "8.69",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/npkAAeSwtWZpN-cc/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/npkAAeSwtWZpN-cc/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|377494622787|0",
+      "legacyItemId": "377494622787",
+      "title": "Charging Port Dock Connector For JBL Flip 6 V2 CS Bluetooth Speaker USB Board",
+      "price": {
+        "value": "131.24",
+        "currency": "ILS",
+        "convertedFromValue": "61.36",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/SwUAAeSwXf5qp94t/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/SwUAAeSwXf5qp94t/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|204718496129|505346408981",
+      "legacyItemId": "204718496129",
+      "title": "For JBL flip6 Speaker Silicone Case Outdoor Portable Audio Case",
+      "price": {
+        "value": "55.40",
+        "currency": "ILS",
+        "convertedFromValue": "25.90",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/hWMAAOSwVwFmB5HL/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/hWMAAOSwVwFmB5HL/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-19T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-17T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|115938902385|0",
+      "legacyItemId": "115938902385",
+      "title": "VTT Billet Roll Bar Mounts for JBL Flip 3-6, Helmet, etc - Black - Size 1.75\"",
+      "price": {
+        "value": "137.80",
+        "currency": "ILS",
+        "convertedFromValue": "44.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/vXcAAOSw70xlJVxM/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/vXcAAOSw70xlJVxM/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "713.66",
+            "currency": "ILS",
+            "convertedFromValue": "233.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-13T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-15T21:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|407251753064|0",
+      "legacyItemId": "407251753064",
+      "title": "For JBL FLIP 6 TL Type C Charge Port Socket Jack Power Supply Board Connector",
+      "price": {
+        "value": "106.24",
+        "currency": "ILS",
+        "convertedFromValue": "26.21",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/50MAAeSwJUxqujdf/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/50MAAeSwJUxqujdf/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "16.17",
+            "currency": "ILS",
+            "convertedFromValue": "3.99",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|397627255574|665976974153",
+      "legacyItemId": "397627255574",
+      "title": "Earpads for JBL Flip 6 Headphones Cushion Replacement Speaker Diaphragm",
+      "price": {
+        "value": "99.18",
+        "currency": "ILS",
+        "convertedFromValue": "32.38",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ifgAAeSwtj9plqEC/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ifgAAeSwtj9plqEC/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-02T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|820202304781|0",
+      "legacyItemId": "820202304781",
+      "title": "JBL Flip 7 Black Portable Bluetooth Case IP68 Waterproof 35W Auracast App",
+      "price": {
+        "value": "344.01",
+        "currency": "ILS",
+        "convertedFromValue": "100.28",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/FaUAAeSwgeNqwjiV/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/FaUAAeSwgeNqwjiV/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "68.61",
+            "currency": "ILS",
+            "convertedFromValue": "20.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-18T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-17T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuovo",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|287564791193|0",
+      "legacyItemId": "287564791193",
+      "title": "For JBL FLIP 6 TL High Quality Type C USB Charger Interface Board",
+      "price": {
+        "value": "92.20",
+        "currency": "ILS",
+        "convertedFromValue": "43.11",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/DNsAAeSw8rhqmpde/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/DNsAAeSw8rhqmpde/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.44",
+            "currency": "ILS",
+            "convertedFromValue": "4.88",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|357862957083|0",
+      "legacyItemId": "357862957083",
+      "title": "Suitable for JBL Xtreme 3/4 for Charge5/6 for Flip7/6 Speaker Bike Strap Holder",
+      "price": {
+        "value": "56.60",
+        "currency": "ILS",
+        "convertedFromValue": "18.48",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/-k4AAeSwMf9pCyq5/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/-k4AAeSwMf9pCyq5/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-05T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|377494607426|0",
+      "legacyItemId": "377494607426",
+      "title": "USB Charging Port Board Dock Connector For JBL Flip 6 GG Bluetooth Speaker Part",
+      "price": {
+        "value": "59.52",
+        "currency": "ILS",
+        "convertedFromValue": "27.83",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/7W0AAeSwCZ5qp9wq/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/7W0AAeSwCZ5qp9wq/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|313937297527|612639398023",
+      "legacyItemId": "313937297527",
+      "title": "Portable Hard Travel Carry Storage Protective Case For JBL Flip 6/ Flip6 Speaker",
+      "price": {
+        "value": "62.18",
+        "currency": "ILS",
+        "convertedFromValue": "15.34",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/mUcAAeSwO9FqzEjy/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/mUcAAeSwO9FqzEjy/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "12.16",
+            "currency": "ILS",
+            "convertedFromValue": "3.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-05T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|168778635381|0",
+      "legacyItemId": "168778635381",
+      "title": "USB Charging Port Board Dock Connector For JBL Flip 6 GG Bluetooth Speaker Part",
+      "price": {
+        "value": "62.00",
+        "currency": "ILS",
+        "convertedFromValue": "28.99",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/qkIAAeSw4YJqyKDx/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/qkIAAeSw4YJqyKDx/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|226268939163|0",
+      "legacyItemId": "226268939163",
+      "title": "Wall Mount Holder Bracket for JBL Flip 6 Bluetooth Speaker (ATV, UTV, Bike, +)",
+      "price": {
+        "value": "48.85",
+        "currency": "ILS",
+        "convertedFromValue": "15.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/TS4AAeSwcIBqFePc/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/TS4AAeSwcIBqFePc/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "61.10",
+            "currency": "ILS",
+            "convertedFromValue": "19.95",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|407274926116|0",
+      "legacyItemId": "407274926116",
+      "title": "Charging Port Replacement Board For JBL Flip 6 V2 CS Bluetooth Speaker USB",
+      "price": {
+        "value": "137.93",
+        "currency": "ILS",
+        "convertedFromValue": "64.49",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/bQYAAeSwiy9qxyIC/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/bQYAAeSwiy9qxyIC/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|156159506301|456983661068",
+      "legacyItemId": "156159506301",
+      "title": "For JBL Flip 6 speaker Protective Case Portable Cover w/ Shoulder Strap Travel",
+      "price": {
+        "value": "70.60",
+        "currency": "ILS",
+        "convertedFromValue": "23.05",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/TMsAAOSw4NRmKG~l/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/TMsAAOSw4NRmKG~l/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.28",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|318403152211|0",
+      "legacyItemId": "318403152211",
+      "title": "Bicycle speaker mount metal wall mount for JBL charge 6/5/JBL flip 6/7",
+      "price": {
+        "value": "80.92",
+        "currency": "ILS",
+        "convertedFromValue": "23.59",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/QjoAAeSwlGBqH~L3/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/QjoAAeSwlGBqH~L3/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "3.40",
+            "currency": "ILS",
+            "convertedFromValue": "0.99",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Neu",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|318932910673|0",
+      "legacyItemId": "318932910673",
+      "title": "High Quality Type C Charge Port USB Charging Port Board  For JBL FLIP 6 TL",
+      "price": {
+        "value": "106.24",
+        "currency": "ILS",
+        "convertedFromValue": "26.21",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/KugAAeSwW3xqu4MO/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/KugAAeSwW3xqu4MO/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "16.17",
+            "currency": "ILS",
+            "convertedFromValue": "3.99",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|137750467238|0",
+      "legacyItemId": "137750467238",
+      "title": "For JBL FLIP 6 TL Type C Charge Port Socket Jack Power Supply Board Connector",
+      "price": {
+        "value": "111.83",
+        "currency": "ILS",
+        "convertedFromValue": "27.59",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/DiEAAeSwYllqrON7/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/DiEAAeSwYllqrON7/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "8.07",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    }
+  ]
+}

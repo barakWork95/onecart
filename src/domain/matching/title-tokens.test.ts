@@ -161,6 +161,8 @@ describe("sharesModel", () => {
   it("matches a colour suffix on a long code", () => {
     expect(sharesModel(m("wh1000xm5"), m("wh1000xm5sa"))).toBe(true);
     expect(sharesModel(m("wh1000xm5"), m("wh1000xm5bnt"))).toBe(true);
+    // Two colours of one model.
+    expect(sharesModel(m("wh1000xm5sa"), m("wh1000xm5bnt"))).toBe(true);
   });
 
   it("rejects short suffixes and different models", () => {
@@ -168,5 +170,9 @@ describe("sharesModel", () => {
     expect(sharesModel(m("wh1000xm5"), m("wh1000xm4"))).toBe(false);
     expect(sharesModel(m("p3"), m("p3i"))).toBe(false);
     expect(sharesModel(m("wh1000xm5"), m("wh1000xm5abcd"))).toBe(false);
+    // Tier suffixes are different products, not colours.
+    expect(sharesModel(m("rtx4090"), m("rtx4090ti"))).toBe(false);
+    expect(sharesModel(m("rtx4070ti"), m("rtx4070super"))).toBe(false);
+    expect(sharesModel(m("sm9100"), m("sm9100max"))).toBe(false);
   });
 });

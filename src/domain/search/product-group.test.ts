@@ -64,17 +64,60 @@ describe("groupProducts", () => {
     });
   });
 
-  it("keeps one offer per store; the cheaper duplicate listing joins the group", () => {
+  it("collapses a store's second listing of the product into the card; offers keep each store's cheapest", () => {
     const aliDuplicate = makeProduct({
       provider: "aliexpress",
       sku: "a2",
       title: "SoundCore Life P3 ANC Earbuds",
       total: 95_00,
     });
-    const groups = groupProducts([aliDuplicate, amz, ali]);
-    expect(groups.map((g) => g.offers.map((o) => o.id))).toEqual([
-      ["aliexpress:a1", "amazon:z1"],
-      ["aliexpress:a2"],
+    const [group, ...others] = groupProducts([aliDuplicate, amz, ali]);
+    expect(others).toEqual([]);
+    expect(group?.offers.map((o) => o.id)).toEqual(["aliexpress:a1", "amazon:z1"]);
+    expect(group?.listings.map((o) => o.id)).toEqual(["aliexpress:a1", "aliexpress:a2", "amazon:z1"]);
+    expect(group?.matchedBy).toBe("model_number");
+  });
+
+  it("never collapses a store's accessories or generic look-alikes", () => {
+    const pads = (sku: string) =>
+      makeProduct({ provider: "ebay", sku, title: "Ear Pads for Soundcore Life P3", total: 30_00 });
+    const pillow = (sku: string) =>
+      makeProduct({ provider: "ebay", sku, title: "Cervical Memory Foam Pillow", total: 50_00 });
+    expect(groupProducts([pads("1"), pads("2")])).toHaveLength(2);
+    expect(groupProducts([pillow("3"), pillow("4")])).toHaveLength(2);
+  });
+
+  it("collapses near-identical branded titles, and same-series listings without model codes", () => {
+    const duo = (sku: string, total: number) =>
+      makeProduct({
+        provider: "ebay",
+        sku,
+        title: "Instant Pot Duo Plus 9-in-1 Multi-Use Pressure Cooker",
+        total,
+      });
+    expect(groupProducts([duo("1", 300_00), duo("2", 368_00)])).toHaveLength(1);
+    const flip = (sku: string, title: string) => makeProduct({ provider: "ebay", sku, title, total: 650_00 });
+    const flips = groupProducts([
+      flip("3", "New JBL Flip 6 Portable Bluetooth Speaker Black Waterproof IP67 Wireless 12H"),
+      flip("4", "JBL Flip 6 Portable Wireless Bluetooth Speaker Camouflage Camo Design"),
+      flip("5", "JBL Flip 7 Portable Bluetooth Speaker Black"),
+    ]);
+    expect(flips.map((g) => g.listings.length)).toEqual([2, 1]);
+  });
+
+  it("never puts conflicting listings in one card, however well the rest match", () => {
+    const listing = (sku: string, title: string, total: number) =>
+      makeProduct({ provider: "ebay", sku, title, total });
+    const groups = groupProducts([
+      listing("a", "Sony WH-1000XM5 Noise Cancelling Wireless Headphones", 900_00),
+      listing("b", "Sony WH-1000XM5 Wireless NC Headphones Midnight Blue", 1000_00),
+      listing("c", "Sony WH-1000XM4 Noise Cancelling Wireless Headphones", 700_00),
+      listing("d", "Sony WH-1000XM5 Noise Cancelling Wireless Headphones (Renewed)", 650_00),
+    ]);
+    expect(groups.map((g) => g.listings.map((l) => l.providerProductId).sort())).toEqual([
+      ["d"],
+      ["c"],
+      ["a", "b"],
     ]);
   });
 

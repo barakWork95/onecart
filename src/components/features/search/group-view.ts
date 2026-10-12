@@ -47,28 +47,56 @@ export function outboundHref(
 const CARD_OFFER_LIMIT = 3;
 
 export interface StoreComparison {
-  /** "Available on 2 stores" */
+  /** "Available on 2 stores", "Compared on 2 stores", "20 listings on eBay" */
   readonly headline: string;
-  /** "Amazon ₪244 vs eBay ₪276", cheapest first. */
+  /** "Amazon ₪244 vs eBay from ₪276 (3 listings)", cheapest store first. */
   readonly prices: string;
-  /** "Best deal on Amazon" */
-  readonly bestDeal: string;
+  /** "Best deal on Amazon", "Only eBay ships it to Israel"; null when one store is all there is. */
+  readonly bestDeal: string | null;
+}
+
+/** How many listings each store has in the group. */
+export function listingsPerStore(group: ProductGroup): ReadonlyMap<ProviderId, number> {
+  const counts = new Map<ProviderId, number>();
+  for (const listing of group.listings) counts.set(listing.provider, (counts.get(listing.provider) ?? 0) + 1);
+  return counts;
+}
+
+/** "eBay ₪1,012" for one listing, "eBay from ₪1,012 (17 listings)" for several. */
+function storePrice(offer: UnifiedProduct, listings: number): string {
+  const name = STORE_META[offer.provider].name;
+  return listings > 1
+    ? `${name} from ${formatMoney(offer.price.total)} (${listings} listings)`
+    : `${name} ${formatMoney(offer.price.total)}`;
 }
 
 /**
- * The card's cross-store summary, or null when only one store has it and no
- * other store was found listing it. A store that lists the product but won't
- * ship it to Israel is part of the comparison: that's worth knowing.
+ * The card's comparison summary, or null for a single listing that no other
+ * store was found listing. A store that lists the product but won't ship it
+ * to Israel is part of the comparison: that's worth knowing.
  */
 export function storeComparison(group: ProductGroup): StoreComparison | null {
   const priced = group.offers.length;
-  if (priced < 2 && group.unavailable.length === 0) return null;
+  const counts = listingsPerStore(group);
+  const best = bestOffer(group);
+  const bestStore = STORE_META[best.provider].name;
+
+  if (priced === 1 && group.unavailable.length === 0) {
+    const listings = group.listings.length;
+    if (listings < 2) return null;
+    const dearest = group.listings[listings - 1] ?? best;
+    return {
+      headline: `${listings} listings on ${bestStore}`,
+      prices: `from ${formatMoney(best.price.total)} to ${formatMoney(dearest.price.total)}`,
+      bestDeal: null,
+    };
+  }
+
   const shown = group.offers
     .slice(0, CARD_OFFER_LIMIT)
-    .map((o) => `${STORE_META[o.provider].name} ${formatMoney(o.price.total)}`);
+    .map((o) => storePrice(o, counts.get(o.provider) ?? 1));
   const hidden = priced - CARD_OFFER_LIMIT;
   const unshipped = group.unavailable.map((u) => `${STORE_META[u.provider].name}: no offer to Israel`);
-  const bestStore = STORE_META[bestOffer(group).provider].name;
   return {
     headline:
       priced >= 2
@@ -77,6 +105,17 @@ export function storeComparison(group: ProductGroup): StoreComparison | null {
     prices: [shown.join(" vs ") + (hidden > 0 ? ` +${hidden} more` : ""), ...unshipped].join(" vs "),
     bestDeal: priced >= 2 ? `Best deal on ${bestStore}` : `Only ${bestStore} ships it to Israel`,
   };
+}
+
+/** Stores on the card's comparison (priced plus "won't ship"), and whether there's a sheet to open. */
+export function comparisonScope(group: ProductGroup): {
+  stores: number;
+  listings: number;
+  hasSheet: boolean;
+} {
+  const stores = group.offers.length + group.unavailable.length;
+  const listings = group.listings.length;
+  return { stores, listings, hasSheet: stores > 1 || listings > 1 };
 }
 
 export interface FindMatchesLink {

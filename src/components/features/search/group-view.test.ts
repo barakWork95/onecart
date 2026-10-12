@@ -1,7 +1,9 @@
 import {
+  comparisonScope,
   discountPercent,
   fastestOfferId,
   findMatchesLink,
+  listingsPerStore,
   outboundHref,
   premiumOverBest,
   storeComparison,
@@ -165,5 +167,40 @@ describe("storeComparison / findMatchesLink — a store that won't ship", () => 
 
   it("doesn't suggest finding it on a store already known not to ship it", () => {
     expect(findMatchesLink(ebayOnly(), ["amazon", "ebay"], "headphones")).toBeNull();
+  });
+});
+
+describe("storeComparison — several listings per store", () => {
+  const listing = (provider: "amazon" | "ebay", sku: string, total: number) =>
+    makeProduct({ provider, sku, title: "Soundcore Life P3 Earbuds", total });
+
+  it("gives each store's lowest price and its listing count", () => {
+    const [g] = groupProducts([
+      listing("amazon", "a", 150_00),
+      listing("ebay", "e1", 140_00),
+      listing("ebay", "e2", 160_00),
+    ]);
+    expect(g && storeComparison(g)).toEqual({
+      headline: "Available on 2 stores",
+      prices: "eBay from ₪140 (2 listings) vs Amazon ₪150",
+      bestDeal: "Best deal on eBay",
+    });
+    expect(g && listingsPerStore(g)).toEqual(
+      new Map([
+        ["ebay", 2],
+        ["amazon", 1],
+      ]),
+    );
+    expect(g && comparisonScope(g)).toEqual({ stores: 2, listings: 3, hasSheet: true });
+  });
+
+  it("summarises one store's listings as a price range", () => {
+    const [g] = groupProducts([listing("ebay", "e1", 140_00), listing("ebay", "e2", 160_00)]);
+    expect(g && storeComparison(g)).toEqual({
+      headline: "2 listings on eBay",
+      prices: "from ₪140 to ₪160",
+      bestDeal: null,
+    });
+    expect(g && comparisonScope(g)).toEqual({ stores: 1, listings: 2, hasSheet: true });
   });
 });

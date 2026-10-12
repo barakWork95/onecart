@@ -1,0 +1,290 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "amazon_domain": "amazon.com",
+    "k": "jbl flip 6",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B09GJVTRNZ",
+      "options": "See options",
+      "title": "Flip 6 - Portable Waterproof Speaker - Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Eaj593GtL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 24600,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "asin": "B0DMV3BMGP",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/81aJ4547UeL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "asin": "B0DN2ZCZX6",
+      "options": "See options",
+      "title": "Charge 6 - Portable Waterproof & DropProof Bluetooth Speaker (Black)",
+      "thumbnail": "https://m.media-amazon.com/images/I/81pM9-KLvqL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 7000,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B0FVJ28RFM",
+      "title": "Flip 7 Waterproof Portable Speaker Bundle - Pair (Black)",
+      "thumbnail": "https://m.media-amazon.com/images/I/81gf1bpsEcL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 18,
+      "price": "ILS 617.69",
+      "extracted_price": 617.69,
+      "old_price": "ILS 926.69",
+      "extracted_old_price": 926.69,
+      "delivery": ["ILS 74.16 delivery Tue, Nov 3", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 617.69",
+          "extracted_primary_price": 617.69,
+          "old_primary_price": "ILS 926.69",
+          "extracted_old_primary_price": 926.69
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B0DMYQ32SC",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - Blue",
+      "thumbnail": "https://m.media-amazon.com/images/I/81+oo1nCHWL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B0DVX7RWPQ",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - Squad",
+      "thumbnail": "https://m.media-amazon.com/images/I/81oqCBYPzVL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B0F2SM8H5P",
+      "sponsored": true,
+      "options": "4 sizes",
+      "title": "Storage Case Compatible with JBL Flip 7/6 / 5 Portable Speaker",
+      "thumbnail": "https://m.media-amazon.com/images/I/81mUD5as9AL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 107,
+      "price": "ILS 52.50",
+      "extracted_price": 52.5,
+      "delivery": ["ILS 58.25 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 52.50",
+          "extracted_primary_price": 52.5
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B0DN35M7S9",
+      "options": "See options",
+      "title": "Charge 6 - Portable Waterproof & DropProof Bluetooth Speaker (Blue)",
+      "thumbnail": "https://m.media-amazon.com/images/I/8179N0kJ2QL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 7000,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "asin": "B0DMYS2K1C",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - White",
+      "thumbnail": "https://m.media-amazon.com/images/I/81myc526O7L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 10,
+      "asin": "B0DMYCC9DJ",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - Purple",
+      "thumbnail": "https://m.media-amazon.com/images/I/81JjVfxjLkL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0FKVSH438",
+      "options": "See options",
+      "title": "Grip Portable Bluetooth Speaker, Waterproof, Ambient Light - Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/81ZUdatJIkL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 1300,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B09LCV374T",
+      "sponsored": true,
+      "title": "Hard Travel Case for JBL Flip 7/6/5/4 Speaker, Grey",
+      "thumbnail": "https://m.media-amazon.com/images/I/81NLqsmFydL._AC_UY218_.jpg",
+      "rating": 4.8,
+      "reviews": 12700,
+      "price": "ILS 58.68",
+      "extracted_price": 58.68,
+      "delivery": ["ILS 61.03 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 58.68",
+          "extracted_primary_price": 58.68
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B0DMYJ48DK",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - Red",
+      "thumbnail": "https://m.media-amazon.com/images/I/81aeuAp3lAL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B0FTT8K591",
+      "title": "Flip 7 Waterproof Portable Speaker Bundle - Pair (Red)",
+      "thumbnail": "https://m.media-amazon.com/images/I/81uNd7pZGXL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 18,
+      "price": "ILS 617.69",
+      "extracted_price": 617.69,
+      "old_price": "ILS 926.69",
+      "extracted_old_price": 926.69,
+      "delivery": ["ILS 74.16 delivery Tue, Nov 3", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 617.69",
+          "extracted_primary_price": 617.69,
+          "old_primary_price": "ILS 926.69",
+          "extracted_old_primary_price": 926.69
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0DMYS8YPK",
+      "options": "See options",
+      "title": "Flip 7 Portable Bluetooth Speaker, Waterproof and Drop-Proof - Pink",
+      "thumbnail": "https://m.media-amazon.com/images/I/81THMaFpu7L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 4900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0DPKYBDDJ",
+      "options": "See options",
+      "title": "Charge 6 - Portable Waterproof & DropProof Bluetooth Speaker (White)",
+      "thumbnail": "https://m.media-amazon.com/images/I/71tdJs0xgtL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 7000,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 17,
+      "asin": "B0DPKW3GJV",
+      "options": "See options",
+      "title": "Charge 6 - Portable Waterproof & DropProof Bluetooth Speaker (Squad)",
+      "thumbnail": "https://m.media-amazon.com/images/I/718CoHo33rL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 7000,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 18,
+      "asin": "B0FKV6YY4D",
+      "options": "See options",
+      "title": "Grip Portable Bluetooth Speaker, Waterproof, Ambient Light - Squad",
+      "thumbnail": "https://m.media-amazon.com/images/I/81ugE4fKh8L._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 1300,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    }
+  ],
+  "featured_products": [],
+  "serpapi_pagination": {
+    "current": 1,
+    "next": "https://serpapi.com/search.json?amazon_domain=amazon.com&device=desktop&engine=amazon&k=jbl+flip+6&language=en_US&page=2&shipping_location=IL"
+  }
+}

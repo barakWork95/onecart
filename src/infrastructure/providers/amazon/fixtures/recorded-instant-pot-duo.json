@@ -1,0 +1,661 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "amazon_domain": "amazon.com",
+    "k": "instant pot duo",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B00FLYWNYQ",
+      "title": "Duo 6 Qt 7-in-1 Electric Pressure Cooker, Stainless Steel",
+      "thumbnail": "https://m.media-amazon.com/images/I/71MLaYtMFOL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 186300,
+      "price": "ILS 244.11",
+      "extracted_price": 244.11,
+      "old_price": "ILS 339.87",
+      "extracted_old_price": 339.87,
+      "delivery": ["ILS 149.03 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 244.11",
+          "extracted_primary_price": 244.11,
+          "old_primary_price": "ILS 339.87",
+          "extracted_old_primary_price": 339.87,
+          "more_buying_choices": "ILS 214.82 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B00FLYWNYQ/ref=sr_1_1_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-1"
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "asin": "B0H9RZCW79",
+      "sponsored": true,
+      "title": "2L Electric Hot Pot, Dual Voltage Portable Ramen Cooker for Travel",
+      "thumbnail": "https://m.media-amazon.com/images/I/71DSuSeDndL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 7,
+      "price": "ILS 154.47",
+      "extracted_price": 154.47,
+      "delivery": ["ILS 75.67 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 154.47",
+          "extracted_primary_price": 154.47
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "asin": "B06Y1YD5W7",
+      "title": "Duo 7-in-1 Mini Electric Pressure Cooker, Slow Rice Cooker, Steamer, Sauté, Yogurt Maker, Warmer & Sterilizer, Includes Free App with over 1900 Recipes, Stainless Steel, 3 Quart",
+      "thumbnail": "https://m.media-amazon.com/images/I/71N1lhYC--L._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 186300,
+      "price": "ILS 216.27",
+      "extracted_price": 216.27,
+      "old_price": "ILS 278.07",
+      "extracted_old_price": 278.07,
+      "delivery": ["ILS 129.66 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 216.27",
+          "extracted_primary_price": 216.27,
+          "old_primary_price": "ILS 278.07",
+          "extracted_old_primary_price": 278.07,
+          "more_buying_choices": "ILS 190.31 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B06Y1YD5W7/ref=sr_1_3_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-3"
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B07VT23JDM",
+      "title": "Duo Crisp 8 Qt 11-in-1 Air Fryer + Pressure Cooker, Steel",
+      "thumbnail": "https://m.media-amazon.com/images/I/81vc3qXKPpL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 32700,
+      "price": "ILS 679.77",
+      "extracted_price": 679.77,
+      "delivery": ["ILS 459.14 delivery Oct 26 - Nov 15", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 679.77",
+          "extracted_primary_price": 679.77,
+          "more_buying_choices": "ILS 638.98 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B07VT23JDM/ref=sr_1_4_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-4"
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B09MZTSSR2",
+      "title": "Duo Plus 8 Qt 9-in-1 Electric Pressure Cooker, WhisperQuiet",
+      "thumbnail": "https://m.media-amazon.com/images/I/71v6wXH8uIL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 5200,
+      "price": "ILS 494.37",
+      "extracted_price": 494.37,
+      "delivery": ["FREE delivery", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 494.37",
+          "extracted_primary_price": 494.37,
+          "more_buying_choices": "ILS 464.71 (3+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B09MZTSSR2/ref=sr_1_5_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-5"
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B09MZTP44L",
+      "title": "6 Qt 9-in-1 Electric Pressure Cooker, WhisperQuiet",
+      "thumbnail": "https://m.media-amazon.com/images/I/617cdlhLjyL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 5200,
+      "price": "ILS 432.57",
+      "extracted_price": 432.57,
+      "delivery": ["ILS 161.82 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 432.57",
+          "extracted_primary_price": 432.57,
+          "more_buying_choices": "ILS 251.40 (2 used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B09MZTP44L/ref=sr_1_6_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-6"
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B0GSB2BBV2",
+      "sponsored": true,
+      "title": "Flexify Slim 8-in-1 French Door Toaster Oven Air Fryer Combo, 26.4 QT",
+      "thumbnail": "https://m.media-amazon.com/images/I/71COlQ+b1sL._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 2000,
+      "price": "ILS 556.17",
+      "extracted_price": 556.17,
+      "delivery": ["ILS 279.27 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 556.17",
+          "extracted_primary_price": 556.17
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B0B4PQDFCL",
+      "title": "Rio 6 Qt 7-in-1 Electric Pressure Cooker, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61KI0-ejZ9L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 6900,
+      "price": "ILS 339.87",
+      "extracted_price": 339.87,
+      "delivery": ["ILS 197.20 delivery Oct 21 - Nov 5", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 339.87",
+          "extracted_primary_price": 339.87,
+          "more_buying_choices": "ILS 253.35 (3+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0B4PQDFCL/ref=sr_1_8_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-8"
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "asin": "B0B1G5M31V",
+      "title": "Duo Crisp Ultimate 6.5 Qt 13-in-1 Pressure Cooker + Air Fryer",
+      "thumbnail": "https://m.media-amazon.com/images/I/712xzIXamaL._AC_UY218_.jpg",
+      "rating": 3.7,
+      "reviews": 2000,
+      "price": "ILS 679.65",
+      "extracted_price": 679.65,
+      "delivery": ["ILS 370.24 delivery Thu, Oct 22", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 679.65",
+          "extracted_primary_price": 679.65,
+          "more_buying_choices": "ILS 645.66 (3+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0B1G5M31V/ref=sr_1_9_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-9"
+        }
+      ]
+    },
+    {
+      "position": 10,
+      "asin": "B08PQ2KWHS",
+      "title": "Pro 6 Qt 10-in-1 Electric Pressure Cooker, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71crmdgrhpL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 14200,
+      "price": "ILS 525.27",
+      "extracted_price": 525.27,
+      "delivery": ["ILS 180.92 delivery Oct 26 - Nov 12", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 525.27",
+          "extracted_primary_price": 525.27,
+          "more_buying_choices": "ILS 350.96 (2 used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B08PQ2KWHS/ref=sr_1_10_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-10"
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0CHL9G36H",
+      "title": "InstantPot Duo Crisp Ultimate 6.5Qt 13-in-1 Pressure Cooker Air Fryer Wifi",
+      "thumbnail": "https://m.media-amazon.com/images/I/71MyLpNy-JL._AC_UY218_.jpg",
+      "rating": 3.8,
+      "reviews": 270,
+      "price": "ILS 752.04",
+      "extracted_price": 752.04,
+      "delivery": ["ILS 362.98 delivery Thu, Oct 22", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 752.04",
+          "extracted_primary_price": 752.04,
+          "more_buying_choices": "ILS 676.68 (4+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0CHL9G36H/ref=sr_1_11_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-11"
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B0DT15VPTC",
+      "sponsored": true,
+      "title": "MAGNIFIQUE 4 Quart Programmable Casserole Slow Cooker, 8-in-1 Multi Cooker with Removable Non-Toxic Stoneware Crock, Claypot Slow Cooker, Rice-cooking, Nonstick, Oven Safe Pot to 450°F, Brown",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Ko1tp3AXL._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 716,
+      "price": "ILS 556.17",
+      "extracted_price": 556.17,
+      "delivery": ["ILS 182.09 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 556.17",
+          "extracted_primary_price": 556.17
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B0F9B923NC",
+      "title": "Rio Mini 4 Qt 7-in-1 Electric Pressure Cooker, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71gkCf-Lo8L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 6900,
+      "price": "ILS 231.35",
+      "extracted_price": 231.35,
+      "old_price": "ILS 278.07",
+      "extracted_old_price": 278.07,
+      "delivery": ["ILS 151.50 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 231.35",
+          "extracted_primary_price": 231.35,
+          "old_primary_price": "ILS 278.07",
+          "extracted_old_primary_price": 278.07,
+          "more_buying_choices": "ILS 208.20 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0F9B923NC/ref=sr_1_13_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-13"
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B0G5B5WT4Y",
+      "title": "Dual Action 8-in-1 Multi-Cooker, Serve Together Timer, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/7177dVtns1L._AC_UY218_.jpg",
+      "rating": 4.1,
+      "reviews": 83,
+      "price": "ILS 525.27",
+      "extracted_price": 525.27,
+      "delivery": ["ILS 255.26 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 525.27",
+          "extracted_primary_price": 525.27,
+          "more_buying_choices": "ILS 390.76 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0G5B5WT4Y/ref=sr_1_14_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-14"
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0G59ZTV3K",
+      "title": "Dual Action 8-in-1 Multi-Cooker, Smart Timing, Sea Salt",
+      "thumbnail": "https://m.media-amazon.com/images/I/71Mg9CETd3L._AC_UY218_.jpg",
+      "rating": 4.1,
+      "reviews": 83,
+      "price": "ILS 525.15",
+      "extracted_price": 525.15,
+      "delivery": ["ILS 255.26 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 525.15",
+          "extracted_primary_price": 525.15
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0FBK1XHXR",
+      "title": "6QT RIO 7-in-1 Multi-Cooker, Pressure Cooker, Slow cook, Sauté, Steam, Rice Maker, Yogurt, & Warmer, Sea Salt, 6 Quarts",
+      "thumbnail": "https://m.media-amazon.com/images/I/61z89QAAxSL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 6900,
+      "price": "ILS 308.97",
+      "extracted_price": 308.97,
+      "old_price": "ILS 339.87",
+      "extracted_old_price": 339.87,
+      "delivery": ["ILS 160.22 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 308.97",
+          "extracted_primary_price": 308.97,
+          "old_primary_price": "ILS 339.87",
+          "extracted_old_primary_price": 339.87,
+          "more_buying_choices": "ILS 247.35 (3+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0FBK1XHXR/ref=sr_1_16_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-16"
+        }
+      ]
+    },
+    {
+      "position": 17,
+      "asin": "B0H4LDG2NT",
+      "sponsored": true,
+      "title": "Stainless Steel Inner Pot for Instant Pot 6 Quart, Upgrade Replacement Pot",
+      "thumbnail": "https://m.media-amazon.com/images/I/71d-cN4ZNZL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 44,
+      "price": "ILS 77.22",
+      "extracted_price": 77.22,
+      "delivery": ["ILS 79.47 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 77.22",
+          "extracted_primary_price": 77.22
+        }
+      ]
+    },
+    {
+      "position": 18,
+      "asin": "B0BFX95J5P",
+      "title": "Pressure Cooker 6QT, 9-in-1, Ceramic Coating Pot, 12 Safety Features",
+      "thumbnail": "https://m.media-amazon.com/images/I/61GhDaofSJL._AC_UY218_.jpg",
+      "rating": 4.8,
+      "reviews": 7500,
+      "price": "ILS 278.07",
+      "extracted_price": 278.07,
+      "delivery": ["ILS 156.23 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 278.07",
+          "extracted_primary_price": 278.07,
+          "more_buying_choices": "ILS 235.24 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0BFX95J5P/ref=sr_1_18_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-18"
+        }
+      ]
+    },
+    {
+      "position": 19,
+      "asin": "B0F9BD5M2K",
+      "title": "Rio Mini 4 Qt 7-in-1 Electric Pressure Cooker, Rosewater Pink",
+      "thumbnail": "https://m.media-amazon.com/images/I/61aqK+ik60L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 6900,
+      "price": "ILS 281.16",
+      "extracted_price": 281.16,
+      "delivery": ["ILS 157.10 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 281.16",
+          "extracted_primary_price": 281.16,
+          "more_buying_choices": "ILS 264.29 (2+ used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0F9BD5M2K/ref=sr_1_19_olp?keywords=instant+pot+duo&dib_tag=se&dib=eyJ2IjoiMSJ9.y4LLAMvRXyF-GJBFF44YphjeAFKP28P3K3lH0dxofyGJIAIp2eeOMj9ZuRxHyZMUqAp9dKEr9C9_qD_y-5iEUX_PqHvJxEe_9i-UZncAafKcdjm0E1LBBgzDQ5R9Mr9rTaGOLCd_REHc5iDvaMFMk60NWzrYWN6RJ-a8TFc2yYCMOpM2_wqjYQL0wdIhcxcFLJwwZO-DZrbRTAWwLnpaSbKe6J681G53ikXjfNKrVY0.2AKt9anT0XJGwAKl8OQl7ilSA_YaFYSqJJ9sGRIr9kE&qid=1791808441&sr=8-19"
+        }
+      ]
+    },
+    {
+      "position": 20,
+      "asin": "B08TMTJZ8L",
+      "title": "Pro Plus 6 Qt 10-in-1 Electric Pressure Cooker, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71P6O0B4mJL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 1500,
+      "price": "ILS 710.55",
+      "extracted_price": 710.55,
+      "delivery": ["ILS 221.61 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 710.55",
+          "extracted_primary_price": 710.55
+        }
+      ]
+    },
+    {
+      "position": 21,
+      "asin": "B0GGZWW6TG",
+      "sponsored": true,
+      "title": "Replacement Instant Pot Float Valve,2 Float Valve + 6 Silicone Caps,Compatible for Instant Pot,Fits Duo 3/5/6 Qt,Duo Plus 3/6 Qt,Lux 3 Qt,Smart 6 Qt,Smart WiFi 6 Qt,Ultra 3/6 Qt (Silver-Fits 3/5/6 Qt)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61IEvTNDgDL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 9,
+      "price": "ILS 16.35",
+      "extracted_price": 16.35,
+      "delivery": ["ILS 53.33 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 16.35",
+          "extracted_primary_price": 16.35
+        }
+      ]
+    },
+    {
+      "position": 22,
+      "asin": "B0DFHPCRXV",
+      "sponsored": true,
+      "title": "13 PCS Instant Pot Accessories for Duo 5, 6 Qt and Duo Plus 6 Quart, Instant Pot Replacement Parts Include 2 Sealing Rings 1 Steam Release Valve 1 Anti-Block Shield 2 Float Valves and 6 Gaskets",
+      "thumbnail": "https://m.media-amazon.com/images/I/612RhlBURrL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 220,
+      "price": "ILS 43.23",
+      "extracted_price": 43.23,
+      "delivery": ["ILS 55.93 delivery Sun, Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 43.23",
+          "extracted_primary_price": 43.23
+        }
+      ]
+    }
+  ],
+  "featured_products": [
+    {
+      "title": "Recently bought and rated",
+      "products": [
+        {
+          "position": 1,
+          "asin": "B0CDFX2P46",
+          "sponsored": true,
+          "title": "Steam Release Diverter Accessory for Instant Pot & Ninja Foodi",
+          "thumbnail": "https://m.media-amazon.com/images/I/61teMLGPLfL._AC_UL320_.jpg",
+          "rating": 4.1,
+          "reviews": 198,
+          "price": "ILS 29.32",
+          "extracted_price": 29.32,
+          "delivery": [
+            "ILS 53.49 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 53.49 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 29.32",
+              "extracted_primary_price": 29.32
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "asin": "B09YH8BTC9",
+          "sponsored": true,
+          "title": "Steam Release Valve Handle for Instant Pot Duo Nova, DUO CRISP AF 8",
+          "thumbnail": "https://m.media-amazon.com/images/I/41vS2+xJf0L._AC_UL320_.jpg",
+          "rating": 4.3,
+          "reviews": 449,
+          "price": "ILS 15.42",
+          "extracted_price": 15.42,
+          "old_price": "ILS 16.96",
+          "extracted_old_price": 16.96,
+          "delivery": [
+            "ILS 53.64 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 53.64 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 15.42",
+              "extracted_primary_price": 15.42,
+              "old_primary_price": "ILS 16.96",
+              "extracted_old_primary_price": 16.96
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "asin": "B0CYZ3RY15",
+          "sponsored": true,
+          "title": "Condensation Collector Replacement for Instant Pot DUO, Duo Plus, ULTRA",
+          "thumbnail": "https://m.media-amazon.com/images/I/51ihBzWuhQL._AC_UL320_.jpg",
+          "rating": 4.6,
+          "reviews": 369,
+          "price": "ILS 15.42",
+          "extracted_price": 15.42,
+          "delivery": [
+            "ILS 53.52 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 53.52 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 15.42",
+              "extracted_primary_price": 15.42
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "asin": "B0BGJ1YM2P",
+          "sponsored": true,
+          "title": "Steam Release Handle Steam Valve for Instant Pot Duo Nova Duo Gourmet 6 qt DUO CRISP AF 8 Ultra 3, 6, 8 qt Viva 6 Quart, Pressure Cooker Valve Replacement Part Accessories",
+          "thumbnail": "https://m.media-amazon.com/images/I/51y2Vqtw1sL._AC_UL320_.jpg",
+          "rating": 4.4,
+          "reviews": 525,
+          "price": "ILS 24.69",
+          "extracted_price": 24.69,
+          "delivery": [
+            "ILS 53.64 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 53.64 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 24.69",
+              "extracted_primary_price": 24.69
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Seen on social media",
+      "products": [
+        {
+          "position": 1,
+          "asin": "B09KH38HF2",
+          "sponsored": true,
+          "options": "See options",
+          "title": "SENSARTE Nonstick Saucepan with Lid, 1.5 Quarts Small Pot with Swiss Granite Coating, Stay-cool Handle, Multipurpose Handy Sauce Pot Small Kitchen Cooking Pot, Induction Comptable, PFOA Free",
+          "thumbnail": "https://m.media-amazon.com/images/I/71WQU+L-qPL._AC_UL320_.jpg",
+          "rating": 4.6,
+          "reviews": 9500,
+          "price": "ILS 61.77",
+          "extracted_price": 61.77,
+          "old_price": "ILS 83.40",
+          "extracted_old_price": 83.4,
+          "delivery": [
+            "ILS 68.54 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 68.54 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 61.77",
+              "extracted_primary_price": 61.77,
+              "old_primary_price": "ILS 83.40",
+              "extracted_old_primary_price": 83.4
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "asin": "B09YH8BTC9",
+          "sponsored": true,
+          "title": "Steam Release Valve Handle for Instant Pot Duo Nova, DUO CRISP AF 8",
+          "thumbnail": "https://m.media-amazon.com/images/I/41vS2+xJf0L._AC_UL320_.jpg",
+          "rating": 4.3,
+          "reviews": 449,
+          "price": "ILS 15.42",
+          "extracted_price": 15.42,
+          "old_price": "ILS 16.96",
+          "extracted_old_price": 16.96,
+          "delivery": [
+            "ILS 53.64 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 53.64 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 15.42",
+              "extracted_primary_price": 15.42,
+              "old_primary_price": "ILS 16.96",
+              "extracted_old_primary_price": 16.96
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "asin": "B0H4LDG2NT",
+          "sponsored": true,
+          "title": "Stainless Steel Inner Pot for Instant Pot 6 Quart, Upgrade Replacement Pot",
+          "thumbnail": "https://m.media-amazon.com/images/I/71d-cN4ZNZL._AC_UL320_.jpg",
+          "rating": 4.6,
+          "reviews": 44,
+          "price": "ILS 77.22",
+          "extracted_price": 77.22,
+          "delivery": [
+            "ILS 79.47 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 79.47 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 77.22",
+              "extracted_primary_price": 77.22
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "asin": "B0D56XS65X",
+          "sponsored": true,
+          "title": "Hybrid Nonstick 2 QT Saucepan with Lid, Stainless Steel Pot with Honeycomb Texture,Compatible with All Cooktops,Dishwasher and Oven Safe",
+          "thumbnail": "https://m.media-amazon.com/images/I/71SmYM2HWiL._AC_UL320_.jpg",
+          "rating": 4.6,
+          "reviews": 77,
+          "price": "ILS 278.07",
+          "extracted_price": 278.07,
+          "delivery": [
+            "FREE delivery Sun, Nov 1 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Sun, Nov 1 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 278.07",
+              "extracted_primary_price": 278.07
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "asin": "B08F7YNR2R",
+          "sponsored": true,
+          "title": "Steam Release Handle, Original Float Valve Replacement Parts with 3 Silicone Caps for Instant Pot Duo/Duo Plus 3, 5, 6 Quart, Duo Mini 3 Qt, Duo50 5 Qt, Duo/Duo plus 60 6 Qt by ZYLONE",
+          "thumbnail": "https://m.media-amazon.com/images/I/61MIkGoZP0L._AC_UL320_.jpg",
+          "rating": 4.5,
+          "reviews": 1600,
+          "price": "ILS 24.69",
+          "extracted_price": 24.69,
+          "delivery": [
+            "ILS 54.04 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 54.04 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 24.69",
+              "extracted_primary_price": 24.69
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "serpapi_pagination": {
+    "current": 1,
+    "next": "https://serpapi.com/search.json?amazon_domain=amazon.com&device=desktop&engine=amazon&k=instant+pot+duo&language=en_US&page=2&shipping_location=IL"
+  }
+}

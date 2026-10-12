@@ -19,7 +19,7 @@ export function filterOffers(products: readonly UnifiedProduct[], filters: Searc
 /** Fastest guaranteed delivery among a group's offers (upper bound of the range); null if unknown. */
 function fastestDeliveryDays(group: ProductGroup): number | null {
   let fastest: number | null = null;
-  for (const offer of group.offers) {
+  for (const offer of group.listings) {
     const days = offer.delivery.maxDays ?? offer.delivery.minDays;
     if (days !== null && (fastest === null || days < fastest)) fastest = days;
   }
@@ -42,10 +42,10 @@ function compareNullable(a: number | null, b: number | null, direction: 1 | -1):
  */
 export type RelevanceRank = (offerId: string) => number | undefined;
 
-/** A group is as relevant as its best-ranked offer in any store. */
+/** A group is as relevant as its best-ranked listing in any store. */
 function groupRank(group: ProductGroup, rankOf: RelevanceRank): number {
   let best = Number.POSITIVE_INFINITY;
-  for (const offer of group.offers) best = Math.min(best, rankOf(offer.id) ?? Number.POSITIVE_INFINITY);
+  for (const offer of group.listings) best = Math.min(best, rankOf(offer.id) ?? Number.POSITIVE_INFINITY);
   return best;
 }
 

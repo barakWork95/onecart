@@ -1,0 +1,1749 @@
+{
+  "total": 3259,
+  "limit": 50,
+  "offset": 0,
+  "itemSummaries": [
+    {
+      "itemId": "v1|377533082305|0",
+      "legacyItemId": "377533082305",
+      "title": "Apple AirPods Pro 2nd generation (USB-C)",
+      "price": {
+        "value": "312.02",
+        "currency": "ILS",
+        "convertedFromValue": "399.00",
+        "convertedFromCurrency": "PLN"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/5McAAeSwJxpqvJ1s/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/5McAAeSwJxpqvJ1s/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "23.46",
+            "currency": "ILS",
+            "convertedFromValue": "30.00",
+            "convertedFromCurrency": "PLN"
+          },
+          "minEstimatedDeliveryDate": "2026-10-15T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nowy",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|128124305605|0",
+      "legacyItemId": "128124305605",
+      "title": "Apple AirPods Pro 2nd Generation with MagSafe Bluetooth Charging Case White",
+      "price": {
+        "value": "294.57",
+        "currency": "ILS",
+        "convertedFromValue": "85.87",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/RVEAAeSwxXVqwgyx/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/RVEAAeSwxXVqwgyx/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "51.46",
+            "currency": "ILS",
+            "convertedFromValue": "15.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-22T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuovo",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|278208430799|0",
+      "legacyItemId": "278208430799",
+      "title": "Apple AirPods Pro 1 Gen. Charging Case Box Accessories",
+      "price": {
+        "value": "260.23",
+        "currency": "ILS",
+        "convertedFromValue": "75.86",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/CHYAAeSwt-ZqRlwI/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/CHYAAeSwt-ZqRlwI/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "136.87",
+            "currency": "ILS",
+            "convertedFromValue": "39.90",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-19T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuovo",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|820094505748|0",
+      "legacyItemId": "820094505748",
+      "title": "Apple AirPods Pro 3 (2025 3rd Gen), Wireless, Noise Cancelling",
+      "price": {
+        "value": "668.80",
+        "currency": "ILS",
+        "convertedFromValue": "194.96",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Y7AAAeSwNRJqnW69/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/Y7AAAeSwNRJqnW69/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "58.32",
+            "currency": "ILS",
+            "convertedFromValue": "17.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-21T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuevo",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|178565127878|0",
+      "legacyItemId": "178565127878",
+      "title": "Apple AirPods Pro 3 (3rd Generation) Wireless Earbuds Perfect Condition",
+      "price": {
+        "value": "325.89",
+        "currency": "ILS",
+        "convertedFromValue": "95.00",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/BYUAAeSwusFqxo0v/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/BYUAAeSwusFqxo0v/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.86",
+            "currency": "ILS",
+            "convertedFromValue": "2.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-15T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuevo",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|800778551625|0",
+      "legacyItemId": "800778551625",
+      "title": "AirPods Pro 3rd Generation",
+      "price": {
+        "value": "358.43",
+        "currency": "ILS",
+        "convertedFromValue": "166.84",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/7vMAAeSwz1lqyS2m/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/7vMAAeSwz1lqyS2m/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "32.20",
+            "currency": "ILS",
+            "convertedFromValue": "14.99",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-20T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|800769303202|0",
+      "legacyItemId": "800769303202",
+      "title": "NEW Apple AirPods Pro 2nd generation Sealed - White MQD83AM/A  A2698 A2699 A2700",
+      "price": {
+        "value": "490.06",
+        "currency": "ILS",
+        "convertedFromValue": "160.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/8LUAAeSw~C5qxouG/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/8LUAAeSw~C5qxouG/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "101.54",
+            "currency": "ILS",
+            "convertedFromValue": "33.15",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-12T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|147280603464|0",
+      "legacyItemId": "147280603464",
+      "title": "Apple AirPods Pro 3 Wireless Earbuds, Active Noise Cancellation, Authentic",
+      "price": {
+        "value": "770.11",
+        "currency": "ILS",
+        "convertedFromValue": "189.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/rCAAAeSwKE5p7472/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/rCAAAeSwKE5p7472/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "83.10",
+            "currency": "ILS",
+            "convertedFromValue": "20.50",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|377557566352|0",
+      "legacyItemId": "377557566352",
+      "title": "AirPro 2 With MagSafe Charging Case (USB-C) Bluetooth Headsets iOS & Android",
+      "price": {
+        "value": "137.18",
+        "currency": "ILS",
+        "convertedFromValue": "39.99",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/tmAAAeSwYhNqyT1x/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/tmAAAeSwYhNqyT1x/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.29",
+            "currency": "ILS",
+            "convertedFromValue": "3.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuovo",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|128129546276|0",
+      "legacyItemId": "128129546276",
+      "title": "APPLE AIRPOD PRO Gen 3",
+      "price": {
+        "value": "275.66",
+        "currency": "ILS",
+        "convertedFromValue": "90.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/s0gAAeSw7-FqqJLp/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/s0gAAeSw7-FqqJLp/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "214.40",
+            "currency": "ILS",
+            "convertedFromValue": "70.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|398066988060|666352426815",
+      "legacyItemId": "398066988060",
+      "title": "Original Apple AirPods Pro 1st 2st 3st Generation Only Replacement Earbud NEW",
+      "price": {
+        "value": "225.75",
+        "currency": "ILS",
+        "convertedFromValue": "105.55",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/kn0AAeSw3XhqPfYq/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/kn0AAeSw3XhqPfYq/s-l640.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "16.15",
+            "currency": "ILS",
+            "convertedFromValue": "7.55",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-22T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-20T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|137009513725|0",
+      "legacyItemId": "137009513725",
+      "title": "New Original Quality AirPods Pro Earphones with Wireless Charging Case",
+      "price": {
+        "value": "277.83",
+        "currency": "ILS",
+        "convertedFromValue": "129.90",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/8B4AAeSw-C5pIuOb/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/8B4AAeSw-C5pIuOb/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "83.20",
+            "currency": "ILS",
+            "convertedFromValue": "38.90",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|960045493633|0",
+      "legacyItemId": "960045493633",
+      "title": "Apple AirPods Pro 3 Brand New Factory Sealed Never Opened Fast Shipping",
+      "price": {
+        "value": "459.44",
+        "currency": "ILS",
+        "convertedFromValue": "150.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/w5UAAeSwN9NqysZU/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/w5UAAeSwN9NqysZU/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "208.71",
+            "currency": "ILS",
+            "convertedFromValue": "68.14",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-16T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|158375215059|0",
+      "legacyItemId": "158375215059",
+      "title": "Apple AirPods Pro Max 2 2026 model (Midnight Black) model number: A3454 Latest 2",
+      "price": {
+        "value": "1069.41",
+        "currency": "ILS",
+        "convertedFromValue": "500.00",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/DpgAAeSw~gJqmu3Y/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/DpgAAeSw~gJqmu3Y/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "271.05",
+            "currency": "ILS",
+            "convertedFromValue": "126.73",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|377485078925|0",
+      "legacyItemId": "377485078925",
+      "title": "Apple AirPods Pro 3 Wireless Earbuds with ANC & Spatial Audio",
+      "price": {
+        "value": "536.61",
+        "currency": "ILS",
+        "convertedFromValue": "250.89",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/lDwAAeSw1vdqofqX/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/lDwAAeSw1vdqofqX/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|236047233833|0",
+      "legacyItemId": "236047233833",
+      "title": "Apple AirPods Pro 2nd Generation with MagSafe Wireless Charging Case (USB‑C)...",
+      "price": {
+        "value": "459.44",
+        "currency": "ILS",
+        "convertedFromValue": "150.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/2pkAAeSw~7Vn-Ajt/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/2pkAAeSw~7Vn-Ajt/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "90.66",
+            "currency": "ILS",
+            "convertedFromValue": "29.60",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|206569392741|0",
+      "legacyItemId": "206569392741",
+      "title": "airpods pro 2nd generation",
+      "price": {
+        "value": "857.61",
+        "currency": "ILS",
+        "convertedFromValue": "250.00",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/D6gAAeSwd3Nqr6O5/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/D6gAAeSwd3Nqr6O5/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "34.30",
+            "currency": "ILS",
+            "convertedFromValue": "10.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-21T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|137224697788|0",
+      "legacyItemId": "137224697788",
+      "title": "Original Quality AirPods Pro Earphones with Wireless Charging Case SYDNEY STOCK",
+      "price": {
+        "value": "256.44",
+        "currency": "ILS",
+        "convertedFromValue": "119.90",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/8B4AAeSw-C5pIuOb/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/8B4AAeSw-C5pIuOb/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "83.20",
+            "currency": "ILS",
+            "convertedFromValue": "38.90",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|267785355643|0",
+      "legacyItemId": "267785355643",
+      "title": "NEW Apple AirPods Pro 3 Bluetooth Headphones with MagSafe Charging Case - White",
+      "price": {
+        "value": "679.36",
+        "currency": "ILS",
+        "convertedFromValue": "167.60",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/rCUAAeSwKK1qqFVo/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/rCUAAeSwKK1qqFVo/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "81.07",
+            "currency": "ILS",
+            "convertedFromValue": "20.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-16T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|365082449624|634725738352",
+      "legacyItemId": "365082449624",
+      "title": "2Pcs Silicone Sports Anti-lost Ear Hook For AirPods 3 Pro 4 Strap Earhook Holder",
+      "price": {
+        "value": "5.56",
+        "currency": "ILS",
+        "convertedFromValue": "2.60",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/PGEAAOSw1Gxmx~6z/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/PGEAAOSw1Gxmx~6z/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|376730434469|645336730345",
+      "legacyItemId": "376730434469",
+      "title": "Real Carbon Fiber Slim Case For Apple AirPods Pro 3/Pro 2/5th/4th Gen Hard Cover",
+      "price": {
+        "value": "74.91",
+        "currency": "ILS",
+        "convertedFromValue": "18.48",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/vpoAAeSwxE5pJf2x/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/vpoAAeSwxE5pJf2x/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.36",
+            "currency": "ILS",
+            "convertedFromValue": "3.79",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|406640998014|676897744914",
+      "legacyItemId": "406640998014",
+      "title": "2Pcs Silicone Sports Anti-lost Ear Hooks For AirPods 3 Pro Strap Earhook Holder",
+      "price": {
+        "value": "4.28",
+        "currency": "ILS",
+        "convertedFromValue": "1.99",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/z~cAAOSwHxloUvY-/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/z~cAAOSwHxloUvY-/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "18.26",
+            "currency": "ILS",
+            "convertedFromValue": "8.50",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-07T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|287258312084|0",
+      "legacyItemId": "287258312084",
+      "title": "ESR for AirPods Pro 3 Case, Compatible with AirPods Pro Case 3rd Generation",
+      "price": {
+        "value": "79.73",
+        "currency": "ILS",
+        "convertedFromValue": "19.67",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/LAkAAeSwE2pp1N77/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/LAkAAeSwE2pp1N77/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "59.26",
+            "currency": "ILS",
+            "convertedFromValue": "14.62",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|386953853830|654224996662",
+      "legacyItemId": "386953853830",
+      "title": "2 x Silicone Sports Anti-lost Ear Hook For AirPods 3 Pro Strap Earhook Holder",
+      "price": {
+        "value": "3.65",
+        "currency": "ILS",
+        "convertedFromValue": "1.70",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/yCAAAOSw2~ZmKG~D/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/yCAAAOSw2~ZmKG~D/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "7.07",
+            "currency": "ILS",
+            "convertedFromValue": "3.29",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|165815723722|465321072950",
+      "legacyItemId": "165815723722",
+      "title": "Apple AirPods Pro 1 & 2 Shockproof Headphones Cases Cover Game Controller Shaped",
+      "price": {
+        "value": "17.79",
+        "currency": "ILS",
+        "convertedFromValue": "4.39",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/kE0AAOSw6cdjjg3K/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/kE0AAOSw6cdjjg3K/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "64.81",
+            "currency": "ILS",
+            "convertedFromValue": "15.99",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-15T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-23T21:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|158289823058|0",
+      "legacyItemId": "158289823058",
+      "title": "Official Apple AirPods Pro 3 Wireless Headphone A3063 A3064 A3122 [ White ] NEW",
+      "price": {
+        "value": "1058.81",
+        "currency": "ILS",
+        "convertedFromValue": "345.69",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/4tsAAeSwHYBqp23F/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/4tsAAeSwHYBqp23F/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "116.39",
+            "currency": "ILS",
+            "convertedFromValue": "38.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|257103033634|557755610688",
+      "legacyItemId": "257103033634",
+      "title": "SUPCASE for Apple AirPods Pro 3 (2025) Case 360° Full Body Protective Cover IP68",
+      "price": {
+        "value": "110.23",
+        "currency": "ILS",
+        "convertedFromValue": "35.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/dQYAAeSw9YZowpdd/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/dQYAAeSw9YZowpdd/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "78.10",
+            "currency": "ILS",
+            "convertedFromValue": "25.50",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|117454747892|0",
+      "legacyItemId": "117454747892",
+      "title": "NEW Coach Signature AirPods Pro Case Holder - Generation 1 & 2",
+      "price": {
+        "value": "113.30",
+        "currency": "ILS",
+        "convertedFromValue": "36.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/UMAAAeSwj7ZquZrX/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/UMAAAeSwj7ZquZrX/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "90.66",
+            "currency": "ILS",
+            "convertedFromValue": "29.60",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|267715488934|0",
+      "legacyItemId": "267715488934",
+      "title": "Apple AirPods Pro 1 Generation Charging Case Box Accessories",
+      "price": {
+        "value": "274.09",
+        "currency": "ILS",
+        "convertedFromValue": "79.90",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/VFUAAeSwih1qRig8/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/VFUAAeSwih1qRig8/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "102.57",
+            "currency": "ILS",
+            "convertedFromValue": "29.90",
+            "convertedFromCurrency": "EUR"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuovo",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|206595868943|0",
+      "legacyItemId": "206595868943",
+      "title": "AirPods Pro (2nd Generation) USB-C Magsafe Charging Case Replacement A2968",
+      "price": {
+        "value": "306.29",
+        "currency": "ILS",
+        "convertedFromValue": "100.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/v9cAAeSwG7pqvs78/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/v9cAAeSwG7pqvs78/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "68.55",
+            "currency": "ILS",
+            "convertedFromValue": "22.38",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|397222025815|0",
+      "legacyItemId": "397222025815",
+      "title": "Apple AirPods Pro 2nd Generation Bluetooth Wireless Ear Buds with Charging Case",
+      "price": {
+        "value": "306.29",
+        "currency": "ILS",
+        "convertedFromValue": "100.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/wJkAAeSwGMVpB~9X/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/wJkAAeSwGMVpB~9X/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "68.55",
+            "currency": "ILS",
+            "convertedFromValue": "22.38",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|128113937406|0",
+      "legacyItemId": "128113937406",
+      "title": "Apple AirPods Pro Bluetooth Wireless In-Ear Headsets MagSafe White",
+      "price": {
+        "value": "313.03",
+        "currency": "ILS",
+        "convertedFromValue": "91.25",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ifwAAeSwIFpqwg0l/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ifwAAeSwIFpqwg0l/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "51.46",
+            "currency": "ILS",
+            "convertedFromValue": "15.00",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-10-22T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Nuovo",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|198527976134|0",
+      "legacyItemId": "198527976134",
+      "title": "Apple AirPods Pro White In-Ear Wireless Earbuds Bluetooth ANC Built-In Mic",
+      "price": {
+        "value": "344.54",
+        "currency": "ILS",
+        "convertedFromValue": "85.00",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/gasAAeSw9ABqZ1RX/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/gasAAeSw9ABqZ1RX/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "20.27",
+            "currency": "ILS",
+            "convertedFromValue": "5.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-19T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|376659907869|645336839417",
+      "legacyItemId": "376659907869",
+      "title": "Genuine Carbon Fiber Case For Apple AirPods Pro 3 2025 Bluetooth Earphones Cover",
+      "price": {
+        "value": "74.91",
+        "currency": "ILS",
+        "convertedFromValue": "18.48",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/JL4AAeSwP2JpAvph/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/JL4AAeSwP2JpAvph/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.36",
+            "currency": "ILS",
+            "convertedFromValue": "3.79",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|800762756012|0",
+      "legacyItemId": "800762756012",
+      "title": "🎧 AirPods Pro 3    🎧 Son HD / High-Quality Sound* 🔊 Bass profond et puissant",
+      "price": {
+        "value": "306.29",
+        "currency": "ILS",
+        "convertedFromValue": "100.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/cuUAAeSweydqxHxC/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/cuUAAeSweydqxHxC/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-08T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-26T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|155679639936|456007246539",
+      "legacyItemId": "155679639936",
+      "title": "For Apple AirPods Pro 1st 2nd Gen Replacement Ear Tips Buds Earbuds Tips",
+      "price": {
+        "value": "27.12",
+        "currency": "ILS",
+        "convertedFromValue": "6.69",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/55MAAOSwB9xkuusI/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/55MAAOSwB9xkuusI/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "57.48",
+            "currency": "ILS",
+            "convertedFromValue": "14.18",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-16T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|257787517643|0",
+      "legacyItemId": "257787517643",
+      "title": "ESR for AirPods Pro 2/1 Case Compatible with MagSafe Black Compatible with",
+      "price": {
+        "value": "121.64",
+        "currency": "ILS",
+        "convertedFromValue": "30.01",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/-qoAAeSwQ-FqxkDr/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/-qoAAeSwQ-FqxkDr/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "60.72",
+            "currency": "ILS",
+            "convertedFromValue": "14.98",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|236424345171|536971209525",
+      "legacyItemId": "236424345171",
+      "title": "Real Carbon Fiber Case For Apple AirPods Pro 3 (2025) Earphones Shockproof Cover",
+      "price": {
+        "value": "76.42",
+        "currency": "ILS",
+        "convertedFromValue": "24.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/M68AAeSwS~5pAvpf/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/M68AAeSwS~5pAvpf/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.28",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|317829182211|0",
+      "legacyItemId": "317829182211",
+      "title": "Apple AirPods Pro 2nd Generation with MagSafe Wireless Charging Case (USB‑C)...",
+      "price": {
+        "value": "367.55",
+        "currency": "ILS",
+        "convertedFromValue": "120.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/jDIAAeSwGJZpf5FJ/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/jDIAAeSwGJZpf5FJ/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "90.66",
+            "currency": "ILS",
+            "convertedFromValue": "29.60",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|800715445270|0",
+      "legacyItemId": "800715445270",
+      "title": "Apple AirPods Pro 2nd Generation with MagSafe Wireless Charging Case (USB‑C)...",
+      "price": {
+        "value": "392.05",
+        "currency": "ILS",
+        "convertedFromValue": "128.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/-LcAAeSwGRBqttxs/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/-LcAAeSwGRBqttxs/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "90.66",
+            "currency": "ILS",
+            "convertedFromValue": "29.60",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|117344110062|0",
+      "legacyItemId": "117344110062",
+      "title": "Apple AirPods Pro (1st Gen 2021) Magsafe White InEar Headphones BRAND NEW SEALED",
+      "price": {
+        "value": "395.68",
+        "currency": "ILS",
+        "convertedFromValue": "185.00",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/~TcAAeSwoUJqdIMU/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/~TcAAeSwoUJqdIMU/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "237.41",
+            "currency": "ILS",
+            "convertedFromValue": "111.00",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|318677560612|0",
+      "legacyItemId": "318677560612",
+      "title": "Delone MFi Certified Wireless Earbuds Headphones For Apple iPhone AIR PODS Pro 3",
+      "price": {
+        "value": "101.30",
+        "currency": "ILS",
+        "convertedFromValue": "24.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/988AAeSw7sJqTNQi/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/988AAeSw7sJqTNQi/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "60.03",
+            "currency": "ILS",
+            "convertedFromValue": "14.81",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|236446302011|536990534112",
+      "legacyItemId": "236446302011",
+      "title": "Real Carbon Fiber Case For Apple AirPods Pro 3 (2025) Earphones Shockproof Cover",
+      "price": {
+        "value": "74.91",
+        "currency": "ILS",
+        "convertedFromValue": "18.48",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/M68AAeSwS~5pAvpf/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/M68AAeSwS~5pAvpf/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.36",
+            "currency": "ILS",
+            "convertedFromValue": "3.79",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|177438644004|477100625274",
+      "legacyItemId": "177438644004",
+      "title": "SUPCASE Shockproof Waterproof Cover for AirPods Pro 3 (3rd Gen) 2025 Case IP68",
+      "price": {
+        "value": "110.23",
+        "currency": "ILS",
+        "convertedFromValue": "35.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/x0cAAeSwxtFo1Sfp/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/x0cAAeSwxtFo1Sfp/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "74.67",
+            "currency": "ILS",
+            "convertedFromValue": "24.38",
+            "convertedFromCurrency": "USD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|406396980434|676718711113",
+      "legacyItemId": "406396980434",
+      "title": "Real Carbon Fiber Case For Apple AirPods Pro 3 (2025) Bluetooth Earphone Cover",
+      "price": {
+        "value": "84.70",
+        "currency": "ILS",
+        "convertedFromValue": "24.69",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/JL4AAeSwP2JpAvph/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/JL4AAeSwP2JpAvph/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "12.01",
+            "currency": "ILS",
+            "convertedFromValue": "3.50",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-11-08T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Neu",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|306855673732|606734866047",
+      "legacyItemId": "306855673732",
+      "title": "For Apple AirPods Pro 3 4 Genuine Alcan-tara Leather Case Suede Anti-drop Cover",
+      "price": {
+        "value": "122.49",
+        "currency": "ILS",
+        "convertedFromValue": "39.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/eD8AAeSw-YFpzVfZ/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/eD8AAeSw-YFpzVfZ/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "9.16",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "USD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|186317103884|0",
+      "legacyItemId": "186317103884",
+      "title": "Replacement ear tips for Apple AirPods Pro 1st/2nd generation earbuds foam x12",
+      "price": {
+        "value": "31.62",
+        "currency": "ILS",
+        "convertedFromValue": "7.80",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/-uwAAOSwPNZl11tg/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/-uwAAOSwPNZl11tg/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "57.60",
+            "currency": "ILS",
+            "convertedFromValue": "14.21",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|820085638608|626918971546",
+      "legacyItemId": "820085638608",
+      "title": "2pcs Bluetooth Earphone Clips Holder For AirPods1/2/3/Pro Wireless Headphone",
+      "price": {
+        "value": "12.68",
+        "currency": "ILS",
+        "convertedFromValue": "5.93",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/98YAAeSw2G9qmmXE/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/98YAAeSw2G9qmmXE/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.67",
+            "currency": "ILS",
+            "convertedFromValue": "4.99",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|406450844571|0",
+      "legacyItemId": "406450844571",
+      "title": "Apple AirPods Pro 2, White, Headphones, Audio",
+      "price": {
+        "value": "427.66",
+        "currency": "ILS",
+        "convertedFromValue": "199.95",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/m5cAAeSwMA5pMjuF/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/m5cAAeSwMA5pMjuF/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "83.88",
+            "currency": "ILS",
+            "convertedFromValue": "39.22",
+            "convertedFromCurrency": "AUD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-03T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|407262383154|0",
+      "legacyItemId": "407262383154",
+      "title": "Apple AirPods Pro 2nd Generation Earbuds with MagSafe Charging Case USB-C, White",
+      "price": {
+        "value": "559.33",
+        "currency": "ILS",
+        "convertedFromValue": "137.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ej0AAeSwbzBqwDg~/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ej0AAeSwbzBqwDg~/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "465.42",
+            "currency": "ILS",
+            "convertedFromValue": "114.82",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    }
+  ]
+}

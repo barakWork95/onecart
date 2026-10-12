@@ -232,7 +232,7 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
 
   const outboundLinks: Record<string, string> = {};
   // "Won't ship to Israel" listings get signed links too: the shopper may still want to look.
-  for (const offer of response.groups.flatMap((g) => [...g.offers, ...g.unavailable])) {
+  for (const offer of response.groups.flatMap((g) => [...g.listings, ...g.unavailable])) {
     outboundLinks[offer.id] = linkCodec.encode({
       id: offer.id,
       provider: offer.provider,
@@ -271,7 +271,7 @@ export async function offersFor(searchText: string): Promise<UnifiedProduct[] | 
   const searched = response.providers.filter((p) => p.status !== "skipped");
   if (searched.length > 0 && searched.every((p) => ["timeout", "error", "circuit_open"].includes(p.status)))
     return null;
-  return response.groups.flatMap((g) => [...g.offers]);
+  return response.groups.flatMap((g) => [...g.listings]);
 }
 
 /** The product with this id in today's results for `searchText`, or null. */

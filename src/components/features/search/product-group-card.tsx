@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CompareSheet } from "@/components/features/search/compare-sheet";
 import { ProductImage } from "@/components/features/search/product-image";
 import {
+  comparisonScope,
   discountPercent,
   outboundHref,
   storeComparison,
@@ -49,10 +50,12 @@ function StoreComparisonNote({ group }: { group: ProductGroup }) {
         <span className="sr-only">:</span>
       </span>{" "}
       <span className="block text-muted-foreground">{comparison.prices}</span>{" "}
-      <span className="block font-semibold text-success">
-        <span className="sr-only">— </span>
-        {comparison.bestDeal}
-      </span>
+      {comparison.bestDeal && (
+        <span className="block font-semibold text-success">
+          <span className="sr-only">— </span>
+          {comparison.bestDeal}
+        </span>
+      )}
     </p>
   );
 }
@@ -119,13 +122,13 @@ export function ProductGroupCard({
 
       <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
         <p className="truncate text-xs text-muted-foreground">
-          {storeCount > 1 ? (
-            <span className="font-medium text-foreground/80">
-              {matchLabel} · {storeCount} stores
-            </span>
-          ) : (
-            <span className="font-medium text-foreground/80">{storeName}</span>
-          )}
+          <span className="font-medium text-foreground/80">
+            {storeCount > 1
+              ? `${matchLabel} · ${storeCount} stores`
+              : group.listings.length > 1
+                ? `${storeName} · ${group.listings.length} listings`
+                : storeName}
+          </span>
         </p>
         <h2
           id={`${group.id}-title`}
@@ -157,7 +160,7 @@ export function ProductGroupCard({
         </div>
 
         <div className="pt-2 [&>*]:w-full">
-          {storeCount > 1 || group.unavailable.length > 0 ? (
+          {comparisonScope(group).hasSheet ? (
             <CompareSheet group={group} links={links} />
           ) : (
             <a

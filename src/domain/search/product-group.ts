@@ -1,6 +1,9 @@
 import {
+  blocksGrouping,
   DEFAULT_MATCHING_POLICY,
+  findConflict,
   matchProducts,
+  matchSameStore,
   matchTitles,
   toMatchCandidate,
   type MatchBasis,
@@ -18,7 +21,9 @@ export type Offers = readonly [UnifiedProduct, ...UnifiedProduct[]];
 
 /**
  * The same product found in one or more stores — one card in the results list
- * and one row per store in the compare sheet. At most one offer per store.
+ * and one row per store in the compare sheet. A store can have several
+ * listings of it (sellers, colours); `offers` holds each store's cheapest and
+ * `listings` all of them.
  */
 export interface ProductGroup {
   /** Stable for identical input: derived from the cheapest offer's id. */
@@ -26,7 +31,10 @@ export interface ProductGroup {
   /** From the offer with the most reviews (usually the cleanest title), else the cheapest. */
   readonly title: string;
   readonly imageUrl: string | null;
+  /** Each store's cheapest listing, cheapest first: the per-store comparison. */
   readonly offers: Offers;
+  /** Every listing of the product, from every store, cheapest first. */
+  readonly listings: Offers;
   readonly priceRange: { readonly min: Money; readonly max: Money };
   /** Review-count-weighted average across offers that have ratings. */
   readonly rating: ProductRating | null;
@@ -82,36 +90,105 @@ function weaker(a: MatchBasis | null, b: MatchBasis): MatchBasis {
   return a === null || BASIS_STRENGTH[b] < BASIS_STRENGTH[a] ? b : a;
 }
 
+/** A listing's positive match with a group member: across stores, or a second listing at one store. */
+function memberMatch(candidate: MatchCandidate, member: MatchCandidate, policy: MatchingPolicy) {
+  return candidate.product.provider === member.product.provider
+    ? matchSameStore(candidate, member, policy)
+    : matchProducts(candidate, member, policy);
+}
+
 /**
- * Best placement for a candidate: a cluster with no offer from the same store
- * where the candidate matches EVERY member (complete linkage, so A~B and B~C
- * can't chain A and C together). Highest minimum score wins.
+ * Best placement for a candidate. Two rules keep groups precise:
+ * - nothing in the group may conflict with it (a different model, size,
+ *   generation, brand, condition, or price far off), so A~B and B~C can't
+ *   chain an A and C that disagree;
+ * - it must positively match more than half the members, and every member
+ *   when the match rests on title similarity alone. Sellers word one product
+ *   many ways, so a 17-listing eBay group needn't match each title.
+ * Most matched members, then the highest minimum score, wins.
  */
 function findCluster(
   candidate: MatchCandidate,
   clusters: readonly Cluster[],
   policy: MatchingPolicy,
 ): { cluster: Cluster; basis: MatchBasis } | null {
-  let best: { cluster: Cluster; basis: MatchBasis; score: number } | null = null;
+  let best: { cluster: Cluster; basis: MatchBasis; share: number; score: number } | null = null;
 
   for (const cluster of clusters) {
     let minScore = Number.POSITIVE_INFINITY;
     let basis: MatchBasis | null = null;
-    let matchesAll = true;
+    let matched = 0;
+    let blocked = false;
 
     for (const member of cluster.members) {
-      const match = matchProducts(candidate, member, policy);
-      if (!match) {
-        matchesAll = false;
+      if (blocksGrouping(candidate, member, policy)) {
+        blocked = true;
         break;
       }
+      const match = memberMatch(candidate, member, policy);
+      if (!match) continue;
+      matched++;
       minScore = Math.min(minScore, match.score);
       basis = weaker(basis, match.basis);
     }
 
-    if (matchesAll && basis && (!best || minScore > best.score)) best = { cluster, basis, score: minScore };
+    const size = cluster.members.length;
+    const enough = basis === "title_similarity" ? matched === size : matched * 2 > size;
+    const share = matched / size;
+    if (blocked || !basis || !enough) continue;
+    if (!best || share > best.share || (share === best.share && minScore > best.score))
+      best = { cluster, basis, share, score: minScore };
   }
   return best;
+}
+
+/**
+ * Joins clusters that placement order kept apart: one listing at a time, a
+ * seller's odd wording can start a second cluster of the same product. Two
+ * clusters merge when no pair across them conflicts and more than half the
+ * pairs match (every pair, when only titles match).
+ */
+function mergeClusters(clusters: Cluster[], policy: MatchingPolicy): Cluster[] {
+  let merged = true;
+  while (merged) {
+    merged = false;
+    outer: for (let i = 0; i < clusters.length; i++) {
+      for (let j = i + 1; j < clusters.length; j++) {
+        const a = clusters[i];
+        const b = clusters[j];
+        if (!a || !b) continue;
+        let pairs = 0;
+        let matched = 0;
+        let basis: MatchBasis | null = null;
+        let blocked = false;
+        for (const x of a.members) {
+          for (const y of b.members) {
+            pairs++;
+            if (blocksGrouping(x, y, policy)) {
+              blocked = true;
+              break;
+            }
+            const match = memberMatch(x, y, policy);
+            if (match) {
+              matched++;
+              basis = weaker(basis, match.basis);
+            }
+          }
+          if (blocked) break;
+        }
+        const enough = basis === "title_similarity" ? matched === pairs : matched * 2 > pairs;
+        if (blocked || !basis || !enough) continue;
+        clusters[i] = {
+          members: [...a.members, ...b.members],
+          weakestBasis: weaker(weaker(a.weakestBasis, basis), b.weakestBasis ?? basis),
+        };
+        clusters.splice(j, 1);
+        merged = true;
+        break outer;
+      }
+    }
+  }
+  return clusters;
 }
 
 function aggregateRating(offers: Offers): ProductRating | null {
@@ -127,7 +204,9 @@ function aggregateRating(offers: Offers): ProductRating | null {
 
 /**
  * For each store missing from the group, the unavailable listing that best
- * matches every offer in it (complete linkage, as for offers).
+ * matches it: no conflict with any listing in the group (model, generation,
+ * condition…) and a title match with at least one. It only adds a "won't ship
+ * to Israel" note, so one seller's wording is enough once nothing disagrees.
  */
 function unavailableFor(
   cluster: Cluster,
@@ -138,14 +217,17 @@ function unavailableFor(
   const best = new Map<string, { listing: UnavailableListing; score: number }>();
   for (const { listing, tokens } of listings) {
     if (stores.has(listing.provider)) continue;
-    let minScore = Number.POSITIVE_INFINITY;
-    for (const member of cluster.members) {
-      const match = matchTitles(member.tokens, tokens, policy);
-      minScore = Math.min(minScore, match ? match.score : Number.NEGATIVE_INFINITY);
-    }
+    if (
+      cluster.members.some(
+        (m) => m.tokens.isAccessory !== tokens.isAccessory || findConflict(m.tokens, tokens),
+      )
+    )
+      continue;
+    const scores = cluster.members.flatMap((m) => matchTitles(m.tokens, tokens, policy)?.score ?? []);
+    if (scores.length === 0) continue;
+    const score = scores.reduce((sum, x) => sum + x, 0) / scores.length;
     const current = best.get(listing.provider);
-    if (minScore > 0 && (!current || minScore > current.score))
-      best.set(listing.provider, { listing, score: minScore });
+    if (!current || score > current.score) best.set(listing.provider, { listing, score });
   }
   return [...best.values()].map((b) => b.listing).sort((a, b) => a.provider.localeCompare(b.provider));
 }
@@ -158,30 +240,33 @@ function toGroup(
   const [first, ...rest] = cluster.members.map((m) => m.product).sort(compareOffers);
   // Clusters are created with one member and only grow.
   if (!first) throw new Error("Invariant violated: empty product cluster");
-  const offers: Offers = [first, ...rest];
-  const last = offers[offers.length - 1] ?? first;
+  const listings: Offers = [first, ...rest];
+  const stores = new Set([first.provider]);
+  const offers: Offers = [first, ...rest.filter((o) => !stores.has(o.provider) && stores.add(o.provider))];
+  const last = listings[listings.length - 1] ?? first;
 
-  const byReviews = [...offers].sort((a, b) => (b.rating?.count ?? 0) - (a.rating?.count ?? 0));
+  const byReviews = [...listings].sort((a, b) => (b.rating?.count ?? 0) - (a.rating?.count ?? 0));
   const titleSource = (byReviews[0]?.rating?.count ?? 0) > 0 ? (byReviews[0] ?? first) : first;
 
   return {
     id: `grp:${first.id}`,
     title: titleSource.title,
-    imageUrl: titleSource.imageUrl ?? offers.find((o) => o.imageUrl)?.imageUrl ?? null,
+    imageUrl: titleSource.imageUrl ?? listings.find((o) => o.imageUrl)?.imageUrl ?? null,
     offers,
+    listings,
     priceRange: { min: first.price.total, max: last.price.total },
-    rating: aggregateRating(offers),
-    matchedBy: cluster.weakestBasis ?? "single",
+    rating: aggregateRating(listings),
+    matchedBy: offers.length > 1 ? (cluster.weakestBasis ?? "single") : "single",
     unavailable,
-    onIntent: offers.some((o) => classes?.get(o.id)?.onIntent ?? true),
+    onIntent: listings.some((o) => classes?.get(o.id)?.onIntent ?? true),
     isAccessory: cluster.members.every((m) => m.tokens.isAccessory),
   };
 }
 
 /**
- * Groups the same product across stores. Products are placed cheapest-first,
- * so when one store lists the item twice, the cheaper listing joins the group
- * and the other stays as its own card. Pure and deterministic.
+ * Groups the same product across stores, and its several listings within a
+ * store, into one card. Products are placed cheapest-first. Pure and
+ * deterministic.
  */
 export function groupProducts(
   products: readonly UnifiedProduct[],
@@ -200,6 +285,7 @@ export function groupProducts(
       clusters.push({ members: [candidate], weakestBasis: null });
     }
   }
+  mergeClusters(clusters, policy);
   // Accessories never pick up a "doesn't ship" note: it would describe the product they fit.
   const listings = (options.unavailable ?? [])
     .map((listing) => ({ listing, tokens: tokenizeTitle(listing.title) }))

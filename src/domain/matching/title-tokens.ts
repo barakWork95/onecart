@@ -127,6 +127,15 @@ const STRONG_ACCESSORY_WORDS = new Set([
   "repair",
   "guide",
   "manual",
+  "cookbook",
+  "cookbooks",
+  "accessory",
+  "accessories",
+  // "Right Single Earbud", "(L) or (R) … Left": one side of a pair is a spare part.
+  "left",
+  "right",
+  "paperback",
+  "hardcover",
 ]);
 
 /** Words introducing the product an accessory is made for ("for Sony …", "fits JBL Flip 6"). */
@@ -136,7 +145,8 @@ const MADE_FOR_WORDS = new Set(["for", "fits", "fit", "compatible"]);
  * Words after which a title stops describing the item and starts listing what's
  * in the box ("Headphones with Charging Cable" is headphones, not a cable).
  */
-const INCLUDES_WORDS = new Set(["with", "w", "includes", "including", "plus", "featuring", "and"]);
+// Not "plus": it names product lines ("Duo Plus", "iPhone 15 Plus").
+const INCLUDES_WORDS = new Set(["with", "w", "includes", "including", "featuring", "and"]);
 
 /**
  * Known brands, so two listings naming different brands never match. Multi-word
@@ -317,6 +327,11 @@ export interface TitleTokens {
   readonly variants: ReadonlyMap<string, ReadonlySet<string>>;
   /** Canonical brand names found in the title. */
   readonly brands: ReadonlySet<string>;
+  /**
+   * Words that only name a brand ("sony", "instant" + "pot"). A product line
+   * that implies its brand ("airpods", "galaxy") is not one: it identifies the item.
+   */
+  readonly brandWords: ReadonlySet<string>;
   /** Condition or packaging that changes the deal: "refurbished", "used", "bundle". */
   readonly qualifiers: ReadonlySet<string>;
   /**
@@ -383,25 +398,26 @@ export function tokenizeTitle(title: string): TitleTokens {
   const variants = new Map<string, Set<string>>();
   const brands = new Set<string>();
   const qualifiers = new Set<string>();
+  const brandWords = new Set<string>();
   let weak = false;
   let strong = false;
   let inHead = true;
   const isModelLike = (t: string | undefined) => !!t && /\d/.test(t) && /[a-z]/.test(t);
 
   raw.forEach((token, i) => {
-    const pair = i + 1 < raw.length ? brandOf(`${token}${raw[i + 1]}`) : null;
+    const next = raw[i + 1];
+    const pair = next ? brandOf(`${token}${next}`) : null;
     const brand = pair ?? brandOf(token);
     if (brand) brands.add(brand);
+    if (pair && next) brandWords.add(token).add(next);
+    else if (BRANDS.has(token)) brandWords.add(token);
 
     // An accessory word only counts in the item's own description, before "with …".
     if (INCLUDES_WORDS.has(token) && i > 0) inHead = false;
     if (inHead && STRONG_ACCESSORY_WORDS.has(token)) strong = true;
     else if (inHead && ACCESSORY_WORDS.has(token)) weak = true;
     // "Earpads for Sony WH-1000XM5", "fits JBL Flip 6", "For WH-1000XM5": made for another product.
-    if (MADE_FOR_WORDS.has(token)) {
-      const next = raw[i + 1];
-      if ((next && brandOf(next)) || isModelLike(next)) strong = true;
-    }
+    if (MADE_FOR_WORDS.has(token) && ((next && brandOf(next)) || isModelLike(next))) strong = true;
 
     const qualifier = QUALIFIERS[token];
     if (qualifier) qualifiers.add(qualifier);
@@ -429,6 +445,7 @@ export function tokenizeTitle(title: string): TitleTokens {
     numbers,
     variants,
     brands,
+    brandWords,
     qualifiers,
     accessorySignal,
     isAccessory: accessorySignal !== "none",
@@ -462,16 +479,45 @@ export function sharesAny(a: ReadonlySet<string>, b: ReadonlySet<string>): boole
 }
 
 /**
+ * Letter suffixes that name a different product tier, not a colour: an
+ * "RTX 4090 Ti" is not an "RTX 4090".
+ */
+const TIER_SUFFIXES = new Set([
+  "ti",
+  "xt",
+  "xtx",
+  "se",
+  "max",
+  "pro",
+  "plus",
+  "ultra",
+  "mini",
+  "lite",
+  "super",
+]);
+
+/** "wh1000xm5sa" → base "wh1000xm5", suffix "sa"; null when there's no short letter suffix. */
+function splitColourSuffix(code: string): { base: string; suffix: string } | null {
+  const m = /^(.*\d)([a-z]{1,3})$/.exec(code);
+  if (!m?.[1] || !m[2] || m[1].length < 6 || TIER_SUFFIXES.has(m[2])) return null;
+  return { base: m[1], suffix: m[2] };
+}
+
+/**
  * Model codes agree when they're equal, when one ends with the other
  * ("wh1000xm5" and "1000xm5"; the shorter needs four characters so "m5" can't
- * ride on it), or when the longer adds a colour suffix of up to three letters
- * ("wh1000xm5sa", "wh1000xm5bnt": Sony's silver and midnight blue).
+ * ride on it), or when they differ only by a colour suffix of up to three
+ * letters on a base of six or more ("wh1000xm5", "wh1000xm5sa",
+ * "wh1000xm5bnt": Sony's black, silver and midnight blue). Tier suffixes
+ * ("ti", "pro", "max"…) never count as colours.
  */
 function sameModel(x: string, y: string): boolean {
+  if (x === y) return true;
   const [short, long] = x.length <= y.length ? [x, y] : [y, x];
-  if (short === long) return true;
   if (short.length >= 4 && long.endsWith(short)) return true;
-  return short.length >= 6 && long.startsWith(short) && /^[a-z]{1,3}$/.test(long.slice(short.length));
+  const baseOf = (code: string) => splitColourSuffix(code)?.base ?? (code.length >= 6 ? code : null);
+  const bx = baseOf(x);
+  return bx !== null && bx === baseOf(y);
 }
 
 export function sharesModel(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {

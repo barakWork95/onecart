@@ -228,8 +228,9 @@ SearchBar (client) → /search?q=… (Server Component)
   - Ties go to groups found in more stores, then to the lower price.
   - Price, delivery and rating are opt-in sorts. Tapping an active chip again clears it back to
     relevance, which has no `sort` URL param.
-- **Query intent (`src/domain/search/search-intent.ts`).** A query that names one product (a model
-  code, or a brand + series number: "sony wh-1000xm5", "jbl flip 6") splits results into tiers,
+- **Query intent (`src/domain/search/search-intent.ts`).** A query that names a product (a model
+  code, or a brand plus words naming the line: "sony wh-1000xm5", "jbl flip 6", "airpods pro",
+  "instant pot duo") splits results into tiers,
   under every sort: (0) listings naming that product, (1) related products, (2) accessories and
   parts. Within tier 0, best match puts cross-store comparisons first. Category queries
   ("wireless headphones") keep the stores' order. If the query asks for an accessory, the products
@@ -277,9 +278,22 @@ SearchBar (client) → /search?q=… (Server Component)
   queries; `recorded-results.test.ts` pins exactly which groups form. The previous matcher formed
   22 cross-store groups there, ~20 of them wrong. Re-record when tuning, and check every new group
   by hand.
-- Groups use complete linkage: a new offer must match **every** offer already in the group. A
-  group has at most one offer per store. Add a test case to `product-matcher.test.ts` for every
-  real mismatch you find.
+- **One card per product, however many sellers.** A group holds every listing of the product
+  (`listings`, cheapest first); `offers` is each store's cheapest, the per-store comparison.
+  - Same-store listings collapse only via `matchSameStore()`: a shared long model code (6+ chars;
+    colour suffixes like `wh1000xm5sa`/`-bnt` count as the same model, tier suffixes `ti`, `pro`,
+    `max`… don't), a shared brand + series number, or near-identical branded titles. Accessories
+    and generic look-alikes never collapse.
+  - Linkage: nothing in the group may conflict with a newcomer (`blocksGrouping`: accessory vs
+    product, price beyond 2.5× across stores or 3× within one, brand/model/variant/series/condition
+    conflict), and it must match more than half the members (all of them when only titles match).
+    A merge pass then joins clusters that placement order split, on the same rules.
+  - The card reads "eBay from ₪902 (18 listings) vs Amazon: no offer to Israel"; the compare sheet
+    has an "All 18 eBay listings" tray under eBay's best offer. A single store with several
+    listings opens a "18 eBay listings" sheet.
+  - Add a test case to `product-matcher.test.ts` for every real mismatch you find. The four
+    recorded live searches in `src/integration/recorded-searches.test.ts` ("sony wh-1000xm5",
+    "jbl flip 6", "airpods pro", "instant pot duo") pin the end-to-end result.
 - `ProductGroup.matchedBy === "title_similarity"` is the weakest grouping. The card labels it
   "Similar item", others "Same item". Grouped cards spell out "Available on N stores: Amazon ₪X vs
   eBay ₪Y — Best deal on …"; single-store cards offer "Find on <other store>", a focused search
