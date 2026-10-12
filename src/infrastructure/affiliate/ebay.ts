@@ -6,8 +6,11 @@ export const EPN_PARAMS = {
   mkcid: "1",
   /** Rotation id for eBay US (ebay.com). */
   mkrid: "711-53200-19255-0",
-  /** Tool id: 10001 = default/API-generated. */
-  toolid: "10001",
+  /**
+   * Tool id 10049 = links generated from the Browse API — what eBay itself puts
+   * in `itemAffiliateWebUrl` for our campaign (verified live 2026-10-12).
+   */
+  toolid: "10049",
 } as const;
 
 const EPN_KEYS = [...Object.keys(EPN_PARAMS), "campid", "customid"];

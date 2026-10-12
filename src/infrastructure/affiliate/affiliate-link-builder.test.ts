@@ -1,6 +1,7 @@
 import { createAffiliateLinkBuilder } from "@/infrastructure/affiliate/affiliate-link-builder";
 import { buildAmazonAffiliateUrl } from "@/infrastructure/affiliate/amazon";
 import { buildEbayAffiliateUrl } from "@/infrastructure/affiliate/ebay";
+import recorded from "./fixtures/ebay-affiliate-urls.recorded.json";
 
 describe("buildAmazonAffiliateUrl", () => {
   it("adds the Associates tag", () => {
@@ -34,7 +35,7 @@ describe("buildEbayAffiliateUrl", () => {
       mkevt: "1",
       mkcid: "1",
       mkrid: "711-53200-19255-0",
-      toolid: "10001",
+      toolid: "10049",
       campid: "5338000000",
     });
   });
@@ -94,4 +95,20 @@ describe("createAffiliateLinkBuilder", () => {
       affiliated: false,
     });
   });
+});
+
+describe("buildEbayAffiliateUrl vs eBay's own affiliate links", () => {
+  // itemAffiliateWebUrl values returned live by the Browse API for our EPN campaign (2026-10-12).
+  const EPN_KEYS = ["mkevt", "mkcid", "mkrid", "campid", "toolid"];
+
+  it.each(recorded)(
+    "matches eBay's tracking parameters for item $legacyItemId",
+    ({ legacyItemId, itemAffiliateWebUrl }) => {
+      const theirs = new URL(itemAffiliateWebUrl);
+      const ours = buildEbayAffiliateUrl(new URL(`https://www.ebay.com/itm/${legacyItemId}`), "5339221493");
+      expect(ours.origin + ours.pathname).toBe(theirs.origin + theirs.pathname);
+      for (const key of EPN_KEYS)
+        expect([key, ours.searchParams.get(key)]).toEqual([key, theirs.searchParams.get(key)]);
+    },
+  );
 });
