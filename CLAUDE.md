@@ -455,6 +455,10 @@ Example: adding `shein`.
 - `OUTBOUND_LINK_SECRET` (at least 32 chars, the same on every instance) is **required in
   production**, and the app refuses to start search without it. Dev and demo fall back to a
   per-process key. Rotating it breaks `/go` links in pages that are already open.
+- eBay credentials: `EBAY_APP_ID` + `EBAY_CERT_ID` (the portal's names) or `EBAY_CLIENT_ID` +
+  `EBAY_CLIENT_SECRET`; `ebayCredentials()` reads either. Dev ID isn't needed. A new **Production
+  keyset stays disabled** (OAuth answers `invalid_client`) until the Marketplace Account Deletion
+  notification is set up or an exemption is granted in the developer portal.
 - SerpApi puts the API key in the query string. Never log request URLs from the Amazon adapter.
 
 ## Definition of done

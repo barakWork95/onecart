@@ -34,6 +34,14 @@ const serverEnvSchema = z.object({
   /** eBay Browse API application keys (developer.ebay.com → Application Keys, Production). */
   EBAY_CLIENT_ID: optional(z.string().min(1)),
   EBAY_CLIENT_SECRET: optional(z.string().min(1)),
+  /**
+   * eBay's developer-portal names for the same credentials: App ID = OAuth
+   * client id, Cert ID = client secret. Either naming works. Dev ID is not
+   * used by the client-credentials flow; accepted so a pasted set validates.
+   */
+  EBAY_APP_ID: optional(z.string().min(1)),
+  EBAY_CERT_ID: optional(z.string().min(1)),
+  EBAY_DEV_ID: optional(z.string().min(1)),
   SEARCHAPI_API_KEY: optional(z.string().min(1)),
 
   // Cache
@@ -67,6 +75,13 @@ const serverEnvSchema = z.object({
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
+
+/** eBay OAuth client credentials under either naming, or null when not configured. */
+export function ebayCredentials(config: ServerEnv): { clientId: string; clientSecret: string } | null {
+  const clientId = config.EBAY_CLIENT_ID ?? config.EBAY_APP_ID;
+  const clientSecret = config.EBAY_CLIENT_SECRET ?? config.EBAY_CERT_ID;
+  return clientId && clientSecret ? { clientId, clientSecret } : null;
+}
 
 let cached: ServerEnv | undefined;
 

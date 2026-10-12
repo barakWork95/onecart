@@ -14,7 +14,7 @@ import {
 } from "@/application/search/build-search-query";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
-import { env } from "@/config/env";
+import { ebayCredentials, env } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductSearchProvider } from "@/domain/search/product-search-provider";
@@ -101,13 +101,11 @@ function buildServices(): Services {
         }),
       );
     }
-    if (config.EBAY_CLIENT_ID && config.EBAY_CLIENT_SECRET) {
+    const ebay = ebayCredentials(config);
+    if (ebay) {
       providers.push(
         createEbayProvider({
-          tokens: createEbayTokenProvider({
-            clientId: config.EBAY_CLIENT_ID,
-            clientSecret: config.EBAY_CLIENT_SECRET,
-          }),
+          tokens: createEbayTokenProvider(ebay),
           importPolicy: ISRAEL_IMPORT_POLICY,
           getFxRates,
           ...(config.AFFILIATE_EBAY_CAMPAIGN_ID

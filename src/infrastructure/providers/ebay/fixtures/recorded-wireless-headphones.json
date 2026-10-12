@@ -1,0 +1,758 @@
+{
+  "total": 41605,
+  "limit": 50,
+  "itemSummaries": [
+    {
+      "itemId": "v1|389601324141|656912745871",
+      "legacyItemId": "389601324141",
+      "title": "Wireless Over Ear Headphones, Foldable Lightweight Headset, Built-in Mic Travel",
+      "price": {
+        "value": "87.61",
+        "currency": "ILS",
+        "convertedFromValue": "40.78",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/kP4AAeSwLlNqHPYg/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-21T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|198533036100|0",
+      "legacyItemId": "198533036100",
+      "title": "Pro Wireless Bluetooth Earbuds, Active Noise Cancellation, True Wireless Stereo,",
+      "price": {
+        "value": "294.47",
+        "currency": "ILS",
+        "convertedFromValue": "96.14",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/EYAAAeSw9ABqaiOE/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "76.57",
+            "currency": "ILS",
+            "convertedFromValue": "25.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "PK"
+      }
+    },
+    {
+      "itemId": "v1|398444883091|0",
+      "legacyItemId": "398444883091",
+      "title": "Bluetooth Earphones 5.0 Charging For Wireless Headphones Touch Control Earbuds",
+      "price": {
+        "value": "32.20",
+        "currency": "ILS",
+        "convertedFromValue": "14.99",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/QJYAAeSw9HBqvDUV/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "21.48",
+            "currency": "ILS",
+            "convertedFromValue": "10.00",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"],
+      "itemLocation": {
+        "country": "CA"
+      }
+    },
+    {
+      "itemId": "v1|286850326874|0",
+      "legacyItemId": "286850326874",
+      "title": "Power Display Earphones Wireless Bluetooth Headphones Noise Cancellation",
+      "price": {
+        "value": "105.25",
+        "currency": "ILS",
+        "convertedFromValue": "48.99",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/uEIAAeSw53No3EL-/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.74",
+            "currency": "ILS",
+            "convertedFromValue": "5.00",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-21T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CA"
+      }
+    },
+    {
+      "itemId": "v1|286552363839|588612499665",
+      "legacyItemId": "286552363839",
+      "title": "Bluetooth 5.0 Headphones Earbuds  Headset Wireless Stereo Neck Earphones",
+      "price": {
+        "value": "42.95",
+        "currency": "ILS",
+        "convertedFromValue": "19.99",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/WpwAAOSwmNNjZVHv/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "19.31",
+            "currency": "ILS",
+            "convertedFromValue": "8.99",
+            "convertedFromCurrency": "CAD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CA"
+      }
+    },
+    {
+      "itemId": "v1|800739887412|0",
+      "legacyItemId": "800739887412",
+      "title": "Wireless Bluetooth Earphones TWS Air In-Ear Pods Buds for Iphone Samsung Android",
+      "price": {
+        "value": "14.59",
+        "currency": "ILS",
+        "convertedFromValue": "3.60",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/3gsAAeSwvmlqvXGF/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.13",
+            "currency": "ILS",
+            "convertedFromValue": "2.50",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-12T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "GB"
+      }
+    },
+    {
+      "itemId": "v1|355223375625|0",
+      "legacyItemId": "355223375625",
+      "title": "MPOW 059 Wireless Bluetooth Headphones Handsfree Foldable Over-Ear Travel",
+      "price": {
+        "value": "74.99",
+        "currency": "ILS",
+        "convertedFromValue": "18.50",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/qP4AAOSwITdlX37F/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "59.10",
+            "currency": "ILS",
+            "convertedFromValue": "14.58",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "GB"
+      }
+    },
+    {
+      "itemId": "v1|126349636399|0",
+      "legacyItemId": "126349636399",
+      "title": "True Wireless Bluetooth Headphones Earphones Earbuds Ear Buds For iPhone Samsung",
+      "price": {
+        "value": "88.20",
+        "currency": "ILS",
+        "convertedFromValue": "21.76",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/AoIAAOSw0Jll3HEN/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "59.59",
+            "currency": "ILS",
+            "convertedFromValue": "14.70",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"],
+      "itemLocation": {
+        "country": "GB"
+      }
+    },
+    {
+      "itemId": "v1|377554102139|0",
+      "legacyItemId": "377554102139",
+      "title": "A6S TWS Bluetooth Wireless Earbuds Headphones with Mic Charging Case Black",
+      "price": {
+        "value": "39.79",
+        "currency": "ILS",
+        "convertedFromValue": "12.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/SRkAAeSw7sxqxz9F/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|860003564979|0",
+      "legacyItemId": "860003564979",
+      "title": "BRAND NEW SEALED Apple AirPods Wireless Bluetooth In-Ear Earbuds w/Charging Case",
+      "price": {
+        "value": "183.77",
+        "currency": "ILS",
+        "convertedFromValue": "60.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Se0AAeSwbItqwMBV/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "marketingPrice": {
+        "originalPrice": {
+          "value": "260.35",
+          "currency": "ILS",
+          "convertedFromValue": "85.00",
+          "convertedFromCurrency": "USD"
+        },
+        "discountPercentage": "29",
+        "discountAmount": {
+          "value": "76.57",
+          "currency": "ILS",
+          "convertedFromValue": "25.00",
+          "convertedFromCurrency": "USD"
+        }
+      },
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"],
+      "itemLocation": {
+        "country": "US"
+      }
+    },
+    {
+      "itemId": "v1|376888177868|645431447542",
+      "legacyItemId": "376888177868",
+      "title": "Over-Ear Wireless Headset Bluetooth 5.2 Earphone Built-in Mic Noise Cancelling",
+      "price": {
+        "value": "40.55",
+        "currency": "ILS",
+        "convertedFromValue": "13.24",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/X5gAAOSwJn1f9~fc/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "30.60",
+            "currency": "ILS",
+            "convertedFromValue": "9.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-22T22:00:00.000Z"
+        }
+      ],
+      "marketingPrice": {
+        "originalPrice": {
+          "value": "43.16",
+          "currency": "ILS",
+          "convertedFromValue": "14.09",
+          "convertedFromCurrency": "USD"
+        },
+        "discountPercentage": "6",
+        "discountAmount": {
+          "value": "2.60",
+          "currency": "ILS",
+          "convertedFromValue": "0.85",
+          "convertedFromCurrency": "USD"
+        },
+        "priceTreatment": "MARKDOWN"
+      },
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|206617300358|0",
+      "legacyItemId": "206617300358",
+      "title": "AirPods Gen 4 New Sealed (ANC)",
+      "price": {
+        "value": "212.69",
+        "currency": "ILS",
+        "convertedFromValue": "99.00",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/PjEAAeSwiOdquq0f/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "64.45",
+            "currency": "ILS",
+            "convertedFromValue": "30.00",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-21T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CA"
+      }
+    },
+    {
+      "itemId": "v1|227557417459|0",
+      "legacyItemId": "227557417459",
+      "title": "TWS Wireless Earbuds Bluetooth 5.2 Waterproof Headset Headphones With Power Bank",
+      "price": {
+        "value": "41.66",
+        "currency": "ILS",
+        "convertedFromValue": "13.60",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/IrwAAeSwlUBqxtY5/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-21T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z"
+        }
+      ],
+      "marketingPrice": {
+        "originalPrice": {
+          "value": "49.01",
+          "currency": "ILS",
+          "convertedFromValue": "16.00",
+          "convertedFromCurrency": "USD"
+        },
+        "discountPercentage": "15",
+        "discountAmount": {
+          "value": "7.35",
+          "currency": "ILS",
+          "convertedFromValue": "2.40",
+          "convertedFromCurrency": "USD"
+        },
+        "priceTreatment": "MARKDOWN"
+      },
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|398365567992|666619871194",
+      "legacyItemId": "398365567992",
+      "title": "Bluetooth 5.4 Ear Hook TWS Wireless Earbuds HiFi Stereo Waterproof Touch LED",
+      "price": {
+        "value": "38.56",
+        "currency": "ILS",
+        "convertedFromValue": "12.59",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/x~QAAeSwNXNqnU~0/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "20.18",
+            "currency": "ILS",
+            "convertedFromValue": "6.59",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-22T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "MA"
+      }
+    },
+    {
+      "itemId": "v1|278377075860|0",
+      "legacyItemId": "278377075860",
+      "title": "Sony WH-CH520 Wireless Bluetooth On-Ear Headphones, Sound, Lightweight Design, U",
+      "price": {
+        "value": "188.04",
+        "currency": "ILS",
+        "convertedFromValue": "87.53",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/uDgAAeSw3i1qtY-j/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.42",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "GB"
+      }
+    },
+    {
+      "itemId": "v1|318593443241|0",
+      "legacyItemId": "318593443241",
+      "title": "Bluetooth Neckband Headphones with Microphone 30-Hour Runtime Magnetic Earbuds",
+      "price": {
+        "value": "137.80",
+        "currency": "ILS",
+        "convertedFromValue": "44.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/d9AAAeSw-1dqX~-M/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "68.55",
+            "currency": "ILS",
+            "convertedFromValue": "22.38",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "US"
+      }
+    },
+    {
+      "itemId": "v1|168273808097|0",
+      "legacyItemId": "168273808097",
+      "title": "For Sony WI-XB400 Headset/Headphones Wireless Extra Bass in-Ear Headphones Black",
+      "price": {
+        "value": "82.67",
+        "currency": "ILS",
+        "convertedFromValue": "26.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/XjYAAeSwAUppypdu/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.31",
+            "currency": "ILS",
+            "convertedFromValue": "5.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-08T22:00:00.000Z"
+        }
+      ],
+      "marketingPrice": {
+        "originalPrice": {
+          "value": "91.86",
+          "currency": "ILS",
+          "convertedFromValue": "29.99",
+          "convertedFromCurrency": "USD"
+        },
+        "discountPercentage": "10",
+        "discountAmount": {
+          "value": "9.19",
+          "currency": "ILS",
+          "convertedFromValue": "3.00",
+          "convertedFromCurrency": "USD"
+        }
+      },
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|354458769322|623859210802",
+      "legacyItemId": "354458769322",
+      "title": "Earpad/Headband for Motorola Pulse Escape Wireless Headphones Cushion Earphone",
+      "price": {
+        "value": "24.36",
+        "currency": "ILS",
+        "convertedFromValue": "6.01",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/maIAAOSwdi9jnZD-/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-08T22:00:00.000Z"
+        }
+      ],
+      "marketingPrice": {
+        "originalPrice": {
+          "value": "25.90",
+          "currency": "ILS",
+          "convertedFromValue": "6.39",
+          "convertedFromCurrency": "GBP"
+        },
+        "discountPercentage": "6",
+        "discountAmount": {
+          "value": "1.54",
+          "currency": "ILS",
+          "convertedFromValue": "0.38",
+          "convertedFromCurrency": "GBP"
+        },
+        "priceTreatment": "MARKDOWN"
+      },
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|318576599293|616927547665",
+      "legacyItemId": "318576599293",
+      "title": "Portable Headset Bluetooth 5.3 Fineblue F580 Wireless Headphones Earbuds Run",
+      "price": {
+        "value": "54.73",
+        "currency": "ILS",
+        "convertedFromValue": "17.87",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/SgsAAeSwdhFqVRO6/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "CN"
+      }
+    },
+    {
+      "itemId": "v1|127292450719|0",
+      "legacyItemId": "127292450719",
+      "title": "SHOKZ OpenRun Pro 2 - Bone Conduction Wireless Sports Headphones - Steel Blue",
+      "price": {
+        "value": "587.55",
+        "currency": "ILS",
+        "convertedFromValue": "144.95",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/PSAAAeSwOTVqx4lc/s-l225.jpg"
+      },
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "76.81",
+            "currency": "ILS",
+            "convertedFromValue": "18.95",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-11T22:00:00.000Z"
+        }
+      ],
+      "marketingPrice": {
+        "originalPrice": {
+          "value": "689.04",
+          "currency": "ILS",
+          "convertedFromValue": "169.99",
+          "convertedFromCurrency": "GBP"
+        },
+        "discountPercentage": "15",
+        "discountAmount": {
+          "value": "101.50",
+          "currency": "ILS",
+          "convertedFromValue": "25.04",
+          "convertedFromCurrency": "GBP"
+        },
+        "priceTreatment": "LIST_PRICE"
+      },
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"],
+      "itemLocation": {
+        "country": "GB"
+      }
+    }
+  ]
+}
