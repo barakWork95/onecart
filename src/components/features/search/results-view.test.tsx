@@ -135,7 +135,11 @@ describe("ResultsView", () => {
   });
 
   it("lays products out as a grid of cards with the price prominent", () => {
-    renderView();
+    const { container } = renderView();
+    const image = container.querySelector("article img");
+    // Full-bleed product photos: fill the square (cover), no letterbox padding.
+    expect(image).toHaveClass("object-cover");
+    expect(image?.className).not.toMatch(/\bobject-contain\b|\bp-\d/);
     expect(screen.getByRole("list", { name: "Products" })).toHaveClass(
       "grid",
       "grid-cols-2",

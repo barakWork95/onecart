@@ -164,8 +164,13 @@ SearchBar (client) → /search?q=… (Server Component)
 
 ### UI conventions
 
-- Design mobile first. The reference mockups are a 400px-wide phone layout with a bottom tab bar
-  (Discover, Compare, Saved, Alerts).
+- Design mobile first.
+  - **Phones:** a bottom tab bar (Discover, Compare, Saved, Alerts).
+  - **From `md` up:** the tab bar is hidden and the same links sit in the header
+    (`DesktopNav`).
+  - Both read `NAV_ITEMS` from `src/components/layout/nav-items.ts`, so add sections there only.
+- Product images are full-bleed `object-cover` in a square, like store listings. Don't add
+  padding or `object-contain` letterboxing.
 - Use brand tokens from `globals.css` (`bg-primary`, `text-brand-navy`, `bg-success` for "VAT
   included" and "free delivery" chips). Do not use ad-hoc hex colors in components.
 - Format prices with `formatMoney` from `src/lib/format.ts`. It uses the `en-IL` locale, so the

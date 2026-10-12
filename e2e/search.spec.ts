@@ -73,6 +73,20 @@ test.describe("search flow", () => {
     ]);
   });
 
+  test("navigation: bottom tab bar on phones, header links on desktop", async ({ page }, testInfo) => {
+    await page.goto("/search?q=earbuds");
+    const headerNav = page.getByRole("banner").getByRole("navigation", { name: "Main", includeHidden: true });
+    const tabBar = page.locator("nav.fixed");
+    if (testInfo.project.name === "mobile") {
+      await expect(tabBar).toBeVisible();
+      await expect(headerNav).toBeHidden();
+    } else {
+      await expect(headerNav).toBeVisible();
+      await expect(tabBar).toBeHidden();
+      await expect(headerNav.getByRole("link", { name: "Compare" })).toHaveAttribute("aria-current", "page");
+    }
+  });
+
   test("results show as a multi-column grid with large square images", async ({ page }) => {
     await page.goto("/search?q=wireless+earbuds");
     await expect(cards(page)).toHaveCount(3);

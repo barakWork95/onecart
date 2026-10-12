@@ -53,16 +53,17 @@ export function ProductGroupCard({
   return (
     <article
       aria-labelledby={`${group.id}-title`}
-      className="flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
+      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="relative aspect-square bg-secondary">
+      <div className="relative aspect-square overflow-hidden bg-muted">
         {group.imageUrl ? (
           <Image
             src={group.imageUrl}
             alt=""
             fill
             sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 50vw"
-            className="object-contain p-4 mix-blend-multiply dark:mix-blend-normal"
+            // Full-bleed like store listings: fill the square, cropping edges rather than letterboxing.
+            className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
           />
         ) : (
           <Headphones className="absolute inset-0 m-auto size-16 text-primary/70" aria-hidden />
