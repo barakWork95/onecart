@@ -128,3 +128,55 @@ describe("groupProducts", () => {
     expect(groupProducts([])).toEqual([]);
   });
 });
+
+describe("groupProducts — stores that won't ship", () => {
+  const amazonListing = (sku: string, title: string) => ({
+    id: `amazon:${sku}`,
+    provider: "amazon" as const,
+    providerProductId: sku,
+    title,
+    productUrl: `https://www.amazon.com/dp/${sku}`,
+    imageUrl: null,
+    reason: "no_offer_to_destination" as const,
+  });
+  const ebayXm5 = makeProduct({
+    provider: "ebay",
+    sku: "e",
+    title: "Sony WH-1000XM5 Noise Canceling Wireless Headphones Black",
+    total: 1000_00,
+  });
+
+  it("attaches the matching listing from a store missing in the group", () => {
+    const black = amazonListing("B1", "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black");
+    const xm6 = amazonListing("B2", "WH-1000XM6 The Best Noise Cancelling Wireless Headphones, Black");
+    const [group] = groupProducts([ebayXm5], { unavailable: [xm6, black] });
+    expect(group?.unavailable).toEqual([black]);
+  });
+
+  it("never attaches to accessories, from accessory listings, or for a store already in the group", () => {
+    const pads = makeProduct({
+      provider: "ebay",
+      sku: "p",
+      title: "Earpads for Sony WH-1000XM5",
+      total: 50_00,
+    });
+    const listingForPads = amazonListing("B3", "Earpads for Sony WH-1000XM5 Black");
+    const amazonOffer = makeProduct({
+      provider: "amazon",
+      sku: "z",
+      title: "Sony WH-1000XM5 Wireless Headphones Black",
+      total: 1100_00,
+    });
+    const groups = groupProducts([pads, ebayXm5, amazonOffer], {
+      unavailable: [listingForPads, amazonListing("B1", "WH-1000XM5 Wireless Headphones Black")],
+    });
+    expect(groups.every((g) => g.unavailable.length === 0)).toBe(true);
+  });
+
+  it("uses the search's accessory decisions for grouping and the group flags", () => {
+    const [group] = groupProducts([ebayXm5], {
+      classes: new Map([[ebayXm5.id, { onIntent: false, isAccessory: true }]]),
+    });
+    expect(group).toMatchObject({ onIntent: false, isAccessory: true });
+  });
+});

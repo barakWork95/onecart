@@ -1,3 +1,4 @@
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProviderId } from "@/domain/shared/provider";
 import type { Result } from "@/domain/shared/result";
@@ -27,6 +28,8 @@ export interface ProviderPage {
   readonly products: readonly UnifiedProduct[];
   /** The store has results beyond this page (worth fetching on "Load more"). */
   readonly hasMore: boolean;
+  /** Items the store lists but won't ship to the destination (only Amazon reports these). */
+  readonly unavailable?: readonly UnavailableListing[];
 }
 
 export interface ProviderSearchOptions {

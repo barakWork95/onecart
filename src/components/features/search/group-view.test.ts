@@ -139,3 +139,31 @@ describe("findMatchesLink", () => {
     ).toBeNull();
   });
 });
+
+describe("storeComparison / findMatchesLink — a store that won't ship", () => {
+  const amazonNoOffer = {
+    id: "amazon:B09XS7JWHH",
+    provider: "amazon" as const,
+    providerProductId: "B09XS7JWHH",
+    title: "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black",
+    productUrl: "https://www.amazon.com/dp/B09XS7JWHH",
+    imageUrl: null,
+    reason: "no_offer_to_destination" as const,
+  };
+  const ebayOnly = () => ({
+    ...group({ provider: "ebay", sku: "e", title: "Sony WH-1000XM5 Headphones Black", total: 1066_00 }),
+    unavailable: [amazonNoOffer],
+  });
+
+  it("compares one priced store with one that has no offer to Israel", () => {
+    expect(storeComparison(ebayOnly())).toEqual({
+      headline: "Compared on 2 stores",
+      prices: "eBay ₪1,066 vs Amazon: no offer to Israel",
+      bestDeal: "Only eBay ships it to Israel",
+    });
+  });
+
+  it("doesn't suggest finding it on a store already known not to ship it", () => {
+    expect(findMatchesLink(ebayOnly(), ["amazon", "ebay"], "headphones")).toBeNull();
+  });
+});

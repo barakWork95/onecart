@@ -106,14 +106,14 @@ describe("Amazon adapter — results", () => {
   it("treats SerpApi's 'no results' message as an empty result, not an error", async () => {
     expect(await setup(async () => json(searchNoResults)).search()).toEqual({
       ok: true,
-      value: { products: [], hasMore: false },
+      value: { products: [], hasMore: false, unavailable: [] },
     });
   });
 
   it("returns an empty list when organic_results is absent", async () => {
     expect(await setup(async () => json({ search_metadata: { status: "Success" } })).search()).toEqual({
       ok: true,
-      value: { products: [], hasMore: false },
+      value: { products: [], hasMore: false, unavailable: [] },
     });
   });
 });
@@ -126,12 +126,29 @@ describe("Amazon adapter — pages and unpriced items", () => {
     purchase_options: [{ no_featured_offers: true }],
   });
 
-  it("treats a page of items with no Israel offer as 'no results', not a broken response", async () => {
-    const body = { organic_results: [unpriced("B0UNPRICE1"), unpriced("B0UNPRICE2")] };
-    expect(await setup(async () => json(body)).search()).toEqual({
-      ok: true,
-      value: { products: [], hasMore: false },
-    });
+  it("treats a page of items with no Israel offer as 'no results', keeping them as unavailable listings", async () => {
+    const body = {
+      organic_results: [
+        unpriced("B0UNPRICE1"),
+        unpriced("B0UNPRICE2"),
+        { asin: "B0RENEWED1", title: "Item (Renewed)" },
+      ],
+    };
+    const result = await setup(async () => json(body)).search();
+    expect(result).toMatchObject({ ok: true, value: { products: [], hasMore: false } });
+    // Only items Amazon flags with no_featured_offers; an unexplained missing price isn't evidence.
+    expect(result.ok && result.value.unavailable).toEqual([
+      {
+        id: "amazon:B0UNPRICE1",
+        provider: "amazon",
+        providerProductId: "B0UNPRICE1",
+        title: "Item B0UNPRICE1",
+        productUrl: "https://www.amazon.com/dp/B0UNPRICE1",
+        imageUrl: null,
+        reason: "no_offer_to_destination",
+      },
+      expect.objectContaining({ id: "amazon:B0UNPRICE2" }),
+    ]);
   });
 
   it("reads priced items from the featured carousels", async () => {

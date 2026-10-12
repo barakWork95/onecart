@@ -294,6 +294,57 @@ describe("ResultsView — wishlist buttons", () => {
   });
 });
 
+describe("ResultsView — a store that won't ship to Israel", () => {
+  const xm5 = makeProduct({
+    provider: "ebay",
+    sku: "x",
+    title: "Sony WH-1000XM5 Headphones Black",
+    total: 1066_00,
+  });
+  const [group] = groupProducts([xm5], {
+    unavailable: [
+      {
+        id: "amazon:B09XS7JWHH",
+        provider: "amazon",
+        providerProductId: "B09XS7JWHH",
+        title: "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black",
+        productUrl: "https://www.amazon.com/dp/B09XS7JWHH",
+        imageUrl: null,
+        reason: "no_offer_to_destination",
+      },
+    ],
+  });
+
+  it("makes a comparison card: eBay's price against Amazon's “no offer”, with a sheet listing both", async () => {
+    const user = userEvent.setup();
+    renderView({
+      response: response({ groups: group ? [group] : [], providers: [ok("amazon"), ok("ebay")] }),
+      outboundLinks: {
+        "ebay:x": "/go/ebay%3Ax?d=x&s=y",
+        "amazon:B09XS7JWHH": "/go/amazon%3AB09XS7JWHH?d=x&s=y",
+      },
+    });
+    expect(screen.getByText(/^Compared on 2 stores/).closest("p")).toHaveTextContent(
+      "Compared on 2 stores: eBay ₪1,066 vs Amazon: no offer to Israel — Only eBay ships it to Israel",
+    );
+    expect(screen.queryByRole("link", { name: /^Find on/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Compare 2 stores for Sony WH-1000XM5/ }));
+    const sheet = await screen.findByRole("dialog");
+    expect(within(sheet).getByRole("listitem", { name: "Amazon: no offer to Israel" })).toHaveTextContent(
+      "Listed, but no offer ships it to Israel",
+    );
+    expect(within(sheet).getByRole("link", { name: "View on Amazon (no offer to Israel)" })).toHaveAttribute(
+      "href",
+      "/go/amazon%3AB09XS7JWHH?d=x&s=y",
+    );
+    expect(within(sheet).getByRole("link", { name: /Go to eBay/ })).toHaveAttribute(
+      "href",
+      "/go/ebay%3Ax?d=x&s=y",
+    );
+  });
+});
+
 describe("nextPageHref", () => {
   it("keeps the query, a non-default sort and every filter", () => {
     const href = nextPageHref(

@@ -57,13 +57,13 @@ export function normalizeQueryText(text: string): string {
  * change what providers return belong here — sort/filters/page size are applied
  * after the cache read, so they must NOT fragment the cache. Store page 1 has
  * no suffix. Bump the version when the cached entry shape, `UnifiedProduct` or
- * the import-tax policy changes (v2: entries carry `hasMore`).
+ * the import-tax policy changes (v3: entries carry `hasMore` and `unavailable`).
  */
 export function searchCacheKey(
   query: Pick<SearchQuery, "normalizedText" | "destination">,
   provider: ProviderId,
   storePage = 1,
 ): string {
-  const base = `search:v2:${query.destination.country}:${provider}:${normalizeQueryText(query.normalizedText)}`;
+  const base = `search:v3:${query.destination.country}:${provider}:${normalizeQueryText(query.normalizedText)}`;
   return storePage > 1 ? `${base}:p${storePage}` : base;
 }

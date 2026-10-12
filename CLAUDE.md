@@ -162,6 +162,10 @@ SearchBar (client) → /search?q=… (Server Component)
 - Files that touch secrets start with `import "server-only"`. Read env only through `env()` from
   `@/config/env`.
 - Use `next/image` for product images, and add each provider's CDN host to `images.remotePatterns`.
+  Product photos go through `ProductImage`: served `unoptimized` straight from the store CDN, which
+  already sizes them (eBay is asked for its 500px rendition). It shows a placeholder when a photo is
+  missing or fails to load. Routing every product photo through the optimizer counted each one
+  against the host's quota.
 
 ### UI conventions
 
@@ -224,6 +228,25 @@ SearchBar (client) → /search?q=… (Server Component)
   - Ties go to groups found in more stores, then to the lower price.
   - Price, delivery and rating are opt-in sorts. Tapping an active chip again clears it back to
     relevance, which has no `sort` URL param.
+- **Query intent (`src/domain/search/search-intent.ts`).** A query that names one product (a model
+  code, or a brand + series number: "sony wh-1000xm5", "jbl flip 6") splits results into tiers,
+  under every sort: (0) listings naming that product, (1) related products, (2) accessories and
+  parts. Within tier 0, best match puts cross-store comparisons first. Category queries
+  ("wireless headphones") keep the stores' order. If the query asks for an accessory, the products
+  themselves drop to tier 2.
+  - `classifyOffers()` decides accessories per search with prices. The tokenizer gives a `strong`
+    signal ("Earpads for Sony …", "Replacement …") or a `weak` one (an accessory word such as
+    "case"). The typical price of clean listings of the named product settles the rest: a `weak`
+    title under 50% of it, or a clean one under 30%, is a part; a "Hard Case … Headphones"
+    listing at headphone prices is the headphones.
+  - This orders results; it never drops them.
+- **Stores that list an item but won't ship it to Israel.** With `shipping_location=IL`, Amazon
+  returns such items with `no_featured_offers` and no price (confirmed for the Sony WH-1000XM5: its
+  product page says it "cannot be shipped to your selected delivery location"). The adapter
+  returns them as `ProviderPage.unavailable` (`UnavailableListing`). They're cached with the page
+  and attached to the matching group (`ProductGroup.unavailable`), never as offers. The card says
+  "Compared on 2 stores: eBay ₪X vs Amazon: no offer to Israel — Only eBay ships it to Israel",
+  and the compare sheet lists the store with a View link. Never invent a price for them.
 - **Never filter store results by the query text.** The store's own search decides what's relevant,
   synonyms included. Locally we only group, filter (by the user's explicit filters) and sort.
 - **A store can set its own deadline** with `ProductSearchProvider.timeoutMs`. Amazon/SerpApi
@@ -319,7 +342,7 @@ SearchBar (client) → /search?q=… (Server Component)
   key; only the store page (what the store returned) is part of it.
 - The TTL comes from `SEARCH_CACHE_TTL_SECONDS` (default 24h). Translation results use their own
   longer-lived keys.
-- Bump the `v2` segment in the key whenever the cached entry or `UnifiedProduct` shape changes.
+- Bump the `v3` segment in the key whenever the cached entry or `UnifiedProduct` shape changes.
   Deeper store pages add a `:pN` suffix.
 - Never cache an error or an empty result from a failed call. Do cache a legitimate "0 results".
 - If Redis is unavailable, log it and continue uncached. A cache outage must not break search.

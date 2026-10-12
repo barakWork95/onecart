@@ -120,8 +120,28 @@ export function matchProducts(
   if (a.product.provider === b.product.provider) return null;
   if (a.tokens.isAccessory !== b.tokens.isAccessory) return null;
   if (priceRatio(a.product, b.product) > policy.maxPriceRatio) return null;
-  if (findConflict(a.tokens, b.tokens)) return null;
+  return matchTitles(a.tokens, b.tokens, policy);
+}
 
+/**
+ * The title rules of `matchProducts` (2 and 4–9), for listings without a
+ * price to compare: a store that lists the item but won't ship it.
+ */
+export function matchTitles(
+  a: TitleTokens,
+  b: TitleTokens,
+  policy: MatchingPolicy = DEFAULT_MATCHING_POLICY,
+): MatchResult | null {
+  if (a.isAccessory !== b.isAccessory) return null;
+  if (findConflict(a, b)) return null;
+  return scoreTitles({ tokens: a }, { tokens: b }, policy);
+}
+
+function scoreTitles(
+  a: { readonly tokens: TitleTokens },
+  b: { readonly tokens: TitleTokens },
+  policy: MatchingPolicy,
+): MatchResult | null {
   const score = diceSimilarity(a.tokens.words, b.tokens.words);
   const similar =
     score >= policy.minScoreWithoutModel ? ({ basis: "title_similarity", score } as const) : null;

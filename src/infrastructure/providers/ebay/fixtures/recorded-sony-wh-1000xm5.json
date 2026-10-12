@@ -1,0 +1,1735 @@
+{
+  "total": 194,
+  "limit": 50,
+  "offset": 0,
+  "itemSummaries": [
+    {
+      "itemId": "v1|335999157703|545543358954",
+      "legacyItemId": "335999157703",
+      "title": "Sony WH-1000XM5 Hinge Swivel Bracket for Earcups - (L) or (R) - Black",
+      "price": {
+        "value": "101.30",
+        "currency": "ILS",
+        "convertedFromValue": "24.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/v5wAAOSwr69oQvXF/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/v5wAAOSwr69oQvXF/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "56.75",
+            "currency": "ILS",
+            "convertedFromValue": "14.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-16T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|940008109582|0",
+      "legacyItemId": "940008109582",
+      "title": "Sony WH-1000XM5 Hard Case Premium Noise Cancelling Wireless Over-Ear Headphones,",
+      "price": {
+        "value": "1743.08",
+        "currency": "ILS",
+        "convertedFromValue": "811.36",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Xp8AAeSwyExqzMoL/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/Xp8AAeSwyExqzMoL/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.42",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|307178506750|0",
+      "legacyItemId": "307178506750",
+      "title": "Sony WH-1000XM5 Noise Cancelling Wireless Headphones - 30 hours battery life - O",
+      "price": {
+        "value": "1399.31",
+        "currency": "ILS",
+        "convertedFromValue": "651.34",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/5Q4AAeSwDW5qp8Mi/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/5Q4AAeSwDW5qp8Mi/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.42",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|920005680832|0",
+      "legacyItemId": "920005680832",
+      "title": "Sony WH-1000XM5 Hard Case Premium Noise Cancelling Wireless Over-Ear Headphones,",
+      "price": {
+        "value": "1366.13",
+        "currency": "ILS",
+        "convertedFromValue": "635.90",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/tcAAAeSwUMVqwbKY/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/tcAAAeSwUMVqwbKY/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.42",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-08T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-24T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|396005944716|664693545852",
+      "legacyItemId": "396005944716",
+      "title": "Replacement Ear Pad Cover For Sony WH1000xm5 1000XM4 1000XM3 1000XM2 Headphones",
+      "price": {
+        "value": "28.20",
+        "currency": "ILS",
+        "convertedFromValue": "8.22",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ra4AAOSwXGpnXFdZ/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ra4AAOSwXGpnXFdZ/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.83",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-23T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Neu",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|277828852428|2560784979676",
+      "legacyItemId": "277828852428",
+      "title": "Replacement Hinge Bracket for Sony WH-1000XM5 | XM5 Eight-Shaped Frame",
+      "price": {
+        "value": "239.11",
+        "currency": "ILS",
+        "convertedFromValue": "58.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/zoYAAeSwYAtpwbp7/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/zoYAAeSwYAtpwbp7/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "64.77",
+            "currency": "ILS",
+            "convertedFromValue": "15.98",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-05T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|256472940805|556640342921",
+      "legacyItemId": "256472940805",
+      "title": "Original Left Right For SONY WH-1000XM5 Headphones Headband Hinge Bracket Part",
+      "price": {
+        "value": "56.02",
+        "currency": "ILS",
+        "convertedFromValue": "18.29",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/NIsAAeSw79Jo7JYx/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/NIsAAeSw79Jo7JYx/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|256805824981|0",
+      "legacyItemId": "256805824981",
+      "title": "1pcs New for SONY WH-1000XM5 XM5 16-Pin Plastic wire Connector Interface Socket",
+      "price": {
+        "value": "24.47",
+        "currency": "ILS",
+        "convertedFromValue": "7.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/6lkAAeSwnNBpqlkj/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/6lkAAeSwnNBpqlkj/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|318898647967|0",
+      "legacyItemId": "318898647967",
+      "title": "Sony WH-1000XM5SA Soft Case Wireless Noise Cancelling Headphones - BRAND NEW",
+      "price": {
+        "value": "659.66",
+        "currency": "ILS",
+        "convertedFromValue": "162.74",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/c3UAAeSwMqpqsO99/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/c3UAAeSwMqpqsO99/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "472.19",
+            "currency": "ILS",
+            "convertedFromValue": "116.49",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|198708666209|0",
+      "legacyItemId": "198708666209",
+      "title": "1pcs New for SONY WH-1000XM5 XM5 16-Pin Plastic wire Connector Interface Socket",
+      "price": {
+        "value": "50.38",
+        "currency": "ILS",
+        "convertedFromValue": "16.45",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Uu0AAeSwUKVqzH59/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/Uu0AAeSwUKVqzH59/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "12.25",
+            "currency": "ILS",
+            "convertedFromValue": "4.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-07T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|374448961809|0",
+      "legacyItemId": "374448961809",
+      "title": "SONY WH-1000XM5 Type C Charging Port complete circuit + Flex Ribbon Original",
+      "price": {
+        "value": "226.95",
+        "currency": "ILS",
+        "convertedFromValue": "55.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/w~0AAOSwnS9juyF6/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/w~0AAOSwnS9juyF6/s-l640.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "442.92",
+            "currency": "ILS",
+            "convertedFromValue": "109.27",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|336067856082|545605778818",
+      "legacyItemId": "336067856082",
+      "title": "Sony WH-1000XM5 Hinge Swivel Bracket for Earcups - (L) or (R) - Blue",
+      "price": {
+        "value": "101.30",
+        "currency": "ILS",
+        "convertedFromValue": "24.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/xjMAAeSw56Rodlh4/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/xjMAAeSw56Rodlh4/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "56.75",
+            "currency": "ILS",
+            "convertedFromValue": "14.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-16T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|277655520296|2560688601306",
+      "legacyItemId": "277655520296",
+      "title": "Speaker Hanger Hinge Part fits Sony WH-1000XM5 - Headset Repair Replacement",
+      "price": {
+        "value": "194.52",
+        "currency": "ILS",
+        "convertedFromValue": "47.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/9DoAAeSwWdhpatEa/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/9DoAAeSwWdhpatEa/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "63.23",
+            "currency": "ILS",
+            "convertedFromValue": "15.60",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-05T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|920008080672|0",
+      "legacyItemId": "920008080672",
+      "title": "Sony WH-1000XM5 Noise Cancelling Wireless Headphones - 30 hours battery life - A",
+      "price": {
+        "value": "1647.16",
+        "currency": "ILS",
+        "convertedFromValue": "766.71",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/PnUAAeSw16hqwq2x/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/PnUAAeSw16hqwq2x/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.42",
+            "currency": "ILS",
+            "convertedFromValue": "2.99",
+            "convertedFromCurrency": "CAD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|147083526306|0",
+      "legacyItemId": "147083526306",
+      "title": "NEW Sony WH-1000XM5SA Wireless Noise Canceling Headphones - Black",
+      "price": {
+        "value": "765.57",
+        "currency": "ILS",
+        "convertedFromValue": "249.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/9G0AAeSwHyJpYU8u/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/9G0AAeSwHyJpYU8u/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "101.54",
+            "currency": "ILS",
+            "convertedFromValue": "33.15",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|306671956018|0",
+      "legacyItemId": "306671956018",
+      "title": "Sony WH-1000XM5 PM Smoky Pink Wireless Noise Cancelling Stereo Headphones",
+      "price": {
+        "value": "802.48",
+        "currency": "ILS",
+        "convertedFromValue": "262.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/wtoAAeSwpWRpSf1Y/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/wtoAAeSwpWRpSf1Y/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "147.02",
+            "currency": "ILS",
+            "convertedFromValue": "48.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|177453243990|0",
+      "legacyItemId": "177453243990",
+      "title": "For SONY WH-1000XM5 Wireless Noise Canceling Bluetooth Headphones Headband Parts",
+      "price": {
+        "value": "137.80",
+        "currency": "ILS",
+        "convertedFromValue": "44.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/tGAAAeSw~7lp~OKk/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/tGAAAeSw~7lp~OKk/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "70.45",
+            "currency": "ILS",
+            "convertedFromValue": "23.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|236959692668|0",
+      "legacyItemId": "236959692668",
+      "title": "New Battery 723741 For Sony WH-1000XM5 WH1000XM5 Wireless Headphones",
+      "price": {
+        "value": "52.47",
+        "currency": "ILS",
+        "convertedFromValue": "24.53",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/DiAAAeSwrFJqYxLi/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/DiAAAeSwrFJqYxLi/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "AUD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|325222794018|0",
+      "legacyItemId": "325222794018",
+      "title": "Sony WH-1000XM5 Wireless Noise-Canceling Over-Ear Headphones Black",
+      "price": {
+        "value": "673.68",
+        "currency": "ILS",
+        "convertedFromValue": "219.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/lggAAOSw629ioQoA/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/lggAAOSw629ioQoA/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "183.62",
+            "currency": "ILS",
+            "convertedFromValue": "59.95",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|356137774785|0",
+      "legacyItemId": "356137774785",
+      "title": "Sony WH-1000XM5 Noise Canceling Wireless Headphones Black",
+      "price": {
+        "value": "1275.39",
+        "currency": "ILS",
+        "convertedFromValue": "416.40",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/mM0AAOSwsLFnCSSi/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/mM0AAOSwsLFnCSSi/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "73.51",
+            "currency": "ILS",
+            "convertedFromValue": "24.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|365754282882|0",
+      "legacyItemId": "365754282882",
+      "title": "New For Sony Headphones WH-1000XM5 XM5 Headband Wire Board Connector Socket",
+      "price": {
+        "value": "27.50",
+        "currency": "ILS",
+        "convertedFromValue": "8.98",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/x-kAAeSwR1JosAj1/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/x-kAAeSwR1JosAj1/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "11.95",
+            "currency": "ILS",
+            "convertedFromValue": "3.90",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-22T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|398401204687|0",
+      "legacyItemId": "398401204687",
+      "title": "New! Sony WH-1000XM5 Premium Noise Cancelling Wireless Headphones, BlackAuto NC",
+      "price": {
+        "value": "673.72",
+        "currency": "ILS",
+        "convertedFromValue": "219.96",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/cI0AAeSwDaxqqsBq/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/cI0AAeSwDaxqqsBq/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "90.66",
+            "currency": "ILS",
+            "convertedFromValue": "29.60",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-28T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-10T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|204447933424|505031238000",
+      "legacyItemId": "204447933424",
+      "title": "Replacement Parts For Sony WH-1000XM5 Noise Reduction Power on Board Headphones",
+      "price": {
+        "value": "203.65",
+        "currency": "ILS",
+        "convertedFromValue": "66.49",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/J5IAAOSwiqdk8ks-/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/J5IAAOSwiqdk8ks-/s-l640.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-02T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|267383947628|567166891387",
+      "legacyItemId": "267383947628",
+      "title": "Original New For SONY WH-1000XM6 XM6 Wireless Noise Headphones Speaker Horn Part",
+      "price": {
+        "value": "88.82",
+        "currency": "ILS",
+        "convertedFromValue": "29.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/J8AAAeSwdIhosXPG/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/J8AAAeSwdIhosXPG/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|318943550483|0",
+      "legacyItemId": "318943550483",
+      "title": "Original for Sony WH-1000XM5 Over-Ear Wireless Bluetooth Noise Cancelling Headse",
+      "price": {
+        "value": "283.74",
+        "currency": "ILS",
+        "convertedFromValue": "70.00",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/frwAAeSwED5qvqHU/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/frwAAeSwED5qvqHU/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "66.31",
+            "currency": "ILS",
+            "convertedFromValue": "16.36",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|267437734171|0",
+      "legacyItemId": "267437734171",
+      "title": "New for SONY WH-1000XM5 XM5 Wire Connector Conne Interface Flex Cable Part",
+      "price": {
+        "value": "22.33",
+        "currency": "ILS",
+        "convertedFromValue": "7.29",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/zWEAAeSwh7do71Gr/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/zWEAAeSwh7do71Gr/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|285476353488|587416997601",
+      "legacyItemId": "285476353488",
+      "title": "Replacement Ear Pads Cushion Cover for SONY WH-1000XM5 Headphones",
+      "price": {
+        "value": "33.66",
+        "currency": "ILS",
+        "convertedFromValue": "10.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/WrIAAOSw6l9lBS4e/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/WrIAAOSw6l9lBS4e/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "7.32",
+            "currency": "ILS",
+            "convertedFromValue": "2.39",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-23T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|389729620167|0",
+      "legacyItemId": "389729620167",
+      "title": "Sony WH-1000XM5 Wireless Noise Canceling Headphones Bluetooth LDAC USB-C Black",
+      "price": {
+        "value": "1065.89",
+        "currency": "ILS",
+        "convertedFromValue": "348.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/jnIAAeSwDAJpsWiH/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/jnIAAeSwDAJpsWiH/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|405956639982|0",
+      "legacyItemId": "405956639982",
+      "title": "Hard Case for Sony WH-CH720N/WH-XB910N/ULT WEAR/MDR-M1/MDR-MV1/WH-1000XM5 JBL",
+      "price": {
+        "value": "64.81",
+        "currency": "ILS",
+        "convertedFromValue": "15.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/I5EAAeSwyuZob93V/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/I5EAAeSwyuZob93V/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "14.15",
+            "currency": "ILS",
+            "convertedFromValue": "3.49",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|146831749542|0",
+      "legacyItemId": "146831749542",
+      "title": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Alexa Built-in Black TI",
+      "price": {
+        "value": "1086.07",
+        "currency": "ILS",
+        "convertedFromValue": "354.59",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/8okAAeSwlsNoxsmW/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/8okAAeSwlsNoxsmW/s-l500.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "73.51",
+            "currency": "ILS",
+            "convertedFromValue": "24.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|146833769059|0",
+      "legacyItemId": "146833769059",
+      "title": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Alexa Silver TI",
+      "price": {
+        "value": "988.40",
+        "currency": "ILS",
+        "convertedFromValue": "322.70",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/hRkAAeSwR~doyBku/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/hRkAAeSwR~doyBku/s-l500.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "73.51",
+            "currency": "ILS",
+            "convertedFromValue": "24.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|306313127424|0",
+      "legacyItemId": "306313127424",
+      "title": "SONY WH-1000XM5-BNT Midnight Blue Wireless Noise Canceling Stereo Headset",
+      "price": {
+        "value": "1121.02",
+        "currency": "ILS",
+        "convertedFromValue": "366.00",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/J0gAAOSwbuNoLY~F/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/J0gAAOSwbuNoLY~F/s-l640.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "147.02",
+            "currency": "ILS",
+            "convertedFromValue": "48.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|266929455840|0",
+      "legacyItemId": "266929455840",
+      "title": "1pcs New for SONY WH-1000XM5 Wireless Noise Headphones Speaker Horn Driver Part",
+      "price": {
+        "value": "74.37",
+        "currency": "ILS",
+        "convertedFromValue": "24.28",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/5iIAAOSwAtxmqhpD/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/5iIAAOSwAtxmqhpD/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|306589183708|0",
+      "legacyItemId": "306589183708",
+      "title": "Original for Sony WH-1000XM5 Over-Ear Wireless Bluetooth Noise Cancelling Headse",
+      "price": {
+        "value": "324.23",
+        "currency": "ILS",
+        "convertedFromValue": "79.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/l9oAAeSwUABpDekI/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/l9oAAeSwUABpDekI/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "67.69",
+            "currency": "ILS",
+            "convertedFromValue": "16.70",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-05T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-18T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|256697670952|557065066531",
+      "legacyItemId": "256697670952",
+      "title": "Left & Right Hanger Bracket Replacement Parts / Headband for Sony WH-1000XM5",
+      "price": {
+        "value": "59.24",
+        "currency": "ILS",
+        "convertedFromValue": "19.34",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/Si0AAOSw6zJnJFfI/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/Si0AAOSw6zJnJFfI/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "12.22",
+            "currency": "ILS",
+            "convertedFromValue": "3.99",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-22T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-29T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|265866722666|0",
+      "legacyItemId": "265866722666",
+      "title": "Sony WH-1000XM5 Premium Silver White New Headphone From Japan",
+      "price": {
+        "value": "1317.02",
+        "currency": "ILS",
+        "convertedFromValue": "429.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/wmwAAOSw2BNjEqYR/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/wmwAAOSw2BNjEqYR/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "0.00",
+            "currency": "ILS",
+            "convertedFromValue": "0.00",
+            "convertedFromCurrency": "USD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|396960840062|0",
+      "legacyItemId": "396960840062",
+      "title": "1200mAh Battery 723741 For Sony WH-1000XM5 WH1000XM5 Wireless Headphones",
+      "price": {
+        "value": "59.87",
+        "currency": "ILS",
+        "convertedFromValue": "27.99",
+        "convertedFromCurrency": "AUD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/SL4AAeSwzw1oneLE/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/SL4AAeSwzw1oneLE/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "10.69",
+            "currency": "ILS",
+            "convertedFromValue": "5.00",
+            "convertedFromCurrency": "AUD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Brand New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|385377845099|653259816740",
+      "legacyItemId": "385377845099",
+      "title": "Ear Pads Foam Cushion Covers for Sony WH-1000XM5 Wireless ANC Headphones Sponge",
+      "price": {
+        "value": "40.72",
+        "currency": "ILS",
+        "convertedFromValue": "11.87",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/r0gAAOSw1S1j1MFs/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/r0gAAOSw1S1j1MFs/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.83",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "EUR"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Neu",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|146831333629|0",
+      "legacyItemId": "146831333629",
+      "title": "Sony WH1000XM5 PM Wireless NC Headphones Alexa Mic Pink VGP Hall of Fame Japan",
+      "price": {
+        "value": "981.08",
+        "currency": "ILS",
+        "convertedFromValue": "320.31",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/FnEAAeSwRyhoxnM9/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/FnEAAeSwRyhoxnM9/s-l500.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "73.51",
+            "currency": "ILS",
+            "convertedFromValue": "24.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|356137777683|0",
+      "legacyItemId": "356137777683",
+      "title": "Sony Wireless Noise Cancelling Stereo Headphones WH-1000XM5 Smoky Pink",
+      "price": {
+        "value": "981.08",
+        "currency": "ILS",
+        "convertedFromValue": "320.31",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/MHcAAOSwjzdoHMZD/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/MHcAAOSwjzdoHMZD/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "73.51",
+            "currency": "ILS",
+            "convertedFromValue": "24.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-04T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|225030636375|523909475547",
+      "legacyItemId": "225030636375",
+      "title": "Sony WH-1000XM5 Wireless Noise-Canceling Over-Ear Headphones Black & Silver",
+      "price": {
+        "value": "673.68",
+        "currency": "ILS",
+        "convertedFromValue": "219.95",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/XRcAAOSwpqJiqPVM/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/XRcAAOSwpqJiqPVM/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "183.62",
+            "currency": "ILS",
+            "convertedFromValue": "59.95",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|175589934802|474939476424",
+      "legacyItemId": "175589934802",
+      "title": "Ear Pads Foam Cushion Covers for Sony WH-1000XM5 Wireless ANC Headphones Sponge",
+      "price": {
+        "value": "36.99",
+        "currency": "ILS",
+        "convertedFromValue": "17.22",
+        "convertedFromCurrency": "CAD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/wqQAAOSw61Jj1MFs/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/wqQAAOSw61Jj1MFs/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "4.15",
+            "currency": "ILS",
+            "convertedFromValue": "1.93",
+            "convertedFromCurrency": "CAD"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|376301830627|644977969911",
+      "legacyItemId": "376301830627",
+      "title": "Genuine Leather Headphones Case For Sony WH-1000XM6 / XM5 Carrying Storage Bag",
+      "price": {
+        "value": "164.12",
+        "currency": "ILS",
+        "convertedFromValue": "40.49",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/rOAAAOSwakZoPgvq/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/rOAAAOSwakZoPgvq/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "15.36",
+            "currency": "ILS",
+            "convertedFromValue": "3.79",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-12-13T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|800765164409|0",
+      "legacyItemId": "800765164409",
+      "title": "Sony WH-1000XM5SA Soft Case Premium Noise Cancelling Headphones Brand New Sealed",
+      "price": {
+        "value": "675.43",
+        "currency": "ILS",
+        "convertedFromValue": "166.63",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/uLgAAeSwEU5qruwE/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/uLgAAeSwEU5qruwE/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "473.24",
+            "currency": "ILS",
+            "convertedFromValue": "116.75",
+            "convertedFromCurrency": "GBP"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|386082993742|653637979872",
+      "legacyItemId": "386082993742",
+      "title": "Ear Pads for Sony WH-1000XM5 Noise Canceling Headphones Noise Isolation Foam",
+      "price": {
+        "value": "46.21",
+        "currency": "ILS",
+        "convertedFromValue": "13.47",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/PbcAAOSwg61k8Xbx/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/PbcAAOSwg61k8Xbx/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.83",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "EUR"
+          }
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Neu",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|336001292807|545545062900",
+      "legacyItemId": "336001292807",
+      "title": "Sony WH-1000XM5 Hinge Swivel Bracket for Earcups - (L) or (R) - Silver/Beige",
+      "price": {
+        "value": "101.30",
+        "currency": "ILS",
+        "convertedFromValue": "24.99",
+        "convertedFromCurrency": "GBP"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/EksAAeSwNaloRHnu/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/EksAAeSwNaloRHnu/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "56.75",
+            "currency": "ILS",
+            "convertedFromValue": "14.00",
+            "convertedFromCurrency": "GBP"
+          },
+          "minEstimatedDeliveryDate": "2026-10-16T21:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-10-25T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|186069131087|694088011732",
+      "legacyItemId": "186069131087",
+      "title": "CS Replacement Ear Pad Cushions for WH-1000XM5 WH1000XM5 XM5 Sony Headphones",
+      "price": {
+        "value": "61.23",
+        "currency": "ILS",
+        "convertedFromValue": "19.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/eqcAAOSw~99k-gNL/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/eqcAAOSw~99k-gNL/s-l1200.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "70.45",
+            "currency": "ILS",
+            "convertedFromValue": "23.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-09T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|227207640501|0",
+      "legacyItemId": "227207640501",
+      "title": "Dekoni Audio Alpine Cooling Earpads for Sony WH1000XM5",
+      "price": {
+        "value": "153.11",
+        "currency": "ILS",
+        "convertedFromValue": "49.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/vO8AAeSwvD5ph9wK/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/vO8AAeSwvD5ph9wK/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "CALCULATED",
+          "shippingCost": {
+            "value": "215.63",
+            "currency": "ILS",
+            "convertedFromValue": "70.40",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-26T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-15T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    },
+    {
+      "itemId": "v1|396123597338|664808761916",
+      "legacyItemId": "396123597338",
+      "title": "Replacement Ear Pads Cushion for Sony WH-1000XM3 WH-1000XM4 WH-1000XM5 Headphones",
+      "price": {
+        "value": "25.11",
+        "currency": "ILS",
+        "convertedFromValue": "7.32",
+        "convertedFromCurrency": "EUR"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/ZwgAAOSwyhpnhorS/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/ZwgAAOSwyhpnhorS/s-l960.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "6.83",
+            "currency": "ILS",
+            "convertedFromValue": "1.99",
+            "convertedFromCurrency": "EUR"
+          },
+          "minEstimatedDeliveryDate": "2026-11-02T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-23T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "Neu",
+      "buyingOptions": ["FIXED_PRICE"]
+    },
+    {
+      "itemId": "v1|389438463377|0",
+      "legacyItemId": "389438463377",
+      "title": "SONY WH-1000XM5 Wireless Noise-Canceling Over-the-Ear Headphones Bluetooth",
+      "price": {
+        "value": "1139.37",
+        "currency": "ILS",
+        "convertedFromValue": "371.99",
+        "convertedFromCurrency": "USD"
+      },
+      "image": {
+        "imageUrl": "https://i.ebayimg.com/images/g/dyUAAeSwmyZpVWVN/s-l225.jpg"
+      },
+      "thumbnailImages": [
+        {
+          "imageUrl": "https://i.ebayimg.com/images/g/dyUAAeSwmyZpVWVN/s-l1600.jpg"
+        }
+      ],
+      "shippingOptions": [
+        {
+          "shippingCostType": "FIXED",
+          "shippingCost": {
+            "value": "30.63",
+            "currency": "ILS",
+            "convertedFromValue": "10.00",
+            "convertedFromCurrency": "USD"
+          },
+          "minEstimatedDeliveryDate": "2026-10-27T22:00:00.000Z",
+          "maxEstimatedDeliveryDate": "2026-11-01T22:00:00.000Z"
+        }
+      ],
+      "conditionId": "1000",
+      "condition": "New",
+      "buyingOptions": ["FIXED_PRICE", "BEST_OFFER"]
+    }
+  ]
+}

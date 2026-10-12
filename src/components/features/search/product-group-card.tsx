@@ -1,7 +1,7 @@
-import { ArrowRight, Headphones, Search, Star, Truck } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, Search, Star, Truck } from "lucide-react";
 import Link from "next/link";
 import { CompareSheet } from "@/components/features/search/compare-sheet";
+import { ProductImage } from "@/components/features/search/product-image";
 import {
   discountPercent,
   outboundHref,
@@ -86,18 +86,11 @@ export function ProductGroupCard({
     >
       {/* White in both themes: store photos (Amazon especially) are shot on white, so the tile blends in. */}
       <div className="relative aspect-square overflow-hidden bg-white">
-        {group.imageUrl ? (
-          <Image
-            src={group.imageUrl}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 50vw"
-            // Whole product visible, never cropped — like Amazon's own listings.
-            className="object-contain p-4 transition-transform duration-300 ease-out group-hover:scale-[1.03]"
-          />
-        ) : (
-          <Headphones className="absolute inset-0 m-auto size-16 text-primary/70" aria-hidden />
-        )}
+        <ProductImage
+          src={group.imageUrl}
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 50vw"
+          className="p-4 transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+        />
         {discount !== null && (
           <span className="absolute start-2.5 top-2.5 rounded-full bg-success px-2 py-0.5 text-xs font-bold text-success-foreground">
             -{discount}%
@@ -164,7 +157,7 @@ export function ProductGroupCard({
         </div>
 
         <div className="pt-2 [&>*]:w-full">
-          {storeCount > 1 ? (
+          {storeCount > 1 || group.unavailable.length > 0 ? (
             <CompareSheet group={group} links={links} />
           ) : (
             <a

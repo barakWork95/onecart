@@ -2,6 +2,7 @@ import "server-only";
 
 import type { FxRates } from "@/domain/pricing/fx-rates";
 import type { ImportTaxPolicy } from "@/domain/pricing/import-tax-policy";
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type {
   ProductSearchProvider,
@@ -9,7 +10,7 @@ import type {
   ProviderErrorKind,
 } from "@/domain/search/product-search-provider";
 import { err, ok, type Result } from "@/domain/shared/result";
-import { mapAmazonProduct } from "@/infrastructure/providers/amazon/amazon-mapper";
+import { mapAmazonProduct, mapAmazonUnavailable } from "@/infrastructure/providers/amazon/amazon-mapper";
 import {
   amazonRawProductSchema,
   amazonSearchResponseSchema,
@@ -172,6 +173,7 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
       // Amazon's relevance order: organic results page by page, then the carousels.
       const rawItems = [...fetched.flatMap((p) => p.organic), ...fetched.flatMap((p) => p.featured)];
       const products: UnifiedProduct[] = [];
+      const unavailable: UnavailableListing[] = [];
       const seen = new Set<string>();
       let schemaFailures = 0;
       for (const raw of rawItems) {
@@ -180,20 +182,23 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
           schemaFailures++;
           continue;
         }
-        // Unpriced items (no offer that ships to Israel) are skipped by the mapper — expected, not an error.
+        // Unpriced items (no offer that ships to Israel) aren't offers; they're kept as
+        // "Amazon won't ship this" listings so a comparison can say so.
         const mapped = mapAmazonProduct(item.data, ctx);
+        const missing = mapped ? null : mapAmazonUnavailable(item.data);
+        const id = mapped?.id ?? missing?.id;
         // Organic, sponsored and carousel slots often repeat the same ASIN.
-        if (mapped && !seen.has(mapped.id)) {
-          seen.add(mapped.id);
-          products.push(mapped);
-        }
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        if (mapped) products.push(mapped);
+        else if (missing) unavailable.push(missing);
       }
 
       // Only a schema failure on every item signals a contract change.
       if (rawItems.length > 0 && schemaFailures === rawItems.length) {
         return err(providerError("parse_error", "ALL_ITEMS_INVALID", `${rawItems.length} items rejected`));
       }
-      return ok({ products, hasMore });
+      return ok({ products, hasMore, unavailable });
     },
   };
 }

@@ -231,7 +231,8 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
   const response = await searchProducts(query, { includeEarlierPages: true });
 
   const outboundLinks: Record<string, string> = {};
-  for (const offer of response.groups.flatMap((g) => g.offers)) {
+  // "Won't ship to Israel" listings get signed links too: the shopper may still want to look.
+  for (const offer of response.groups.flatMap((g) => [...g.offers, ...g.unavailable])) {
     outboundLinks[offer.id] = linkCodec.encode({
       id: offer.id,
       provider: offer.provider,

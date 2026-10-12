@@ -13,6 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductGroup } from "@/domain/search/product-group";
 import { formatDeliveryDays, formatMoney } from "@/lib/format";
@@ -111,6 +112,36 @@ function OfferRow({
   );
 }
 
+/** A store that lists the product but has no offer that ships it to Israel. */
+function UnavailableRow({ listing, href }: { listing: UnavailableListing; href: string }) {
+  const meta = STORE_META[listing.provider];
+  return (
+    <li className="py-4" aria-label={`${meta.name}: no offer to Israel`}>
+      <div className="flex items-center gap-3">
+        <StoreChip provider={listing.provider} />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-foreground">{meta.name}</p>
+          <p className="text-xs leading-snug text-muted-foreground">
+            Listed, but no offer ships it to Israel
+          </p>
+        </div>
+        <a
+          href={href}
+          target="_blank"
+          rel="nofollow sponsored noopener"
+          aria-label={`View on ${meta.name} (no offer to Israel)`}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "h-10 rounded-xl px-4 font-semibold",
+          )}
+        >
+          View
+        </a>
+      </div>
+    </li>
+  );
+}
+
 /** "Compare (n)" button that opens the per-store landed-price breakdown as a bottom sheet. */
 export function CompareSheet({
   group,
@@ -120,7 +151,7 @@ export function CompareSheet({
   links: Readonly<Record<string, string>>;
 }) {
   const fastestId = fastestOfferId(group);
-  const storeCount = group.offers.length;
+  const storeCount = group.offers.length + group.unavailable.length;
 
   return (
     <Drawer>
@@ -168,6 +199,9 @@ export function CompareSheet({
                 fastestId={fastestId}
                 href={outboundHref(links, offer)}
               />
+            ))}
+            {group.unavailable.map((listing) => (
+              <UnavailableRow key={listing.id} listing={listing} href={outboundHref(links, listing)} />
             ))}
           </ul>
         </div>

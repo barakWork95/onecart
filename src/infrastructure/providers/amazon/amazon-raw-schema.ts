@@ -19,6 +19,8 @@ export const amazonRawProductSchema = z.object({
   /** Free-text lines such as "FREE delivery Sat, Jan 17 on $35 of items shipped by Amazon". */
   delivery: z.array(z.string()).optional(),
   sponsored: z.boolean().optional(),
+  /** `[{ no_featured_offers: true }]` when no offer ships to `shipping_location`. */
+  purchase_options: z.array(z.object({ no_featured_offers: z.boolean().optional() })).optional(),
 });
 
 export type AmazonRawProduct = z.infer<typeof amazonRawProductSchema>;

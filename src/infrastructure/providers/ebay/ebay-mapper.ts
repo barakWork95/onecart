@@ -37,14 +37,30 @@ function cheapestShipping(options: readonly EbayRawShippingOption[], fx: FxRates
   return best;
 }
 
+/** eBay's photo size presets ("s-l225"); 500px stays sharp on a phone's 2× screen at tile size. */
+const IMAGE_SIZE = /\/s-l\d+(\.(?:jpe?g|png|webp))$/i;
+
 function cleanImage(url: string | undefined): string | null {
   if (!url) return null;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" ? parsed.toString() : null;
+    if (parsed.protocol !== "https:") return null;
+    // The search thumbnail is 225px; the same photo is served at any preset size.
+    parsed.pathname = parsed.pathname.replace(IMAGE_SIZE, "/s-l500$1");
+    return parsed.toString();
   } catch {
     return null;
   }
+}
+
+/** The listing's main photo, else the first thumbnail or additional photo eBay sent. */
+function imageOf(raw: EbayRawItem): string | null {
+  const candidates = [raw.image, raw.thumbnailImages?.[0], raw.additionalImages?.[0]];
+  for (const candidate of candidates) {
+    const url = cleanImage(candidate?.imageUrl);
+    if (url) return url;
+  }
+  return null;
 }
 
 /**
@@ -77,7 +93,7 @@ export function mapEbayItem(raw: EbayRawItem, ctx: EbayMapContext): UnifiedProdu
     provider: "ebay",
     providerProductId: id,
     title,
-    imageUrl: cleanImage(raw.image?.imageUrl),
+    imageUrl: imageOf(raw),
     // Canonical listing URL; tracking params from itemWebUrl are dropped.
     productUrl: `https://www.ebay.com/itm/${id.split("-")[0]}`,
     price: calculateLandedPrice({ item, shipping: shipping?.cost ?? null }, ctx.policy, ctx.fx),

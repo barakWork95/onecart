@@ -1,6 +1,6 @@
-import { Headphones, type LucideIcon } from "lucide-react";
-import Image from "next/image";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { ProductImage } from "@/components/features/search/product-image";
 import type { ReactNode } from "react";
 
 /** Shared chrome for /saved and /alerts. */
@@ -35,11 +35,7 @@ export function EmptyList({ icon: Icon, title, body }: { icon: LucideIcon; title
 export function ProductThumb({ imageUrl }: { imageUrl: string | null }) {
   return (
     <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border border-border/60 bg-white">
-      {imageUrl ? (
-        <Image src={imageUrl} alt="" fill sizes="64px" className="object-contain p-1.5" />
-      ) : (
-        <Headphones className="absolute inset-0 m-auto size-7 text-primary" aria-hidden />
-      )}
+      <ProductImage src={imageUrl} sizes="64px" className="p-1.5" />
     </div>
   );
 }

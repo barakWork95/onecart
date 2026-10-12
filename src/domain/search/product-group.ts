@@ -1,12 +1,16 @@
 import {
   DEFAULT_MATCHING_POLICY,
   matchProducts,
+  matchTitles,
   toMatchCandidate,
   type MatchBasis,
   type MatchCandidate,
   type MatchingPolicy,
 } from "@/domain/matching/product-matcher";
+import { tokenizeTitle } from "@/domain/matching/title-tokens";
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { ProductRating, UnifiedProduct } from "@/domain/product/unified-product";
+import type { OfferClass } from "@/domain/search/search-intent";
 import { compareMoney, type Money } from "@/domain/shared/money";
 
 /** Non-empty list of offers, cheapest landed total first. */
@@ -32,6 +36,23 @@ export interface ProductGroup {
    * label it "similar item"). The weakest link in the group wins.
    */
   readonly matchedBy: "single" | MatchBasis;
+  /**
+   * The same product at stores that list it but won't ship it to Israel, at
+   * most one per store and never a store already in `offers`.
+   */
+  readonly unavailable: readonly UnavailableListing[];
+  /** Names the product the query names (always true for category searches). */
+  readonly onIntent: boolean;
+  /** An accessory or part rather than a product in its own right. */
+  readonly isAccessory: boolean;
+}
+
+export interface GroupingOptions {
+  readonly policy?: MatchingPolicy;
+  /** Per-search accessory and intent decisions (`classifyOffers`); titles alone otherwise. */
+  readonly classes?: ReadonlyMap<string, OfferClass>;
+  /** Listings with no offer to Israel, attached to the groups they match. */
+  readonly unavailable?: readonly UnavailableListing[];
 }
 
 export function bestOffer(group: ProductGroup): UnifiedProduct {
@@ -46,6 +67,13 @@ export function compareOffers(a: UnifiedProduct, b: UnifiedProduct): number {
 interface Cluster {
   readonly members: MatchCandidate[];
   weakestBasis: MatchBasis | null;
+}
+
+/** A product's match candidate, with the search's accessory decision when there is one. */
+function candidateFor(product: UnifiedProduct, classes: GroupingOptions["classes"]): MatchCandidate {
+  const candidate = toMatchCandidate(product);
+  const cls = classes?.get(product.id);
+  return cls ? { product, tokens: { ...candidate.tokens, isAccessory: cls.isAccessory } } : candidate;
 }
 
 const BASIS_STRENGTH: Record<MatchBasis, number> = { title_similarity: 0, model_number: 1 };
@@ -97,7 +125,36 @@ function aggregateRating(offers: Offers): ProductRating | null {
   return count > 0 ? { average: Math.round((weightedSum / count) * 100) / 100, count } : null;
 }
 
-function toGroup(cluster: Cluster): ProductGroup {
+/**
+ * For each store missing from the group, the unavailable listing that best
+ * matches every offer in it (complete linkage, as for offers).
+ */
+function unavailableFor(
+  cluster: Cluster,
+  listings: readonly { listing: UnavailableListing; tokens: ReturnType<typeof tokenizeTitle> }[],
+  policy: MatchingPolicy,
+): UnavailableListing[] {
+  const stores = new Set(cluster.members.map((m) => m.product.provider));
+  const best = new Map<string, { listing: UnavailableListing; score: number }>();
+  for (const { listing, tokens } of listings) {
+    if (stores.has(listing.provider)) continue;
+    let minScore = Number.POSITIVE_INFINITY;
+    for (const member of cluster.members) {
+      const match = matchTitles(member.tokens, tokens, policy);
+      minScore = Math.min(minScore, match ? match.score : Number.NEGATIVE_INFINITY);
+    }
+    const current = best.get(listing.provider);
+    if (minScore > 0 && (!current || minScore > current.score))
+      best.set(listing.provider, { listing, score: minScore });
+  }
+  return [...best.values()].map((b) => b.listing).sort((a, b) => a.provider.localeCompare(b.provider));
+}
+
+function toGroup(
+  cluster: Cluster,
+  unavailable: readonly UnavailableListing[],
+  classes: GroupingOptions["classes"],
+): ProductGroup {
   const [first, ...rest] = cluster.members.map((m) => m.product).sort(compareOffers);
   // Clusters are created with one member and only grow.
   if (!first) throw new Error("Invariant violated: empty product cluster");
@@ -115,6 +172,9 @@ function toGroup(cluster: Cluster): ProductGroup {
     priceRange: { min: first.price.total, max: last.price.total },
     rating: aggregateRating(offers),
     matchedBy: cluster.weakestBasis ?? "single",
+    unavailable,
+    onIntent: offers.some((o) => classes?.get(o.id)?.onIntent ?? true),
+    isAccessory: cluster.members.every((m) => m.tokens.isAccessory),
   };
 }
 
@@ -125,12 +185,13 @@ function toGroup(cluster: Cluster): ProductGroup {
  */
 export function groupProducts(
   products: readonly UnifiedProduct[],
-  policy: MatchingPolicy = DEFAULT_MATCHING_POLICY,
+  options: GroupingOptions = {},
 ): ProductGroup[] {
+  const policy = options.policy ?? DEFAULT_MATCHING_POLICY;
   const clusters: Cluster[] = [];
 
   for (const product of [...products].sort(compareOffers)) {
-    const candidate = toMatchCandidate(product);
+    const candidate = candidateFor(product, options.classes);
     const placement = findCluster(candidate, clusters, policy);
     if (placement) {
       placement.cluster.members.push(candidate);
@@ -139,5 +200,12 @@ export function groupProducts(
       clusters.push({ members: [candidate], weakestBasis: null });
     }
   }
-  return clusters.map(toGroup);
+  // Accessories never pick up a "doesn't ship" note: it would describe the product they fit.
+  const listings = (options.unavailable ?? [])
+    .map((listing) => ({ listing, tokens: tokenizeTitle(listing.title) }))
+    .filter(({ tokens }) => tokens.accessorySignal === "none");
+  return clusters.map((cluster) => {
+    const isAccessory = cluster.members.every((m) => m.tokens.isAccessory);
+    return toGroup(cluster, isAccessory ? [] : unavailableFor(cluster, listings, policy), options.classes);
+  });
 }

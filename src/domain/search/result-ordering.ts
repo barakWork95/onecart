@@ -1,5 +1,6 @@
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import type { SearchIntent } from "@/domain/search/search-intent";
 import type { SearchFilters, SearchSort } from "@/domain/search/search-query";
 import type { Pagination } from "@/domain/search/search-response";
 import { compareMoney } from "@/domain/shared/money";
@@ -75,12 +76,44 @@ function relevanceComparator(rankOf: RelevanceRank): Comparator {
     byId(a, b);
 }
 
+/**
+ * For a query naming one product: 0 = that product, 1 = related products
+ * (other models, other brands), 2 = accessories and parts (or, when the
+ * shopper asked for an accessory, the products themselves). Category searches
+ * keep every group in tier 0.
+ */
+export function intentTier(group: ProductGroup, intent: SearchIntent | undefined): 0 | 1 | 2 {
+  if (!intent?.specific) return 0;
+  if (group.isAccessory !== intent.wantsAccessory) return 2;
+  return group.onIntent ? 0 : 1;
+}
+
+/** Stores the shopper sees compared on the card: priced offers plus "won't ship" listings. */
+const storesCompared = (group: ProductGroup) => group.offers.length + group.unavailable.length;
+
+/**
+ * Every sort first separates the product the shopper named from related
+ * items and accessories, so "sony wh-1000xm5" sorted by price starts with the
+ * cheapest headphones, not a ₪25 ear pad. Within the named product, best match
+ * puts cross-store comparisons first: comparing is what OneCart is for.
+ */
 export function sortGroups(
   groups: readonly ProductGroup[],
   sort: SearchSort,
   rankOf: RelevanceRank = () => undefined,
+  intent?: SearchIntent,
 ): ProductGroup[] {
-  return [...groups].sort(sort === "relevance" ? relevanceComparator(rankOf) : COMPARATORS[sort]);
+  const within = sort === "relevance" ? relevanceComparator(rankOf) : COMPARATORS[sort];
+  const tiers = new Map(groups.map((g) => [g, intentTier(g, intent)]));
+  const tier = (g: ProductGroup) => tiers.get(g) ?? 0;
+  return [...groups].sort(
+    (a, b) =>
+      tier(a) - tier(b) ||
+      (sort === "relevance" && tier(a) === 0 && intent?.specific
+        ? storesCompared(b) - storesCompared(a)
+        : 0) ||
+      within(a, b),
+  );
 }
 
 export function paginate<T>(

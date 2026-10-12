@@ -1,3 +1,4 @@
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import {
   circuitAfterFailure,
@@ -14,6 +15,7 @@ import type {
   ProviderPage,
 } from "@/domain/search/product-search-provider";
 import { groupProducts } from "@/domain/search/product-group";
+import { classifyOffers, searchIntent, type SearchIntent } from "@/domain/search/search-intent";
 import type { CircuitBreakerStore, SearchResultCache } from "@/domain/search/ports";
 import { filterOffers, paginate, sortGroups } from "@/domain/search/result-ordering";
 import { searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
@@ -69,6 +71,7 @@ interface ProviderRun {
   readonly outcome: ProviderOutcome;
   readonly products: readonly UnifiedProduct[];
   readonly hasMore: boolean;
+  readonly unavailable: readonly UnavailableListing[];
 }
 
 /** One provider's store pages loaded so far for this search. */
@@ -174,6 +177,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
       products: cached.products,
       // Entries cached before paging existed carry no flag: treat them as the last page.
       hasMore: cached.hasMore === true,
+      unavailable: cached.unavailable ?? [],
     };
   }
 
@@ -187,7 +191,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const base = { provider: id, resultCount: 0, latencyMs: null, fromCache: false } as const;
 
     if (query.providers && query.providers.length > 0 && !query.providers.includes(id)) {
-      return { outcome: { ...base, status: "skipped" }, products: [], hasMore: false };
+      return { outcome: { ...base, status: "skipped" }, products: [], hasMore: false, unavailable: [] };
     }
 
     const cacheKey = searchCacheKey(query, id, storePage);
@@ -202,7 +206,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     );
     const decision: CircuitDecision = decideCircuit(state, now(), policy);
     if (decision === "reject") {
-      return { outcome: { ...base, status: "circuit_open" }, products: [], hasMore: false };
+      return { outcome: { ...base, status: "circuit_open" }, products: [], hasMore: false, unavailable: [] };
     }
 
     const startedAt = now();
@@ -252,10 +256,12 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
         },
         products: [],
         hasMore: false,
+        unavailable: [],
       };
     }
 
     const { products, hasMore } = result.value;
+    const unavailable = result.value.unavailable ?? [];
     await Promise.all([
       // Skip the write when already closed and clean — saves a Redis call per search.
       state === null || state.status === "open" || state.consecutiveFailures > 0
@@ -268,7 +274,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
         () =>
           deps.cache.set(
             cacheKey,
-            { products, hasMore, cachedAt: new Date(now()).toISOString() },
+            { products, hasMore, unavailable, cachedAt: new Date(now()).toISOString() },
             ttlSeconds,
           ),
         id,
@@ -284,6 +290,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
       },
       products,
       hasMore,
+      unavailable,
     };
   }
 
@@ -310,9 +317,10 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
   }
 
   /** Every store page loaded so far, merged, with each offer's rank in its store. */
-  function merge(progress: readonly ProviderProgress[], query: SearchQuery) {
+  function merge(progress: readonly ProviderProgress[], query: SearchQuery, intent: SearchIntent) {
     const ranks = new Map<string, number>();
     const products: UnifiedProduct[] = [];
+    const unavailable = new Map<string, UnavailableListing>();
     for (const { runs } of progress) {
       let rank = 0;
       for (const product of runs.flatMap((r) => r.products)) {
@@ -321,9 +329,17 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
         ranks.set(product.id, rank++);
         products.push(product);
       }
+      for (const listing of runs.flatMap((r) => r.unavailable)) unavailable.set(listing.id, listing);
     }
     const offers = filterOffers(products, query.filters);
-    const groups = sortGroups(groupProducts(offers), query.sort, (id) => ranks.get(id));
+    // Classified on every loaded offer, before filters, so a price filter can't move the typical price.
+    const classes = classifyOffers(products, intent);
+    const groups = sortGroups(
+      groupProducts(offers, { classes, unavailable: [...unavailable.values()] }),
+      query.sort,
+      (id) => ranks.get(id),
+      intent,
+    );
     return { offers, groups, uniqueCount: products.length };
   }
 
@@ -356,12 +372,13 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
 
     // Already-loaded results fill pages first; a store is asked for its next page only
     // when they run out. One extra group tells us whether a next results page exists.
-    let merged = merge(progress, query);
+    const intent = searchIntent(query.normalizedText);
+    let merged = merge(progress, query, intent);
     while (mode !== "none" && merged.groups.length <= page * pageSize) {
       const deeper = progress.filter(canGoDeeper);
       if (deeper.length === 0) break;
       await Promise.all(deeper.map((p) => loadNextPage(p, query, mode, signal)));
-      merged = merge(progress, query);
+      merged = merge(progress, query, intent);
     }
 
     const { items, pagination } = paginate(merged.groups, page, pageSize);

@@ -1,6 +1,7 @@
 import { toIls, type FxRates } from "@/domain/pricing/fx-rates";
 import type { ImportTaxPolicy } from "@/domain/pricing/import-tax-policy";
 import { calculateLandedPrice } from "@/domain/pricing/landed-price-calculator";
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import { unifiedProductId, type IsoDateTime, type UnifiedProduct } from "@/domain/product/unified-product";
 import { moneyFromMajor, zeroMoney, type CurrencyCode } from "@/domain/shared/money";
 import { parseAmazonDelivery } from "@/infrastructure/providers/amazon/amazon-delivery";
@@ -43,6 +44,26 @@ function cleanImage(url: string | undefined): string | null {
 }
 
 /** Pure: SerpApi Amazon item → UnifiedProduct, or null when it can't be priced honestly. */
+/**
+ * An item Amazon lists with no offer that ships to the destination (confirmed
+ * live for Sony WH-1000XM5 → Israel: "This item cannot be shipped to your
+ * selected delivery location"). Null for anything else, including priced items.
+ */
+export function mapAmazonUnavailable(raw: AmazonRawProduct): UnavailableListing | null {
+  const title = normalizeTitle(raw.title);
+  const noOffer = raw.purchase_options?.some((o) => o.no_featured_offers === true) ?? false;
+  if (!noOffer || raw.extracted_price !== undefined || !title) return null;
+  return {
+    id: unifiedProductId("amazon", raw.asin),
+    provider: "amazon",
+    providerProductId: raw.asin,
+    title,
+    productUrl: canonicalUrl(raw.asin),
+    imageUrl: cleanImage(raw.thumbnail),
+    reason: "no_offer_to_destination",
+  };
+}
+
 export function mapAmazonProduct(raw: AmazonRawProduct, ctx: AmazonMapContext): UnifiedProduct | null {
   const currency = currencyOf(raw.price);
   const title = normalizeTitle(raw.title);

@@ -89,7 +89,7 @@ describe("multi-store search (Amazon + eBay)", () => {
     expect(ebay.map((o) => o.title)).toContain("Soundcore by Anker Life P3 Noise Cancelling Earbuds Black");
     const p3 = ebay.find((o) => o.providerProductId === "395012345678");
     expect(p3).toMatchObject({
-      imageUrl: "https://i.ebayimg.com/images/g/lifep3/s-l225.jpg",
+      imageUrl: "https://i.ebayimg.com/images/g/lifep3/s-l500.jpg",
       productUrl: "https://www.ebay.com/itm/395012345678",
       price: { total: { amountMinor: 153_18, currency: "ILS" }, shippingKnown: true },
       // Monday 12 Oct → 25–29 Oct is 9–13 business days.

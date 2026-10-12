@@ -1,4 +1,5 @@
 import type { IsoDateTime, UnifiedProduct } from "@/domain/product/unified-product";
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { CircuitState } from "@/domain/search/circuit-breaker";
 import type { ProviderId } from "@/domain/shared/provider";
 
@@ -6,6 +7,7 @@ export interface CachedProviderResult {
   readonly products: readonly UnifiedProduct[];
   /** The store had more results past this page when it was cached. */
   readonly hasMore: boolean;
+  readonly unavailable?: readonly UnavailableListing[];
   readonly cachedAt: IsoDateTime;
 }
 

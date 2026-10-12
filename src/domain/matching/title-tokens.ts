@@ -114,6 +114,25 @@ const ACCESSORY_WORDS = new Set([
 ]);
 
 /**
+ * Accessory words that leave no doubt: nobody sells the product itself as a
+ * "replacement part". Weaker words ("case", "stand") also describe products
+ * sold *with* one ("Sony WH-1000XM5 Hard Case … Headphones").
+ */
+const STRONG_ACCESSORY_WORDS = new Set([
+  "replacement",
+  "replacements",
+  "spare",
+  "part",
+  "parts",
+  "repair",
+  "guide",
+  "manual",
+]);
+
+/** Words introducing the product an accessory is made for ("for Sony …", "fits JBL Flip 6"). */
+const MADE_FOR_WORDS = new Set(["for", "fits", "fit", "compatible"]);
+
+/**
  * Words after which a title stops describing the item and starts listing what's
  * in the box ("Headphones with Charging Cable" is headphones, not a cable).
  */
@@ -300,9 +319,18 @@ export interface TitleTokens {
   readonly brands: ReadonlySet<string>;
   /** Condition or packaging that changes the deal: "refurbished", "used", "bundle". */
   readonly qualifiers: ReadonlySet<string>;
-  /** A case, spare part, add-on or guide *for* a product, not the product. */
+  /**
+   * How sure the title is about being an accessory, spare part or guide:
+   * `strong` ("Earpads for Sony …", "Replacement hinge"), `weak` (an accessory
+   * word such as "case" that products sold with a case share), or `none`.
+   * Search results can settle `weak` by price; see `classifyOffers`.
+   */
+  readonly accessorySignal: AccessorySignal;
+  /** Read without context: any accessory signal. */
   readonly isAccessory: boolean;
 }
+
+export type AccessorySignal = "none" | "weak" | "strong";
 
 /** Rewrites multi-word quantity phrases into single tokens before splitting. */
 function normalizePhrases(text: string): string {
@@ -355,8 +383,10 @@ export function tokenizeTitle(title: string): TitleTokens {
   const variants = new Map<string, Set<string>>();
   const brands = new Set<string>();
   const qualifiers = new Set<string>();
-  let isAccessory = false;
+  let weak = false;
+  let strong = false;
   let inHead = true;
+  const isModelLike = (t: string | undefined) => !!t && /\d/.test(t) && /[a-z]/.test(t);
 
   raw.forEach((token, i) => {
     const pair = i + 1 < raw.length ? brandOf(`${token}${raw[i + 1]}`) : null;
@@ -365,9 +395,13 @@ export function tokenizeTitle(title: string): TitleTokens {
 
     // An accessory word only counts in the item's own description, before "with …".
     if (INCLUDES_WORDS.has(token) && i > 0) inHead = false;
-    if (inHead && ACCESSORY_WORDS.has(token)) isAccessory = true;
-    // "… for Sony WH-1000XM5", "fits JBL Flip 6": an item made for another brand's product.
-    if (token === "for" && i + 1 < raw.length && brandOf(raw[i + 1] ?? "")) isAccessory = true;
+    if (inHead && STRONG_ACCESSORY_WORDS.has(token)) strong = true;
+    else if (inHead && ACCESSORY_WORDS.has(token)) weak = true;
+    // "Earpads for Sony WH-1000XM5", "fits JBL Flip 6", "For WH-1000XM5": made for another product.
+    if (MADE_FOR_WORDS.has(token)) {
+      const next = raw[i + 1];
+      if ((next && brandOf(next)) || isModelLike(next)) strong = true;
+    }
 
     const qualifier = QUALIFIERS[token];
     if (qualifier) qualifiers.add(qualifier);
@@ -388,7 +422,17 @@ export function tokenizeTitle(title: string): TitleTokens {
     else if (/\d/.test(token) && /[a-z]/.test(token) && !SPEC_CODE.test(token)) models.add(token);
   });
 
-  return { words, models, numbers, variants, brands, qualifiers, isAccessory };
+  const accessorySignal: AccessorySignal = strong ? "strong" : weak ? "weak" : "none";
+  return {
+    words,
+    models,
+    numbers,
+    variants,
+    brands,
+    qualifiers,
+    accessorySignal,
+    isAccessory: accessorySignal !== "none",
+  };
 }
 
 function intersectionSize(a: ReadonlySet<string>, b: ReadonlySet<string>): number {
@@ -420,14 +464,14 @@ export function sharesAny(a: ReadonlySet<string>, b: ReadonlySet<string>): boole
 /**
  * Model codes agree when they're equal, when one ends with the other
  * ("wh1000xm5" and "1000xm5"; the shorter needs four characters so "m5" can't
- * ride on it), or when the longer adds a one- or two-letter colour suffix
- * ("wh1000xm5sa", Sony's silver).
+ * ride on it), or when the longer adds a colour suffix of up to three letters
+ * ("wh1000xm5sa", "wh1000xm5bnt": Sony's silver and midnight blue).
  */
 function sameModel(x: string, y: string): boolean {
   const [short, long] = x.length <= y.length ? [x, y] : [y, x];
   if (short === long) return true;
   if (short.length >= 4 && long.endsWith(short)) return true;
-  return short.length >= 6 && long.startsWith(short) && /^[a-z]{1,2}$/.test(long.slice(short.length));
+  return short.length >= 6 && long.startsWith(short) && /^[a-z]{1,3}$/.test(long.slice(short.length));
 }
 
 export function sharesModel(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {

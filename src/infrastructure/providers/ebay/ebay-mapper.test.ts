@@ -47,7 +47,7 @@ describe("mapEbayItem", () => {
       provider: "ebay",
       providerProductId: "395012345678",
       title: "Soundcore Life P3 Earbuds",
-      imageUrl: "https://i.ebayimg.com/images/g/x/s-l225.jpg",
+      imageUrl: "https://i.ebayimg.com/images/g/x/s-l500.jpg",
       productUrl: "https://www.ebay.com/itm/395012345678",
       price: {
         item: ils(127_65),
@@ -188,5 +188,35 @@ describe("mapEbayItem", () => {
     ["unparseable id", { legacyItemId: undefined, itemId: "weird-id" }],
   ])("returns null for %s", (_label, overrides) => {
     expect(mapEbayItem(raw(overrides), ctx)).toBeNull();
+  });
+});
+
+describe("mapEbayItem — images", () => {
+  const imageOf = (overrides: Partial<EbayRawItem>) => mapEbayItem(raw(overrides), ctx)?.imageUrl;
+
+  it("asks eBay for the 500px rendition of the photo, keeping other URLs as they are", () => {
+    expect(imageOf({ image: { imageUrl: "https://i.ebayimg.com/images/g/a/s-l225.webp" } })).toBe(
+      "https://i.ebayimg.com/images/g/a/s-l500.webp",
+    );
+    expect(imageOf({ image: { imageUrl: "https://i.ebayimg.com/thumbs/images/g/a/photo.jpg" } })).toBe(
+      "https://i.ebayimg.com/thumbs/images/g/a/photo.jpg",
+    );
+  });
+
+  it("falls back to the thumbnails, then additional photos, when the main photo is missing or unusable", () => {
+    expect(
+      imageOf({
+        image: undefined,
+        thumbnailImages: [{ imageUrl: "https://i.ebayimg.com/images/g/b/s-l1600.jpg" }],
+      }),
+    ).toBe("https://i.ebayimg.com/images/g/b/s-l500.jpg");
+    expect(
+      imageOf({
+        image: { imageUrl: "http://insecure.example/x.jpg" },
+        thumbnailImages: [],
+        additionalImages: [{ imageUrl: "https://i.ebayimg.com/images/g/c/s-l225.jpg" }],
+      }),
+    ).toBe("https://i.ebayimg.com/images/g/c/s-l500.jpg");
+    expect(imageOf({ image: { imageUrl: "not a url" } })).toBeNull();
   });
 });

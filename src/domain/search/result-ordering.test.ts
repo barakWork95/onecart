@@ -1,5 +1,6 @@
 import { groupProducts } from "@/domain/search/product-group";
-import { filterOffers, paginate, sortGroups } from "@/domain/search/result-ordering";
+import { searchIntent } from "@/domain/search/search-intent";
+import { filterOffers, intentTier, paginate, sortGroups } from "@/domain/search/result-ordering";
 import { money } from "@/domain/shared/money";
 import { makeProduct } from "@/test/product-factory";
 
@@ -171,5 +172,74 @@ describe("paginate", () => {
 
   it("returns an empty page past the end", () => {
     expect(paginate(items, 9, 2).items).toEqual([]);
+  });
+});
+
+describe("sortGroups — what the shopper named comes first", () => {
+  const intent = searchIntent("sony wh-1000xm5");
+  const g = (
+    sku: string,
+    title: string,
+    shekels: number,
+    flags: { onIntent: boolean; isAccessory: boolean },
+  ) => {
+    const [group] = groupProducts([makeProduct({ provider: "ebay", sku, title, total: shekels * 100 })]);
+    if (!group) throw new Error("expected a group");
+    return { ...group, ...flags };
+  };
+  const pads = g("pads", "Earpads for Sony WH-1000XM5", 25, { onIntent: true, isAccessory: true });
+  const earbuds = g("buds", "Wired Earbuds", 30, { onIntent: false, isAccessory: false });
+  const cheap = g("cheap", "Sony WH-1000XM5 Black", 700, { onIntent: true, isAccessory: false });
+  const dear = g("dear", "Sony WH-1000XM5 Silver", 1300, { onIntent: true, isAccessory: false });
+  const compared = {
+    ...dear,
+    id: "grp:compared",
+    unavailable: [
+      {
+        id: "amazon:B1",
+        provider: "amazon" as const,
+        providerProductId: "B1",
+        title: "WH-1000XM5 Black",
+        productUrl: "https://www.amazon.com/dp/B1",
+        imageUrl: null,
+        reason: "no_offer_to_destination" as const,
+      },
+    ],
+  };
+  const ranks: Record<string, number> = { "ebay:pads": 0, "ebay:buds": 1, "ebay:cheap": 2, "ebay:dear": 3 };
+  const rankOf = (id: string) => ranks[id];
+  const ids = (groups: readonly { id: string }[]) => groups.map((x) => x.id);
+
+  it("orders the product, then related items, then accessories, under every sort", () => {
+    for (const sort of ["landed_price_asc", "rating_desc", "delivery_fastest"] as const) {
+      expect(ids(sortGroups([pads, earbuds, dear, cheap], sort, rankOf, intent))).toEqual([
+        cheap.id,
+        dear.id,
+        earbuds.id,
+        pads.id,
+      ]);
+    }
+  });
+
+  it("puts cross-store comparisons first under best match", () => {
+    expect(ids(sortGroups([pads, cheap, compared], "relevance", rankOf, intent))).toEqual([
+      compared.id,
+      cheap.id,
+      pads.id,
+    ]);
+  });
+
+  it("leaves category searches in the stores' own order", () => {
+    expect(ids(sortGroups([dear, pads, earbuds], "relevance", rankOf, searchIntent("headphones")))).toEqual([
+      pads.id,
+      earbuds.id,
+      dear.id,
+    ]);
+  });
+
+  it("demotes the products themselves when the shopper asked for an accessory", () => {
+    expect(intentTier(cheap, searchIntent("sony wh-1000xm5 case"))).toBe(2);
+    expect(intentTier(pads, searchIntent("sony wh-1000xm5 case"))).toBe(0);
+    expect(intentTier(pads, undefined)).toBe(0);
   });
 });

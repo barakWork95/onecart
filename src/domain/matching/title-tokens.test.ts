@@ -160,12 +160,13 @@ describe("sharesModel", () => {
 
   it("matches a colour suffix on a long code", () => {
     expect(sharesModel(m("wh1000xm5"), m("wh1000xm5sa"))).toBe(true);
+    expect(sharesModel(m("wh1000xm5"), m("wh1000xm5bnt"))).toBe(true);
   });
 
   it("rejects short suffixes and different models", () => {
     expect(sharesModel(m("wh1000xm5"), m("m5"))).toBe(false);
     expect(sharesModel(m("wh1000xm5"), m("wh1000xm4"))).toBe(false);
     expect(sharesModel(m("p3"), m("p3i"))).toBe(false);
-    expect(sharesModel(m("wh1000xm5"), m("wh1000xm5abc"))).toBe(false);
+    expect(sharesModel(m("wh1000xm5"), m("wh1000xm5abcd"))).toBe(false);
   });
 });

@@ -335,7 +335,12 @@ describe("searchProducts — caching", () => {
     await ctx.search(QUERY);
     expect(set).toHaveBeenCalledWith(
       searchCacheKey(QUERY, "aliexpress"),
-      { products: [EARBUDS.aliexpress], hasMore: false, cachedAt: new Date(ctx.clock.ms).toISOString() },
+      {
+        products: [EARBUDS.aliexpress],
+        hasMore: false,
+        unavailable: [],
+        cachedAt: new Date(ctx.clock.ms).toISOString(),
+      },
       86_400,
     );
   });
@@ -704,5 +709,49 @@ describe("searchProducts — paging through store results", () => {
     const response = await ctx.search({ ...PAGE, page: 2 });
     expect(ebay.search).not.toHaveBeenCalled();
     expect(response.pagination.hasNextPage).toBe(false);
+  });
+});
+
+describe("searchProducts — stores that won't ship, and what the shopper named", () => {
+  const noOffer = {
+    id: "amazon:B09XS7JWHH",
+    provider: "amazon" as const,
+    providerProductId: "B09XS7JWHH",
+    title: "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black",
+    productUrl: "https://www.amazon.com/dp/B09XS7JWHH",
+    imageUrl: null,
+    reason: "no_offer_to_destination" as const,
+  };
+  const XM5: SearchQuery = {
+    ...QUERY,
+    rawText: "sony wh-1000xm5",
+    normalizedText: "sony wh-1000xm5",
+    sort: "relevance",
+  };
+  const headphones = makeProduct({
+    provider: "ebay",
+    sku: "h",
+    title: "Sony WH-1000XM5 Headphones Black",
+    total: 1066_00,
+  });
+  const pads = makeProduct({
+    provider: "ebay",
+    sku: "p",
+    title: "Earpads for Sony WH-1000XM5",
+    total: 25_00,
+  });
+
+  it("attaches Amazon's no-offer listing to the matching group, from the cache too", async () => {
+    const amazon = fakeProvider("amazon", () => ok({ products: [], hasMore: false, unavailable: [noOffer] }));
+    const ebay = fakeProvider("ebay", () => okPage([pads, headphones]));
+    const { search } = setup([amazon.provider, ebay.provider]);
+    for (const response of [await search(XM5), await search(XM5)]) {
+      const [top, second] = response.groups;
+      expect(top?.offers[0].id).toBe(headphones.id);
+      expect(top?.unavailable).toEqual([noOffer]);
+      expect(second?.offers[0].id).toBe(pads.id);
+      expect(second?.unavailable).toEqual([]);
+    }
+    expect(amazon.search).toHaveBeenCalledTimes(1);
   });
 });

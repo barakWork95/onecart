@@ -36,7 +36,10 @@ export function premiumOverBest(group: ProductGroup, offer: UnifiedProduct): Mon
  * The signed /go link for an offer. Falls back to the clean store URL so a
  * missing entry costs us attribution, never the shopper's click.
  */
-export function outboundHref(links: Readonly<Record<string, string>>, offer: UnifiedProduct): string {
+export function outboundHref(
+  links: Readonly<Record<string, string>>,
+  offer: Pick<UnifiedProduct, "id" | "productUrl">,
+): string {
   return links[offer.id] ?? offer.productUrl;
 }
 
@@ -52,17 +55,27 @@ export interface StoreComparison {
   readonly bestDeal: string;
 }
 
-/** The card's cross-store summary, or null for a single-store group. */
+/**
+ * The card's cross-store summary, or null when only one store has it and no
+ * other store was found listing it. A store that lists the product but won't
+ * ship it to Israel is part of the comparison: that's worth knowing.
+ */
 export function storeComparison(group: ProductGroup): StoreComparison | null {
-  if (group.offers.length < 2) return null;
+  const priced = group.offers.length;
+  if (priced < 2 && group.unavailable.length === 0) return null;
   const shown = group.offers
     .slice(0, CARD_OFFER_LIMIT)
     .map((o) => `${STORE_META[o.provider].name} ${formatMoney(o.price.total)}`);
-  const hidden = group.offers.length - CARD_OFFER_LIMIT;
+  const hidden = priced - CARD_OFFER_LIMIT;
+  const unshipped = group.unavailable.map((u) => `${STORE_META[u.provider].name}: no offer to Israel`);
+  const bestStore = STORE_META[bestOffer(group).provider].name;
   return {
-    headline: `Available on ${group.offers.length} stores`,
-    prices: shown.join(" vs ") + (hidden > 0 ? ` +${hidden} more` : ""),
-    bestDeal: `Best deal on ${STORE_META[bestOffer(group).provider].name}`,
+    headline:
+      priced >= 2
+        ? `Available on ${priced} stores`
+        : `Compared on ${priced + group.unavailable.length} stores`,
+    prices: [shown.join(" vs ") + (hidden > 0 ? ` +${hidden} more` : ""), ...unshipped].join(" vs "),
+    bestDeal: priced >= 2 ? `Best deal on ${bestStore}` : `Only ${bestStore} ships it to Israel`,
   };
 }
 
@@ -74,16 +87,17 @@ export interface FindMatchesLink {
 
 /**
  * A focused search for a single-store item, so its twin at another store can
- * turn up and group with it. Null when no other store is connected, or when
- * the focused search is the one already on screen.
+ * turn up and group with it. Null when every other connected store is already
+ * accounted for (including one that won't ship it), or when the focused
+ * search is the one already on screen.
  */
 export function findMatchesLink(
   group: ProductGroup,
   connectedStores: readonly ProviderId[],
   currentQuery: string,
 ): FindMatchesLink | null {
-  const best = bestOffer(group);
-  const others = connectedStores.filter((store) => store !== best.provider);
+  const known = new Set([...group.offers, ...group.unavailable].map((o) => o.provider));
+  const others = connectedStores.filter((store) => !known.has(store));
   const text = matchSearchText(group.title);
   if (others.length === 0 || !text || normalizeQueryText(text) === normalizeQueryText(currentQuery))
     return null;

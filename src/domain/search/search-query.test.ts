@@ -5,13 +5,13 @@ describe("searchCacheKey", () => {
   it("is scoped by destination and provider, versioned for invalidation", () => {
     expect(
       searchCacheKey({ normalizedText: "wireless earbuds", destination: { country: "IL" } }, "temu"),
-    ).toBe("search:v2:IL:temu:wireless earbuds");
+    ).toBe("search:v3:IL:temu:wireless earbuds");
   });
 
   it("keeps page 1 unsuffixed and gives each deeper store page its own key", () => {
     const query = { normalizedText: "wireless earbuds", destination: { country: "IL" } } as const;
     expect(searchCacheKey(query, "ebay", 1)).toBe(searchCacheKey(query, "ebay"));
-    expect(searchCacheKey(query, "ebay", 2)).toBe("search:v2:IL:ebay:wireless earbuds:p2");
+    expect(searchCacheKey(query, "ebay", 2)).toBe("search:v3:IL:ebay:wireless earbuds:p2");
   });
 
   it("ignores the city so courier estimates don't fragment the cache", () => {

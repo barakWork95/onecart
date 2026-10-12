@@ -20,6 +20,9 @@ export const ebayRawItemSchema = z.object({
   title: z.string().min(1),
   price: amount,
   image: z.object({ imageUrl: z.string() }).optional(),
+  /** Larger renditions; the fallback when `image` is missing. */
+  thumbnailImages: z.array(z.object({ imageUrl: z.string() })).optional(),
+  additionalImages: z.array(z.object({ imageUrl: z.string() })).optional(),
   itemWebUrl: z.string().optional(),
   shippingOptions: z.array(shippingOption).optional(),
   marketingPrice: z.object({ originalPrice: amount.optional() }).optional(),
