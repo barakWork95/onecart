@@ -169,15 +169,22 @@ SearchBar (client) → /search?q=… (Server Component)
   - **From `md` up:** the tab bar is hidden and the same links sit in the header
     (`DesktopNav`).
   - Both read `NAV_ITEMS` from `src/components/layout/nav-items.ts`, so add sections there only.
-- Product images are full-bleed `object-cover` in a square, like store listings. Don't add
-  padding or `object-contain` letterboxing.
+- Product images are shown Amazon-style: a white square tile (`bg-white`, in both themes) with the
+  whole product visible (`object-contain p-4`). Store photos are shot on white, so the tile blends
+  in. Never crop products with `object-cover`.
 - Use brand tokens from `globals.css` (`bg-primary`, `text-brand-navy`, `bg-success` for "VAT
   included" and "free delivery" chips). Do not use ad-hoc hex colors in components.
 - Format prices with `formatMoney` from `src/lib/format.ts`. It uses the `en-IL` locale, so the
   symbol comes first ("₪89"); `he-IL` would render "89 ₪" in the English UI. Headline prices round
   to whole shekels; breakdowns pass `{ precise: true }`. Never concatenate `"₪" + n`.
-- Inputs that may hold Hebrew use `dir="auto"`. Dark mode follows the OS
-  (`prefers-color-scheme`); there is no `.dark` class.
+- Inputs that may hold Hebrew use `dir="auto"`.
+- **Theme.** Dark mode is a `.dark` class on `<html>`, used through the `dark:` variant.
+  - `THEME_INIT_SCRIPT` (`src/components/layout/theme.ts`) is inlined in the root layout's `<head>`.
+    It applies the stored choice (`localStorage["onecart-theme"]`), or else the OS setting, before
+    first paint.
+  - `ThemeToggle` in the header switches and stores the theme.
+  - Don't reintroduce `next-themes`: it renders its script from a client component, which makes
+    React 19 log an error.
 - Keep layouts RTL-safe: use logical utilities (`ms-*`, `me-*`, `ps-*`, `start-*`) instead of
   `ml-*` or `left-*`, so a Hebrew UI can ship later without a rewrite.
 - Every interactive element must have an accessible name, and each page has exactly one `<h1>`.

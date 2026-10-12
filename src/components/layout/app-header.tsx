@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DesktopNav } from "@/components/layout/desktop-nav";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 export function AppHeader() {
   return (
@@ -16,12 +17,15 @@ export function AppHeader() {
           </Link>
           <DesktopNav />
         </div>
-        <span
-          className="shrink-0 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
-          title="All prices are shown in Israeli shekels, delivered to Israel"
-        >
-          ₪ ILS
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
+            title="All prices are shown in Israeli shekels, delivered to Israel"
+          >
+            ₪ ILS
+          </span>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

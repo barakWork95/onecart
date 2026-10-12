@@ -261,3 +261,39 @@ test("the Amazon Associates disclosure appears on every page", async ({ page }) 
     ).toBeVisible();
   }
 });
+
+test.describe("theme", () => {
+  test("follows the system theme by default", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    await expect(page.locator("html")).not.toHaveClass(/\bdark\b/);
+  });
+
+  test("the header toggle switches theme, persists across reloads, and logs no errors", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/search?q=wireless+earbuds");
+
+    const toggle = page.getByRole("banner").getByRole("button", { name: "Toggle dark mode" });
+    await toggle.click();
+    await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+
+    await page.reload();
+    await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+    // Product tiles stay white in dark mode so store photos blend in.
+    await expect(page.locator("article .aspect-square").first()).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)",
+    );
+
+    await page.getByRole("banner").getByRole("button", { name: "Toggle dark mode" }).click();
+    await expect(page.locator("html")).not.toHaveClass(/\bdark\b/);
+    expect(errors).toEqual([]);
+  });
+});
