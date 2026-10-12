@@ -38,6 +38,7 @@ function TranslationNotice({
         Showing results for{" "}
         <strong className="font-semibold text-foreground">“{query.normalizedText}”</strong>
         <span className="sr-only">, translated from Hebrew</span>
+        {translation.partial && <span> (some words couldn&apos;t be translated)</span>}
       </span>
     </p>
   );

@@ -124,6 +124,22 @@ describe("searchProducts — fan-out and grouping", () => {
     expect(response.groups.map((g) => g.id)).toEqual(["grp:aliexpress:a1", "grp:amazon:z2"]);
   });
 
+  it("never filters store results by the query text — the store's own search decides relevance", async () => {
+    // A store may return products whose titles don't repeat the query words (synonyms, related items).
+    const related = makeProduct({
+      provider: "amazon",
+      sku: "r1",
+      title: "Sony WH-1000XM5 Over-Ear",
+      total: 900_00,
+    });
+    const amazon = fakeProvider("amazon", () => ok([related]));
+    const response = await setup([amazon.provider]).search({
+      ...QUERY,
+      normalizedText: "wireless headphones",
+    });
+    expect(response.groups.map((g) => g.id)).toEqual(["grp:amazon:r1"]);
+  });
+
   it("always asks providers for page 1 and paginates locally", async () => {
     const ali = fakeProvider("aliexpress", () => ok([EARBUDS.aliexpress, HEADPHONES]));
     const response = await setup([ali.provider]).search({ ...QUERY, page: 2, pageSize: 1 });
@@ -178,6 +194,17 @@ describe("searchProducts — resilience and partial results", () => {
     expect(outcome(response, "temu")).toMatchObject({ status: "timeout", errorCode: "TIMEOUT" });
     expect(receivedSignal?.aborted).toBe(true);
     expect(response).toMatchObject({ isPartial: true, totalOffers: 1 });
+  });
+
+  it("gives a store its own deadline when it declares one", async () => {
+    // Search-wide deadline is 50ms; this store answers after 120ms but allows itself 500ms.
+    const slow: ProductSearchProvider = {
+      id: "amazon",
+      timeoutMs: 500,
+      search: () => new Promise((resolve) => setTimeout(() => resolve(ok([EARBUDS.amazon])), 120)),
+    };
+    const response = await setup([slow]).search(QUERY);
+    expect(outcome(response, "amazon")?.status).toBe("ok");
   });
 
   it("reports an adapter-reported timeout as a timeout", async () => {

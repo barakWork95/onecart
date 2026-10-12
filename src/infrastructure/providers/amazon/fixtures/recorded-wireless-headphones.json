@@ -1,0 +1,550 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "k": "wireless headphones",
+    "amazon_domain": "amazon.com",
+    "language": "en_US",
+    "device": "desktop",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B0BS1QCFHX",
+      "options": "See options",
+      "badges": ["Overall Pick"],
+      "title": "Sony WH-CH720N Wireless Noise Cancelling Over-Ear Headphones, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51rpbVmi9XL._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 17000,
+      "bought_last_month": "10K+ bought in past month",
+      "works_with_alexa": true,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "asin": "B0CRTR3PMF",
+      "options": "See options",
+      "title": "Soundcore P30i by Anker Noise Cancelling Earbuds, Hands-Free Viewing",
+      "thumbnail": "https://m.media-amazon.com/images/I/51013C6va8L._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 44000,
+      "bought_last_month": "10K+ bought in past month",
+      "climate_pledge_friendly": true,
+      "sustainability_features": [
+        {
+          "position": 1,
+          "name": "Carbon impact",
+          "snippet": "Carbon emissions from the lifecycle of this product were measured, reduced and/or offset.",
+          "thumbnail": "https://m.media-amazon.com/images/I/314xGMCjZxL._SS200_.png",
+          "certified_by": "ClimatePartner Verified",
+          "certified_info": "ClimatePartner Verified certifies products and services from companies that have calculated their carbon footprint, set reduction targets, implemented reduction measures, and financed certified climate projects. ClimatePartner is an independent certification partner that enables companies to take measurable climate action with full transparency via an individual Climate ID page."
+        }
+      ],
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "asin": "B0C8PR4W22",
+      "options": "See options",
+      "title": "Beats Studio Pro Premium Wireless Over-Ear Headphones- Up to 40-Hour Battery Life, Active Noise Cancelling, Great for Travel & Commuting, USB-C Lossless Audio, Apple & Android Compatible -Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61u-OaDSfQL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 28700,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B0BTYCJXBK",
+      "options": "See options",
+      "title": "Soundcore by Anker P20i True Wireless Earbuds, with Big Bass, 30H Playtime",
+      "thumbnail": "https://m.media-amazon.com/images/I/41hED0cR6tL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 116600,
+      "bought_last_month": "5K+ bought in past month",
+      "climate_pledge_friendly": true,
+      "sustainability_features": [
+        {
+          "position": 1,
+          "name": "Carbon impact",
+          "snippet": "Carbon emissions from the lifecycle of this product were measured, reduced and/or offset.",
+          "thumbnail": "https://m.media-amazon.com/images/I/314xGMCjZxL._SS200_.png",
+          "certified_by": "ClimatePartner Verified",
+          "certified_info": "ClimatePartner Verified certifies products and services from companies that have calculated their carbon footprint, set reduction targets, implemented reduction measures, and financed certified climate projects. ClimatePartner is an independent certification partner that enables companies to take measurable climate action with full transparency via an individual Climate ID page."
+        }
+      ],
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B0C1QQYP53",
+      "options": "See options",
+      "title": "JBL Tune Flex - True Wireless Noise Cancelling Earbuds (Blue), Small",
+      "thumbnail": "https://m.media-amazon.com/images/I/61PPlQVg8xL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 14600,
+      "bought_last_month": "5K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B0CFSKN2LW",
+      "options": "See options",
+      "title": "Sony WH-CH520 Wireless Bluetooth On-Ear Headphones with Microphone, Up to 50 Hours Battery Life with Quick Charge Function, Includes USB-C Charging Cable - Black - International Version (No Warranty)",
+      "thumbnail": "https://m.media-amazon.com/images/I/41ETuD2aZRL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 7800,
+      "bought_last_month": "100+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B0FM4BRQ5W",
+      "options": "See options",
+      "title": "Skullcandy Icon 180 Wireless On-Ear Bluetooth Headphones - True Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71UK3UFD9AL._AC_UY218_.jpg",
+      "rating": 4.1,
+      "reviews": 486,
+      "bought_last_month": "1K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B0FKG6TDRR",
+      "options": "See options",
+      "title": "CMF BY Nothing Headphone Pro Active Noise Canceling Wireless Headphones Bluetooth 5.4 Over The Ear Headset, 50H ANC Playtime, Bass&Treble Slider, Custom EQ&Spatial Audio, Hi-Res LDAC, Dark Grey",
+      "thumbnail": "https://m.media-amazon.com/images/I/61GgFT3p9QL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 1900,
+      "bought_last_month": "1K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "asin": "B0DDQLGDY3",
+      "options": "See options",
+      "title": "Beats Solo 4 - Wireless On-Ear Bluetooth Headphones, Up to 50-Hour Battery Life, Ultra-Lightweight Comfort, Powerful and Balanced Sound, Apple & Android Compatible - Black & Gold",
+      "thumbnail": "https://m.media-amazon.com/images/I/51lI3NHA7-L._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 29500,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 10,
+      "asin": "B0FH5YWH7B",
+      "options": "See options",
+      "title": "Razer BlackShark V3 X HyperSpeed Wireless PC Gaming Headset, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71pDWCIirLL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 707,
+      "bought_last_month": "2K+ bought in past month",
+      "climate_pledge_friendly": true,
+      "sustainability_features": [
+        {
+          "position": 1,
+          "name": "Safer chemicals",
+          "snippet": "Made with chemicals safer for human health and the environment.",
+          "thumbnail": "https://m.media-amazon.com/images/I/31qtcPd2ODL._SS200_.png",
+          "certified_by": "ECOLOGO",
+          "certified_info": "ECOLOGO certified products are made with materials that reduce environmental impact at one or more stages of their life cycle, from raw materials to end of life. An ECOLOGO certification indicates that a product has met environmental performance standards, which include criteria in some or all of the following categories: materials, energy, manufacturing and operations, health and environment, product performance and use, and product stewardship and innovation. Products are evaluated on the applicable criteria through testing and auditing."
+        },
+        {
+          "position": 2,
+          "name": "Manufacturing practices",
+          "snippet": "Manufactured using processes that reduce the risk of negative environmental impact.",
+          "thumbnail": "https://m.media-amazon.com/images/I/31qtcPd2ODL._SS200_.png",
+          "certified_by": "ECOLOGO",
+          "certified_info": "ECOLOGO certified products are made with materials that reduce environmental impact at one or more stages of their life cycle, from raw materials to end of life. An ECOLOGO certification indicates that a product has met environmental performance standards, which include criteria in some or all of the following categories: materials, energy, manufacturing and operations, health and environment, product performance and use, and product stewardship and innovation. Products are evaluated on the applicable criteria through testing and auditing."
+        }
+      ],
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0HFMYDH5X",
+      "title": "TV Headphones for Seniors, 65H, Comfortable Fit, Easy Setup",
+      "thumbnail": "https://m.media-amazon.com/images/I/61UKtXC7WyL._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 300,
+      "bought_last_month": "1K+ bought in past month",
+      "price": "ILS 205.45",
+      "extracted_price": 205.45,
+      "old_price": "ILS 216.27",
+      "extracted_old_price": 216.27,
+      "delivery": ["FREE delivery Tue, Nov 3 to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 205.45",
+          "extracted_primary_price": 205.45,
+          "old_primary_price": "ILS 216.27",
+          "extracted_old_primary_price": 216.27
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B09TRW57WB",
+      "options": "See options",
+      "title": "HyperX Cloud Alpha Wireless - Gaming Headset for PC, 300-hour battery life, DTS Headphone:X Spatial Audio, Memory foam, Dual Chamber Drivers, Noise-canceling mic, Durable aluminum frame,Red",
+      "thumbnail": "https://m.media-amazon.com/images/I/71pFeJFdJQL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 6700,
+      "bought_last_month": "1K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B0FHLPS8ZF",
+      "options": "See options",
+      "title": "Beats Solo 4 - Wireless On-Ear Bluetooth Headphones, Up to 50-Hour Battery Life, Ultra-Lightweight Comfort, Powerful and Balanced Sound, Apple & Android Compatible - Amazon Exclusive Metallic Pink",
+      "thumbnail": "https://m.media-amazon.com/images/I/51kJvfwJSWL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 29500,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B0C8PSMPTH",
+      "options": "See options",
+      "title": "Beats Studio Pro Premium Wireless Over-Ear Headphones- Up to 40-Hour Battery Life, Active Noise Cancelling, Great for Travel & Commuting, USB-C Lossless Audio, Apple & Android Compatible - Sandstone",
+      "thumbnail": "https://m.media-amazon.com/images/I/51t0IE0zjaL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 28700,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0FDKR293G",
+      "options": "See options",
+      "title": "Bose QuietComfort Ultra Bluetooth Headphones (2nd Gen), Wireless Headphones with Spatial Audio, Over Ear Noise Cancelling with Mic, Up to 30 Hours of Play time, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51revx-zToL._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 2900,
+      "bought_last_month": "3K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0D46JP795",
+      "options": "See options",
+      "title": "Amazon Basics Hybrid Active Noise Cancelling Headphones, Wireless Bluetooth 5.3, 35 Hours Battery Life with ANC On, 45 Hours with ANC Off, Over Ear Comfortable Fit with Soft Ear Cushions, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71hrthGDz1L._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 1000,
+      "bought_last_month": "1K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    }
+  ],
+  "featured_products": [
+    {
+      "title": "Customers frequently viewed",
+      "products": [
+        {
+          "position": 1,
+          "asin": "B0FGCTK61N",
+          "sponsored": true,
+          "title": "Srhythm NiceComfort 35(2nd Gen)Noise Cancelling Headphones 4-Speakers 40kHz",
+          "thumbnail": "https://m.media-amazon.com/images/I/610VKfWfK4L._AC_UL320_.jpg",
+          "rating": 4.2,
+          "reviews": 264,
+          "bought_last_month": "50+ bought in past month",
+          "price": "ILS 216.27",
+          "extracted_price": 216.27,
+          "offers": ["Save 5% on 2 select item(s)"],
+          "delivery": [
+            "FREE delivery Tue, Nov 3 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Tue, Nov 3 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 216.27",
+              "extracted_primary_price": 216.27
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "asin": "B0BXNT9CTQ",
+          "sponsored": true,
+          "title": "Kids Unicorns Headphones with Mic for School/Travel,95dB Volume Limited,Shareport,On/Over Ear Wired Headsets with Nylon Cable-Hot Pink",
+          "thumbnail": "https://m.media-amazon.com/images/I/71JSkvfjXyL._AC_UL320_.jpg",
+          "rating": 4.4,
+          "reviews": 4900,
+          "price": "ILS 43.23",
+          "extracted_price": 43.23,
+          "delivery": [
+            "ILS 57.10 delivery Thu, Oct 29Or fastest delivery Thu, Oct 22",
+            "ILS 57.10 delivery Thu, Oct 29",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 43.23",
+              "extracted_primary_price": 43.23
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "asin": "B0F9YN3RNB",
+          "sponsored": true,
+          "title": "TONOSHARK Noise Cancelling Headphones for Kids,Colorful RGB LED Lights",
+          "thumbnail": "https://m.media-amazon.com/images/I/61ht+zSe4RL._AC_UL320_.jpg",
+          "rating": 4.4,
+          "reviews": 1000,
+          "price": "ILS 154.47",
+          "extracted_price": 154.47,
+          "delivery": [
+            "FREE delivery Tue, Nov 3 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Tue, Nov 3 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 154.47",
+              "extracted_primary_price": 154.47
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "asin": "B07CKRZ42S",
+          "sponsored": true,
+          "title": "Gaming Headset for Xbox One, PS4, PS5, Nintendo Switch, Bass Surround and Noise Cancelling 3.5mm Over Ear Headphones with Mic for Laptop PC Smartphones, Pink",
+          "thumbnail": "https://m.media-amazon.com/images/I/61usSw64TTL._AC_UL320_.jpg",
+          "rating": 4.3,
+          "reviews": 6200,
+          "bought_last_month": "100+ bought in past month",
+          "price": "ILS 58.68",
+          "extracted_price": 58.68,
+          "save_with_coupon": "Save 5% with coupon",
+          "delivery": [
+            "ILS 61.34 delivery Thu, Oct 29Or fastest delivery Thu, Oct 22",
+            "ILS 61.34 delivery Thu, Oct 29",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 58.68",
+              "extracted_primary_price": 58.68
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "asin": "B09KYJ8RKG",
+          "sponsored": true,
+          "title": "iJoy Premium Headphones with Microphone for Kids Kid Safe Over-Ear Headphones with Hearing Protection for Boys & Girls- Kid’s Adjustable Headset with Mic for School, Music- Blue (Pink)",
+          "thumbnail": "https://m.media-amazon.com/images/I/61eChPIsVtL._AC_UL320_.jpg",
+          "rating": 4.0,
+          "reviews": 76,
+          "price": "ILS 52.50",
+          "extracted_price": 52.5,
+          "delivery": [
+            "ILS 57.72 delivery Sun, Nov 1Or fastest delivery Oct 21 - 22",
+            "ILS 57.72 delivery Sun, Nov 1",
+            "Or fastest delivery Oct 21 - 22"
+          ],
+          "small_business": true,
+          "purchase_options": [
+            {
+              "primary_price": "ILS 52.50",
+              "extracted_primary_price": 52.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Picks from Amazon Influencers",
+      "products": [
+        {
+          "position": 1,
+          "asin": "B0FGCTK61N",
+          "sponsored": true,
+          "title": "Srhythm NiceComfort 35(2nd Gen)Noise Cancelling Headphones 4-Speakers 40kHz",
+          "thumbnail": "https://m.media-amazon.com/images/I/610VKfWfK4L._AC_UL320_.jpg",
+          "rating": 4.2,
+          "reviews": 264,
+          "bought_last_month": "50+ bought in past month",
+          "price": "ILS 216.27",
+          "extracted_price": 216.27,
+          "offers": ["Save 5% on 2 select item(s)"],
+          "delivery": [
+            "FREE delivery Tue, Nov 3 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Tue, Nov 3 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 216.27",
+              "extracted_primary_price": 216.27
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "asin": "B0F1G3BJ7G",
+          "sponsored": true,
+          "title": "USB C Wired Over-Ear Headphones with Microphone",
+          "thumbnail": "https://m.media-amazon.com/images/I/71zG6J6yHzL._AC_UL320_.jpg",
+          "rating": 4.2,
+          "reviews": 337,
+          "price": "ILS 43.23",
+          "extracted_price": 43.23,
+          "old_price": "ILS 52.50",
+          "extracted_old_price": 52.5,
+          "delivery": [
+            "ILS 56.61 delivery Thu, Oct 29Or fastest delivery Thu, Oct 22",
+            "ILS 56.61 delivery Thu, Oct 29",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 43.23",
+              "extracted_primary_price": 43.23,
+              "old_primary_price": "ILS 52.50",
+              "extracted_old_primary_price": 52.5
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "asin": "B0F9YN3RNB",
+          "sponsored": true,
+          "title": "TONOSHARK Noise Cancelling Headphones for Kids,Colorful RGB LED Lights",
+          "thumbnail": "https://m.media-amazon.com/images/I/61ht+zSe4RL._AC_UL320_.jpg",
+          "rating": 4.4,
+          "reviews": 1000,
+          "price": "ILS 154.47",
+          "extracted_price": 154.47,
+          "delivery": [
+            "FREE delivery Tue, Nov 3 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Tue, Nov 3 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 154.47",
+              "extracted_primary_price": 154.47
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "asin": "B08JCD23MJ",
+          "sponsored": true,
+          "title": "LORELEI X8 Over-Ear Wired Headphones with Microphone with 1.45m-Tangle-Free Nylon Line&3.5mm Plug,Lightweight Foldable & Portable Headphones for Smartphone,Tablet,Computer,Mp3/4(Dark Purple)",
+          "thumbnail": "https://m.media-amazon.com/images/I/71KbTAWLTNL._AC_UL320_.jpg",
+          "rating": 4.4,
+          "reviews": 10000,
+          "bought_last_month": "1K+ bought in past month",
+          "price": "ILS 46.32",
+          "extracted_price": 46.32,
+          "delivery": [
+            "ILS 73.63 delivery Thu, Oct 29Or fastest delivery Thu, Oct 22",
+            "ILS 73.63 delivery Thu, Oct 29",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 46.32",
+              "extracted_primary_price": 46.32
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "asin": "B0H6WYZKSD",
+          "sponsored": true,
+          "title": "Redragon USB Wired Gaming Headset with 7.1 Surround Sound, Volume Control",
+          "thumbnail": "https://m.media-amazon.com/images/I/61Eh7kqBHTL._AC_UL320_.jpg",
+          "rating": 4.2,
+          "reviews": 21,
+          "price": "ILS 123.57",
+          "extracted_price": 123.57,
+          "offers": ["Save 6% on 2 select item(s)"],
+          "delivery": [
+            "ILS 70.05 delivery Thu, Oct 29Or fastest delivery Thu, Oct 22",
+            "ILS 70.05 delivery Thu, Oct 29",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 123.57",
+              "extracted_primary_price": 123.57
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "serpapi_pagination": {
+    "current": 1
+  }
+}

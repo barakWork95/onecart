@@ -97,6 +97,7 @@ function buildServices(): Services {
           apiKey: config.SERPAPI_API_KEY,
           importPolicy: ISRAEL_IMPORT_POLICY,
           getFxRates,
+          pages: config.SERPAPI_AMAZON_PAGES,
         }),
       );
     }

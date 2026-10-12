@@ -84,7 +84,7 @@ const renderView = (props: Partial<ResultsViewProps> = {}) =>
   render(
     <ResultsView
       response={response()}
-      translation={{ from: "he", source: "glossary" }}
+      translation={{ from: "he", source: "glossary", partial: false }}
       demoMode={false}
       outboundLinks={LINKS}
       {...props}
@@ -150,8 +150,13 @@ describe("ResultsView", () => {
   });
 
   it("explains when Hebrew couldn't be translated", () => {
-    renderView({ translation: { from: "he", source: null } });
+    renderView({ translation: { from: "he", source: null, partial: false } });
     expect(screen.getByText(/couldn't translate your Hebrew search/)).toBeInTheDocument();
+  });
+
+  it("tells the shopper when only part of a Hebrew query could be translated", () => {
+    renderView({ translation: { from: "he", source: "glossary", partial: true } });
+    expect(screen.getByText(/some words couldn't be translated/)).toBeInTheDocument();
   });
 
   it("says nothing about translation for English queries", () => {

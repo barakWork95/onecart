@@ -57,6 +57,8 @@ export interface QueryTranslationInfo {
   readonly from: "he";
   /** null when translation failed and we searched with the original text. */
   readonly source: TranslationSource | null;
+  /** Some words couldn't be translated and were left out of the search. */
+  readonly partial: boolean;
 }
 
 export interface BuiltSearchQuery {
@@ -79,12 +81,12 @@ export async function buildSearchQuery(
     try {
       const result = await translator.translateToEnglish(request.text);
       englishText = result.text;
-      translation = { from: "he", source: result.source };
+      translation = { from: "he", source: result.source, partial: result.partial ?? false };
     } catch (error) {
       logger.warn("search: translation failed, searching with original text", {
         error: error instanceof Error ? error.message : String(error),
       });
-      translation = { from: "he", source: null };
+      translation = { from: "he", source: null, partial: false };
     }
   }
 

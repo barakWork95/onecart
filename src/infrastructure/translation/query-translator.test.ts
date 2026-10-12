@@ -37,6 +37,7 @@ describe("createQueryTranslator", () => {
     await expect(translator.translateToEnglish("אוזניות אלחוטיות")).resolves.toEqual({
       text: "wireless earbuds",
       source: "glossary",
+      partial: false,
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("DeepL failed"), { code: "HTTP_456" });
   });
@@ -59,8 +60,22 @@ describe("createQueryTranslator", () => {
     await expect(translator.translateToEnglish("מקלדת מכנית")).resolves.toEqual({
       text: "mechanical keyboard",
       source: "glossary",
+      partial: false,
     });
     expect(set).not.toHaveBeenCalled();
+  });
+
+  it("returns partial glossary translations and logs the missing words", async () => {
+    const logger = { warn: jest.fn() };
+    const translator = createQueryTranslator({ cache: createInMemoryRedis(), deepl: null, logger });
+    await expect(translator.translateToEnglish("אוזניות מגניבות")).resolves.toEqual({
+      text: "headphones",
+      source: "glossary",
+      partial: true,
+    });
+    expect(logger.warn).toHaveBeenCalledWith("translate: glossary left words untranslated", {
+      words: ["מגניבות"],
+    });
   });
 
   it("rejects when nothing can translate the query", async () => {

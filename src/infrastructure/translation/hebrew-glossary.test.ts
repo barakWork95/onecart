@@ -4,32 +4,63 @@ import {
   translateWithGlossary,
 } from "@/infrastructure/translation/hebrew-glossary";
 
+const t = (text: string) => translateWithGlossary(text);
+
 describe("translateWithGlossary", () => {
   it("translates known phrases with English word order", () => {
-    expect(translateWithGlossary("אוזניות אלחוטיות")).toBe("wireless earbuds");
+    expect(t("אוזניות אלחוטיות")).toEqual({ text: "wireless earbuds", untranslated: [] });
+    expect(t("מכונת קפה")?.text).toBe("coffee machine");
   });
 
   it("prefers the longest phrase", () => {
-    expect(translateWithGlossary("שואב אבק רובוטי")).toBe("robot vacuum");
-    expect(translateWithGlossary("שואב אבק")).toBe("vacuum cleaner");
+    expect(t("שואב אבק רובוטי")?.text).toBe("robot vacuum");
+    expect(t("שואב אבק")?.text).toBe("vacuum cleaner");
   });
 
-  it("falls back to word-by-word and passes Latin words and numbers through", () => {
-    expect(translateWithGlossary("אוזניות sony 2")).toBe("earbuds sony 2");
-    expect(translateWithGlossary("מקלדת מכנית  שחורה")).toBe("mechanical keyboard black");
+  it("translates word by word, keeping Latin words and numbers", () => {
+    expect(t("אוזניות sony 2")?.text).toBe("headphones sony 2");
+    expect(t("מקלדת מכנית  שחורה")?.text).toBe("mechanical keyboard black");
   });
 
-  it("ignores niqqud and geresh", () => {
-    expect(translateWithGlossary("רמקול בלוטות'")).toBe("bluetooth speaker");
-    expect(translateWithGlossary("אוֹזְנִיּוֹת")).toBe("earbuds");
+  it("understands every gender/number form of common adjectives", () => {
+    for (const form of ["אלחוטי", "אלחוטית", "אלחוטיים", "אלחוטיות"]) {
+      expect(t(`רמקול ${form}`)?.text).toBe("speaker wireless");
+    }
   });
 
-  it("returns null when any Hebrew word is unknown (no half translations)", () => {
-    expect(translateWithGlossary("אוזניות סגולות")).toBeNull();
+  it("strips Hebrew prefixes (ל/ב/ה/ו/ש/מ/כ and two-letter combos)", () => {
+    expect(t("כיסוי לאייפון")?.text).toBe("case iphone");
+    expect(t("מטען לרכב")?.text).toBe("car charger");
+    expect(t("מחזיק לטלפון")?.text).toBe("holder phone");
+    expect(t("והאוזניות")?.text).toBe("headphones");
+    expect(t("שבתיק")?.text).toBe("bag"); // ש + ב + תיק
+    expect(t("ושבתיק")).toBeNull(); // three prefix letters: too ambiguous to guess
   });
 
-  it("returns null for empty input", () => {
-    expect(translateWithGlossary("  ")).toBeNull();
+  it("drops function words like 'with' and 'for'", () => {
+    expect(t("אוזניות עם מיקרופון")?.text).toBe("headphones microphone");
+    expect(t("צעצועים בשביל ילדים")?.text).toBe("toys kids");
+  });
+
+  it("transliterates common brands", () => {
+    expect(t("אוזניות סוני")?.text).toBe("headphones sony");
+    expect(t("שעון סמסונג גלקסי")?.text).toBe("watch samsung galaxy");
+    expect(t("ג'יביאל")?.text).toBe("jbl");
+  });
+
+  it("ignores niqqud and quote marks", () => {
+    expect(t("רמקול בלוטות'")?.text).toBe("bluetooth speaker");
+    expect(t("אוֹזְנִיּוֹת")?.text).toBe("headphones");
+  });
+
+  it("translates what it can and reports the words it couldn't", () => {
+    expect(t("אוזניות מגניבות סגולות")).toEqual({ text: "headphones purple", untranslated: ["מגניבות"] });
+  });
+
+  it("returns null when no Hebrew word could be translated", () => {
+    expect(t("מילים לא מוכרות")).toBeNull();
+    expect(t("  ")).toBeNull();
+    expect(t("של עם")).toBeNull();
   });
 
   it("only maps to lower-case English", () => {

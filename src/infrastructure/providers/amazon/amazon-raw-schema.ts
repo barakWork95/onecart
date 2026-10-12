@@ -27,4 +27,9 @@ export const amazonSearchResponseSchema = z.object({
   /** Present on failures, and on successful searches with no results. */
   error: z.string().optional(),
   organic_results: z.array(z.unknown()).optional(),
+  /**
+   * Carousels ("Customers frequently viewed", …). With `shipping_location=IL`
+   * these are often the only priced, deliverable items on a page.
+   */
+  featured_products: z.array(z.object({ products: z.array(z.unknown()).optional() })).optional(),
 });

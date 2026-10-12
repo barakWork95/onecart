@@ -165,7 +165,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
               detail: error instanceof Error ? error.message : String(error),
             },
           })),
-      timeoutMs,
+      provider.timeoutMs ?? timeoutMs,
       signal,
     );
     const latencyMs = now() - startedAt;

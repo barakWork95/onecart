@@ -87,7 +87,16 @@ describe("buildSearchQuery", () => {
       detectedLanguage: "he",
       normalizedText: "wireless earbuds",
     });
-    expect(built.translation).toEqual({ from: "he", source: "deepl" });
+    expect(built.translation).toEqual({ from: "he", source: "deepl", partial: false });
+  });
+
+  it("passes through a partial glossary translation", async () => {
+    const built = await buildSearchQuery(
+      { ...base, text: "אוזניות סוני מגניבות" },
+      translator(async () => ({ text: "headphones sony", source: "glossary", partial: true })),
+    );
+    expect(built.query.normalizedText).toBe("headphones sony");
+    expect(built.translation).toEqual({ from: "he", source: "glossary", partial: true });
   });
 
   it("falls back to the original text and flags it when translation fails", async () => {
@@ -98,7 +107,7 @@ describe("buildSearchQuery", () => {
       logger,
     );
     expect(built.query.normalizedText).toBe("משהו נדיר");
-    expect(built.translation).toEqual({ from: "he", source: null });
+    expect(built.translation).toEqual({ from: "he", source: null, partial: false });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("translation failed"), {
       error: "UNTRANSLATABLE",
     });

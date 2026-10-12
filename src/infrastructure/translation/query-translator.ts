@@ -17,7 +17,11 @@ export interface QueryTranslatorDeps {
   readonly logger?: Logger;
 }
 
-/** Chain: cache → DeepL → offline glossary. Successful machine translations are cached. */
+/**
+ * Chain: cache → DeepL → offline glossary. Successful machine translations are
+ * cached. The glossary may translate only part of a query (`partial`), which
+ * still beats sending Hebrew to English-language stores.
+ */
 export function createQueryTranslator(deps: QueryTranslatorDeps): QueryTranslator {
   const logger = deps.logger ?? noopLogger;
 
@@ -58,7 +62,13 @@ export function createQueryTranslator(deps: QueryTranslatorDeps): QueryTranslato
       }
 
       const glossary = translateWithGlossary(text);
-      if (glossary) return { text: glossary, source: "glossary" };
+      if (glossary) {
+        if (glossary.untranslated.length > 0) {
+          // Grow the glossary from these (or configure DEEPL_API_KEY).
+          logger.warn("translate: glossary left words untranslated", { words: glossary.untranslated });
+        }
+        return { text: glossary.text, source: "glossary", partial: glossary.untranslated.length > 0 };
+      }
       throw new TranslationError("UNTRANSLATABLE");
     },
   };

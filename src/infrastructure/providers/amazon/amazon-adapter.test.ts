@@ -114,6 +114,69 @@ describe("Amazon adapter — results", () => {
   });
 });
 
+describe("Amazon adapter — pages and unpriced items", () => {
+  const unpriced = (asin: string) => ({
+    asin,
+    title: `Item ${asin}`,
+    options: "See options",
+    purchase_options: [{ no_featured_offers: true }],
+  });
+
+  it("treats a page of items with no Israel offer as 'no results', not a broken response", async () => {
+    const body = { organic_results: [unpriced("B0UNPRICE1"), unpriced("B0UNPRICE2")] };
+    expect(await setup(async () => json(body)).search()).toEqual({ ok: true, value: [] });
+  });
+
+  it("reads priced items from the featured carousels", async () => {
+    const body = {
+      organic_results: [unpriced("B0UNPRICE1")],
+      featured_products: [
+        {
+          products: [{ asin: "B0FEATURED", title: "Carousel pick", price: "ILS 99.00", extracted_price: 99 }],
+        },
+        {},
+      ],
+    };
+    const result = await setup(async () => json(body)).search();
+    expect(result.ok && result.value.map((p) => p.providerProductId)).toEqual(["B0FEATURED"]);
+  });
+
+  it("fetches extra pages in parallel and tolerates a failing later page", async () => {
+    const { fetchMock, search } = setup(async (url) =>
+      url.searchParams.get("page") === "2" ? json({}, 500) : json(searchOk),
+    );
+    const result = await search();
+    expect(fetchMock.mock.calls.map(([u]) => new URL(String(u)).searchParams.get("page"))).toEqual([
+      null,
+      "2",
+    ]);
+    expect(result.ok && result.value).toHaveLength(5);
+  });
+
+  it("fails when page 1 fails, even if later pages succeed", async () => {
+    const { search } = setup(async (url) =>
+      url.searchParams.get("page") === "2" ? json(searchOk) : json({}, 503),
+    );
+    expect(await search()).toMatchObject({ ok: false, error: { code: "HTTP_503" } });
+  });
+
+  it.each([
+    [1, 1],
+    [3, 3],
+    [10, 3],
+    [0, 1],
+  ])("fetches %i requested page(s) as %i", async (pages, expected) => {
+    const { fetchMock, search } = setup(async () => json(searchNoResults), { pages });
+    await search();
+    expect(fetchMock).toHaveBeenCalledTimes(expected);
+  });
+
+  it("declares a longer deadline than the search-wide default, because SerpApi is slow", () => {
+    expect(setup(async () => json(searchNoResults)).provider.timeoutMs).toBe(9_000);
+    expect(setup(async () => json(searchNoResults), { timeoutMs: 5_000 }).provider.timeoutMs).toBe(5_000);
+  });
+});
+
 describe("Amazon adapter — failures never throw", () => {
   it("maps an invalid key (401) to unauthorized with SerpApi's message as internal detail", async () => {
     expect(await setup(async () => json(errorInvalidKey, 401)).search()).toEqual({

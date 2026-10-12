@@ -1,0 +1,548 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "k": "wireless headphones",
+    "amazon_domain": "amazon.com",
+    "language": "en_US",
+    "page": "2",
+    "device": "desktop",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B0FH3WP6XR",
+      "sponsored": true,
+      "title": "FM Radio Headphones, Headset for Mowing, Cycling, Jogging, Portable Radio Support USB Power, LED Display, 3.5mm Jack, Gifts for Seniors Elderly (Carbon)",
+      "thumbnail": "https://m.media-amazon.com/images/I/613Bcp8jr-L._AC_UY218_.jpg",
+      "rating": 3.9,
+      "reviews": 195,
+      "price": "ILS 55.59",
+      "extracted_price": 55.59,
+      "save_with_coupon": "Save 10% with coupon",
+      "delivery": ["ILS 57.81 delivery Tue, Nov 3", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 55.59",
+          "extracted_primary_price": 55.59
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "asin": "B09G3D81QM",
+      "sponsored": true,
+      "title": "LORELEI S9 Wired Headphones with Microphone for School，On-Ear Kids Headphones for Girls Boys，Folding Lightweight and 3.5mm Audio Jack Headset for Phone, Ipad，Tablet, PC, Chromebook (Pearl Pink)",
+      "thumbnail": "https://m.media-amazon.com/images/I/71iWuH1mMiL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 849,
+      "bought_last_month": "100+ bought in past month",
+      "price": "ILS 49.41",
+      "extracted_price": 49.41,
+      "delivery": ["ILS 56.64 delivery Oct 26 - Nov 1", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 49.41",
+          "extracted_primary_price": 49.41
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "asin": "B0HDP855VQ",
+      "options": "See options",
+      "title": "Hybrid Active Noise Cancelling Bluetooth Headphones Wireless Headphones",
+      "thumbnail": "https://m.media-amazon.com/images/I/61h+2KaD9IL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 88,
+      "bought_last_month": "5K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B0H5J3FDR2",
+      "options": "See options",
+      "title": "Wireless Earbuds, Sports Bluetooth Headphones, Running Headphones",
+      "thumbnail": "https://m.media-amazon.com/images/I/71yU6OL3zkL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 56,
+      "bought_last_month": "3K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B0D2YBQQ1P",
+      "options": "See options",
+      "title": "SteelSeries Arctis Nova 5 Wireless Multi-System Gaming Headset - Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61+WSjGgFzL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 1500,
+      "bought_last_month": "2K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B08FCGH2RL",
+      "options": "See options",
+      "title": "Skullcandy Crusher Evo Wireless Multi-Sensory Bass Headphones - True Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61TuQdBSgsL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 19700,
+      "bought_last_month": "8K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B08G1ZBKGP",
+      "options": "See options",
+      "title": "Skullcandy Hesh ANC Noise Cancelling Wireless Headphones - True Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71XV1uzAw8L._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 9400,
+      "bought_last_month": "500+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B0C1QWWZR4",
+      "options": "See options",
+      "title": "JBL Tune Buds - Noise Cancelling Earbuds - Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51EZig0rEAL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 10700,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "asin": "B0DW6BFVNB",
+      "options": "See options",
+      "title": "Belkin SoundForm Surround Wireless Over-Ear Headphones",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Oqmc44q7L._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 323,
+      "bought_last_month": "200+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 10,
+      "asin": "B09VJJLFX9",
+      "options": "See options",
+      "title": "Audio-Technica ATH-M20xBT Wireless Over-Ear Headphones, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/8123MFd26NL._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 1800,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0CX1Q4D44",
+      "sponsored": true,
+      "title": "USOTSO MPOWER Stereo Gaming Headset for PS4, PC, Mobile, Noise Cancelling Over Ear Headphones with Retractable Flexible Mic & Soft Memory Earmuffs for Laptop Mac Games-Angel Edition",
+      "thumbnail": "https://m.media-amazon.com/images/I/61LIpKW2PlL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 266,
+      "price": "ILS 123.57",
+      "extracted_price": 123.57,
+      "delivery": ["FREE delivery Thu, Oct 29 to Israel on $49 (ILS 151.41) of eligible items"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 123.57",
+          "extracted_primary_price": 123.57
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B088RCHL51",
+      "sponsored": true,
+      "title": "Wired Kids Headphones for School with Cord Mic,Safe Volume Limit 85/94dB",
+      "thumbnail": "https://m.media-amazon.com/images/I/61edyQQkX8L._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 3400,
+      "bought_last_month": "500+ bought in past month",
+      "price": "ILS 29.29",
+      "extracted_price": 29.29,
+      "old_price": "ILS 40.14",
+      "extracted_old_price": 40.14,
+      "delivery": ["ILS 55.71 delivery Thu, Oct 29", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 29.29",
+          "extracted_primary_price": 29.29,
+          "old_primary_price": "ILS 40.14",
+          "extracted_old_primary_price": 40.14
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B0HJGZ6FW7",
+      "title": "Ultra Open Ear Earbuds, Ergonomic Clip On Headphones for All-Day Comfort",
+      "thumbnail": "https://m.media-amazon.com/images/I/61kKQGWQlVL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 29,
+      "bought_last_month": "500+ bought in past month",
+      "price": "ILS 154.47",
+      "extracted_price": 154.47,
+      "old_price": "ILS 451.11",
+      "extracted_old_price": 451.11,
+      "save_with_coupon": "Save 40% with coupon",
+      "delivery": ["FREE delivery Tue, Nov 3 to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 154.47",
+          "extracted_primary_price": 154.47,
+          "old_primary_price": "ILS 451.11",
+          "extracted_old_primary_price": 451.11
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B0CN9GQ1LW",
+      "options": "See options",
+      "title": "Calmbee Hybrid Active Noise Cancelling Headphones Wireless Over Ear 140Hrs",
+      "thumbnail": "https://m.media-amazon.com/images/I/61zKWtjenPL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 1300,
+      "bought_last_month": "100+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0G1PJLWLZ",
+      "options": "See options",
+      "title": "Samsung Galaxy Buds 4 Pro (2026) AI True Wireless Bluetooth Earbuds, Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51QEHqsjzPL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 2500,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0FDKRX5G9",
+      "options": "See options",
+      "title": "Bose QuietComfort Ultra Bluetooth Headphones (2nd Gen), Wireless Headphones with Spatial Audio, Over Ear Noise Cancelling with Mic, Up to 30 Hours of Play time, White Smoke",
+      "thumbnail": "https://m.media-amazon.com/images/I/51PidGKAJ6L._AC_UY218_.jpg",
+      "rating": 4.3,
+      "reviews": 2900,
+      "bought_last_month": "500+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 17,
+      "asin": "B0F3PT1VBL",
+      "options": "See options",
+      "title": "Sony WH-1000XM6 The Best Noise Cancelling Wireless Headphones Midnight Blue",
+      "thumbnail": "https://m.media-amazon.com/images/I/61drDn6HJRL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 3800,
+      "bought_last_month": "1K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 18,
+      "asin": "B09YKYJX7Y",
+      "options": "See options",
+      "title": "Sony WI-C100 Wireless in-Ear Bluetooth Headphones with Built-in Mic, White",
+      "thumbnail": "https://m.media-amazon.com/images/I/41RTvQGbTNL._AC_UY218_.jpg",
+      "rating": 4.1,
+      "reviews": 15000,
+      "bought_last_month": "1K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 19,
+      "asin": "B0FQFB8FMG",
+      "options": "See options",
+      "title": "Apple AirPods Pro 3 Wireless Earbuds with Active Noise Cancellation",
+      "thumbnail": "https://m.media-amazon.com/images/I/61solmQSSlL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 16300,
+      "bought_last_month": "10K+ bought in past month",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 20,
+      "asin": "B0HFMCH32K",
+      "options": "See options",
+      "title": "Hybrid Active Noise Cancelling Bluetooth Headphones Wireless Headphones",
+      "thumbnail": "https://m.media-amazon.com/images/I/61BcX3KJ4IL._AC_UY218_.jpg",
+      "rating": 5.0,
+      "reviews": 63,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 21,
+      "asin": "B0H6RQD773",
+      "sponsored": true,
+      "title": "Open Ear Clip On Earbuds Wireless Headphones with Mirror(White)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61r-REOkONL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 13,
+      "bought_last_month": "50+ bought in past month",
+      "price": "ILS 196.12",
+      "extracted_price": 196.12,
+      "old_price": "ILS 251.40",
+      "extracted_old_price": 251.4,
+      "save_with_coupon": "Save 27% with coupon",
+      "delivery": ["FREE delivery Tue, Nov 3 to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 196.12",
+          "extracted_primary_price": 196.12,
+          "old_primary_price": "ILS 251.40",
+          "extracted_old_primary_price": 251.4
+        }
+      ]
+    },
+    {
+      "position": 22,
+      "asin": "B0F1G3BJ7G",
+      "sponsored": true,
+      "title": "USB C Wired Over-Ear Headphones with Microphone",
+      "thumbnail": "https://m.media-amazon.com/images/I/71zG6J6yHzL._AC_UY218_.jpg",
+      "rating": 4.2,
+      "reviews": 337,
+      "price": "ILS 43.23",
+      "extracted_price": 43.23,
+      "old_price": "ILS 52.50",
+      "extracted_old_price": 52.5,
+      "delivery": ["ILS 56.61 delivery Thu, Oct 29", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 43.23",
+          "extracted_primary_price": 43.23,
+          "old_primary_price": "ILS 52.50",
+          "extracted_old_primary_price": 52.5
+        }
+      ]
+    }
+  ],
+  "featured_products": [
+    {
+      "title": "Customers frequently viewed",
+      "products": [
+        {
+          "position": 1,
+          "asin": "B0CX1Q4D44",
+          "sponsored": true,
+          "title": "USOTSO MPOWER Stereo Gaming Headset for PS4, PC, Mobile, Noise Cancelling Over Ear Headphones with Retractable Flexible Mic & Soft Memory Earmuffs for Laptop Mac Games-Angel Edition",
+          "thumbnail": "https://m.media-amazon.com/images/I/61LIpKW2PlL._AC_UL320_.jpg",
+          "rating": 4.2,
+          "reviews": 266,
+          "price": "ILS 123.57",
+          "extracted_price": 123.57,
+          "delivery": [
+            "FREE delivery Thu, Oct 29 to Israel on $49 (ILS 151.41) of eligible itemsOr fastest delivery Thu, Oct 22",
+            "FREE delivery Thu, Oct 29 to Israel on $49 (ILS 151.41) of eligible items",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 123.57",
+              "extracted_primary_price": 123.57
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "asin": "B0H6RQD773",
+          "sponsored": true,
+          "title": "Open Ear Clip On Earbuds Wireless Headphones with Mirror(White)",
+          "thumbnail": "https://m.media-amazon.com/images/I/61r-REOkONL._AC_UL320_.jpg",
+          "rating": 4.5,
+          "reviews": 13,
+          "bought_last_month": "50+ bought in past month",
+          "price": "ILS 196.12",
+          "extracted_price": 196.12,
+          "old_price": "ILS 251.40",
+          "extracted_old_price": 251.4,
+          "save_with_coupon": "Save 27% with coupon",
+          "delivery": [
+            "FREE delivery Tue, Nov 3 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Tue, Nov 3 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 196.12",
+              "extracted_primary_price": 196.12,
+              "old_primary_price": "ILS 251.40",
+              "extracted_old_primary_price": 251.4
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "asin": "B0CQKP2SX5",
+          "sponsored": true,
+          "title": "Skullcandy Grom Wired Over-Ear Volume-Limiting Audio Headphones - Bone",
+          "thumbnail": "https://m.media-amazon.com/images/I/71t+CuDI6VL._AC_UL320_.jpg",
+          "rating": 4.6,
+          "reviews": 277,
+          "price": "ILS 83.40",
+          "extracted_price": 83.4,
+          "offers": ["90 days free of Amazon Music with purchase"],
+          "delivery": [
+            "ILS 59.30 delivery Sun, Nov 1Or fastest delivery Thu, Oct 22",
+            "ILS 59.30 delivery Sun, Nov 1",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 83.40",
+              "extracted_primary_price": 83.4,
+              "secondary_price": "90 days free of Amazon Music with purchase",
+              "extracted_secondary_price": 90
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "asin": "B0GWMV74CN",
+          "sponsored": true,
+          "title": "OJW Open Ear Headphones, Replaceable Battery, Never Run Out of Power, IPX7",
+          "thumbnail": "https://m.media-amazon.com/images/I/61LmF72YTuL._AC_UL320_.jpg",
+          "rating": 4.3,
+          "reviews": 41,
+          "bought_last_month": "50+ bought in past month",
+          "price": "ILS 189.08",
+          "extracted_price": 189.08,
+          "old_price": "ILS 200.20",
+          "extracted_old_price": 200.2,
+          "save_with_coupon": "Save 10% with coupon",
+          "delivery": [
+            "FREE delivery Tue, Nov 3 to IsraelOr fastest delivery Thu, Oct 22",
+            "FREE delivery Tue, Nov 3 to Israel",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 189.08",
+              "extracted_primary_price": 189.08,
+              "old_primary_price": "ILS 200.20",
+              "extracted_old_primary_price": 200.2
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "asin": "B07Q2PC166",
+          "sponsored": true,
+          "title": "KZ ZSN Pro in Ear Monitor Headphones, 1BA 1DD Hybrid Driver Wired Gaming Earbuds, Deep Bass Sound Wired Ear buds, HiFi IEM for Gaming Music Video Calling Singer Musician Drummer DJ (without mic, Gray)",
+          "thumbnail": "https://m.media-amazon.com/images/I/71ik4Vy3FsL._AC_UL320_.jpg",
+          "rating": 4.4,
+          "reviews": 3800,
+          "bought_last_month": "100+ bought in past month",
+          "price": "ILS 77.22",
+          "extracted_price": 77.22,
+          "offers": ["Save 5% on 3 select item(s)"],
+          "delivery": [
+            "ILS 53.09 delivery Thu, Oct 29Or fastest delivery Thu, Oct 22",
+            "ILS 53.09 delivery Thu, Oct 29",
+            "Or fastest delivery Thu, Oct 22"
+          ],
+          "climate_pledge_friendly": true,
+          "sustainability_features": [
+            {
+              "position": 1,
+              "name": "Recycled materials",
+              "snippet": "Contains at least 50% recycled material.",
+              "thumbnail": "https://m.media-amazon.com/images/I/51IhSrucIyL._SS200_.png",
+              "certified_by": "Global Recycled Standard",
+              "certified_info": "Global Recycled Standard (GRS) certified products contain recycled content (>50%) that has been independently verified at each stage of the supply chain, from the source to the final product and meet social, environmental, and chemical requirements. The purchase of Global Recycled Standard (GRS) certified products supports the use of recycled content in the supply chain."
+            },
+            {
+              "position": 2,
+              "name": "Safer chemicals",
+              "snippet": "Made with chemicals safer for human health and the environment.",
+              "thumbnail": "https://m.media-amazon.com/images/I/51IhSrucIyL._SS200_.png",
+              "certified_by": "Global Recycled Standard",
+              "certified_info": "Global Recycled Standard (GRS) certified products contain recycled content (>50%) that has been independently verified at each stage of the supply chain, from the source to the final product and meet social, environmental, and chemical requirements. The purchase of Global Recycled Standard (GRS) certified products supports the use of recycled content in the supply chain."
+            },
+            {
+              "position": 3,
+              "name": "Worker well-being",
+              "snippet": "Manufactured on farms or in facilities that protect the rights and/or health of workers.",
+              "thumbnail": "https://m.media-amazon.com/images/I/51IhSrucIyL._SS200_.png",
+              "certified_by": "Global Recycled Standard",
+              "certified_info": "Global Recycled Standard (GRS) certified products contain recycled content (>50%) that has been independently verified at each stage of the supply chain, from the source to the final product and meet social, environmental, and chemical requirements. The purchase of Global Recycled Standard (GRS) certified products supports the use of recycled content in the supply chain."
+            }
+          ],
+          "purchase_options": [
+            {
+              "primary_price": "ILS 77.22",
+              "extracted_primary_price": 77.22
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "serpapi_pagination": {
+    "current": 2
+  }
+}

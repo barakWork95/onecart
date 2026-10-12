@@ -29,6 +29,11 @@ export interface ProviderError {
  */
 export interface ProductSearchProvider {
   readonly id: ProviderId;
+  /**
+   * This store's own deadline, for slow upstreams (SerpApi's Amazon engine
+   * takes ~3–4s per page). Omit to use the search-wide default.
+   */
+  readonly timeoutMs?: number;
   search(
     query: SearchQuery,
     options: { readonly signal: AbortSignal },

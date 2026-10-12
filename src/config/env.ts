@@ -29,6 +29,8 @@ const serverEnvSchema = z.object({
   ALIEXPRESS_APP_KEY: optional(z.string().min(1)),
   ALIEXPRESS_APP_SECRET: optional(z.string().min(1)),
   SERPAPI_API_KEY: optional(z.string().min(1)),
+  /** Amazon result pages fetched in parallel per uncached query (1–3); each costs one SerpApi credit. */
+  SERPAPI_AMAZON_PAGES: z.coerce.number().int().min(1).max(3).default(2),
   /** eBay Browse API application keys (developer.ebay.com → Application Keys, Production). */
   EBAY_CLIENT_ID: optional(z.string().min(1)),
   EBAY_CLIENT_SECRET: optional(z.string().min(1)),

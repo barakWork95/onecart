@@ -72,6 +72,13 @@ describe("createDemoProvider", () => {
     });
   });
 
+  it("matches by tokens: any word order, extra words in the title, singular or plural", async () => {
+    const forward = (await search("amazon", "noise cancelling headphones")).map((p) => p.id);
+    const reversed = (await search("amazon", "headphone cancelling noise")).map((p) => p.id);
+    expect(forward).toContain("amazon:B0BS1QCFHX"); // "Sony WH-CH720N Noise Canceling Wireless Headphones"
+    expect(reversed).toEqual(forward);
+  });
+
   it("returns nothing for unmatched or empty queries", async () => {
     expect(await search("temu", "espresso machine")).toEqual([]);
     expect(await search("temu", "   ")).toEqual([]);

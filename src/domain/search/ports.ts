@@ -27,6 +27,8 @@ export type TranslationSource = "cache" | "deepl" | "glossary";
 export interface Translation {
   readonly text: string;
   readonly source: TranslationSource;
+  /** Some Hebrew words couldn't be translated and were left out of `text`. */
+  readonly partial?: boolean;
 }
 
 /**

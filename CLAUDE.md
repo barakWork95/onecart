@@ -211,6 +211,17 @@ SearchBar (client) → /search?q=… (Server Component)
   - Ties go to groups found in more stores, then to the lower price.
   - Price, delivery and rating are opt-in sorts. Tapping an active chip again clears it back to
     relevance, which has no `sort` URL param.
+- **Never filter store results by the query text.** The store's own search decides what's relevant,
+  synonyms included. Locally we only group, filter (by the user's explicit filters) and sort.
+- **A store can set its own deadline** with `ProductSearchProvider.timeoutMs`. Amazon/SerpApi
+  takes about 3–4 seconds per page, so it gets 9 seconds; everything else keeps 4.
+- **Amazon with `shipping_location=IL`.** Most organic results come back unpriced (`no_featured_offers`):
+  Amazon has no offer that ships them to Israel, so we skip them.
+  - The `featured_products` carousels usually carry the priced, deliverable items, so read both.
+  - `SERPAPI_AMAZON_PAGES` (default 2, maximum 3) pages are fetched in parallel. Each page costs
+    one SerpApi credit.
+  - A page of only unpriced items means "no results", not an error.
+  - The recorded fixtures `fixtures/recorded-*.json` hold the real response shape.
 - Product matching is pure domain code (`src/domain/matching/`, `src/domain/search/product-group.ts`).
   It is tuned for precision: a missed match is acceptable, a wrong match is a bug. Two offers match
   only if all of these hold:
@@ -233,8 +244,14 @@ SearchBar (client) → /search?q=… (Server Component)
   1. the Redis cache (30-day TTL);
   2. DeepL (`DEEPL_API_KEY`; keys ending in `:fx` use the free endpoint);
   3. the offline glossary in `src/infrastructure/translation/hebrew-glossary.ts`.
-- If every step fails, the search runs with the original text and the UI says so. The glossary
-  refuses partial translations, so grow it from real zero-result queries.
+
+  The glossary handles phrases, common Hebrew prefixes (ל/ב/ה/ו/ש/מ/כ, up to two letters), every
+  gender and number form of adjectives, brand transliterations, and filler words ("של", "עם").
+  When some words are unknown it still returns a partial translation; the UI says "some words
+  couldn't be translated" and the server logs the missing words.
+
+- If every step fails, the search runs with the original text and the UI says so. Grow the glossary
+  from the logged untranslated words, or set `DEEPL_API_KEY`, which is far better coverage.
 - Exchange rates come from Frankfurter (ECB reference rates, no key), cached in Redis and refreshed
   every 6 hours. If the source is down, the last-known-good rates are used for up to 7 days.
 - An adapter that can't get rates returns a **non-retryable** `FX_UNAVAILABLE` error, so an FX
