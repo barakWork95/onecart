@@ -75,3 +75,42 @@ describe("amazonSource", () => {
     expect(source({ SERPAPI_MODE: "recorded" })).toBe("recorded");
   });
 });
+
+describe("Redis credentials", () => {
+  const redis = (vars: Record<string, string>) => {
+    const { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } = parseServerEnv(vars);
+    return { url: UPSTASH_REDIS_REST_URL, token: UPSTASH_REDIS_REST_TOKEN };
+  };
+
+  it("uses Vercel Storage's KV_REST_API_* names when UPSTASH_REDIS_REST_* aren't set", () => {
+    expect(
+      redis({
+        KV_REST_API_URL: "https://onecart-redis.upstash.io",
+        KV_REST_API_TOKEN: "kv-token",
+        KV_URL: "rediss://x",
+      }),
+    ).toEqual({ url: "https://onecart-redis.upstash.io", token: "kv-token" });
+  });
+
+  it("prefers a complete UPSTASH_REDIS_REST_* pair", () => {
+    expect(
+      redis({
+        UPSTASH_REDIS_REST_URL: "https://explicit.upstash.io",
+        UPSTASH_REDIS_REST_TOKEN: "explicit",
+        KV_REST_API_URL: "https://kv.upstash.io",
+        KV_REST_API_TOKEN: "kv",
+      }),
+    ).toEqual({ url: "https://explicit.upstash.io", token: "explicit" });
+  });
+
+  it("never mixes a URL from one naming with a token from the other", () => {
+    expect(
+      redis({
+        UPSTASH_REDIS_REST_URL: "https://explicit.upstash.io",
+        KV_REST_API_URL: "https://kv.upstash.io",
+        KV_REST_API_TOKEN: "kv",
+      }),
+    ).toEqual({ url: "https://kv.upstash.io", token: "kv" });
+    expect(redis({ KV_REST_API_URL: "https://kv.upstash.io" })).toEqual({ url: undefined, token: undefined });
+  });
+});

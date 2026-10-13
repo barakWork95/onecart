@@ -398,7 +398,9 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   `AMAZON_DAILY_CALL_BUDGET`). Over budget → that store reports `DAILY_BUDGET`, the circuit is
   untouched, and the UI offers "Check <store>" links. This stops floods from rotating IPs.
 - Counters are fixed windows in Upstash (`createUpstashCounterStore`), per-instance in memory
-  without it. A counter outage allows the request: the limiter must never take the site down.
+  without it. Production's database is Vercel Storage `onecart-redis`, which injects
+  `KV_REST_API_URL` / `KV_REST_API_TOKEN`; `parseServerEnv()` maps them onto
+  `UPSTASH_REDIS_REST_*` when that pair is unset, so every Redis user finds it. A counter outage allows the request: the limiter must never take the site down.
 - Check eBay's usage: `GET https://api.ebay.com/developer/analytics/v1_beta/rate_limit/?api_context=buy&api_name=browse`
   (client-credentials token); it reports count, remaining and the reset time.
 

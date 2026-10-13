@@ -61,6 +61,14 @@ const serverEnvSchema = z.object({
   // Cache
   UPSTASH_REDIS_REST_URL: optional(z.url()),
   UPSTASH_REDIS_REST_TOKEN: optional(z.string().min(1)),
+  /**
+   * The same Upstash database under the names Vercel Storage injects when it's
+   * connected to the project (KV_REST_API_URL / KV_REST_API_TOKEN). Used when
+   * the UPSTASH_REDIS_REST_* pair isn't set. Never the read-only token: the
+   * cache and rate-limit counters write.
+   */
+  KV_REST_API_URL: optional(z.url()),
+  KV_REST_API_TOKEN: optional(z.string().min(1)),
   SEARCH_CACHE_TTL_SECONDS: z.coerce
     .number()
     .int()
@@ -111,7 +119,24 @@ export function ebayCredentials(config: ServerEnv): { clientId: string; clientSe
 let cached: ServerEnv | undefined;
 
 export function parseServerEnv(source: Readonly<Record<string, string | undefined>>): ServerEnv {
-  return serverEnvSchema.parse(source);
+  return withRedisFromVercelStorage(serverEnvSchema.parse(source));
+}
+
+/**
+ * Fills UPSTASH_REDIS_REST_* from Vercel Storage's KV_REST_API_* names, so
+ * every Redis user (search cache, circuit breaker, FX cache, rate limits)
+ * finds the database whichever way it was connected. Each pair is taken
+ * whole: a URL from one naming with a token from the other would point a
+ * token at the wrong database.
+ */
+function withRedisFromVercelStorage(config: ServerEnv): ServerEnv {
+  if (config.UPSTASH_REDIS_REST_URL && config.UPSTASH_REDIS_REST_TOKEN) return config;
+  if (!config.KV_REST_API_URL || !config.KV_REST_API_TOKEN) return config;
+  return {
+    ...config,
+    UPSTASH_REDIS_REST_URL: config.KV_REST_API_URL,
+    UPSTASH_REDIS_REST_TOKEN: config.KV_REST_API_TOKEN,
+  };
 }
 
 export function env(): ServerEnv {
