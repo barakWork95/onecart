@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
+import { trendingCardId } from "@/components/features/home/trending-card";
 import { TrendingShowcase } from "@/components/features/home/trending-showcase";
 import { money } from "@/domain/shared/money";
 
@@ -51,6 +52,13 @@ describe("TrendingShowcase", () => {
 
     expect(duo).toHaveTextContent("From₪288on Amazon");
     expect(within(duo!).getByRole("list", { name: "Stores" })).toHaveTextContent("Amazon ₪288eBay ₪6,379");
+  });
+
+  it("names each card by its product with a valid id (queries contain spaces)", () => {
+    render(<TrendingShowcase cards={[{ ...XM5, label: "AirPods Pro", query: "airpods pro" }]} />);
+    const card = screen.getByRole("article", { name: "AirPods Pro" });
+    expect(card).toHaveAttribute("aria-labelledby", "trending-airpods-pro");
+    expect(trendingCardId("Sony WH-1000XM5")).toBe("trending-sony-wh-1000xm5");
   });
 
   it("renders nothing while no trending product is cached", () => {

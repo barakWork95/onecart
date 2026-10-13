@@ -6,6 +6,17 @@ import type { TrendingCard } from "@/application/deals/trending-showcase";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+/**
+ * A valid element id for a card: ids can't contain spaces, and
+ * `aria-labelledby` splits on them ("airpods pro" would name two elements).
+ */
+export function trendingCardId(query: string): string {
+  return `trending-${query
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}`;
+}
+
 export function trendingHref(query: string): string {
   return `/search?${new URLSearchParams({ q: query }).toString()}`;
 }
@@ -17,11 +28,12 @@ export function trendingHref(query: string): string {
  */
 export function TrendingCardView({ card }: { card: TrendingCard }) {
   const bestStore = STORE_META[card.best.provider].name;
+  const headingId = trendingCardId(card.query);
   // Stores with a price; "won't ship to Israel" is shown in the store chips, not counted here.
   const storeCount = card.stores.length;
   return (
     <article
-      aria-labelledby={`trending-${card.query}`}
+      aria-labelledby={headingId}
       className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-ring hover:shadow-md"
     >
       <div className="relative aspect-square overflow-hidden bg-white">
@@ -38,7 +50,7 @@ export function TrendingCardView({ card }: { card: TrendingCard }) {
       </div>
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <h3
-          id={`trending-${card.query}`}
+          id={headingId}
           className="text-sm leading-snug font-bold text-foreground sm:text-base"
         >
           {/* The heading's link covers the whole card: one tab stop, one click target. */}
