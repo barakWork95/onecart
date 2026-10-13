@@ -416,6 +416,66 @@ describe("ResultsView — one card for a store's many listings", () => {
   });
 });
 
+describe("ResultsView — Amazon unavailable (quota used up)", () => {
+  const amazonDown: ProviderOutcome = {
+    provider: "amazon",
+    status: "error",
+    resultCount: 0,
+    latencyMs: 120,
+    fromCache: false,
+    errorCode: "QUOTA_EXHAUSTED",
+  };
+
+  it("keeps eBay's results, says why, and offers “Check Amazon” instead of “Find on Amazon”", () => {
+    const sony = groupProducts([OFFERS[3]!]);
+    renderView({
+      response: response({ groups: sony, isPartial: true, providers: [amazonDown, ok("ebay")] }),
+      storeChecks: { [sony[0]!.id]: { provider: "amazon", href: "/go/amazon-search%3Ax?d=x&s=y" } },
+    });
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Some stores are unavailable right now: Amazon (unavailable). Showing results from the rest; “Check Amazon” on a card searches that store for the item.",
+    );
+    const check = screen.getByRole("link", { name: "Check Amazon for Sony WH-CH720N Headphones" });
+    expect(check).toHaveAttribute("href", "/go/amazon-search%3Ax?d=x&s=y");
+    expect(check).toHaveAttribute("target", "_blank");
+    expect(check).toHaveAttribute("rel", "nofollow sponsored noopener");
+    expect(screen.queryByRole("link", { name: /^Find on/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /View deal ₪310/ })).toBeInTheDocument();
+  });
+
+  it("offers direct store searches when every store is down, instead of a dead end", () => {
+    renderView({
+      response: response({
+        groups: [],
+        totalOffers: 0,
+        isPartial: true,
+        providers: [amazonDown, { ...amazonDown, provider: "ebay", errorCode: "EBAY_2001" }],
+      }),
+      storeSearches: [
+        { provider: "amazon", href: "/go/amazon-search%3Aq?d=a&s=b" },
+        { provider: "ebay", href: "/go/ebay-search%3Aq?d=c&s=d" },
+      ],
+    });
+    expect(screen.getByRole("heading", { name: "Stores aren't responding" })).toBeInTheDocument();
+    const direct = screen.getByRole("list", { name: "Search the stores directly" });
+    expect(within(direct).getByRole("link", { name: "Search Amazon" })).toHaveAttribute(
+      "href",
+      "/go/amazon-search%3Aq?d=a&s=b",
+    );
+    expect(within(direct).getByRole("link", { name: "Search eBay" })).toHaveAttribute(
+      "rel",
+      "nofollow sponsored noopener",
+    );
+  });
+
+  it("labels stores answering from recorded samples", () => {
+    renderView({ sampleStores: ["amazon"] });
+    expect(
+      screen.getByText(/Amazon results here are recorded samples, not live prices\./),
+    ).toBeInTheDocument();
+  });
+});
+
 describe("nextPageHref", () => {
   it("keeps the query, a non-default sort and every filter", () => {
     const href = nextPageHref(

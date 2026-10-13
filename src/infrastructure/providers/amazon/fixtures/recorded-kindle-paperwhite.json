@@ -1,0 +1,241 @@
+{
+  "search_parameters": {
+    "engine": "amazon",
+    "amazon_domain": "amazon.com",
+    "k": "kindle paperwhite",
+    "shipping_location": "IL"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "asin": "B0F4DBXKZK",
+      "title": "Android Tablet 7 Inch Tablet, E-Reader, 6GB RAM 32GB ROM 1TB Expansion, Quad-core Processor, Dual Camera, WiFi, Bluetooth, Parental Control (Pink)",
+      "thumbnail": "https://m.media-amazon.com/images/I/61jNtBVAGZL._AC_UY218_.jpg",
+      "rating": 3.9,
+      "reviews": 443,
+      "price": "ILS 142.11",
+      "extracted_price": 142.11,
+      "delivery": ["ILS 60.56 delivery Tue, Nov 3", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 142.11",
+          "extracted_primary_price": 142.11
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "asin": "B0H964FWGK",
+      "options": "See options",
+      "title": "Kindle 16GB (newest model), Now thinner, lighter, and faster, 6\" display, Without Lockscreen Ads, Ube",
+      "thumbnail": "https://m.media-amazon.com/images/I/51GgxKqi4SL._AC_UY218_.jpg",
+      "rating": 3.7,
+      "reviews": 125,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "asin": "B0CZXX465Z",
+      "title": "Libra Colour | eReader | 7” Glare-Free Colour E Ink Kaleido™ 3 Display | Dark Mode Option | Audiobooks | Waterproof | Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61gbdrkvfQL._AC_UY218_.jpg",
+      "rating": 4.4,
+      "reviews": 4200,
+      "price": "ILS 797.50",
+      "extracted_price": 797.5,
+      "delivery": ["ILS 57.72 delivery Nov 2 - 30", "Ships to Israel"],
+      "purchase_options": [
+        {
+          "primary_price": "ILS 797.50",
+          "extracted_primary_price": 797.5,
+          "more_buying_choices": "ILS 741.57 (3 used & new offers)",
+          "more_buying_choices_link": "https://www.amazon.com/gp/offer-listing/B0CZXX465Z/ref=sr_1_3_olp?keywords=kindle+paperwhite&dib_tag=se&dib=eyJ2IjoiMSJ9.Fg6v4En3aXVl-dPjNa-NhVkjSuYZ1jw6dewurK4ydgMqLUiR47f7QVmtFVQxfut34UrAuTQBr_-rOUpPr88N61BpGfDrxxeSLpjC4qap5jjo6Sc6g0PdNG_khagbRP0-I9P67FPtc89hgiWfBamWYQRjCt1jMl74pEsx2HHIkNFcHdpqxiyAubb0VgDA44UvIFc3NzIXK6aV-iDKjzdobbGXtMfkG2yq6Mk5UxfB0XM.My8eCOhBP_FNuskaguNDYySCGHaNH_8HhVx0RZ_tpTs&qid=1791804320&sr=8-3"
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "asin": "B0DDZJS3SB",
+      "options": "See options",
+      "title": "Kindle Paperwhite 16GB (2024 model) – 7\" glare-free display and weeks of battery life – Without Lockscreen Ads – Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/61KMlIaN9pL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 23400,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "asin": "B0D9ZWBFWQ",
+      "options": "See options",
+      "title": "Kindle Essentials Bundle including Kindle (2024 release) - Matcha, Fabric Cover - Matcha, and Power Adapter",
+      "thumbnail": "https://m.media-amazon.com/images/I/81g4GIqXoVL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 471,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "asin": "B0DB6B9829",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite 16GB | Jade, Fabric Cover | Jade, & Power Adapter",
+      "thumbnail": "https://m.media-amazon.com/images/I/81vBcjQg7+L._AC_UY218_.jpg",
+      "rating": 4.8,
+      "reviews": 227,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "asin": "B0DC7SZ4T9",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite Signature Edition 32GB | Jade, Fabric Cover| Jade & Wireless Charging Dock",
+      "thumbnail": "https://m.media-amazon.com/images/I/71TE0HqBrVL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 334,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "asin": "B0DC7YFRTK",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite Signature Edition 32GB | Black, Plant-Based Leather Cover & Wireless Charging Dock | Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/71biqZck9GL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 120,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "asin": "B0DDZQTYHL",
+      "options": "See options",
+      "title": "Kindle 16 GB (2024 model) – Light and compact, with fast page turns, and high contrast ratio – Without Lockscreen Ads – Black",
+      "thumbnail": "https://m.media-amazon.com/images/I/51V8MeGEKGL._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 20900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 10,
+      "asin": "B0DDZT2Z1L",
+      "options": "See options",
+      "title": "Kindle 16 GB (2024 model) – Light and compact, with fast page turns, and high contrast ratio – Without Lockscreen Ads – Matcha",
+      "thumbnail": "https://m.media-amazon.com/images/I/51seYeLPo9L._AC_UY218_.jpg",
+      "rating": 4.5,
+      "reviews": 20900,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 11,
+      "asin": "B0H961CQ8T",
+      "options": "See options",
+      "title": "Kindle Paperwhite 16GB (newest model), Now thinner and lighter, 7\" display, warm light, Without Lockscreen Ads, Graphite",
+      "thumbnail": "https://m.media-amazon.com/images/I/61mUPskG7WL._AC_UY218_.jpg",
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 12,
+      "asin": "B0DB6BCWGV",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite 16GB | Black, Fabric Cover| Black, & Power Adapter",
+      "thumbnail": "https://m.media-amazon.com/images/I/81yx4wUCk6L._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 218,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "asin": "B0DF12G4TW",
+      "options": "See options",
+      "title": "Kindle Paperwhite 16GB (2024 model) – 7\" glare-free display and weeks of battery life – Without Lockscreen Ads – Jade",
+      "thumbnail": "https://m.media-amazon.com/images/I/61GJzn8CQeL._AC_UY218_.jpg",
+      "rating": 4.6,
+      "reviews": 23400,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "asin": "B0DC7CZ76X",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite Signature Edition 32GB | Jade, Plant-Based Leather Cover & Wireless Charging Dock | Jade",
+      "thumbnail": "https://m.media-amazon.com/images/I/71TE0HqBrVL._AC_UY218_.jpg",
+      "rating": 4.8,
+      "reviews": 323,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "asin": "B0DC85J75V",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite Signature Edition 32GB | Black, Fabric Cover| Black & Wireless Charging Dock",
+      "thumbnail": "https://m.media-amazon.com/images/I/71biqZck9GL._AC_UY218_.jpg",
+      "rating": 4.7,
+      "reviews": 188,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "asin": "B0DC7VDCYZ",
+      "options": "See options",
+      "title": "Kindle Paperwhite Bundle: Includes, Amazon Kindle Paperwhite Signature Edition 32GB | Raspberry, Fabric Cover| Raspberry & Wireless Charging Dock",
+      "thumbnail": "https://m.media-amazon.com/images/I/71RoVkpW1AL._AC_UY218_.jpg",
+      "rating": 4.9,
+      "reviews": 209,
+      "purchase_options": [
+        {
+          "no_featured_offers": true
+        }
+      ]
+    }
+  ],
+  "featured_products": []
+}

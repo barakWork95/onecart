@@ -63,7 +63,10 @@ export function searchCacheKey(
   query: Pick<SearchQuery, "normalizedText" | "destination">,
   provider: ProviderId,
   storePage = 1,
+  /** Keeps a provider's non-live data (recorded samples) apart from its live results. */
+  scope?: string,
 ): string {
-  const base = `search:v3:${query.destination.country}:${provider}:${normalizeQueryText(query.normalizedText)}`;
+  const source = scope ? `${provider}@${scope}` : provider;
+  const base = `search:v3:${query.destination.country}:${source}:${normalizeQueryText(query.normalizedText)}`;
   return storePage > 1 ? `${base}:p${storePage}` : base;
 }

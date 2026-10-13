@@ -29,6 +29,14 @@ const serverEnvSchema = z.object({
   ALIEXPRESS_APP_KEY: optional(z.string().min(1)),
   ALIEXPRESS_APP_SECRET: optional(z.string().min(1)),
   SERPAPI_API_KEY: optional(z.string().min(1)),
+  /**
+   * Where Amazon results come from: `live` (SerpApi, spends the monthly
+   * quota) or `recorded` (saved SerpApi responses for a few queries, no
+   * network). Unset: live only on Vercel production, recorded everywhere else.
+   */
+  SERPAPI_MODE: optional(z.enum(["live", "recorded"])),
+  /** Set by Vercel: "production", "preview" or "development". */
+  VERCEL_ENV: optional(z.enum(["production", "preview", "development"])),
   /** Amazon result pages fetched in parallel per uncached query (1–3); each costs one SerpApi credit. */
   SERPAPI_AMAZON_PAGES: z.coerce.number().int().min(1).max(3).default(2),
   /** eBay Browse API application keys (developer.ebay.com → Application Keys, Production). */
@@ -75,6 +83,17 @@ const serverEnvSchema = z.object({
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
+
+/**
+ * Amazon's data source. Local runs (dev, tests, a local production build) and
+ * preview deployments use recorded responses unless SERPAPI_MODE says
+ * otherwise, so development never spends the 250-a-month SerpApi quota.
+ */
+export function amazonSource(config: ServerEnv): "live" | "recorded" | "off" {
+  const mode = config.SERPAPI_MODE ?? (config.VERCEL_ENV === "production" ? "live" : "recorded");
+  if (mode === "recorded") return "recorded";
+  return config.SERPAPI_API_KEY ? "live" : "off";
+}
 
 /** eBay OAuth client credentials under either naming, or null when not configured. */
 export function ebayCredentials(config: ServerEnv): { clientId: string; clientSecret: string } | null {

@@ -22,6 +22,8 @@ import instantEbay from "@/infrastructure/providers/ebay/fixtures/recorded-insta
 import jblEbay from "@/infrastructure/providers/ebay/fixtures/recorded-jbl-flip-6.json";
 import xm5Ebay from "@/infrastructure/providers/ebay/fixtures/recorded-sony-wh-1000xm5.json";
 import { TEST_FX } from "@/test/fx";
+import { storeChecks } from "@/application/search/store-fallback";
+import quotaExhausted from "@/infrastructure/providers/amazon/fixtures/error-quota-exhausted.json";
 
 /**
  * Live Amazon + eBay responses (recorded 2026-10-12) through the real adapters
@@ -41,14 +43,21 @@ const RECORDED = {
   "instant pot duo": { amazon: [instantAmazon1, instantAmazon2], ebay: instantEbay },
 } as const;
 
-async function search(text: keyof typeof RECORDED, sort: SearchSort = "relevance") {
+async function search(
+  text: keyof typeof RECORDED,
+  sort: SearchSort = "relevance",
+  amazonFetch?: typeof fetch,
+  deps: { cache?: ReturnType<typeof createInMemorySearchCache> } = {},
+) {
   const { amazon: pages, ebay: ebayBody } = RECORDED[text];
   const amazon = createAmazonProvider({
     apiKey: "k",
     importPolicy: ISRAEL_IMPORT_POLICY,
     getFxRates: async () => TEST_FX,
-    fetch: async (input) =>
-      new Response(JSON.stringify(pages[new URL(String(input)).searchParams.get("page") === "2" ? 1 : 0])),
+    fetch:
+      amazonFetch ??
+      (async (input) =>
+        new Response(JSON.stringify(pages[new URL(String(input)).searchParams.get("page") === "2" ? 1 : 0]))),
   });
   const ebay = createEbayProvider({
     tokens: { getToken: async () => ok("token"), invalidate: () => undefined },
@@ -68,7 +77,7 @@ async function search(text: keyof typeof RECORDED, sort: SearchSort = "relevance
   };
   return createSearchProducts({
     providers: [amazon, ebay],
-    cache: createInMemorySearchCache(),
+    cache: deps.cache ?? createInMemorySearchCache(),
     circuitBreaker: createInMemoryCircuitBreakerStore(),
   })(query);
 }
@@ -172,5 +181,37 @@ describe("“instant pot duo” (both stores ship it)", () => {
       (g) => /Pressure Cooker|Multi-?Cooker/i.test(g.title) && !g.isAccessory,
     );
     expect(groups.findIndex((g) => books.includes(g))).toBeGreaterThan(lastCooker);
+  });
+});
+
+describe("SerpApi quota used up (recorded live: HTTP 429)", () => {
+  const quota: typeof fetch = async () => new Response(JSON.stringify(quotaExhausted), { status: 429 });
+
+  it("still shows eBay's results, reports Amazon's quota, and offers “Check Amazon” on eBay-only cards", async () => {
+    const response = await search("sony wh-1000xm5", "relevance", quota);
+    expect(response.providers.find((p) => p.provider === "amazon")).toMatchObject({
+      status: "error",
+      errorCode: "QUOTA_EXHAUSTED",
+    });
+    expect(response.isPartial).toBe(true);
+    const [top] = response.groups;
+    expect(top?.offers.map((o) => o.provider)).toEqual(["ebay"]);
+    expect(top && listingsAt(top, "ebay")).toBeGreaterThanOrEqual(18);
+
+    const checks = storeChecks(response);
+    expect(top && checks[top.id]).toMatchObject({
+      provider: "amazon",
+      url: expect.stringMatching(/^https:\/\/www\.amazon\.com\/s\?k=.*WH-1000XM5/),
+    });
+    expect(Object.keys(checks).length).toBe(response.groups.length);
+  });
+
+  it("never caches the failure: the next search asks Amazon again", async () => {
+    const cache = createInMemorySearchCache();
+    const calls = jest.fn(quota);
+    await search("jbl flip 6", "relevance", calls, { cache });
+    await search("jbl flip 6", "relevance", calls, { cache });
+    // Two SerpApi pages per search, both times.
+    expect(calls).toHaveBeenCalledTimes(4);
   });
 });

@@ -8,6 +8,7 @@ import {
 } from "@/infrastructure/providers/amazon/amazon-adapter";
 import { TEST_FX } from "@/test/fx";
 import errorInvalidKey from "./fixtures/error-invalid-key.json";
+import errorQuotaExhausted from "./fixtures/error-quota-exhausted.json";
 import searchNoResults from "./fixtures/search-no-results.json";
 import searchOk from "./fixtures/search-ok.json";
 
@@ -248,6 +249,30 @@ describe("Amazon adapter — store pages", () => {
 });
 
 describe("Amazon adapter — failures never throw", () => {
+  it("reports a used-up monthly quota (recorded live: HTTP 429) as QUOTA_EXHAUSTED", async () => {
+    const result = await setup(async () => json(errorQuotaExhausted, 429)).search();
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        provider: "amazon",
+        kind: "rate_limited",
+        code: "QUOTA_EXHAUSTED",
+        retryable: true,
+        detail: "Your account has run out of searches.",
+      },
+    });
+    // The same message on a 200 is still the quota, not "no results".
+    const on200 = await setup(async () => json(errorQuotaExhausted)).search();
+    expect(on200).toMatchObject({ ok: false, error: { code: "QUOTA_EXHAUSTED" } });
+  });
+
+  it("keeps a plain 429 (hourly throughput limit) as HTTP_429", async () => {
+    const result = await setup(async () =>
+      json({ error: "You have exceeded the hourly throughput limit." }, 429),
+    ).search();
+    expect(result).toMatchObject({ ok: false, error: { kind: "rate_limited", code: "HTTP_429" } });
+  });
+
   it("maps an invalid key (401) to unauthorized with SerpApi's message as internal detail", async () => {
     expect(await setup(async () => json(errorInvalidKey, 401)).search()).toEqual({
       ok: false,

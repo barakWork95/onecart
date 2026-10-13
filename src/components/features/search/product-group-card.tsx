@@ -1,4 +1,4 @@
-import { ArrowRight, Search, Star, Truck } from "lucide-react";
+import { ArrowRight, ExternalLink, Search, Star, Truck } from "lucide-react";
 import Link from "next/link";
 import { CompareSheet } from "@/components/features/search/compare-sheet";
 import { ProductImage } from "@/components/features/search/product-image";
@@ -14,6 +14,7 @@ import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
 import { buttonVariants } from "@/components/ui/button";
 import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import type { ProviderId } from "@/domain/shared/provider";
 import { formatCount, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -69,12 +70,15 @@ export function ProductGroupCard({
   links,
   user = null,
   findMatches = null,
+  checkStore = null,
 }: {
   group: ProductGroup;
   links: Readonly<Record<string, string>>;
   user?: CardUserState | null;
   /** Single-store cards: a focused search that may find the item at another store. */
   findMatches?: FindMatchesLink | null;
+  /** A store that's down, with a signed link to search its own site for this item. */
+  checkStore?: { readonly provider: ProviderId; readonly href: string } | null;
 }) {
   const best = bestOffer(group);
   const storeCount = group.offers.length;
@@ -174,6 +178,19 @@ export function ProductGroupCard({
             >
               View deal {formatMoney(best.price.total)}
               <ArrowRight className="size-4" aria-hidden />
+            </a>
+          )}
+          {storeCount === 1 && checkStore && (
+            // The store's API is down: send the shopper to its own search, via our affiliate redirect.
+            <a
+              href={checkStore.href}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              aria-label={`Check ${STORE_META[checkStore.provider].name} for ${group.title}`}
+              className="mt-1.5 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
+            >
+              <ExternalLink className="size-3.5" aria-hidden />
+              Check {STORE_META[checkStore.provider].name}
             </a>
           )}
           {storeCount === 1 && findMatches && (

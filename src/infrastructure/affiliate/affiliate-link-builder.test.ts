@@ -112,3 +112,15 @@ describe("buildEbayAffiliateUrl vs eBay's own affiliate links", () => {
     },
   );
 });
+
+describe("Amazon search links (“Check Amazon” while the API is down)", () => {
+  it("tags a search page and keeps the query", () => {
+    const url = buildAmazonAffiliateUrl(
+      new URL("https://www.amazon.com/s?k=Sony+WH-1000XM5+Noise+Cancelling+Headphones"),
+      "onecart-20",
+    );
+    expect(url.toString()).toBe(
+      "https://www.amazon.com/s?k=Sony+WH-1000XM5+Noise+Cancelling+Headphones&tag=onecart-20",
+    );
+  });
+});

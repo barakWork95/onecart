@@ -9,7 +9,8 @@ import { ResultsView } from "@/components/features/search/results-view";
 import { SearchBox } from "@/components/features/search/search-box";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata: Metadata = { title: "Compare prices" };
+// Results are live store queries (see robots.ts); they're never worth indexing.
+export const metadata: Metadata = { title: "Compare prices", robots: { index: false, follow: false } };
 
 type SearchParams = PageProps<"/search">["searchParams"];
 
@@ -29,6 +30,9 @@ async function Results({ searchParams }: { searchParams: SearchParams }) {
       translation={result.translation}
       demoMode={result.demoMode}
       outboundLinks={result.outboundLinks}
+      storeChecks={result.storeChecks}
+      storeSearches={result.storeSearches}
+      sampleStores={result.sampleStores}
       userLists={userLists}
     />
   );

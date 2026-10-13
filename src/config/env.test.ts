@@ -1,4 +1,4 @@
-import { ebayCredentials, parseServerEnv } from "@/config/env";
+import { amazonSource, ebayCredentials, parseServerEnv } from "@/config/env";
 
 describe("parseServerEnv", () => {
   it("treats empty values from an unfilled .env template as unset", () => {
@@ -55,5 +55,23 @@ describe("ebayCredentials", () => {
   it("is null unless both an id and a secret are present", () => {
     expect(ebayCredentials(parseServerEnv({ EBAY_APP_ID: "app" }))).toBeNull();
     expect(ebayCredentials(parseServerEnv({}))).toBeNull();
+  });
+});
+
+describe("amazonSource", () => {
+  const source = (vars: Record<string, string>) => amazonSource(parseServerEnv(vars));
+
+  it("uses recorded responses everywhere but Vercel production, so development spends no quota", () => {
+    expect(source({ SERPAPI_API_KEY: "k" })).toBe("recorded");
+    expect(source({ SERPAPI_API_KEY: "k", NODE_ENV: "production" })).toBe("recorded");
+    expect(source({ SERPAPI_API_KEY: "k", VERCEL_ENV: "preview" })).toBe("recorded");
+    expect(source({ SERPAPI_API_KEY: "k", VERCEL_ENV: "production" })).toBe("live");
+  });
+
+  it("follows SERPAPI_MODE when set, and is off when live has no key", () => {
+    expect(source({ SERPAPI_API_KEY: "k", SERPAPI_MODE: "live" })).toBe("live");
+    expect(source({ VERCEL_ENV: "production", SERPAPI_MODE: "recorded" })).toBe("recorded");
+    expect(source({ VERCEL_ENV: "production" })).toBe("off");
+    expect(source({ SERPAPI_MODE: "recorded" })).toBe("recorded");
   });
 });

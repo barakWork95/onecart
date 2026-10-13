@@ -15,6 +15,7 @@ const moduleNameMapper = {
 const node = await createJestConfig({
   displayName: "node",
   testEnvironment: "node",
+  setupFiles: ["<rootDir>/src/test/no-live-apis.ts"],
   moduleNameMapper,
   testMatch: ["<rootDir>/src/**/*.test.ts"],
 })();
@@ -22,6 +23,7 @@ const node = await createJestConfig({
 const dom = await createJestConfig({
   displayName: "dom",
   testEnvironment: "jsdom",
+  setupFiles: ["<rootDir>/src/test/no-live-apis.ts"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper,
   testMatch: ["<rootDir>/src/**/*.test.tsx"],

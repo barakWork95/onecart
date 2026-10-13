@@ -252,6 +252,20 @@ SearchBar (client) → /search?q=… (Server Component)
   synonyms included. Locally we only group, filter (by the user's explicit filters) and sort.
 - **A store can set its own deadline** with `ProductSearchProvider.timeoutMs`. Amazon/SerpApi
   takes about 3–4 seconds per page, so it gets 9 seconds; everything else keeps 4.
+- **SerpApi quota (250 searches a month) — never spend it on development.**
+  - `amazonSource()` picks Amazon's data: `live` only on Vercel production
+    (`VERCEL_ENV=production`), `recorded` everywhere else (dev, tests, local production builds,
+    previews). `SERPAPI_MODE=live|recorded` overrides it.
+  - Recorded mode answers from `fixtures/recorded-*.json` via `createRecordedSerpApiFetch()`;
+    unknown queries read as "no results". It's cached under `amazon@recorded` keys
+    (`ProductSearchProvider.cacheScope`), so samples never pass for live prices, and the
+    results page labels them "recorded samples, not live prices".
+  - Jest blocks real calls to the stores' APIs (`src/test/no-live-apis.ts`).
+  - Quota used up (live: HTTP 429, "Your account has run out of searches.") →
+    `rate_limited` / `QUOTA_EXHAUSTED`, never cached; the circuit opens after a few. The page
+    still renders the other stores. Every single-store card gets "Check Amazon": a signed `/go`
+    link to Amazon's own search for the item (`storeChecks()`, `storeSearchUrl()`), affiliate
+    tag added. The same applies to any failed store with a search page.
 - **Amazon with `shipping_location=IL`.** Most organic results come back unpriced (`no_featured_offers`):
   Amazon has no offer that ships them to Israel, so we skip them.
   - The `featured_products` carousels usually carry the priced, deliverable items, so read both.

@@ -8,6 +8,14 @@ describe("searchCacheKey", () => {
     ).toBe("search:v3:IL:temu:wireless earbuds");
   });
 
+  it("keeps recorded samples apart from live results", () => {
+    const query = { normalizedText: "sony wh-1000xm5", destination: { country: "IL" } } as const;
+    expect(searchCacheKey(query, "amazon", 2, "recorded")).toBe(
+      "search:v3:IL:amazon@recorded:sony wh-1000xm5:p2",
+    );
+    expect(searchCacheKey(query, "amazon", 1, "recorded")).not.toBe(searchCacheKey(query, "amazon"));
+  });
+
   it("keeps page 1 unsuffixed and gives each deeper store page its own key", () => {
     const query = { normalizedText: "wireless earbuds", destination: { country: "IL" } } as const;
     expect(searchCacheKey(query, "ebay", 1)).toBe(searchCacheKey(query, "ebay"));

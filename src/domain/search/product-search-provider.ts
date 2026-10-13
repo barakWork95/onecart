@@ -54,5 +54,10 @@ export interface ProductSearchProvider {
    * takes ~3–4s per page). Omit to use the search-wide default.
    */
   readonly timeoutMs?: number;
+  /**
+   * Set when results don't come from the live store (`"recorded"` samples in
+   * development). Scopes the cache key, so samples never pass for live prices.
+   */
+  readonly cacheScope?: string;
   search(query: SearchQuery, options: ProviderSearchOptions): Promise<Result<ProviderPage, ProviderError>>;
 }

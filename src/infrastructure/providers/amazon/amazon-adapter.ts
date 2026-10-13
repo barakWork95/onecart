@@ -23,6 +23,14 @@ const DEFAULT_PAGES = 2;
 const MAX_PAGES = 3;
 /** SerpApi reports "no results" as a 200 with this kind of message in `error`. */
 const NO_RESULTS = /hasn't returned any results/i;
+/**
+ * The plan's monthly searches are used up. Confirmed live: HTTP 429 with
+ * `{"error": "Your account has run out of searches."}`. Distinct from the
+ * hourly rate limit, so the UI can say "Amazon is unavailable" without
+ * implying a retry in seconds will help.
+ */
+const QUOTA_EXHAUSTED = /run out of searches|searches? (?:are|is) (?:exhausted|used up)/i;
+export const QUOTA_EXHAUSTED_CODE = "QUOTA_EXHAUSTED";
 
 export interface AmazonProviderConfig {
   readonly apiKey: string;
@@ -44,6 +52,8 @@ export interface AmazonProviderConfig {
   readonly now?: () => Date;
   readonly timeoutMs?: number;
   readonly endpoint?: string;
+  /** Marks non-live data (`"recorded"`) so it's cached apart from live results. */
+  readonly cacheScope?: string;
 }
 
 function providerError(kind: ProviderErrorKind, code: string, detail?: string): ProviderError {
@@ -120,6 +130,9 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
     }
 
     const parsed = amazonSearchResponseSchema.safeParse(body);
+    // Retryable, so after a few the circuit opens and searches stop waiting on SerpApi.
+    if (parsed.data?.error && QUOTA_EXHAUSTED.test(parsed.data.error))
+      return err(providerError("rate_limited", QUOTA_EXHAUSTED_CODE, parsed.data.error));
     if (status >= 400)
       return err({ ...errorForStatus(status), ...(parsed.data?.error ? { detail: parsed.data.error } : {}) });
     if (!parsed.success) return err(providerError("parse_error", "PARSE_ERROR", parsed.error.message));
@@ -141,6 +154,7 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
   return {
     id: "amazon",
     timeoutMs,
+    ...(config.cacheScope ? { cacheScope: config.cacheScope } : {}),
     async search(query, options) {
       const signal = AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)]);
       // Pages in parallel: one round trip (~3–4s) instead of one per page.

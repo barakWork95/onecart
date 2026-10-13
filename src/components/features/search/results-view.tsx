@@ -1,10 +1,14 @@
-import { AlertTriangle, BadgeCheck, FlaskConical, Languages, SearchX } from "lucide-react";
+import { AlertTriangle, BadgeCheck, ExternalLink, FlaskConical, Languages, SearchX } from "lucide-react";
+import type { ReactNode } from "react";
 import type { QueryTranslationInfo } from "@/application/search/build-search-query";
 import { findMatchesLink } from "@/components/features/search/group-view";
 import { LoadMore } from "@/components/features/search/load-more";
 import { ProductGroupCard } from "@/components/features/search/product-group-card";
 import { SortChips } from "@/components/features/search/sort-chips";
 import { STORE_META } from "@/components/features/store-meta";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { ProviderId } from "@/domain/shared/provider";
 import {
   FAILED_PROVIDER_STATUSES,
   type ProviderOutcome,
@@ -46,17 +50,28 @@ function TranslationNotice({
   );
 }
 
-function PartialNotice({ failed }: { failed: readonly ProviderOutcome[] }) {
+function PartialNotice({
+  failed,
+  checkStores,
+}: {
+  failed: readonly ProviderOutcome[];
+  /** Stores the cards offer "Check <store>" links for. */
+  checkStores: readonly ProviderId[];
+}) {
   const list = failed
     .map((o) => `${STORE_META[o.provider].name} (${STATUS_TEXT[o.status] ?? "unavailable"})`)
     .join(", ");
+  const checks = checkStores.map((p) => `“Check ${STORE_META[p].name}”`).join(" or ");
   return (
     <p
       role="status"
       className="flex items-start gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100"
     >
       <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
-      <span>Some stores are unavailable right now: {list}. Showing results from the rest.</span>
+      <span>
+        Some stores are unavailable right now: {list}. Showing results from the rest
+        {checks ? `; ${checks} on a card searches that store for the item.` : "."}
+      </span>
     </p>
   );
 }
@@ -71,12 +86,13 @@ export function nextPageHref(query: SearchResponse["query"], nextPage: number): 
   return `/search?${params.toString()}`;
 }
 
-function EmptyState({ title, body }: { title: string; body: string }) {
+function EmptyState({ title, body, children }: { title: string; body: string; children?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-border px-6 py-12 text-center">
       <SearchX className="size-10 text-muted-foreground" aria-hidden />
       <h2 className="text-lg font-bold text-foreground">{title}</h2>
       <p className="max-w-sm text-sm text-muted-foreground">{body}</p>
+      {children}
     </div>
   );
 }
@@ -87,6 +103,12 @@ export interface ResultsViewProps {
   readonly demoMode: boolean;
   /** Offer id → signed `/go/...` href. */
   readonly outboundLinks: Readonly<Record<string, string>>;
+  /** Group id → a store that's down and a signed link to search it there. */
+  readonly storeChecks?: Readonly<Record<string, { readonly provider: ProviderId; readonly href: string }>>;
+  /** Stores answering from recorded samples rather than live (development). */
+  readonly sampleStores?: readonly ProviderId[];
+  /** Unavailable stores, with a signed link to search each one's own site for the query. */
+  readonly storeSearches?: readonly { readonly provider: ProviderId; readonly href: string }[];
   /** Products this visitor saved / tracks; null when wishlists aren't available. */
   readonly userLists?: { readonly savedIds: readonly string[]; readonly alertIds: readonly string[] } | null;
 }
@@ -96,11 +118,17 @@ export function ResultsView({
   translation,
   demoMode,
   outboundLinks,
+  storeChecks = {},
+  sampleStores = [],
+  storeSearches = [],
   userLists = null,
 }: ResultsViewProps) {
   const { query, groups, providers, totalOffers, isPartial, pagination } = response;
   const searched = providers.filter((p) => p.status !== "skipped");
-  const connectedStores = searched.map((p) => p.provider);
+  // A store that's down can't be searched again; its cards get "Check <store>" instead.
+  const connectedStores = searched
+    .filter((p) => !FAILED_PROVIDER_STATUSES.includes(p.status))
+    .map((p) => p.provider);
   const failed = searched.filter((p) => FAILED_PROVIDER_STATUSES.includes(p.status));
   const allFailed = searched.length > 0 && failed.length === searched.length;
   const anyTaxEstimated = groups.some((g) => g.offers.some((o) => !o.price.taxesCollectedAtCheckout));
@@ -136,7 +164,21 @@ export function ResultsView({
 
       <SortChips text={query.rawText} active={query.sort} />
 
-      {isPartial && !allFailed && <PartialNotice failed={failed} />}
+      {isPartial && !allFailed && (
+        <PartialNotice
+          failed={failed}
+          checkStores={[...new Set(Object.values(storeChecks).map((c) => c.provider))]}
+        />
+      )}
+      {sampleStores.length > 0 && (
+        <p className="flex items-start gap-2 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-900 dark:bg-violet-950 dark:text-violet-100">
+          <FlaskConical className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            {sampleStores.map((p) => STORE_META[p].name).join(" and ")} results here are recorded samples, not
+            live prices.
+          </span>
+        </p>
+      )}
 
       {searched.length === 0 ? (
         <EmptyState
@@ -146,8 +188,33 @@ export function ResultsView({
       ) : allFailed ? (
         <EmptyState
           title="Stores aren't responding"
-          body="We couldn't reach any store just now. Please try again in a minute."
-        />
+          body={
+            storeSearches.length > 0
+              ? "We couldn't reach any store just now. You can search them directly, or try again in a minute."
+              : "We couldn't reach any store just now. Please try again in a minute."
+          }
+        >
+          {storeSearches.length > 0 && (
+            <ul className="flex flex-wrap justify-center gap-2" aria-label="Search the stores directly">
+              {storeSearches.map(({ provider, href }) => (
+                <li key={provider}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="nofollow sponsored noopener"
+                    className={cn(
+                      buttonVariants({ variant: "secondary", size: "lg" }),
+                      "h-10 rounded-xl px-4 font-semibold",
+                    )}
+                  >
+                    Search {STORE_META[provider].name}
+                    <ExternalLink className="size-4" aria-hidden />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </EmptyState>
       ) : groups.length === 0 ? (
         <EmptyState
           title="No matches"
@@ -162,6 +229,7 @@ export function ResultsView({
                   group={group}
                   links={outboundLinks}
                   findMatches={findMatchesLink(group, connectedStores, query.normalizedText)}
+                  checkStore={storeChecks[group.id] ?? null}
                   user={
                     userLists && {
                       searchText: query.rawText,

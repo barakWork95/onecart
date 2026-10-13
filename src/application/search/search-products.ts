@@ -153,6 +153,9 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     }
   }
 
+  const scopes = new Map(deps.providers.map((p) => [p.id, p.cacheScope]));
+  const scopeOf = (id: ProductSearchProvider["id"]) => scopes.get(id);
+
   async function readCache(
     id: ProductSearchProvider["id"],
     query: SearchQuery,
@@ -161,7 +164,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const cached = await safely(
       "cache read",
       null,
-      () => deps.cache.get(searchCacheKey(query, id, storePage)),
+      () => deps.cache.get(searchCacheKey(query, id, storePage, scopeOf(id))),
       id,
     );
     if (!cached) return null;
@@ -194,7 +197,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
       return { outcome: { ...base, status: "skipped" }, products: [], hasMore: false, unavailable: [] };
     }
 
-    const cacheKey = searchCacheKey(query, id, storePage);
+    const cacheKey = searchCacheKey(query, id, storePage, scopeOf(id));
     const cached = await readCache(id, query, storePage);
     if (cached) return cached;
 

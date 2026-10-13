@@ -13,14 +13,15 @@ import {
   type RawSearchParams,
 } from "@/application/search/build-search-query";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
+import { storeChecks, storeSearches } from "@/application/search/store-fallback";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
-import { ebayCredentials, env } from "@/config/env";
+import { amazonSource, ebayCredentials, env } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductSearchProvider } from "@/domain/search/product-search-provider";
 import type { SearchResponse } from "@/domain/search/search-response";
 import type { QueryTranslator } from "@/domain/search/ports";
-import { PROVIDER_IDS } from "@/domain/shared/provider";
+import { PROVIDER_IDS, type ProviderId } from "@/domain/shared/provider";
 import type { Result } from "@/domain/shared/result";
 import { createAffiliateLinkBuilder } from "@/infrastructure/affiliate/affiliate-link-builder";
 import { consoleClickRecorder } from "@/infrastructure/affiliate/console-click-recorder";
@@ -37,6 +38,7 @@ import { createAliExpressProvider } from "@/infrastructure/providers/aliexpress/
 import { createAliExpressLinkGenerator } from "@/infrastructure/providers/aliexpress/aliexpress-link-generator";
 import { createAmazonProvider } from "@/infrastructure/providers/amazon/amazon-adapter";
 import { createEbayProvider } from "@/infrastructure/providers/ebay/ebay-adapter";
+import { createRecordedSerpApiFetch } from "@/infrastructure/providers/amazon/amazon-recorded";
 import { createEbayTokenProvider } from "@/infrastructure/providers/ebay/ebay-oauth";
 import { DEMO_CATALOG, DEMO_FX } from "@/infrastructure/providers/demo/demo-catalog";
 import { createDemoProvider } from "@/infrastructure/providers/demo/demo-provider";
@@ -53,6 +55,8 @@ interface Services {
   readonly linkCodec: OutboundLinkCodec;
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
   readonly demoMode: boolean;
+  /** Stores answering from recorded samples (development); the UI labels them. */
+  readonly sampleStores: readonly ProviderId[];
   /** Where wishlists and alerts live; see `src/app/_user-lists.ts`. */
   readonly userListsBackend: UserListsBackend;
 }
@@ -82,6 +86,8 @@ function buildServices(): Services {
   const demoMode = config.ONECART_DEMO_PROVIDERS;
 
   const providers: ProductSearchProvider[] = [];
+  /** Stores answering from recorded samples rather than live. */
+  const sampleStores: ProviderId[] = [];
   if (demoMode) {
     logger.warn("composition: demo providers enabled — results are sample data");
     for (const provider of PROVIDER_IDS) {
@@ -91,15 +97,23 @@ function buildServices(): Services {
     }
   } else {
     const getFxRates = createCachedFxRates({ source: createFrankfurterFxSource(), store: redis, logger });
-    if (config.SERPAPI_API_KEY) {
+    const amazon = amazonSource(config);
+    if (amazon !== "off") {
+      if (amazon === "recorded")
+        logger.warn(
+          "composition: Amazon serves recorded SerpApi responses (SERPAPI_MODE=live for real ones)",
+        );
       providers.push(
         createAmazonProvider({
-          apiKey: config.SERPAPI_API_KEY,
+          // Recorded mode never sends a request; a key isn't needed or used.
+          apiKey: amazon === "live" ? (config.SERPAPI_API_KEY ?? "") : "recorded",
           importPolicy: ISRAEL_IMPORT_POLICY,
           getFxRates,
           pages: config.SERPAPI_AMAZON_PAGES,
+          ...(amazon === "recorded" ? { fetch: createRecordedSerpApiFetch(), cacheScope: "recorded" } : {}),
         }),
       );
+      if (amazon === "recorded") sampleStores.push("amazon");
     }
     const ebay = ebayCredentials(config);
     if (ebay) {
@@ -185,6 +199,7 @@ function buildServices(): Services {
     }),
     translator,
     demoMode,
+    sampleStores,
   };
 }
 
@@ -218,6 +233,13 @@ export type SearchPageResult =
       readonly demoMode: boolean;
       /** Offer id → signed `/go/...` href for every offer shown (all pages through this one). */
       readonly outboundLinks: Readonly<Record<string, string>>;
+      /** Group id → a store that's down and a signed link to search it ("Check Amazon"). */
+      readonly storeChecks: Readonly<
+        Record<string, { readonly provider: ProviderId; readonly href: string }>
+      >;
+      /** Unavailable stores, each with a signed link to search its own site for the query. */
+      readonly storeSearches: readonly { readonly provider: ProviderId; readonly href: string }[];
+      readonly sampleStores: readonly ProviderId[];
     };
 
 /** Everything the /search page needs, from raw URL params. */
@@ -225,7 +247,7 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
   const request = parseSearchParams(params);
   if (!request.ok) return { kind: "no_query" };
 
-  const { searchProducts, translator, demoMode, linkCodec } = getServices();
+  const { searchProducts, translator, demoMode, linkCodec, sampleStores } = getServices();
   const { query, translation } = await buildSearchQuery(request.value, translator, consoleLogger);
   // Cumulative: "Load more" re-renders every card through the requested page.
   const response = await searchProducts(query, { includeEarlierPages: true });
@@ -239,7 +261,20 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
       url: offer.productUrl,
     });
   }
-  return { kind: "results", response, translation, demoMode, outboundLinks };
+  const checks: Record<string, { provider: ProviderId; href: string }> = {};
+  for (const [groupId, target] of Object.entries(storeChecks(response))) {
+    checks[groupId] = { provider: target.provider, href: linkCodec.encode(target) };
+  }
+  return {
+    kind: "results",
+    response,
+    translation,
+    demoMode,
+    outboundLinks,
+    storeChecks: checks,
+    storeSearches: storeSearches(response).map((t) => ({ provider: t.provider, href: linkCodec.encode(t) })),
+    sampleStores,
+  };
 }
 
 /** The /go/[id] decision; see `createResolveOutboundLink`. */
