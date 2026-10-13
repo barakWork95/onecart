@@ -32,13 +32,12 @@ export function searchThrottle(): RateLimiter {
 }
 
 /**
- * The client's IP. On Vercel, `x-real-ip` and the first `x-forwarded-for`
- * entry are set by the platform's edge, not the client.
+ * The client's IP, or null when no proxy in front of us set one. On Vercel,
+ * `x-real-ip` and the first `x-forwarded-for` entry are set by the platform's
+ * edge, not the client, so null only happens on local runs.
  */
-export function clientIp(headers: Headers): string {
-  return (
-    headers.get("x-real-ip")?.trim() || headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-  );
+export function clientIp(headers: Headers): string | null {
+  return headers.get("x-real-ip")?.trim() || headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
 }
 
 /**

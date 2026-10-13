@@ -302,6 +302,11 @@ SearchBar (client) → /search?q=… (Server Component)
     product, price beyond 2.5× across stores or 3× within one, brand/model/variant/series/condition
     conflict), and it must match more than half the members (all of them when only titles match).
     A merge pass then joins clusters that placement order split, on the same rules.
+  - **Card photo and title** (`hero-listing.ts`): a catalog store's photo first (Amazon's main
+    image is product-only on white), including a "won't ship to Israel" Amazon listing of the
+    same product; else the photo of the listing its store ranks best. The title comes from the
+    most-reviewed listing, else the store's best match. Never just the cheapest seller's.
+    Amazon thumbnails are requested at `_AC_SL500_`, eBay's at `s-l500`.
   - The card reads "eBay from ₪902 (18 listings) vs Amazon: no offer to Israel"; the compare sheet
     has an "All 18 eBay listings" tray under eBay's best offer. A single store with several
     listings opens a "18 eBay listings" sheet.
@@ -397,6 +402,9 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   circuit): eBay 4,500 and Amazon 4 live calls a day by default (`EBAY_DAILY_CALL_BUDGET`,
   `AMAZON_DAILY_CALL_BUDGET`). Over budget → that store reports `DAILY_BUDGET`, the circuit is
   untouched, and the UI offers "Check <store>" links. This stops floods from rotating IPs.
+- Local runs may share production Redis (`.env.local` holds the `KV_*` vars). Non-live data is
+  always cache-scoped (`amazon@recorded`, `<store>@demo`), E2E blanks every Redis variable, and
+  requests without a client IP (local runs) aren't throttled.
 - Counters are fixed windows in Upstash (`createUpstashCounterStore`), per-instance in memory
   without it. Production's database is Vercel Storage `onecart-redis`, which injects
   `KV_REST_API_URL` / `KV_REST_API_TOKEN`; `parseServerEnv()` maps them onto

@@ -101,6 +101,17 @@ describe("“sony wh-1000xm5”", () => {
     expect(groups.slice(1).some((g) => /wh-?1000xm5/i.test(g.title) && !g.isAccessory)).toBe(false);
   });
 
+  it("shows Amazon's catalog photo and the eBay best match's title, not the cheapest seller's", async () => {
+    const { groups } = await search("sony wh-1000xm5");
+    const [top] = groups;
+    // Amazon won't ship it, but its listing of the same model carries the white-background catalog photo.
+    expect(top?.imageUrl).toMatch(/^https:\/\/m\.media-amazon\.com\//);
+    expect(top?.imageUrl).toBe(top?.unavailable[0]?.imageUrl);
+    // The cheapest seller titles it "New! … BlackAuto NC"; eBay's own top match is cleaner.
+    expect(top?.title).not.toMatch(/^New!/);
+    expect(top?.title).toMatch(/^Sony WH-1000XM5 /);
+  });
+
   it("keeps parts out of the headphones card and below every product", async () => {
     const { groups } = await search("sony wh-1000xm5");
     const [top] = groups;

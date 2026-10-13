@@ -29,6 +29,9 @@ export default defineConfig({
       DEEPL_API_KEY: "",
       UPSTASH_REDIS_REST_URL: "",
       UPSTASH_REDIS_REST_TOKEN: "",
+      // Vercel Storage's names for the same database: E2E must never write to production Redis.
+      KV_REST_API_URL: "",
+      KV_REST_API_TOKEN: "",
       OUTBOUND_LINK_SECRET: "e2e-only-outbound-link-secret-0123456789",
       AFFILIATE_AMAZON_TAG: "onecart-e2e-20",
       AFFILIATE_EBAY_CAMPAIGN_ID: "5338000000",

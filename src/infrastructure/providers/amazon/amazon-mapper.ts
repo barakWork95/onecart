@@ -33,11 +33,20 @@ function canonicalUrl(asin: string): string {
   return `https://www.amazon.com/dp/${asin}`;
 }
 
+/**
+ * Amazon's image size modifier ("…/61O3iMlnJIL._AC_UY218_.jpg"). Search
+ * results carry the 218px thumbnail; `_AC_SL500_` serves the same photo with
+ * its longer side at 500px (confirmed: 142×218 → 325×500), sharp on a 2× tile.
+ */
+const IMAGE_SIZE = /\._[A-Z0-9_,]+_\.(jpe?g|png|webp)$/i;
+
 function cleanImage(url: string | undefined): string | null {
   if (!url) return null;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" ? parsed.toString() : null;
+    if (parsed.protocol !== "https:") return null;
+    parsed.pathname = parsed.pathname.replace(IMAGE_SIZE, "._AC_SL500_.$1");
+    return parsed.toString();
   } catch {
     return null;
   }

@@ -84,6 +84,8 @@ export function createDemoProvider(config: DemoProviderConfig): ProductSearchPro
 
   return {
     id: config.provider,
+    // Sample data must never sit under a live store's cache key, even on a shared Redis.
+    cacheScope: "demo",
     async search(query, options) {
       const wanted = stems(query.normalizedText);
       const fetchedAt = now().toISOString();

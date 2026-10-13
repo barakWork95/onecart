@@ -121,3 +121,9 @@ describe("createDemoProvider — store pages", () => {
     expect(second.ok && second.value.products).toHaveLength(30 - DEMO_STORE_PAGE_SIZE);
   });
 });
+
+describe("createDemoProvider — cache scope", () => {
+  it("scopes its cache entries, so sample data never sits under a live store's key", () => {
+    expect(provider("ebay").cacheScope).toBe("demo");
+  });
+});

@@ -6,7 +6,8 @@ describe("clientIp", () => {
       "203.0.113.7",
     );
     expect(clientIp(new Headers({ "x-forwarded-for": " 198.51.100.2 , 10.0.0.1" }))).toBe("198.51.100.2");
-    expect(clientIp(new Headers())).toBe("unknown");
+    expect(clientIp(new Headers())).toBeNull();
+    expect(clientIp(new Headers({ "x-forwarded-for": " " }))).toBeNull();
   });
 });
 

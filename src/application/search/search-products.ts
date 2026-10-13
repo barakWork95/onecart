@@ -351,7 +351,11 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     // Classified on every loaded offer, before filters, so a price filter can't move the typical price.
     const classes = classifyOffers(products, intent);
     const groups = sortGroups(
-      groupProducts(offers, { classes, unavailable: [...unavailable.values()] }),
+      groupProducts(offers, {
+        classes,
+        unavailable: [...unavailable.values()],
+        rankOf: (id) => ranks.get(id),
+      }),
       query.sort,
       (id) => ranks.get(id),
       intent,

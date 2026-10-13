@@ -23,8 +23,11 @@ function tooManySearches(retryAfterSeconds: number): NextResponse {
  *    returning visitor's Saved/Alerts look empty. No-op without Supabase.
  */
 export async function proxy(request: NextRequest) {
-  if (isSearchRequest(request.method, request.nextUrl)) {
-    const decision = await searchThrottle()(clientIp(request.headers));
+  const ip = clientIp(request.headers);
+  // No client IP means a local run (Vercel always sets one): lumping every such request
+  // into one shared bucket would throttle all local runs together, so they aren't counted.
+  if (ip && isSearchRequest(request.method, request.nextUrl)) {
+    const decision = await searchThrottle()(ip);
     if (!decision.allowed) return tooManySearches(decision.retryAfterSeconds);
   }
 

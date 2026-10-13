@@ -119,6 +119,22 @@ describe("mapAmazonProduct", () => {
     expect(mapAmazonProduct(raw({ extracted_old_price: 29.99 }), ctx)?.originalPrice).toBeNull();
   });
 
+  it("asks Amazon for the 500px rendition of the thumbnail, leaving unmodified URLs alone", () => {
+    expect(
+      mapAmazonProduct(
+        raw({ thumbnail: "https://m.media-amazon.com/images/I/61O3iMlnJIL._AC_UY218_.jpg" }),
+        ctx,
+      )?.imageUrl,
+    ).toBe("https://m.media-amazon.com/images/I/61O3iMlnJIL._AC_SL500_.jpg");
+    expect(
+      mapAmazonProduct(raw({ thumbnail: "https://m.media-amazon.com/images/I/71x._AC_UL320_.png" }), ctx)
+        ?.imageUrl,
+    ).toBe("https://m.media-amazon.com/images/I/71x._AC_SL500_.png");
+    expect(
+      mapAmazonProduct(raw({ thumbnail: "https://m.media-amazon.com/images/I/61.jpg" }), ctx)?.imageUrl,
+    ).toBe("https://m.media-amazon.com/images/I/61.jpg");
+  });
+
   it("omits ratings without reviews and non-https or invalid thumbnails", () => {
     const product = mapAmazonProduct(
       raw({ rating: 5, reviews: 0, thumbnail: "http://insecure.example/x.jpg" }),

@@ -13,6 +13,7 @@ import {
 import { tokenizeTitle } from "@/domain/matching/title-tokens";
 import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { ProductRating, UnifiedProduct } from "@/domain/product/unified-product";
+import { heroImage, heroTitleListing, type ListingRank } from "@/domain/search/hero-listing";
 import type { OfferClass } from "@/domain/search/search-intent";
 import { compareMoney, type Money } from "@/domain/shared/money";
 
@@ -28,8 +29,9 @@ export type Offers = readonly [UnifiedProduct, ...UnifiedProduct[]];
 export interface ProductGroup {
   /** Stable for identical input: derived from the cheapest offer's id. */
   readonly id: string;
-  /** From the offer with the most reviews (usually the cleanest title), else the cheapest. */
+  /** From the most-reviewed listing (usually the canonical page), else the stores' best match. */
   readonly title: string;
+  /** A catalog photo when a store has one (Amazon), else the best-ranked listing's; see `heroImage`. */
   readonly imageUrl: string | null;
   /** Each store's cheapest listing, cheapest first: the per-store comparison. */
   readonly offers: Offers;
@@ -61,6 +63,8 @@ export interface GroupingOptions {
   readonly classes?: ReadonlyMap<string, OfferClass>;
   /** Listings with no offer to Israel, attached to the groups they match. */
   readonly unavailable?: readonly UnavailableListing[];
+  /** Each listing's position in its store's results; picks the card's photo and title. */
+  readonly rankOf?: ListingRank;
 }
 
 export function bestOffer(group: ProductGroup): UnifiedProduct {
@@ -236,6 +240,7 @@ function toGroup(
   cluster: Cluster,
   unavailable: readonly UnavailableListing[],
   classes: GroupingOptions["classes"],
+  rankOf: ListingRank | undefined,
 ): ProductGroup {
   const [first, ...rest] = cluster.members.map((m) => m.product).sort(compareOffers);
   // Clusters are created with one member and only grow.
@@ -245,13 +250,12 @@ function toGroup(
   const offers: Offers = [first, ...rest.filter((o) => !stores.has(o.provider) && stores.add(o.provider))];
   const last = listings[listings.length - 1] ?? first;
 
-  const byReviews = [...listings].sort((a, b) => (b.rating?.count ?? 0) - (a.rating?.count ?? 0));
-  const titleSource = (byReviews[0]?.rating?.count ?? 0) > 0 ? (byReviews[0] ?? first) : first;
+  const titleSource = heroTitleListing(listings, rankOf);
 
   return {
     id: `grp:${first.id}`,
     title: titleSource.title,
-    imageUrl: titleSource.imageUrl ?? listings.find((o) => o.imageUrl)?.imageUrl ?? null,
+    imageUrl: heroImage(listings, unavailable, rankOf),
     offers,
     listings,
     priceRange: { min: first.price.total, max: last.price.total },
@@ -292,6 +296,11 @@ export function groupProducts(
     .filter(({ tokens }) => tokens.accessorySignal === "none");
   return clusters.map((cluster) => {
     const isAccessory = cluster.members.every((m) => m.tokens.isAccessory);
-    return toGroup(cluster, isAccessory ? [] : unavailableFor(cluster, listings, policy), options.classes);
+    return toGroup(
+      cluster,
+      isAccessory ? [] : unavailableFor(cluster, listings, policy),
+      options.classes,
+      options.rankOf,
+    );
   });
 }
