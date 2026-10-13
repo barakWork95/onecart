@@ -463,6 +463,13 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
 - The URL-parameter builders are pure functions that keep other params, replace an existing tag and
   never double-encode.
 - Click recording must never block or break the redirect.
+- **Every outbound anchor spreads `OUTBOUND_LINK`** (`src/components/features/outbound-link.ts`):
+  `target="_blank"` and `rel="nofollow sponsored noopener noreferrer"`. Never hand-write these.
+  The E2E "affiliate & conversion audit" follows every `/go` link on a page (cards, compare
+  sheet, listings tray, 60 Load-more cards) and checks Amazon's `tag` and eBay's
+  `campid`/`toolid`/`mkrid` on the 302.
+- Outbound buttons are at least 44px tall (touch-target guideline); the compare sheet's title is
+  clamped to 2 lines on phones so the offers stay above the fold.
 
 ---
 

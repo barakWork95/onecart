@@ -11,6 +11,7 @@ import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-li
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoney } from "@/lib/format";
+import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 export const metadata: Metadata = { title: "Saved" };
 
@@ -51,8 +52,7 @@ async function SavedList() {
             <div className="mt-1 flex gap-3 text-sm font-semibold">
               <a
                 href={linkCodec.encode({ id: item.productId, provider: item.provider, url: item.productUrl })}
-                target="_blank"
-                rel="nofollow sponsored noopener"
+                {...OUTBOUND_LINK}
                 className="text-primary"
                 aria-label={`Go to ${STORE_META[item.provider].name} for ${item.title}`}
               >

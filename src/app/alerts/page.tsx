@@ -11,6 +11,7 @@ import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
 import { formatMoney } from "@/lib/format";
+import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 export const metadata: Metadata = { title: "Price alerts" };
 
@@ -77,8 +78,7 @@ async function AlertList() {
                   provider: alert.provider,
                   url: alert.productUrl,
                 })}
-                target="_blank"
-                rel="nofollow sponsored noopener"
+                {...OUTBOUND_LINK}
                 className="text-sm font-semibold text-primary"
               >
                 Buy now

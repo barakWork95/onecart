@@ -24,6 +24,7 @@ import type { UnifiedProduct } from "@/domain/product/unified-product";
 import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import { formatDeliveryDays, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 function shippingLabel(offer: UnifiedProduct): string {
   if (!offer.price.shippingKnown) return "Shipping not quoted";
@@ -102,12 +103,11 @@ function OfferRow({
         </div>
         <a
           href={href}
-          target="_blank"
-          rel="nofollow sponsored noopener"
+          {...OUTBOUND_LINK}
           aria-label={`Go to ${meta.name} — ${formatMoney(offer.price.total)}`}
           className={cn(
             buttonVariants({ variant: isBest ? "default" : "secondary", size: "lg" }),
-            "h-10 rounded-xl px-4 font-semibold",
+            "h-11 min-w-11 rounded-xl px-4 font-semibold",
           )}
         >
           Go
@@ -133,12 +133,11 @@ function UnavailableRow({ listing, href }: { listing: UnavailableListing; href: 
         </div>
         <a
           href={href}
-          target="_blank"
-          rel="nofollow sponsored noopener"
+          {...OUTBOUND_LINK}
           aria-label={`View on ${meta.name} (no offer to Israel)`}
           className={cn(
             buttonVariants({ variant: "outline", size: "lg" }),
-            "h-10 rounded-xl px-4 font-semibold",
+            "h-11 min-w-11 rounded-xl px-4 font-semibold",
           )}
         >
           View
@@ -166,7 +165,7 @@ function ListingsTray({
   return (
     <li className="pb-3">
       <details className="group/tray rounded-2xl bg-secondary/60 open:bg-secondary">
-        <summary className="flex h-10 cursor-pointer list-none items-center justify-between gap-2 rounded-2xl px-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+        <summary className="flex h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-2xl px-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
           <span>
             All {listings.length} {name} listings
           </span>
@@ -184,12 +183,11 @@ function ListingsTray({
               <p className="shrink-0 text-sm font-bold text-foreground">{formatMoney(listing.price.total)}</p>
               <a
                 href={outboundHref(links, listing)}
-                target="_blank"
-                rel="nofollow sponsored noopener"
+                {...OUTBOUND_LINK}
                 aria-label={`Go to ${name} — ${formatMoney(listing.price.total)}: ${listing.title}`}
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
-                  "h-8 shrink-0 rounded-lg px-3",
+                  "h-11 min-w-11 shrink-0 rounded-lg px-3",
                 )}
               >
                 Go
@@ -218,7 +216,7 @@ export function CompareSheet({
   return (
     <Drawer>
       <DrawerTrigger
-        className={cn(buttonVariants({ size: "lg" }), "h-10 rounded-xl px-4 font-semibold")}
+        className={cn(buttonVariants({ size: "lg" }), "h-11 rounded-xl px-4 font-semibold")}
         aria-label={
           singleStore
             ? `See ${listingCount} ${storeName} listings for ${group.title}`
@@ -239,7 +237,11 @@ export function CompareSheet({
                   Delivery to Israel
                 </span>
               </p>
-              <DrawerTitle className="mt-1 text-xl font-bold text-foreground">
+              {/* Seller titles run long; two lines on phones keep the offers above the fold. */}
+              <DrawerTitle
+                className="mt-1 line-clamp-2 text-xl font-bold text-foreground sm:line-clamp-none"
+                title={group.title}
+              >
                 {singleStore
                   ? `${listingCount} ${storeName} listings: ${group.title}`
                   : `Compare ${storeCount} stores: ${group.title}`}

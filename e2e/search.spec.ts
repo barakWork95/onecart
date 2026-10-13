@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 const cards = (page: Page) => page.getByRole("list", { name: "Products" }).getByRole("article");
 
@@ -356,5 +356,64 @@ test.describe("theme", () => {
     await page.getByRole("banner").getByRole("button", { name: "Toggle dark mode" }).click();
     await expect(page.locator("html")).not.toHaveClass(/\bdark\b/);
     expect(errors).toEqual([]);
+  });
+});
+
+test.describe("affiliate & conversion audit", () => {
+  /** Every Amazon and eBay outbound link on the page must land on the store with our tags. */
+  async function auditOutbound(page: Page, request: APIRequestContext) {
+    const anchors = page.locator('a[href^="/go/"]');
+    const count = await anchors.count();
+    const checked: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const anchor = anchors.nth(i);
+      await expect(anchor).toHaveAttribute("target", "_blank");
+      const rel = ((await anchor.getAttribute("rel")) ?? "").split(" ").sort();
+      expect(rel).toEqual(["nofollow", "noopener", "noreferrer", "sponsored"]);
+
+      const href = (await anchor.getAttribute("href")) ?? "";
+      const response = await request.get(href, { maxRedirects: 0 });
+      expect(response.status(), href).toBe(302);
+      const location = new URL(response.headers()["location"] ?? "");
+      if (location.hostname.endsWith("amazon.com")) {
+        expect(location.searchParams.get("tag"), href).toBe("onecart-e2e-20");
+      } else if (location.hostname.endsWith("ebay.com")) {
+        expect(location.searchParams.get("campid"), href).toBe("5338000000");
+        expect(location.searchParams.get("toolid"), href).toBe("10049");
+        expect(location.searchParams.get("mkrid"), href).toBe("711-53200-19255-0");
+      }
+      checked.push(location.hostname);
+    }
+    return checked;
+  }
+
+  test("every card, sheet and tray link carries our Amazon tag or eBay campaign", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/search?q=wireless+earbuds");
+    // Every card here compares several stores, so its links live in the sheet.
+    await auditOutbound(page, request);
+
+    // The Life P3 card: compare sheet rows plus eBay's tray of 2 listings.
+    await cards(page)
+      .nth(0)
+      .getByRole("button", { name: /Compare 4 stores/ })
+      .click();
+    const sheet = page.getByRole("dialog");
+    await sheet.getByText("All 2 eBay listings").click();
+    await expect(sheet.getByRole("list", { name: "eBay listings" }).getByRole("listitem")).toHaveCount(2);
+    const hosts = await auditOutbound(page, request);
+    // 4 store rows (AliExpress, Temu, Amazon, eBay) + eBay's 2 tray listings.
+    expect(hosts.filter((h) => h.endsWith("ebay.com"))).toHaveLength(3);
+    expect(hosts.filter((h) => h.endsWith("amazon.com"))).toHaveLength(1);
+  });
+
+  test("Load-more pages are audited the same way (60 cables, Amazon and eBay)", async ({ page, request }) => {
+    await page.goto("/search?q=usb+cable&page=3");
+    await expect(cards(page)).toHaveCount(60);
+    const hosts = await auditOutbound(page, request);
+    expect(hosts).toHaveLength(60);
+    expect(new Set(hosts)).toEqual(new Set(["www.amazon.com", "www.ebay.com"]));
   });
 });

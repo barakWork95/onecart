@@ -111,7 +111,7 @@ describe("ResultsView", () => {
     expect(screen.getByRole("button", { name: /Compare 3 stores for/ })).toBeInTheDocument();
     const deal = screen.getByRole("link", { name: /View deal ₪310/ });
     expect(deal).toHaveAttribute("href", "/go/ebay%3Ae?d=x&s=y");
-    expect(deal).toHaveAttribute("rel", "nofollow sponsored noopener");
+    expect(deal).toHaveAttribute("rel", "nofollow sponsored noopener noreferrer");
   });
 
   it("spells out the cross-store comparison and the best deal on a grouped card", () => {
@@ -438,7 +438,7 @@ describe("ResultsView — Amazon unavailable (quota used up)", () => {
     const check = screen.getByRole("link", { name: "Check Amazon for Sony WH-CH720N Headphones" });
     expect(check).toHaveAttribute("href", "/go/amazon-search%3Ax?d=x&s=y");
     expect(check).toHaveAttribute("target", "_blank");
-    expect(check).toHaveAttribute("rel", "nofollow sponsored noopener");
+    expect(check).toHaveAttribute("rel", "nofollow sponsored noopener noreferrer");
     expect(screen.queryByRole("link", { name: /^Find on/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /View deal ₪310/ })).toBeInTheDocument();
   });
@@ -464,7 +464,7 @@ describe("ResultsView — Amazon unavailable (quota used up)", () => {
     );
     expect(within(direct).getByRole("link", { name: "Search eBay" })).toHaveAttribute(
       "rel",
-      "nofollow sponsored noopener",
+      "nofollow sponsored noopener noreferrer",
     );
   });
 
@@ -473,6 +473,78 @@ describe("ResultsView — Amazon unavailable (quota used up)", () => {
     expect(
       screen.getByText(/Amazon results here are recorded samples, not live prices\./),
     ).toBeInTheDocument();
+  });
+});
+
+describe("ResultsView — outbound link audit", () => {
+  /** Every anchor leaving OneCart: through the signed /go redirect, new tab, affiliate rel. */
+  function expectOutbound(anchor: HTMLElement) {
+    expect(anchor.getAttribute("href")).toMatch(/^\/go\//);
+    expect(anchor).toHaveAttribute("target", "_blank");
+    expect((anchor.getAttribute("rel") ?? "").split(" ").sort()).toEqual(
+      ["nofollow", "noopener", "noreferrer", "sponsored"].sort(),
+    );
+  }
+
+  it("covers View deal, Go in the sheet, every listing in the tray, Check Amazon, and store searches", async () => {
+    const user = userEvent.setup();
+    const xm5 = (sku: string, title: string, total: number) =>
+      makeProduct({ provider: "ebay", sku, title, total });
+    const collapsed = groupProducts([
+      xm5("x1", "Sony WH-1000XM5 Noise Cancelling Wireless Headphones Black", 1012_00),
+      xm5("x2", "Sony WH-1000XM5SA Wireless Noise Canceling Headphones Silver", 1100_00),
+      makeProduct({
+        provider: "amazon",
+        sku: "z1",
+        title: "Sony WH-1000XM5 Wireless Headphones Black",
+        total: 1150_00,
+      }),
+    ]);
+    const single = groupProducts([OFFERS[3]!]);
+    const groups = [...collapsed, ...single];
+    const links = Object.fromEntries(
+      groups.flatMap((g) => g.listings).map((l) => [l.id, `/go/${encodeURIComponent(l.id)}?d=x&s=y`]),
+    );
+    renderView({
+      response: response({ groups, providers: [ok("amazon"), ok("ebay")] }),
+      outboundLinks: links,
+      storeChecks: { [single[0]!.id]: { provider: "amazon", href: "/go/amazon%3Asearch%3Ax?d=x&s=y" } },
+    });
+
+    const external = () =>
+      screen.getAllByRole("link").filter((a) => /^(\/go\/|https?:)/.test(a.getAttribute("href") ?? ""));
+    const onCards = external();
+    expect(onCards.map((a) => a.textContent)).toEqual(
+      expect.arrayContaining(["View deal ₪310", "Check Amazon"]),
+    );
+    onCards.forEach(expectOutbound);
+
+    await user.click(screen.getByRole("button", { name: /^Compare 2 stores for/ }));
+    const sheet = await screen.findByRole("dialog");
+    await user.click(within(sheet).getByText("All 2 eBay listings"));
+    const inSheet = within(sheet).getAllByRole("link");
+    // Best offer per store (2) + every eBay listing in the tray (2).
+    expect(inSheet).toHaveLength(4);
+    inSheet.forEach(expectOutbound);
+  });
+
+  it("covers the direct store searches offered when every store is down", () => {
+    renderView({
+      response: response({
+        groups: [],
+        totalOffers: 0,
+        isPartial: true,
+        providers: [
+          { provider: "amazon", status: "error", resultCount: 0, latencyMs: 1, fromCache: false },
+          { provider: "ebay", status: "error", resultCount: 0, latencyMs: 1, fromCache: false },
+        ],
+      }),
+      storeSearches: [
+        { provider: "amazon", href: "/go/amazon%3Asearch%3Aq?d=a&s=b" },
+        { provider: "ebay", href: "/go/ebay%3Asearch%3Aq?d=c&s=d" },
+      ],
+    });
+    screen.getAllByRole("link", { name: /^Search (Amazon|eBay)$/ }).forEach(expectOutbound);
   });
 });
 

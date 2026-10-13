@@ -14,6 +14,7 @@ import {
   type ProviderOutcome,
   type SearchResponse,
 } from "@/domain/search/search-response";
+import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 const STATUS_TEXT: Partial<Record<ProviderOutcome["status"], string>> = {
   timeout: "timed out",
@@ -200,11 +201,10 @@ export function ResultsView({
                 <li key={provider}>
                   <a
                     href={href}
-                    target="_blank"
-                    rel="nofollow sponsored noopener"
+                    {...OUTBOUND_LINK}
                     className={cn(
                       buttonVariants({ variant: "secondary", size: "lg" }),
-                      "h-10 rounded-xl px-4 font-semibold",
+                      "h-11 rounded-xl px-4 font-semibold",
                     )}
                   >
                     Search {STORE_META[provider].name}

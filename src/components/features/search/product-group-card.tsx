@@ -17,6 +17,7 @@ import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import type { ProviderId } from "@/domain/shared/provider";
 import { formatCount, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 function DeliveryNote({ group }: { group: ProductGroup }) {
   const best = bestOffer(group);
@@ -169,11 +170,10 @@ export function ProductGroupCard({
           ) : (
             <a
               href={outboundHref(links, best)}
-              target="_blank"
-              rel="nofollow sponsored noopener"
+              {...OUTBOUND_LINK}
               className={cn(
                 buttonVariants({ variant: "secondary", size: "lg" }),
-                "h-10 rounded-xl px-3 font-semibold",
+                "h-11 rounded-xl px-3 font-semibold",
               )}
             >
               View deal {formatMoney(best.price.total)}
@@ -184,10 +184,9 @@ export function ProductGroupCard({
             // The store's API is down: send the shopper to its own search, via our affiliate redirect.
             <a
               href={checkStore.href}
-              target="_blank"
-              rel="nofollow sponsored noopener"
+              {...OUTBOUND_LINK}
               aria-label={`Check ${STORE_META[checkStore.provider].name} for ${group.title}`}
-              className="mt-1.5 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
+              className="mt-1.5 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
             >
               <ExternalLink className="size-3.5" aria-hidden />
               Check {STORE_META[checkStore.provider].name}
@@ -199,7 +198,7 @@ export function ProductGroupCard({
               href={findMatches.href}
               prefetch={false}
               aria-label={`${findMatches.label}: search for ${group.title}`}
-              className="mt-1.5 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
+              className="mt-1.5 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
             >
               <Search className="size-3.5" aria-hidden />
               {findMatches.label}
