@@ -54,8 +54,14 @@ const serverEnvSchema = z.object({
       )
       .pipe(z.array(z.enum(PROVIDER_IDS)).min(1)),
   ),
-  /** Shown on /privacy and /terms as the contact for privacy and legal questions. */
-  CONTACT_EMAIL: optional(z.email()),
+  /**
+   * Shown on /privacy and /terms as the contact for privacy and legal questions.
+   * Trimmed; a malformed value is dropped (the line is left out) rather than
+   * failing validation and taking the whole site down over a typo.
+   */
+  CONTACT_EMAIL: z
+    .preprocess((v) => (typeof v === "string" ? v.trim() || undefined : v), z.email().optional())
+    .catch(undefined),
   /** Set by Vercel: "production", "preview" or "development". */
   VERCEL_ENV: optional(z.enum(["production", "preview", "development"])),
   /** Amazon result pages fetched in parallel per uncached query (1–3); each costs one SerpApi credit. */

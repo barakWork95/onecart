@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "OneCart — Find the best price", template: "%s · OneCart" },
   description:
-    "Search Amazon, AliExpress, Temu and eBay at once. Compare the real landed price to Israel — shipping, VAT and customs included.",
-  icons: { icon: "/brand/onecart-icon.png", apple: "/brand/onecart-icon.png" },
+    "Compare Amazon and eBay by the real landed price to Israel: shipping, import VAT and customs included.",
+  // Icons come from the file conventions: app/icon.svg, app/favicon.ico, app/apple-icon.png.
 };
 
 export const viewport: Viewport = {

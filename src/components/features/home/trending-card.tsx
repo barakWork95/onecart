@@ -49,10 +49,7 @@ export function TrendingCardView({ card }: { card: TrendingCard }) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-        <h3
-          id={headingId}
-          className="text-sm leading-snug font-bold text-foreground sm:text-base"
-        >
+        <h3 id={headingId} className="text-sm leading-snug font-bold text-foreground sm:text-base">
           {/* The heading's link covers the whole card: one tab stop, one click target. */}
           <Link href={trendingHref(card.query)} className="after:absolute after:inset-0 focus:outline-none">
             {card.label}

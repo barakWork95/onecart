@@ -114,3 +114,19 @@ describe("Redis credentials", () => {
     expect(redis({ KV_REST_API_URL: "https://kv.upstash.io" })).toEqual({ url: undefined, token: undefined });
   });
 });
+
+describe("CONTACT_EMAIL", () => {
+  const contact = (value: string | undefined) => parseServerEnv({ CONTACT_EMAIL: value }).CONTACT_EMAIL;
+
+  it("accepts an address, trimming what a paste may add", () => {
+    expect(contact("owner@onecartapp.com")).toBe("owner@onecartapp.com");
+    expect(contact("  owner@onecartapp.com \n")).toBe("owner@onecartapp.com");
+  });
+
+  it("drops an empty or malformed value instead of failing the whole config", () => {
+    expect(contact(undefined)).toBeUndefined();
+    expect(contact("")).toBeUndefined();
+    expect(contact("not-an-email")).toBeUndefined();
+    expect(() => parseServerEnv({ CONTACT_EMAIL: "owner@" })).not.toThrow();
+  });
+});

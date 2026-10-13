@@ -64,6 +64,44 @@ test.describe("compliance", () => {
     }
   });
 
+  test("privacy policy and terms show the configured contact address", async ({ page }) => {
+    for (const path of ["/privacy", "/terms"]) {
+      await page.goto(path);
+      await expect(page.getByRole("link", { name: "legal@example.com" }), path).toHaveAttribute(
+        "href",
+        "mailto:legal@example.com",
+      );
+    }
+  });
+
+  test("the site has the OneCart cart icon, not the framework default", async ({ page, request }) => {
+    await page.goto("/");
+    const icons = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"]').evaluateAll((links) =>
+      links.map((l) => ({
+        rel: l.getAttribute("rel"),
+        type: l.getAttribute("type"),
+        href: l.getAttribute("href"),
+      })),
+    );
+    expect(icons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ rel: "icon", href: expect.stringMatching(/^\/favicon\.ico/) }),
+        expect.objectContaining({
+          rel: "icon",
+          type: "image/svg+xml",
+          href: expect.stringMatching(/^\/icon\.svg/),
+        }),
+        expect.objectContaining({
+          rel: "apple-touch-icon",
+          href: expect.stringMatching(/^\/apple-icon\.png/),
+        }),
+      ]),
+    );
+    const svg = await request.get(icons.find((i) => i.type === "image/svg+xml")?.href ?? "");
+    expect(svg.headers()["content-type"]).toContain("image/svg+xml");
+    expect(await svg.text()).toContain('id="oc-blue"');
+  });
+
   test("privacy policy and terms are reachable from the footer", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("contentinfo").getByRole("link", { name: "Privacy Policy" }).click();

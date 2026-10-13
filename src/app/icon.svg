@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="oc-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b8cff"/>
+      <stop offset="1" stop-color="#1747d6"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#oc-blue)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- the "1": flag, stem, and the cart's floor -->
+    <path d="M58 132 L138 74 L138 352 L404 352" stroke-width="56"/>
+    <!-- basket: top rail and slanted front -->
+    <path d="M196 150 L452 150 L398 318 L200 318" stroke-width="34"/>
+    <!-- wire grid -->
+    <path d="M206 206 L420 206 M206 262 L402 262" stroke-width="26"/>
+    <path d="M268 160 L240 310 M352 160 L324 310" stroke-width="24"/>
+  </g>
+  <g fill="#0f2a5f">
+    <circle cx="180" cy="420" r="31"/>
+    <circle cx="352" cy="420" r="31"/>
+  </g>
+</svg>
