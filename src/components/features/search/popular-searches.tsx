@@ -1,12 +1,13 @@
 import Link from "next/link";
 
-/** Starting points that exercise both English and Hebrew search. */
+/** Starting points: the trending products, plus a Hebrew search to show translation works. */
 export const POPULAR_SEARCHES: readonly { label: string; q: string; lang?: "he" }[] = [
-  { label: "Wireless earbuds", q: "wireless earbuds" },
+  { label: "Sony WH-1000XM5", q: "sony wh-1000xm5" },
+  { label: "AirPods Pro", q: "airpods pro" },
+  { label: "Instant Pot Duo", q: "instant pot duo" },
+  { label: "JBL Flip 6", q: "jbl flip 6" },
+  { label: "Kindle Paperwhite", q: "kindle paperwhite" },
   { label: "אוזניות אלחוטיות", q: "אוזניות אלחוטיות", lang: "he" },
-  { label: "Mechanical keyboard", q: "mechanical keyboard" },
-  { label: "Memory foam pillow", q: "memory foam pillow" },
-  { label: "Car phone mount", q: "car phone mount" },
 ];
 
 export function PopularSearches({ heading }: { heading: string }) {

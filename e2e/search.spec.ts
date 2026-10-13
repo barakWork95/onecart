@@ -113,7 +113,8 @@ test.describe("search flow", () => {
 
   test("sorting by fastest delivery reorders the groups and updates the URL", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Wireless earbuds" }).click();
+    // The Hebrew trending chip searches "wireless earbuds" after translation.
+    await page.getByRole("link", { name: "אוזניות אלחוטיות" }).click();
     await expect(cards(page)).toHaveCount(3);
 
     await page.getByRole("link", { name: "Fastest Delivery" }).click();
@@ -316,10 +317,8 @@ test("the Amazon Associates disclosure appears on every page", async ({ page }) 
     await page.goto(route);
     const footer = page.getByRole("contentinfo");
     await footer.scrollIntoViewIfNeeded();
-    await expect(
-      footer.getByText("As an Amazon Associate I earn from qualifying purchases.", { exact: true }),
-      route,
-    ).toBeVisible();
+    // Amazon's exact sentence, now alongside our general affiliate disclosure.
+    await expect(footer, route).toContainText("As an Amazon Associate I earn from qualifying purchases.");
   }
 });
 

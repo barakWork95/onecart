@@ -386,6 +386,15 @@ SearchBar (client) → /search?q=… (Server Component)
   per-instance only.
 - The homepage deal feed reads Supabase and the Redis cache only. It must **never** trigger a live
   provider API call.
+- **Homepage "Trending comparisons"** (`application/deals/trending-showcase.ts`): one card per
+  product in `config/trending.ts`, built from **cached** results with the same
+  `assembleResults()` the search page uses (so a card matches the comparison it links to); the
+  card is the search's top non-accessory result. Nothing cached → no card. Each card shows when
+  its prices were fetched ("Prices as of …", the oldest snapshot). Cards are memoized per
+  instance for 5 minutes.
+  - `/api/cron/warm-trending` (daily 07:30 UTC, after eBay's quota reset) re-runs those searches
+    through the normal search path, asking only `TRENDING_WARM_STORES` (default `ebay`: 5 calls a
+    day, no SerpApi credits). Demo mode warms the demo catalog's `DEMO_TRENDING_QUERIES`.
 
 ## Abuse protection (store API quotas)
 
@@ -411,6 +420,16 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   `UPSTASH_REDIS_REST_*` when that pair is unset, so every Redis user finds it. A counter outage allows the request: the limiter must never take the site down.
 - Check eBay's usage: `GET https://api.ebay.com/developer/analytics/v1_beta/rate_limit/?api_context=buy&api_name=browse`
   (client-credentials token); it reports count, remaining and the reset time.
+
+## Compliance
+
+- The footer on every page carries the general affiliate disclosure (`AFFILIATE_DISCLOSURE`:
+  eBay Partner Network and Amazon Associates) and Amazon's exact sentence
+  (`AMAZON_ASSOCIATES_DISCLOSURE`; keep the wording), plus links to `/privacy` and `/terms`.
+- `/privacy` and `/terms` describe what the app actually does (anonymous accounts, IP rate
+  limiting, 24h query cache, click logging, the processors). Update them when that changes, and
+  bump `LEGAL_LAST_UPDATED`. `CONTACT_EMAIL` adds the contact line; without it the line is
+  left out rather than showing a placeholder.
 
 ## Error resilience
 

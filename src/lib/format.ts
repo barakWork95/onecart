@@ -42,3 +42,17 @@ export function formatDeliveryDays(delivery: DeliveryEstimate): string | null {
 export function formatCount(n: number): string {
   return new Intl.NumberFormat("en-US").format(n);
 }
+
+const SNAPSHOT_TIME = new Intl.DateTimeFormat("en-IL", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "Asia/Jerusalem",
+});
+
+/** "13 Oct, 10:30" in Israel time: when a cached price was fetched. */
+export function formatSnapshotTime(iso: string): string {
+  return SNAPSHOT_TIME.format(new Date(iso));
+}

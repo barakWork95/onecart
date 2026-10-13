@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { PROVIDER_IDS } from "@/domain/shared/provider";
 
 /**
  * Server-side environment, validated once on first access. Import `env` only
@@ -41,6 +42,20 @@ const serverEnvSchema = z.object({
   /** Live store API calls allowed per day across all shoppers; see config/rate-limits.ts. */
   EBAY_DAILY_CALL_BUDGET: optional(z.coerce.number().int().positive()),
   AMAZON_DAILY_CALL_BUDGET: optional(z.coerce.number().int().positive()),
+  /** Comma-separated stores the warm-trending cron calls (default "ebay"; see config/trending.ts). */
+  TRENDING_WARM_STORES: optional(
+    z
+      .string()
+      .transform((v) =>
+        v
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      )
+      .pipe(z.array(z.enum(PROVIDER_IDS)).min(1)),
+  ),
+  /** Shown on /privacy and /terms as the contact for privacy and legal questions. */
+  CONTACT_EMAIL: optional(z.email()),
   /** Set by Vercel: "production", "preview" or "development". */
   VERCEL_ENV: optional(z.enum(["production", "preview", "development"])),
   /** Amazon result pages fetched in parallel per uncached query (1–3); each costs one SerpApi credit. */

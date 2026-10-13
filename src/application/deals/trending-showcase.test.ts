@@ -1,0 +1,146 @@
+import { createTrendingShowcase, warmTrendingSearches } from "@/application/deals/trending-showcase";
+import type { SearchProducts } from "@/application/search/search-products";
+import type { UnavailableListing } from "@/domain/product/unavailable-listing";
+import { searchCacheKey } from "@/domain/search/search-query";
+import type { SearchResponse } from "@/domain/search/search-response";
+import { money } from "@/domain/shared/money";
+import type { ProviderId } from "@/domain/shared/provider";
+import { fakeSearchCache } from "@/test/fakes";
+import { makeProduct } from "@/test/product-factory";
+
+const at = { ms: Date.UTC(2026, 9, 13, 7, 30) };
+const key = (provider: ProviderId, query: string, scope?: string) =>
+  searchCacheKey({ normalizedText: query, destination: { country: "IL" } }, provider, 1, scope);
+
+const xm5 = (sku: string, title: string, total: number) =>
+  makeProduct({ provider: "ebay", sku, title, total });
+const noOffer: UnavailableListing = {
+  id: "amazon:B09XS7JWHH",
+  provider: "amazon",
+  providerProductId: "B09XS7JWHH",
+  title: "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black",
+  productUrl: "https://www.amazon.com/dp/B09XS7JWHH",
+  imageUrl: "https://m.media-amazon.com/images/I/61O3iMlnJIL._AC_SL500_.jpg",
+  reason: "no_offer_to_destination",
+};
+
+async function seeded() {
+  const cache = fakeSearchCache(() => at.ms);
+  await cache.set(
+    key("ebay", "sony wh-1000xm5"),
+    {
+      products: [
+        xm5("pads", "Earpads for Sony WH-1000XM5", 40_00),
+        xm5("a", "Sony WH-1000XM5 Noise Cancelling Wireless Headphones Black", 1012_00),
+        xm5("b", "Sony WH-1000XM5SA Wireless Noise Canceling Headphones Silver", 1100_00),
+      ],
+      hasMore: false,
+      cachedAt: "2026-10-13T07:30:00.000Z",
+    },
+    86_400,
+  );
+  await cache.set(
+    key("amazon", "sony wh-1000xm5", "recorded"),
+    { products: [], hasMore: false, unavailable: [noOffer], cachedAt: "2026-10-13T06:00:00.000Z" },
+    86_400,
+  );
+  return cache;
+}
+
+describe("trending showcase", () => {
+  it("builds a card from cached results: the named product, never its accessories", async () => {
+    const showcase = createTrendingShowcase({
+      cache: await seeded(),
+      stores: [{ id: "ebay" }, { id: "amazon", cacheScope: "recorded" }],
+    });
+    const [card] = await showcase([{ label: "Sony WH-1000XM5", query: "Sony WH-1000XM5" }]);
+    expect(card).toEqual({
+      label: "Sony WH-1000XM5",
+      query: "sony wh-1000xm5",
+      title: "Sony WH-1000XM5 Noise Cancelling Wireless Headphones Black",
+      imageUrl: noOffer.imageUrl,
+      best: { provider: "ebay", total: money(1012_00, "ILS") },
+      stores: [{ provider: "ebay", total: money(1012_00, "ILS"), listings: 2 }],
+      unshippedStores: ["amazon"],
+      matchedBy: "single",
+      // The older of the two snapshots: the card is only as fresh as its stalest price.
+      pricesAsOf: "2026-10-13T06:00:00.000Z",
+    });
+  });
+
+  it("leaves out products with nothing cached, or with only accessories cached", async () => {
+    const cache = await seeded();
+    await cache.set(
+      key("ebay", "jbl flip 6"),
+      {
+        products: [xm5("case", "Case for JBL Flip 6", 50_00)],
+        hasMore: false,
+        cachedAt: "2026-10-13T07:30:00.000Z",
+      },
+      86_400,
+    );
+    const showcase = createTrendingShowcase({ cache, stores: [{ id: "ebay" }] });
+    const cards = await showcase([
+      { label: "AirPods Pro", query: "airpods pro" },
+      { label: "JBL Flip 6", query: "jbl flip 6" },
+      { label: "Sony WH-1000XM5", query: "sony wh-1000xm5" },
+    ]);
+    expect(cards.map((c) => c.label)).toEqual(["Sony WH-1000XM5"]);
+  });
+
+  it("only reads the cache, and skips a store whose cache read fails", async () => {
+    const logger = { warn: jest.fn() };
+    const cache = await seeded();
+    const flaky = {
+      ...cache,
+      get: jest.fn((k: string) => (k.includes("amazon") ? Promise.reject(new Error("down")) : cache.get(k))),
+    };
+    const showcase = createTrendingShowcase({
+      cache: flaky,
+      stores: [{ id: "ebay" }, { id: "amazon", cacheScope: "recorded" }],
+      logger,
+    });
+    const [card] = await showcase([{ label: "Sony WH-1000XM5", query: "sony wh-1000xm5" }]);
+    expect(card?.unshippedStores).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith("showcase: cache read failed", {
+      provider: "amazon",
+      error: "down",
+    });
+  });
+});
+
+describe("warmTrendingSearches", () => {
+  it("runs each trending search through the normal search, asking only the given stores", async () => {
+    const searchProducts = jest.fn(async (query): Promise<SearchResponse> => ({
+      query,
+      groups: [],
+      totalOffers: 0,
+      providers: [
+        { provider: "ebay", status: "ok", resultCount: 3, latencyMs: 90, fromCache: false },
+        { provider: "amazon", status: "skipped", resultCount: 0, latencyMs: null, fromCache: false },
+      ],
+      pagination: { page: 1, pageSize: 20, totalResults: 0, hasNextPage: false },
+      isPartial: false,
+      generatedAt: "2026-10-13T07:30:00.000Z",
+    })) as jest.MockedFunction<SearchProducts>;
+    const warmed = await warmTrendingSearches(
+      searchProducts,
+      [
+        { label: "Sony WH-1000XM5", query: "Sony WH-1000XM5" },
+        { label: "JBL Flip 6", query: "jbl flip 6" },
+      ],
+      ["ebay"],
+    );
+    expect(searchProducts).toHaveBeenCalledTimes(2);
+    expect(searchProducts.mock.calls[0]?.[0]).toMatchObject({
+      normalizedText: "sony wh-1000xm5",
+      providers: ["ebay"],
+      page: 1,
+      sort: "relevance",
+    });
+    expect(warmed).toEqual([
+      { query: "sony wh-1000xm5", outcomes: [{ provider: "ebay", status: "ok" }] },
+      { query: "jbl flip 6", outcomes: [{ provider: "ebay", status: "ok" }] },
+    ]);
+  });
+});

@@ -9,15 +9,15 @@ import {
   type CircuitDecision,
   type CircuitState,
 } from "@/domain/search/circuit-breaker";
+import { assembleResults } from "@/application/search/assemble-results";
 import type {
   ProductSearchProvider,
   ProviderError,
   ProviderPage,
 } from "@/domain/search/product-search-provider";
-import { groupProducts } from "@/domain/search/product-group";
-import { classifyOffers, searchIntent, type SearchIntent } from "@/domain/search/search-intent";
+import { searchIntent, type SearchIntent } from "@/domain/search/search-intent";
 import type { CircuitBreakerStore, SearchResultCache, StoreCallBudget } from "@/domain/search/ports";
-import { filterOffers, paginate, sortGroups } from "@/domain/search/result-ordering";
+import { paginate } from "@/domain/search/result-ordering";
 import { searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import {
   FAILED_PROVIDER_STATUSES,
@@ -332,35 +332,16 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     return !progress.stopped && !!last?.hasMore && progress.runs.length < maxStorePages;
   }
 
-  /** Every store page loaded so far, merged, with each offer's rank in its store. */
+  /** Every store page loaded so far, assembled into the cards a shopper sees. */
   function merge(progress: readonly ProviderProgress[], query: SearchQuery, intent: SearchIntent) {
-    const ranks = new Map<string, number>();
-    const products: UnifiedProduct[] = [];
-    const unavailable = new Map<string, UnavailableListing>();
-    for (const { runs } of progress) {
-      let rank = 0;
-      for (const product of runs.flatMap((r) => r.products)) {
-        // Stores repeat items across pages (sponsored slots); the first position counts.
-        if (ranks.has(product.id)) continue;
-        ranks.set(product.id, rank++);
-        products.push(product);
-      }
-      for (const listing of runs.flatMap((r) => r.unavailable)) unavailable.set(listing.id, listing);
-    }
-    const offers = filterOffers(products, query.filters);
-    // Classified on every loaded offer, before filters, so a price filter can't move the typical price.
-    const classes = classifyOffers(products, intent);
-    const groups = sortGroups(
-      groupProducts(offers, {
-        classes,
-        unavailable: [...unavailable.values()],
-        rankOf: (id) => ranks.get(id),
-      }),
-      query.sort,
-      (id) => ranks.get(id),
+    return assembleResults(
+      progress.map(({ runs }) => ({
+        products: runs.flatMap((r) => r.products),
+        unavailable: runs.flatMap((r) => r.unavailable),
+      })),
+      query,
       intent,
     );
-    return { offers, groups, uniqueCount: products.length };
   }
 
   /** Page 1's outcome, with counts and cache status covering every page loaded. */

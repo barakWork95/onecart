@@ -12,12 +12,20 @@ import {
   type QueryTranslationInfo,
   type RawSearchParams,
 } from "@/application/search/build-search-query";
+import {
+  createTrendingShowcase,
+  warmTrendingSearches,
+  type TrendingCard,
+  type TrendingShowcase,
+} from "@/application/deals/trending-showcase";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
 import { createRateLimiter, type RateLimiter } from "@/application/security/rate-limiter";
 import { storeChecks, storeSearches } from "@/application/search/store-fallback";
 import { FALLBACK_FX_RATES } from "@/config/fallback-fx-rates";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
 import { DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
+import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
+import type { TrendingQuery } from "@/domain/deals/trending-query";
 import { amazonSource, ebayCredentials, env } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
@@ -55,6 +63,9 @@ import { createQueryTranslator } from "@/infrastructure/translation/query-transl
  */
 interface Services {
   readonly searchProducts: SearchProducts;
+  readonly trendingShowcase: TrendingShowcase;
+  readonly trendingQueries: readonly TrendingQuery[];
+  readonly trendingWarmStores: readonly ProviderId[];
   readonly translator: QueryTranslator;
   readonly linkCodec: OutboundLinkCodec;
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
@@ -152,6 +163,8 @@ function buildServices(): Services {
     }
   }
 
+  const searchCache = createRedisSearchCache(redis);
+
   const translator = createQueryTranslator({
     cache: redis,
     deepl: config.DEEPL_API_KEY ? createDeepLTranslator({ apiKey: config.DEEPL_API_KEY }) : null,
@@ -199,10 +212,20 @@ function buildServices(): Services {
       clicks: consoleClickRecorder,
       logger,
     }),
+    trendingShowcase: createTrendingShowcase({
+      cache: searchCache,
+      stores: providers.map((p) => ({ id: p.id, ...(p.cacheScope ? { cacheScope: p.cacheScope } : {}) })),
+      logger,
+    }),
+    trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
+    // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.
+    trendingWarmStores: demoMode
+      ? providers.map((p) => p.id)
+      : (config.TRENDING_WARM_STORES ?? DEFAULT_TRENDING_WARM_STORES),
     searchProducts: createSearchProducts({
       providers,
       ...(demoMode ? {} : { callBudget: createCallBudget(config, providers, logger) }),
-      cache: createRedisSearchCache(redis),
+      cache: searchCache,
       circuitBreaker: createRedisCircuitBreakerStore(redis),
       cacheTtlSeconds: config.SEARCH_CACHE_TTL_SECONDS,
       logger,
@@ -319,6 +342,33 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
     storeSearches: storeSearches(response).map((t) => ({ provider: t.provider, href: linkCodec.encode(t) })),
     sampleStores,
   };
+}
+
+/** Showcase cards are cache reads; reuse them briefly so homepage traffic doesn't multiply Redis calls. */
+const SHOWCASE_MEMO_MS = 5 * 60 * 1000;
+const SHOWCASE_KEY = Symbol.for("onecart.showcaseMemo");
+type ShowcaseHolder = { [SHOWCASE_KEY]?: { readonly cards: TrendingCard[]; readonly atMs: number } };
+
+/**
+ * The homepage "Trending" cards, from cached search results only (never a
+ * store API call). An empty result isn't memoized, so cards appear as soon
+ * as the cache is warmed.
+ */
+export async function trendingCards(): Promise<TrendingCard[]> {
+  const holder = globalThis as ShowcaseHolder;
+  const memo = holder[SHOWCASE_KEY];
+  if (memo && Date.now() - memo.atMs < SHOWCASE_MEMO_MS) return memo.cards;
+  const { trendingShowcase, trendingQueries } = getServices();
+  const cards = await trendingShowcase(trendingQueries);
+  if (cards.length > 0) holder[SHOWCASE_KEY] = { cards, atMs: Date.now() };
+  return cards;
+}
+
+/** Runs the trending searches so the showcase has fresh cached results (cron). */
+export function warmTrending() {
+  const { searchProducts, trendingQueries, trendingWarmStores } = getServices();
+  delete (globalThis as ShowcaseHolder)[SHOWCASE_KEY];
+  return warmTrendingSearches(searchProducts, trendingQueries, trendingWarmStores);
 }
 
 /** The /go/[id] decision; see `createResolveOutboundLink`. */
