@@ -24,6 +24,8 @@ export interface ProviderOutcome {
   /** null when the provider was not called (skipped / circuit_open / cache hit). Includes time spent waiting on a timeout. */
   readonly latencyMs: number | null;
   readonly fromCache: boolean;
+  /** When any page shown came from the cache: when the oldest such page was fetched from the store. */
+  readonly cachedAt?: IsoDateTime;
   /** Stable machine-readable code (e.g. "HTTP_429", "PARSE_ERROR"); never a raw upstream message. */
   readonly errorCode?: string;
 }

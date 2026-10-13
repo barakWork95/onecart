@@ -42,6 +42,8 @@ const serverEnvSchema = z.object({
   /** Live store API calls allowed per day across all shoppers; see config/rate-limits.ts. */
   EBAY_DAILY_CALL_BUDGET: optional(z.coerce.number().int().positive()),
   AMAZON_DAILY_CALL_BUDGET: optional(z.coerce.number().int().positive()),
+  /** Trending queries refreshed on Amazon per day by the warm-trending cron (0 = off); see config/rate-limits.ts. */
+  AMAZON_WARM_PER_DAY: optional(z.coerce.number().int().min(0)),
   /** Comma-separated stores the warm-trending cron calls (default "ebay"; see config/trending.ts). */
   TRENDING_WARM_STORES: optional(
     z

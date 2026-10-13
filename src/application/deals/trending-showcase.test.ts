@@ -129,7 +129,7 @@ describe("warmTrendingSearches", () => {
         { label: "Sony WH-1000XM5", query: "Sony WH-1000XM5" },
         { label: "JBL Flip 6", query: "jbl flip 6" },
       ],
-      ["ebay"],
+      { daily: ["ebay"], rotating: [], atMs: at.ms },
     );
     expect(searchProducts).toHaveBeenCalledTimes(2);
     expect(searchProducts.mock.calls[0]?.[0]).toMatchObject({
@@ -142,5 +142,60 @@ describe("warmTrendingSearches", () => {
       { query: "sony wh-1000xm5", outcomes: [{ provider: "ebay", status: "ok" }] },
       { query: "jbl flip 6", outcomes: [{ provider: "ebay", status: "ok" }] },
     ]);
+  });
+
+  it("refreshes daily stores for every query and a rotating store for today's slice only", async () => {
+    const searchProducts = jest.fn(async (query): Promise<SearchResponse> => ({
+      query,
+      groups: [],
+      totalOffers: 0,
+      providers: (query.providers ?? []).map((provider: ProviderId) => ({
+        provider,
+        status: "ok" as const,
+        resultCount: 1,
+        latencyMs: 90,
+        fromCache: false,
+      })),
+      pagination: { page: 1, pageSize: 20, totalResults: 0, hasNextPage: false },
+      isPartial: false,
+      generatedAt: "2026-10-13T07:30:00.000Z",
+    })) as jest.MockedFunction<SearchProducts>;
+    const queries = ["a", "b", "c", "d", "e"].map((q) => ({ label: q, query: q }));
+    const day = 24 * 60 * 60 * 1000;
+    // Epoch day 20,374 (2025-10-13 UTC): start = (20374 * 2) % 5 = 3 → "d", "e".
+    const atMs = 20_374 * day + 7.5 * 60 * 60 * 1000;
+
+    const warmed = await warmTrendingSearches(searchProducts, queries, {
+      // "amazon" listed as daily too: the rotation governs it.
+      daily: ["ebay", "amazon"],
+      rotating: [{ provider: "amazon", perDay: 2 }],
+      atMs,
+    });
+
+    expect(warmed.map((w) => [w.query, w.outcomes.map((o) => o.provider)])).toEqual([
+      ["a", ["ebay"]],
+      ["b", ["ebay"]],
+      ["c", ["ebay"]],
+      ["d", ["ebay", "amazon"]],
+      ["e", ["ebay", "amazon"]],
+    ]);
+    expect(searchProducts.mock.calls[0]?.[1]).toEqual({ refresh: true, lean: true, cacheTtlSeconds: {} });
+    expect(searchProducts.mock.calls[3]?.[1]).toEqual({
+      refresh: true,
+      lean: true,
+      // Every 3 days, kept 3.5 days.
+      cacheTtlSeconds: { amazon: 302_400 },
+    });
+  });
+
+  it("searches nothing for a query no store is asked about", async () => {
+    const searchProducts = jest.fn() as jest.MockedFunction<SearchProducts>;
+    const warmed = await warmTrendingSearches(searchProducts, [{ label: "a", query: "a" }], {
+      daily: [],
+      rotating: [{ provider: "amazon", perDay: 0 }],
+      atMs: at.ms,
+    });
+    expect(warmed).toEqual([]);
+    expect(searchProducts).not.toHaveBeenCalled();
   });
 });

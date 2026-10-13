@@ -1,4 +1,12 @@
-import { AlertTriangle, BadgeCheck, ExternalLink, FlaskConical, Languages, SearchX } from "lucide-react";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Clock,
+  ExternalLink,
+  FlaskConical,
+  Languages,
+  SearchX,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import type { QueryTranslationInfo } from "@/application/search/build-search-query";
 import { findMatchesLink } from "@/components/features/search/group-view";
@@ -7,6 +15,7 @@ import { ProductGroupCard } from "@/components/features/search/product-group-car
 import { SortChips } from "@/components/features/search/sort-chips";
 import { STORE_META } from "@/components/features/store-meta";
 import { buttonVariants } from "@/components/ui/button";
+import { formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { ProviderId } from "@/domain/shared/provider";
 import {
@@ -77,6 +86,45 @@ function PartialNotice({
   );
 }
 
+/** Cached results younger than this read as current; older ones are dated. */
+const SNAPSHOT_NOTICE_AFTER_MS = 60 * 60 * 1000;
+
+/**
+ * Stores whose prices come from an older snapshot (cache warming keeps
+ * Amazon's for days), each with when it was fetched, oldest first.
+ */
+export function datedStores(
+  providers: readonly ProviderOutcome[],
+  generatedAt: string,
+): { readonly provider: ProviderId; readonly cachedAt: string }[] {
+  const now = Date.parse(generatedAt);
+  return providers
+    .flatMap((o) =>
+      o.cachedAt && o.resultCount > 0 && now - Date.parse(o.cachedAt) > SNAPSHOT_NOTICE_AFTER_MS
+        ? [{ provider: o.provider, cachedAt: o.cachedAt }]
+        : [],
+    )
+    .sort((a, b) => a.cachedAt.localeCompare(b.cachedAt));
+}
+
+function SnapshotNotice({ stores }: { stores: ReturnType<typeof datedStores> }) {
+  return (
+    <p className="flex items-start gap-2 text-sm text-muted-foreground">
+      <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <span>
+        {stores.map(({ provider, cachedAt }, i) => (
+          <span key={provider}>
+            {i > 0 && " · "}
+            {STORE_META[provider].name} prices as of{" "}
+            <time dateTime={cachedAt}>{formatSnapshotTime(cachedAt)}</time>
+          </span>
+        ))}
+        . Prices may have changed since; the store shows the current one.
+      </span>
+    </p>
+  );
+}
+
 /** The current URL's search, one results page further; filters and sort are kept. */
 export function nextPageHref(query: SearchResponse["query"], nextPage: number): string {
   const params = new URLSearchParams({ q: query.rawText });
@@ -133,6 +181,7 @@ export function ResultsView({
   const failed = searched.filter((p) => FAILED_PROVIDER_STATUSES.includes(p.status));
   const allFailed = searched.length > 0 && failed.length === searched.length;
   const anyTaxEstimated = groups.some((g) => g.offers.some((o) => !o.price.taxesCollectedAtCheckout));
+  const dated = datedStores(searched, response.generatedAt);
 
   return (
     <section aria-label="Search results" className="flex flex-col gap-4">
@@ -164,6 +213,8 @@ export function ResultsView({
       </div>
 
       <SortChips text={query.rawText} active={query.sort} />
+
+      {dated.length > 0 && groups.length > 0 && <SnapshotNotice stores={dated} />}
 
       {isPartial && !allFailed && (
         <PartialNotice

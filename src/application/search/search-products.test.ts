@@ -790,3 +790,58 @@ describe("searchProducts — daily call budget", () => {
     expect(outcome(response, "aliexpress")?.status).toBe("ok");
   });
 });
+
+describe("searchProducts — cache warming options", () => {
+  it("`refresh` skips the cache read, calls the store and re-caches", async () => {
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));
+    const { search, clock } = setup([amazon.provider]);
+    await search(QUERY);
+    clock.ms += 60_000;
+    expect(outcome(await search(QUERY), "amazon")?.fromCache).toBe(true);
+    expect(amazon.search).toHaveBeenCalledTimes(1);
+
+    const refreshed = await search(QUERY, { refresh: true });
+    expect(amazon.search).toHaveBeenCalledTimes(2);
+    expect(outcome(refreshed, "amazon")).toMatchObject({ fromCache: false });
+    expect(outcome(refreshed, "amazon")?.cachedAt).toBeUndefined();
+    // The refreshed entry is what the next visitor reads.
+    expect(outcome(await search(QUERY), "amazon")?.cachedAt).toBe(new Date(clock.ms).toISOString());
+  });
+
+  it("`lean` is passed to the stores; other searches don't send it", async () => {
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));
+    const { search } = setup([amazon.provider]);
+    await search(QUERY, { lean: true });
+    expect(amazon.search.mock.calls[0]?.[1]).toMatchObject({ lean: true, storePage: 1 });
+    await search(QUERY, { refresh: true });
+    expect(amazon.search.mock.calls[1]?.[1]).not.toHaveProperty("lean");
+  });
+
+  it("caches each store for its own TTL when given one", async () => {
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));
+    const temu = fakeProvider("temu", () => okPage([EARBUDS.temu]));
+    const { search, cache } = setup([amazon.provider, temu.provider], { cacheTtlSeconds: 86_400 });
+    const set = jest.spyOn(cache, "set");
+    await search(QUERY, { cacheTtlSeconds: { amazon: 302_400 } });
+    const ttlFor = (id: ProviderId) => set.mock.calls.find(([key]) => key === searchCacheKey(QUERY, id))?.[2];
+    expect(ttlFor("amazon")).toBe(302_400);
+    expect(ttlFor("temu")).toBe(86_400);
+  });
+
+  it("dates cached results by their oldest page, across Load more", async () => {
+    const amazon = fakeProvider("amazon", (_q, _s, page) =>
+      okPage(page === 1 ? [EARBUDS.amazon] : [HEADPHONES], page === 1),
+    );
+    const { search, clock } = setup([amazon.provider]);
+    const first = new Date(clock.ms).toISOString();
+    await search(QUERY);
+    clock.ms += 3_600_000;
+    // Page 2 is fetched live now; page 1 still comes from the hour-old cache.
+    const response = await search({ ...QUERY, page: 2, pageSize: 1 }, { includeEarlierPages: true });
+    expect(outcome(response, "amazon")).toMatchObject({ fromCache: false, cachedAt: first });
+
+    clock.ms += 60_000;
+    const allCached = await search({ ...QUERY, page: 2, pageSize: 1 }, { includeEarlierPages: true });
+    expect(outcome(allCached, "amazon")).toMatchObject({ fromCache: true, cachedAt: first });
+  });
+});

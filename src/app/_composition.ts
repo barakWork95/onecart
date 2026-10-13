@@ -25,7 +25,7 @@ import { createRateLimiter, type RateLimiter } from "@/application/security/rate
 import { storeChecks, storeSearches } from "@/application/search/store-fallback";
 import { FALLBACK_FX_RATES } from "@/config/fallback-fx-rates";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
-import { DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
+import { DEFAULT_AMAZON_WARM_PER_DAY, DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
 import { amazonSource, ebayCredentials, env } from "@/config/env";
@@ -73,6 +73,10 @@ interface Services {
   readonly trendingShowcase: TrendingShowcase;
   readonly trendingQueries: readonly TrendingQuery[];
   readonly trendingWarmStores: readonly ProviderId[];
+  /** Amazon trending queries refreshed per day (0: Amazon isn't warmed). */
+  readonly amazonWarmPerDay: number;
+  /** The search path for cache warming: same stores and cache, its own Amazon budget. */
+  readonly warmSearchProducts: SearchProducts;
   readonly translator: QueryTranslator;
   readonly linkCodec: OutboundLinkCodec;
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
@@ -196,6 +200,24 @@ function buildServices(): Services {
         ? { kind: "memory", store: createInMemoryUserLists() }
         : { kind: "none" };
 
+  const searchDeps = {
+    providers,
+    cache: searchCache,
+    circuitBreaker: createRedisCircuitBreakerStore(redis),
+    cacheTtlSeconds: config.SEARCH_CACHE_TTL_SECONDS,
+    logger,
+  };
+  const amazonWarmPerDay = config.AMAZON_WARM_PER_DAY ?? DEFAULT_AMAZON_WARM_PER_DAY;
+  const shopperBudget = demoMode
+    ? null
+    : createCallBudget(config, providers, logger, "budget", {
+        ebay: config.EBAY_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.ebay,
+        amazon: config.AMAZON_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.amazon,
+      });
+  const warmBudget = demoMode
+    ? null
+    : createCallBudget(config, providers, logger, "budget-warm", { amazon: amazonWarmPerDay });
+
   // Server-side only and never request-scoped: the click table has no policies for visitors.
   const clicksDb =
     config.NEXT_PUBLIC_SUPABASE_URL && config.SUPABASE_SECRET_KEY
@@ -240,13 +262,20 @@ function buildServices(): Services {
     trendingWarmStores: demoMode
       ? providers.map((p) => p.id)
       : (config.TRENDING_WARM_STORES ?? DEFAULT_TRENDING_WARM_STORES),
+    amazonWarmPerDay: demoMode ? 0 : amazonWarmPerDay,
     searchProducts: createSearchProducts({
-      providers,
-      ...(demoMode ? {} : { callBudget: createCallBudget(config, providers, logger) }),
-      cache: searchCache,
-      circuitBreaker: createRedisCircuitBreakerStore(redis),
-      cacheTtlSeconds: config.SEARCH_CACHE_TTL_SECONDS,
-      logger,
+      ...searchDeps,
+      ...(shopperBudget ? { callBudget: shopperBudget } : {}),
+    }),
+    warmSearchProducts: createSearchProducts({
+      ...searchDeps,
+      ...(shopperBudget && warmBudget
+        ? {
+            // Amazon warming spends its own budget, never shoppers'; other stores share theirs.
+            callBudget: (provider: ProviderId) =>
+              provider === "amazon" ? warmBudget(provider) : shopperBudget(provider),
+          }
+        : {}),
     }),
     translator,
     demoMode,
@@ -262,12 +291,11 @@ function createCallBudget(
   config: ReturnType<typeof env>,
   providers: readonly ProductSearchProvider[],
   logger: typeof consoleLogger,
+  /** Counter key prefix: separate prefixes are separate budgets. */
+  prefix: string,
+  limits: Partial<Record<ProviderId, number>>,
 ): StoreCallBudget {
   const counter = createUpstashCounterStore(config) ?? createInMemoryCounterStore();
-  const limits: Partial<Record<ProviderId, number>> = {
-    ebay: config.EBAY_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.ebay,
-    amazon: config.AMAZON_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.amazon,
-  };
   const limiters = new Map<ProviderId, RateLimiter>();
   for (const provider of providers) {
     const limit = limits[provider.id];
@@ -275,7 +303,7 @@ function createCallBudget(
     limiters.set(
       provider.id,
       createRateLimiter({
-        prefix: "budget",
+        prefix,
         windows: [{ name: "day", limit, windowSeconds: 24 * 60 * 60 }],
         counter,
         logger,
@@ -384,9 +412,13 @@ export async function trendingCards(): Promise<TrendingCard[]> {
 
 /** Runs the trending searches so the showcase has fresh cached results (cron). */
 export function warmTrending() {
-  const { searchProducts, trendingQueries, trendingWarmStores } = getServices();
+  const { warmSearchProducts, trendingQueries, trendingWarmStores, amazonWarmPerDay } = getServices();
   delete (globalThis as ShowcaseHolder)[SHOWCASE_KEY];
-  return warmTrendingSearches(searchProducts, trendingQueries, trendingWarmStores);
+  return warmTrendingSearches(warmSearchProducts, trendingQueries, {
+    daily: trendingWarmStores,
+    rotating: amazonWarmPerDay > 0 ? [{ provider: "amazon", perDay: amazonWarmPerDay }] : [],
+    atMs: Date.now(),
+  });
 }
 
 /** The /go/[id] decision; see `createResolveOutboundLink`. */

@@ -157,15 +157,17 @@ export function createAmazonProvider(config: AmazonProviderConfig): ProductSearc
     ...(config.cacheScope ? { cacheScope: config.cacheScope } : {}),
     async search(query, options) {
       const signal = AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)]);
+      // A lean page 1 (cache warming) is one SerpApi credit: page 1 alone.
+      const serpPages = options.lean ? [1] : serpApiPagesFor(options.storePage ?? 1, pageCount);
       // Pages in parallel: one round trip (~3–4s) instead of one per page.
-      const pages = await Promise.all(
-        serpApiPagesFor(options.storePage ?? 1, pageCount).map((page) => fetchPage(query, page, signal)),
-      );
+      const pages = await Promise.all(serpPages.map((page) => fetchPage(query, page, signal)));
       // The first page decides success; later pages are a bonus and may fail quietly.
       const first = pages[0];
       if (!first || !first.ok) return first ?? err(providerError("upstream_error", "NO_PAGES"));
       const fetched = pages.flatMap((p) => (p.ok ? [p.value] : []));
-      const hasMore = fetched[fetched.length - 1]?.hasNext ?? false;
+      // After a lean page 1, "store page 2" would mean SerpApi page pageCount + 1 and skip
+      // the pages between, so a lean page is the last one: warmed results don't page further.
+      const hasMore = !options.lean && (fetched[fetched.length - 1]?.hasNext ?? false);
 
       let fx: FxRates;
       try {

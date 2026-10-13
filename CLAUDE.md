@@ -393,8 +393,20 @@ SearchBar (client) → /search?q=… (Server Component)
   its prices were fetched ("Prices as of …", the oldest snapshot). Cards are memoized per
   instance for 5 minutes.
   - `/api/cron/warm-trending` (daily 07:30 UTC, after eBay's quota reset) re-runs those searches
-    through the normal search path, asking only `TRENDING_WARM_STORES` (default `ebay`: 5 calls a
-    day, no SerpApi credits). Demo mode warms the demo catalog's `DEMO_TRENDING_QUERIES`.
+    through the normal search path with `refresh` (skip the cache read, call, re-cache).
+    Demo mode warms the demo catalog's `DEMO_TRENDING_QUERIES`.
+    - `TRENDING_WARM_STORES` (default `ebay`: 5 calls a day) are refreshed for every query daily.
+    - **Amazon is warmed on a rotation** (`rotationFor`, `domain/deals/warm-rotation.ts`):
+      `AMAZON_WARM_PER_DAY` queries a day (default 2), each a `lean` page 1 (one SerpApi
+      credit; reported as the last page, so warmed Amazon results don't "Load more"), cached
+      for the rotation interval + 12h (`rotationTtlSeconds`: 5 queries at 2 a day → 3.5 days).
+      eBay stays at the default 24h.
+    - Warming has its **own Amazon counter** (`budget-warm:`, `warmSearchProducts` in the
+      composition root), so it never spends shoppers' calls. Shoppers keep
+      `AMAZON_DAILY_CALL_BUDGET` (default 3 calls × 2 pages). Total: 6 + 2 = 8 credits a day ≈
+      248 a month, under the free plan's 250. Change both together.
+  - Results from an older snapshot are dated: `ProviderOutcome.cachedAt` (oldest cached page)
+    → "Amazon prices as of 13 Oct, 10:30" above the cards when older than an hour.
 
 ## Abuse protection (store API quotas)
 
@@ -408,7 +420,7 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   429 with `Retry-After`. Router prefetches are excluded by the proxy **matcher** (`missing`
   headers): Next strips `next-router-prefetch` from `request.headers`, so code can't see it.
 - **Per-store daily budget** (`StoreCallBudget`, checked in the orchestrator after cache and
-  circuit): eBay 4,500 and Amazon 4 live calls a day by default (`EBAY_DAILY_CALL_BUDGET`,
+  circuit): eBay 4,500 and Amazon 3 live calls a day by default (`EBAY_DAILY_CALL_BUDGET`,
   `AMAZON_DAILY_CALL_BUDGET`). Over budget → that store reports `DAILY_BUDGET`, the circuit is
   untouched, and the UI offers "Check <store>" links. This stops floods from rotating IPs.
 - Local runs may share production Redis (`.env.local` holds the `KV_*` vars). Non-live data is

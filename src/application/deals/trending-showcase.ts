@@ -7,6 +7,7 @@ import type { SearchResultCache } from "@/domain/search/ports";
 import { bestOffer } from "@/domain/search/product-group";
 import { intentTier } from "@/domain/search/result-ordering";
 import { searchIntent } from "@/domain/search/search-intent";
+import { rotationFor, rotationTtlSeconds } from "@/domain/deals/warm-rotation";
 import { normalizeQueryText, searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import type { Money } from "@/domain/shared/money";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
@@ -111,22 +112,57 @@ export function createTrendingShowcase(deps: TrendingShowcaseDeps) {
 
 export type TrendingShowcase = ReturnType<typeof createTrendingShowcase>;
 
+/** A store warmed on a rotation: `perDay` trending queries a day instead of all of them. */
+export interface RotatingWarmStore {
+  readonly provider: ProviderId;
+  readonly perDay: number;
+}
+
+export interface WarmPlan {
+  /** Stores refreshed for every trending query, every run. */
+  readonly daily: readonly ProviderId[];
+  /** Scarce-quota stores (SerpApi bills each search): a few queries a day, in turn. */
+  readonly rotating: readonly RotatingWarmStore[];
+  /** When the run happens (epoch ms); picks today's rotation. */
+  readonly atMs: number;
+}
+
+export interface WarmedQuery {
+  readonly query: string;
+  readonly outcomes: readonly { provider: ProviderId; status: string }[];
+}
+
 /**
- * Runs the trending searches through the normal search path (cache, circuit
- * breaker, daily call budget), so the showcase has fresh cached results.
- * Only `stores` are asked; the rest are skipped, so warming can stay off a
- * store with a scarce quota (SerpApi bills every search).
+ * Runs the trending searches through the normal search path (circuit breaker,
+ * daily call budget) with `refresh`, so each store asked is called even when
+ * a cached entry exists, and the showcase and searches read fresh results.
+ *
+ * - `daily` stores are asked for every query, with the default cache TTL.
+ * - Each `rotating` store is asked only for today's slice (`rotationFor`), for
+ *   its cheapest page (`lean`), cached until a little after its next turn
+ *   (`rotationTtlSeconds`), so a query's results never lapse between turns.
+ *
+ * Stores not listed are skipped. A query no store is asked about isn't searched.
  */
 export async function warmTrendingSearches(
   searchProducts: SearchProducts,
   queries: readonly TrendingQuery[],
-  stores: readonly ProviderId[],
-): Promise<
-  { readonly query: string; readonly outcomes: readonly { provider: ProviderId; status: string }[] }[]
-> {
-  const results = [];
+  plan: WarmPlan,
+): Promise<WarmedQuery[]> {
+  const rotatingIds = new Set(plan.rotating.map((r) => r.provider));
+  const daily = plan.daily.filter((p) => !rotatingIds.has(p));
+  const turns = plan.rotating.map((r) => ({
+    provider: r.provider,
+    today: new Set(rotationFor(queries, r.perDay, plan.atMs).map((q) => q.query)),
+    ttlSeconds: rotationTtlSeconds(queries.length, r.perDay),
+  }));
+
+  const results: WarmedQuery[] = [];
   // One query at a time: a cron run has minutes, store APIs prefer no bursts.
   for (const { query } of queries) {
+    const rotatingToday = turns.filter((t) => t.today.has(query));
+    const stores = [...daily, ...rotatingToday.map((t) => t.provider)];
+    if (stores.length === 0) continue;
     const text = normalizeQueryText(query);
     const searchQuery: SearchQuery = {
       rawText: text,
@@ -139,7 +175,11 @@ export async function warmTrendingSearches(
       page: 1,
       pageSize: 20,
     };
-    const response = await searchProducts(searchQuery);
+    const response = await searchProducts(searchQuery, {
+      refresh: true,
+      lean: true,
+      cacheTtlSeconds: Object.fromEntries(rotatingToday.map((t) => [t.provider, t.ttlSeconds])),
+    });
     results.push({
       query: text,
       outcomes: response.providers

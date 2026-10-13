@@ -40,6 +40,12 @@ export interface ProviderSearchOptions {
    * together, each later page is one more SerpApi page). Defaults to 1.
    */
   readonly storePage?: number;
+  /**
+   * The cheapest useful page 1, for background cache warming. Amazon: one
+   * SerpApi page instead of several, reported as the last page (a deeper
+   * page after it would skip SerpApi pages). Other adapters ignore it.
+   */
+  readonly lean?: boolean;
 }
 
 /**

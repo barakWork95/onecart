@@ -23,8 +23,9 @@ export const DEMO_TRENDING_QUERIES: readonly TrendingQuery[] = [
 ];
 
 /**
- * Stores the warm-trending cron may call. eBay only by default: 5 calls a day
- * against its 5,000. Add "amazon" only on a SerpApi plan with room: each
- * warmed query costs SERPAPI_AMAZON_PAGES searches every day.
+ * Stores the warm-trending cron refreshes for every query, every day. eBay by
+ * default: 5 calls a day against its 5,000. Amazon isn't listed: SerpApi's
+ * quota is too small for daily refreshes, so it's warmed on a rotation
+ * (AMAZON_WARM_PER_DAY, see config/rate-limits.ts) that overrides this list.
  */
 export const DEFAULT_TRENDING_WARM_STORES = ["ebay"] as const;

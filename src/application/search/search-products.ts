@@ -25,6 +25,7 @@ import {
   type SearchResponse,
 } from "@/domain/search/search-response";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
+import type { ProviderId } from "@/domain/shared/provider";
 import type { Result } from "@/domain/shared/result";
 
 export const DEFAULT_PROVIDER_TIMEOUT_MS = 4_000;
@@ -65,6 +66,20 @@ export interface SearchProductsOptions {
   readonly deeperStorePages?: DeeperStorePages;
   /** Return every group up to the requested page ("Load more" re-renders the whole list). */
   readonly includeEarlierPages?: boolean;
+  /** Skip the cache read and call the stores (cache warming); results are still cached. */
+  readonly refresh?: boolean;
+  /** Ask stores for their cheapest page 1 (see `ProviderSearchOptions.lean`). */
+  readonly lean?: boolean;
+  /** Cache lifetime per store for what this search fetches, instead of the default. */
+  readonly cacheTtlSeconds?: Partial<Record<ProviderId, number>>;
+}
+
+/** Per-call knobs `runProvider` needs from the search options. */
+interface RunOptions {
+  readonly signal: AbortSignal | undefined;
+  readonly refresh: boolean;
+  readonly lean: boolean;
+  readonly ttlSeconds: Partial<Record<ProviderId, number>>;
 }
 
 export type SearchProducts = (query: SearchQuery, options?: SearchProductsOptions) => Promise<SearchResponse>;
@@ -178,6 +193,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
         resultCount: count,
         latencyMs: null,
         fromCache: true,
+        cachedAt: cached.cachedAt,
       },
       products: cached.products,
       // Entries cached before paging existed carry no flag: treat them as the last page.
@@ -190,8 +206,9 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     provider: ProductSearchProvider,
     query: SearchQuery,
     storePage: number,
-    signal: AbortSignal | undefined,
+    run: RunOptions,
   ): Promise<ProviderRun> {
+    const { signal } = run;
     const id = provider.id;
     const base = { provider: id, resultCount: 0, latencyMs: null, fromCache: false } as const;
 
@@ -200,7 +217,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     }
 
     const cacheKey = searchCacheKey(query, id, storePage, scopeOf(id));
-    const cached = await readCache(id, query, storePage);
+    const cached = run.refresh ? null : await readCache(id, query, storePage);
     if (cached) return cached;
 
     const state: CircuitState | null = await safely(
@@ -231,7 +248,13 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
       (callSignal) =>
         // `.then` turns a synchronous throw inside the adapter into a rejection the `.catch` sees.
         Promise.resolve()
-          .then(() => provider.search(providerQuery, { signal: callSignal, storePage }))
+          .then(() =>
+            provider.search(providerQuery, {
+              signal: callSignal,
+              storePage,
+              ...(run.lean ? { lean: true } : {}),
+            }),
+          )
           .catch((error: unknown): CallResult => ({
             ok: false,
             error: {
@@ -291,7 +314,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
           deps.cache.set(
             cacheKey,
             { products, hasMore, unavailable, cachedAt: new Date(now()).toISOString() },
-            ttlSeconds,
+            run.ttlSeconds[id] ?? ttlSeconds,
           ),
         id,
       ),
@@ -315,12 +338,12 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     progress: ProviderProgress,
     query: SearchQuery,
     mode: Exclude<DeeperStorePages, "none">,
-    signal: AbortSignal | undefined,
+    options: RunOptions,
   ): Promise<void> {
     const storePage = progress.runs.length + 1;
     const run =
       mode === "fetch"
-        ? await runProvider(progress.provider, query, storePage, signal)
+        ? await runProvider(progress.provider, query, storePage, options)
         : await readCache(progress.provider.id, query, storePage);
     // A failed deeper page keeps what we have: the store answered page 1 fine.
     if (!run || FAILED_PROVIDER_STATUSES.includes(run.outcome.status)) progress.stopped = true;
@@ -350,15 +373,23 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     if (!first) throw new Error("Invariant violated: provider without a first page");
     if (deeper.length === 0) return first.outcome;
     const ids = new Set(runs.flatMap((r) => r.products.map((p) => p.id)));
+    // The oldest cached page dates the prices shown; ISO-8601 UTC strings sort chronologically.
+    const oldest = runs.flatMap((r) => (r.outcome.cachedAt ? [r.outcome.cachedAt] : [])).sort()[0];
     return {
       ...first.outcome,
       resultCount: ids.size,
       fromCache: runs.every((r) => r.outcome.fromCache),
+      ...(oldest ? { cachedAt: oldest } : {}),
     };
   }
 
   return async function searchProducts(query, options = {}) {
-    const signal = options.signal;
+    const run: RunOptions = {
+      signal: options.signal,
+      refresh: options.refresh === true,
+      lean: options.lean === true,
+      ttlSeconds: options.cacheTtlSeconds ?? {},
+    };
     const mode = options.deeperStorePages ?? (query.page > 1 ? "fetch" : "none");
     const pageSize = Math.max(1, Math.floor(query.pageSize));
     const page = Math.max(1, Math.floor(query.page));
@@ -366,7 +397,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const progress: ProviderProgress[] = await Promise.all(
       deps.providers.map(async (provider) => ({
         provider,
-        runs: [await runProvider(provider, query, 1, signal)],
+        runs: [await runProvider(provider, query, 1, run)],
         stopped: false,
       })),
     );
@@ -378,7 +409,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     while (mode !== "none" && merged.groups.length <= page * pageSize) {
       const deeper = progress.filter(canGoDeeper);
       if (deeper.length === 0) break;
-      await Promise.all(deeper.map((p) => loadNextPage(p, query, mode, signal)));
+      await Promise.all(deeper.map((p) => loadNextPage(p, query, mode, run)));
       merged = merge(progress, query, intent);
     }
 

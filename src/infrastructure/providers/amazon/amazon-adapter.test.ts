@@ -227,6 +227,14 @@ describe("Amazon adapter — store pages", () => {
     expect(pagesAsked(fetchMock)).toEqual(["3"]);
   });
 
+  it("a lean page 1 costs one credit and ends paging", async () => {
+    const { fetchMock, provider } = setup(async () => json(withNext(true)), { pages: 3 });
+    const result = await provider.search(QUERY, { signal: new AbortController().signal, lean: true });
+    expect(pagesAsked(fetchMock)).toEqual(["1"]);
+    expect(result.ok && result.value.products.length).toBeGreaterThan(0);
+    expect(result.ok && result.value.hasMore).toBe(false);
+  });
+
   it("has more results exactly when SerpApi links a next page", async () => {
     const signal = new AbortController().signal;
     const more = await setup(async () => json(withNext(true)), { pages: 1 }).provider.search(QUERY, {

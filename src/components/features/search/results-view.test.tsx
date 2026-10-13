@@ -605,3 +605,37 @@ describe("CompareSheet", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });
+
+describe("ResultsView — dated prices", () => {
+  const cached = (provider: ProviderId, cachedAt: string): ProviderOutcome => ({
+    ...ok(provider),
+    latencyMs: null,
+    fromCache: true,
+    cachedAt,
+  });
+
+  it("dates stores whose prices come from an older snapshot, oldest first", () => {
+    renderView({
+      response: response({
+        providers: [
+          ok("aliexpress"),
+          // 20 minutes old: reads as current, not dated.
+          cached("temu", "2026-10-11T08:40:00.000Z"),
+          cached("ebay", "2026-10-11T03:00:00.000Z"),
+          cached("amazon", "2026-10-09T07:30:00.000Z"),
+        ],
+      }),
+    });
+    const notice = screen.getByText(/Prices may have changed/).closest("p");
+    expect(notice).toHaveTextContent(
+      "Amazon prices as of 9 Oct, 10:30 · eBay prices as of 11 Oct, 06:00. Prices may have changed since",
+    );
+    expect(notice?.querySelector("time")).toHaveAttribute("dateTime", "2026-10-09T07:30:00.000Z");
+    expect(notice).not.toHaveTextContent("Temu");
+  });
+
+  it("shows no date for live or fresh results", () => {
+    renderView();
+    expect(screen.queryByText(/Prices may have changed/)).not.toBeInTheDocument();
+  });
+});
