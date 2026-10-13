@@ -1,6 +1,8 @@
 import "server-only";
 
 import { randomBytes } from "node:crypto";
+import { after } from "next/server";
+import { createClickReport, type ClickReport } from "@/application/affiliate/click-report";
 import {
   createResolveOutboundLink,
   type OutboundLinkError,
@@ -39,6 +41,11 @@ import { consoleClickRecorder } from "@/infrastructure/affiliate/console-click-r
 import { createHmacOutboundLinkCodec } from "@/infrastructure/affiliate/outbound-link-codec";
 import { createInMemoryRedis } from "@/infrastructure/cache/in-memory-redis";
 import { createInMemoryUserLists } from "@/infrastructure/db/in-memory-user-lists";
+import { createSupabaseServiceClient } from "@/infrastructure/db/supabase-clients";
+import {
+  createSupabaseClickRecorder,
+  createSupabaseClickStats,
+} from "@/infrastructure/db/supabase-outbound-clicks";
 import { createRedisCircuitBreakerStore } from "@/infrastructure/cache/redis-circuit-breaker-store";
 import { createRedisSearchCache } from "@/infrastructure/cache/redis-search-cache";
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
@@ -69,6 +76,8 @@ interface Services {
   readonly translator: QueryTranslator;
   readonly linkCodec: OutboundLinkCodec;
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
+  /** Null without Supabase's service key: clicks are only logged then. */
+  readonly clickReport: ReturnType<typeof createClickReport> | null;
   readonly demoMode: boolean;
   /** Stores answering from recorded samples (development); the UI labels them. */
   readonly sampleStores: readonly ProviderId[];
@@ -187,9 +196,16 @@ function buildServices(): Services {
         ? { kind: "memory", store: createInMemoryUserLists() }
         : { kind: "none" };
 
+  // Server-side only and never request-scoped: the click table has no policies for visitors.
+  const clicksDb =
+    config.NEXT_PUBLIC_SUPABASE_URL && config.SUPABASE_SECRET_KEY
+      ? createSupabaseServiceClient(config.NEXT_PUBLIC_SUPABASE_URL, config.SUPABASE_SECRET_KEY)
+      : null;
+
   return {
     userListsBackend,
     linkCodec,
+    clickReport: clicksDb ? createClickReport({ stats: createSupabaseClickStats(clicksDb) }) : null,
     resolveOutboundLink: createResolveOutboundLink({
       codec: linkCodec,
       affiliate: createAffiliateLinkBuilder({
@@ -209,7 +225,9 @@ function buildServices(): Services {
             }
           : {}),
       }),
-      clicks: consoleClickRecorder,
+      clicks: clicksDb ? createSupabaseClickRecorder(clicksDb) : consoleClickRecorder,
+      // The redirect is sent first; the click is written after the response.
+      defer: after,
       logger,
     }),
     trendingShowcase: createTrendingShowcase({
@@ -377,6 +395,20 @@ export function resolveOutboundLink(
   params: Readonly<Record<string, string | undefined>>,
 ): Promise<Result<ResolvedOutboundLink, OutboundLinkError>> {
   return getServices().resolveOutboundLink(id, params);
+}
+
+/** Outbound clicks for the last `days` days; failures are logged here, the page just says so. */
+export async function clickReport(days: number): Promise<ClickReport | "not_configured" | "error"> {
+  const report = getServices().clickReport;
+  if (!report) return "not_configured";
+  try {
+    return await report(days);
+  } catch (error) {
+    consoleLogger.warn("internal/clicks: report failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "error";
+  }
 }
 
 /** Every result group is wanted here, not one page of them. */

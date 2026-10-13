@@ -421,6 +421,14 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
 - Check eBay's usage: `GET https://api.ebay.com/developer/analytics/v1_beta/rate_limit/?api_context=buy&api_name=browse`
   (client-credentials token); it reports count, remaining and the reset time.
 
+## Share previews and sitemap
+
+- `SITE_URL` (`src/config/site.ts`) is `https://www.onecartapp.com`; the apex redirects there.
+  The root layout sets `metadataBase`, Open Graph and `summary_large_image` Twitter tags.
+- `app/opengraph-image.tsx` and `app/twitter-image.tsx` render `_share-card.tsx` at build time
+  (static). The logo is inlined there; a test keeps it equal to `app/icon.svg`.
+- `sitemap.ts` lists only static pages; never add `/search` URLs (they spend store quota).
+
 ## Compliance
 
 - The footer on every page carries the general affiliate disclosure (`AFFILIATE_DISCLOSURE`:
@@ -460,7 +468,7 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
      host must be on `STORE_HOSTS`);
   3. add the affiliate tag;
   4. check the tagged URL against the allowlist again;
-  5. record the click;
+  5. record the click, after the 302 is sent (`defer: after`), so analytics never delays it;
   6. return a 302 with `no-store`, `noindex` and `Referrer-Policy: no-referrer`.
 
   Any failure returns a 404, never a redirect.
@@ -482,6 +490,14 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
 - The URL-parameter builders are pure functions that keep other params, replace an existing tag and
   never double-encode.
 - Click recording must never block or break the redirect.
+  - `SupabaseClickRecorder` appends to `outbound_clicks` (product id, store, `affiliated`, time;
+    nothing identifying) with a 2-second timeout. Without `SUPABASE_SECRET_KEY` clicks go to the
+    logs (`consoleClickRecorder`).
+  - The table has RLS and no policies: only the service role writes or reads it. The
+    `outbound_clicks_daily` view counts per **Israeli** day and store.
+  - `/internal/clicks` shows the last 30 days per store and per day, with the affiliate-tagged
+    share. HTTP Basic: any user name, password `ADMIN_DASHBOARD_PASSWORD` (checked in
+    `src/proxy.ts` and again in the page). Unset → 404. `robots.txt` disallows `/internal`.
 - **Every outbound anchor spreads `OUTBOUND_LINK`** (`src/components/features/outbound-link.ts`):
   `target="_blank"` and `rel="nofollow sponsored noopener noreferrer"`. Never hand-write these.
   The E2E "affiliate & conversion audit" follows every `/go` link on a page (cards, compare
@@ -587,8 +603,8 @@ Example: adding `shein`.
 - Supabase:
   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` drive user requests,
     under RLS.
-  - `SUPABASE_SECRET_KEY` is used only by the price checker. Never pass it to a request-scoped
-    client.
+  - `SUPABASE_SECRET_KEY` is used only by the price checker and the click log/report. Never pass
+    it to a request-scoped client.
   - `CRON_SECRET` (at least 16 chars) protects the cron route.
 - `OUTBOUND_LINK_SECRET` (at least 32 chars, the same on every instance) is **required in
   production**, and the app refuses to start search without it. Dev and demo fall back to a

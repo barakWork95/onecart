@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_REALM, adminAccess } from "@/app/_admin-auth";
 import { clientIp, isSearchRequest, searchThrottle } from "@/app/_search-throttle";
+import { env } from "@/config/env";
 
 /** A plain 429 for a client over its search limit; noindex so crawlers drop the URL. */
 function tooManySearches(retryAfterSeconds: number): NextResponse {
@@ -15,7 +17,24 @@ function tooManySearches(retryAfterSeconds: number): NextResponse {
   });
 }
 
+/** /internal pages: a browser password prompt, or a 404 when no password is configured. */
+function guardInternal(request: NextRequest): NextResponse {
+  const headers = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" };
+  switch (adminAccess(request.headers.get("authorization"), env().ADMIN_DASHBOARD_PASSWORD)) {
+    case "granted":
+      return NextResponse.next({ headers });
+    case "denied":
+      return new NextResponse("Authentication required.", {
+        status: 401,
+        headers: { ...headers, "WWW-Authenticate": ADMIN_REALM },
+      });
+    case "disabled":
+      return new NextResponse("Not found.", { status: 404, headers });
+  }
+}
+
 /**
+ * 0. Password-protects /internal.
  * 1. Throttles searches per IP: each one can call the stores' rate-limited
  *    APIs (see `_search-throttle.ts`).
  * 2. Keeps the Supabase session cookie fresh. Server Components can read but
@@ -23,6 +42,8 @@ function tooManySearches(retryAfterSeconds: number): NextResponse {
  *    returning visitor's Saved/Alerts look empty. No-op without Supabase.
  */
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/internal")) return guardInternal(request);
+
   const ip = clientIp(request.headers);
   // No client IP means a local run (Vercel always sets one): lumping every such request
   // into one shared bucket would throttle all local runs together, so they aren't counted.
@@ -65,5 +86,6 @@ export const config = {
     },
     "/saved",
     "/alerts",
+    "/internal/:path*",
   ],
 };

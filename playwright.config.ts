@@ -44,6 +44,9 @@ export default defineConfig({
       // Demo mode keeps wishlists in memory; never point E2E at a real Supabase project.
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
+      // Click storage stays off too: E2E clicks must never land in the production click table.
+      SUPABASE_SECRET_KEY: "",
+      ADMIN_DASHBOARD_PASSWORD: "e2e-only-admin-password-0123",
     },
   },
 });

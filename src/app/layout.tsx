@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { THEME_INIT_SCRIPT } from "@/components/layout/theme";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/config/site";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -16,10 +17,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const DEFAULT_TITLE = "OneCart — Find the best price";
+
 export const metadata: Metadata = {
-  title: { default: "OneCart — Find the best price", template: "%s · OneCart" },
-  description:
-    "Compare Amazon and eBay by the real landed price to Israel: shipping, import VAT and customs included.",
+  // Resolves relative URLs (share images, canonical links) against the production host.
+  metadataBase: new URL(SITE_URL),
+  title: { default: DEFAULT_TITLE, template: "%s · OneCart" },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  // Share images come from app/opengraph-image.tsx and app/twitter-image.tsx.
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: DEFAULT_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "en_IL",
+  },
+  twitter: { card: "summary_large_image", title: DEFAULT_TITLE, description: SITE_DESCRIPTION },
   // Icons come from the file conventions: app/icon.svg, app/favicon.ico, app/apple-icon.png.
 };
 

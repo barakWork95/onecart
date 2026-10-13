@@ -7,4 +7,11 @@ describe("robots.txt", () => {
     expect(rule?.disallow).toEqual(expect.arrayContaining(["/search", "/go/", "/api/"]));
     expect(rule?.allow).toBe("/");
   });
+
+  it("hides internal pages and points to the sitemap", () => {
+    const { rules, sitemap } = robots();
+    const rule = Array.isArray(rules) ? rules[0] : rules;
+    expect(rule?.disallow).toEqual(expect.arrayContaining(["/internal"]));
+    expect(sitemap).toBe("https://www.onecartapp.com/sitemap.xml");
+  });
 });

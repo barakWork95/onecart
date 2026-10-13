@@ -36,8 +36,10 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Store visits.</strong> When you follow a link to a store, we record which product and
-            store it was and when, without anything that identifies you, to understand which comparisons are
-            useful.
+            store it was, whether it carried our affiliate identifier, and when, without anything that
+            identifies you, to understand which comparisons are useful. This is counted on our server when the
+            link is followed; no cookies or tracking scripts are involved, and no IP address, account or
+            session is stored with it.
           </li>
           <li>
             <strong>Preferences.</strong> Your light or dark theme choice is kept in your browser&apos;s local
@@ -63,7 +65,9 @@ export default function PrivacyPage() {
         <ul>
           <li>Vercel, which hosts the site.</li>
           <li>Upstash, which stores the search cache and the rate-limit counters.</li>
-          <li>Supabase, which stores anonymous accounts, saved items and price alerts.</li>
+          <li>
+            Supabase, which stores anonymous accounts, saved items, price alerts and the store-visit counts.
+          </li>
           <li>
             eBay (Browse API) and SerpApi (for Amazon results), which receive your search text to return
             products.
@@ -78,6 +82,7 @@ export default function PrivacyPage() {
         <ul>
           <li>Cached search results: up to 24 hours.</li>
           <li>Rate-limit counters: up to one day.</li>
+          <li>Store-visit records: kept to follow trends over time; they contain no personal data.</li>
           <li>Saved items and price alerts: until you delete them, which you can do on those pages.</li>
           <li>Hosting logs: as long as our hosting provider retains them.</li>
         </ul>

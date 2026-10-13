@@ -110,6 +110,9 @@ const serverEnvSchema = z.object({
   /** Bearer token Vercel Cron sends to /api/cron/* (≥16 chars). */
   CRON_SECRET: optional(z.string().min(16)),
 
+  /** Password for the internal pages under /internal (HTTP Basic, any user name; ≥16 chars). Unset: they 404. */
+  ADMIN_DASHBOARD_PASSWORD: optional(z.string().min(16)),
+
   // Affiliate tags
   AFFILIATE_AMAZON_TAG: optional(z.string().min(1)),
   AFFILIATE_ALIEXPRESS_TRACKING_ID: optional(z.string().min(1)),

@@ -1,5 +1,10 @@
 import { parseAllowedStoreUrl } from "@/domain/affiliate/store-hosts";
-import type { AffiliateLinkBuilder, ClickRecorder, OutboundLinkCodec } from "@/domain/affiliate/ports";
+import type {
+  AffiliateLinkBuilder,
+  ClickRecorder,
+  OutboundClick,
+  OutboundLinkCodec,
+} from "@/domain/affiliate/ports";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
 import type { ProviderId } from "@/domain/shared/provider";
 import { err, ok, type Result } from "@/domain/shared/result";
@@ -20,6 +25,12 @@ export interface ResolveOutboundLinkDeps {
   readonly codec: OutboundLinkCodec;
   readonly affiliate: AffiliateLinkBuilder;
   readonly clicks: ClickRecorder;
+  /**
+   * Runs click recording after the response is sent (Next's `after()`), so a
+   * slow or failing analytics write never delays the redirect. Without it the
+   * click is recorded inline.
+   */
+  readonly defer?: (task: () => Promise<void>) => void;
   readonly now?: () => Date;
   readonly logger?: Logger;
 }
@@ -32,6 +43,16 @@ export interface ResolveOutboundLinkDeps {
 export function createResolveOutboundLink(deps: ResolveOutboundLinkDeps) {
   const now = deps.now ?? (() => new Date());
   const logger = deps.logger ?? noopLogger;
+
+  async function record(click: OutboundClick): Promise<void> {
+    try {
+      await deps.clicks.record(click);
+    } catch (error) {
+      logger.warn("go: click recording failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 
   return async function resolveOutboundLink(
     id: string,
@@ -54,18 +75,14 @@ export function createResolveOutboundLink(deps: ResolveOutboundLinkDeps) {
       return err("disallowed_destination");
     }
 
-    try {
-      await deps.clicks.record({
-        productId: id,
-        provider: target.provider,
-        affiliated: tagged.affiliated,
-        at: now().toISOString(),
-      });
-    } catch (error) {
-      logger.warn("go: click recording failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+    const click: OutboundClick = {
+      productId: id,
+      provider: target.provider,
+      affiliated: tagged.affiliated,
+      at: now().toISOString(),
+    };
+    if (deps.defer) deps.defer(() => record(click));
+    else await record(click);
 
     return ok({ location: final.toString(), provider: target.provider, affiliated: tagged.affiliated });
   };

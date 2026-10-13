@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/config/site";
 
 /**
  * Every /search URL is a live query to the stores' APIs: SerpApi bills each
@@ -8,6 +9,11 @@ import type { MetadataRoute } from "next";
  */
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/search", "/go/", "/api/", "/saved", "/alerts"] },
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/search", "/go/", "/api/", "/saved", "/alerts", "/internal"],
+    },
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

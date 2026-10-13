@@ -91,6 +91,23 @@ describe("resolveOutboundLink", () => {
     expect(other.logger.warn).toHaveBeenCalledWith("go: click recording failed", { error: "nope" });
   });
 
+  it("hands click recording to `defer`, so the redirect doesn't wait for it", async () => {
+    const deferred: (() => Promise<void>)[] = [];
+    const clicks = { record: jest.fn(() => Promise.reject(new Error("db down"))) };
+    const { resolve, logger } = setup({
+      clicks,
+      defer: (task) => deferred.push(task),
+    });
+    expect((await resolve(TARGET.id, { s: "valid" })).ok).toBe(true);
+    expect(clicks.record).not.toHaveBeenCalled();
+    expect(deferred).toHaveLength(1);
+
+    await deferred[0]?.();
+    expect(clicks.record).toHaveBeenCalledTimes(1);
+    // The deferred task swallows the failure: nothing may throw after the response.
+    expect(logger.warn).toHaveBeenCalledWith("go: click recording failed", { error: "db down" });
+  });
+
   it("works with default clock and logger", async () => {
     const resolve = createResolveOutboundLink({
       codec: codecFor(TARGET),

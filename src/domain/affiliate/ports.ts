@@ -40,7 +40,23 @@ export interface OutboundClick {
   readonly at: string;
 }
 
-/** Click analytics sink (Supabase later). Must not throw into the redirect path. */
+/** Click analytics sink. Failures are caught and logged; they never reach the redirect. */
 export interface ClickRecorder {
   record(click: OutboundClick): void | Promise<void>;
+}
+
+/** Outbound clicks for one store on one day (Israel time). */
+export interface DailyStoreClicks {
+  /** `YYYY-MM-DD` in Asia/Jerusalem. */
+  readonly day: string;
+  readonly provider: ProviderId;
+  readonly clicks: number;
+  /** How many of `clicks` carried our affiliate tag. */
+  readonly affiliated: number;
+}
+
+/** Read side of the click log, for the internal report. */
+export interface ClickStatsReader {
+  /** Every day from `sinceDay` (inclusive, `YYYY-MM-DD`) that had a click. */
+  dailyClicks(sinceDay: string): Promise<readonly DailyStoreClicks[]>;
 }
