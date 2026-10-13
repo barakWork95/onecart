@@ -33,6 +33,9 @@ export default defineConfig({
       AFFILIATE_AMAZON_TAG: "onecart-e2e-20",
       AFFILIATE_EBAY_CAMPAIGN_ID: "5338000000",
       CRON_SECRET: "e2e-only-cron-secret-0123456789",
+      // The suite runs many searches from one IP within a minute; the throttle has its own tests.
+      SEARCH_RATE_LIMIT_PER_MINUTE: "100000",
+      SEARCH_RATE_LIMIT_PER_DAY: "100000",
       // Demo mode keeps wishlists in memory; never point E2E at a real Supabase project.
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",

@@ -42,3 +42,10 @@ export interface Translation {
 export interface QueryTranslator {
   translateToEnglish(text: string): Promise<Translation>;
 }
+
+/**
+ * Whether a store may be called live once more today (and counts the call).
+ * Cache hits never ask. A store over budget is skipped like an outage, so the
+ * UI offers "Check <store>" links. Implementations fail open.
+ */
+export type StoreCallBudget = (provider: ProviderId) => Promise<boolean>;

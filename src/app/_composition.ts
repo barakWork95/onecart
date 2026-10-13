@@ -13,14 +13,17 @@ import {
   type RawSearchParams,
 } from "@/application/search/build-search-query";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
+import { createRateLimiter, type RateLimiter } from "@/application/security/rate-limiter";
 import { storeChecks, storeSearches } from "@/application/search/store-fallback";
+import { FALLBACK_FX_RATES } from "@/config/fallback-fx-rates";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
+import { DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
 import { amazonSource, ebayCredentials, env } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductSearchProvider } from "@/domain/search/product-search-provider";
 import type { SearchResponse } from "@/domain/search/search-response";
-import type { QueryTranslator } from "@/domain/search/ports";
+import type { QueryTranslator, StoreCallBudget } from "@/domain/search/ports";
 import { PROVIDER_IDS, type ProviderId } from "@/domain/shared/provider";
 import type { Result } from "@/domain/shared/result";
 import { createAffiliateLinkBuilder } from "@/infrastructure/affiliate/affiliate-link-builder";
@@ -30,7 +33,8 @@ import { createInMemoryRedis } from "@/infrastructure/cache/in-memory-redis";
 import { createInMemoryUserLists } from "@/infrastructure/db/in-memory-user-lists";
 import { createRedisCircuitBreakerStore } from "@/infrastructure/cache/redis-circuit-breaker-store";
 import { createRedisSearchCache } from "@/infrastructure/cache/redis-search-cache";
-import { createUpstashRedis } from "@/infrastructure/cache/upstash";
+import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
+import { createUpstashCounterStore, createUpstashRedis } from "@/infrastructure/cache/upstash";
 import { createCachedFxRates } from "@/infrastructure/fx/cached-fx-rates";
 import { createFrankfurterFxSource } from "@/infrastructure/fx/frankfurter-fx-source";
 import { consoleLogger } from "@/infrastructure/logging/console-logger";
@@ -96,7 +100,12 @@ function buildServices(): Services {
       );
     }
   } else {
-    const getFxRates = createCachedFxRates({ source: createFrankfurterFxSource(), store: redis, logger });
+    const getFxRates = createCachedFxRates({
+      source: createFrankfurterFxSource(),
+      store: redis,
+      fallback: FALLBACK_FX_RATES,
+      logger,
+    });
     const amazon = amazonSource(config);
     if (amazon !== "off") {
       if (amazon === "recorded")
@@ -192,6 +201,7 @@ function buildServices(): Services {
     }),
     searchProducts: createSearchProducts({
       providers,
+      ...(demoMode ? {} : { callBudget: createCallBudget(config, providers, logger) }),
       cache: createRedisSearchCache(redis),
       circuitBreaker: createRedisCircuitBreakerStore(redis),
       cacheTtlSeconds: config.SEARCH_CACHE_TTL_SECONDS,
@@ -200,6 +210,40 @@ function buildServices(): Services {
     translator,
     demoMode,
     sampleStores,
+  };
+}
+
+/**
+ * Daily live-call caps for the stores we call for real (not recorded or demo
+ * data), counted in Upstash so every instance shares them.
+ */
+function createCallBudget(
+  config: ReturnType<typeof env>,
+  providers: readonly ProductSearchProvider[],
+  logger: typeof consoleLogger,
+): StoreCallBudget {
+  const counter = createUpstashCounterStore(config) ?? createInMemoryCounterStore();
+  const limits: Partial<Record<ProviderId, number>> = {
+    ebay: config.EBAY_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.ebay,
+    amazon: config.AMAZON_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.amazon,
+  };
+  const limiters = new Map<ProviderId, RateLimiter>();
+  for (const provider of providers) {
+    const limit = limits[provider.id];
+    if (limit === undefined || provider.cacheScope) continue;
+    limiters.set(
+      provider.id,
+      createRateLimiter({
+        prefix: "budget",
+        windows: [{ name: "day", limit, windowSeconds: 24 * 60 * 60 }],
+        counter,
+        logger,
+      }),
+    );
+  }
+  return async (provider) => {
+    const limiter = limiters.get(provider);
+    return limiter ? (await limiter(provider)).allowed : true;
   };
 }
 

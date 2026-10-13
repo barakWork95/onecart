@@ -755,3 +755,38 @@ describe("searchProducts — stores that won't ship, and what the shopper named"
     expect(amazon.search).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("searchProducts — daily call budget", () => {
+  it("skips a store over its budget like an outage, without tripping its circuit", async () => {
+    const ebay = fakeProvider("ebay", () => okPage([EARBUDS.amazon]));
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const callBudget = jest.fn(async (provider: ProviderId) => provider !== "ebay");
+    const { search, logger, circuitBreaker } = setup([ebay.provider, ali.provider], { callBudget });
+
+    const response = await search(QUERY);
+    expect(ebay.search).not.toHaveBeenCalled();
+    expect(outcome(response, "ebay")).toMatchObject({ status: "error", errorCode: "DAILY_BUDGET" });
+    expect(outcome(response, "aliexpress")?.status).toBe("ok");
+    expect(response.isPartial).toBe(true);
+    expect(await circuitBreaker.get("ebay")).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith("search: store over its daily call budget, skipping", {
+      provider: "ebay",
+    });
+  });
+
+  it("never spends budget on cache hits", async () => {
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const callBudget = jest.fn(async () => true);
+    const { search } = setup([ali.provider], { callBudget });
+    await search(QUERY);
+    await search(QUERY);
+    expect(callBudget).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows the call when the budget check itself fails", async () => {
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const callBudget = jest.fn(() => Promise.reject(new Error("redis down")));
+    const response = await setup([ali.provider], { callBudget }).search(QUERY);
+    expect(outcome(response, "aliexpress")?.status).toBe("ok");
+  });
+});

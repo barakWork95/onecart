@@ -330,7 +330,10 @@ SearchBar (client) → /search?q=… (Server Component)
 - If every step fails, the search runs with the original text and the UI says so. Grow the glossary
   from the logged untranslated words, or set `DEEPL_API_KEY`, which is far better coverage.
 - Exchange rates come from Frankfurter (ECB reference rates, no key), cached in Redis and refreshed
-  every 6 hours. If the source is down, the last-known-good rates are used for up to 7 days.
+  every 6 hours. If the source is down, the last-known-good rates are used for up to 7 days. With
+  none cached (a fresh instance during an outage), the static table in
+  `src/config/fallback-fx-rates.ts` is used and the source retried at most every 5 minutes, so
+  prices never fail on FX. Refresh that table every few months.
 - An adapter that can't get rates returns a **non-retryable** `FX_UNAVAILABLE` error, so an FX
   outage never trips a store's circuit breaker.
 
@@ -378,6 +381,26 @@ SearchBar (client) → /search?q=… (Server Component)
   per-instance only.
 - The homepage deal feed reads Supabase and the Redis cache only. It must **never** trigger a live
   provider API call.
+
+## Abuse protection (store API quotas)
+
+Every `/search` can call the stores' APIs, whose limits are shared by all shoppers (eBay Browse:
+5,000 calls a day; SerpApi: 250 searches a month). On 2026-10-12 crawlers made 5,790 eBay calls
+in a day and used up SerpApi's month, taking both stores down for everyone.
+
+- `robots.txt` disallows `/search`, `/go/`, `/api/`; search pages are `noindex`.
+- **Per-IP throttle** in `src/proxy.ts` (`_search-throttle.ts`): GET `/search?q=…` only, 20 a
+  minute and 300 a day per IP by default (`SEARCH_RATE_LIMIT_PER_MINUTE` / `_PER_DAY`); over it →
+  429 with `Retry-After`. Router prefetches are excluded by the proxy **matcher** (`missing`
+  headers): Next strips `next-router-prefetch` from `request.headers`, so code can't see it.
+- **Per-store daily budget** (`StoreCallBudget`, checked in the orchestrator after cache and
+  circuit): eBay 4,500 and Amazon 4 live calls a day by default (`EBAY_DAILY_CALL_BUDGET`,
+  `AMAZON_DAILY_CALL_BUDGET`). Over budget → that store reports `DAILY_BUDGET`, the circuit is
+  untouched, and the UI offers "Check <store>" links. This stops floods from rotating IPs.
+- Counters are fixed windows in Upstash (`createUpstashCounterStore`), per-instance in memory
+  without it. A counter outage allows the request: the limiter must never take the site down.
+- Check eBay's usage: `GET https://api.ebay.com/developer/analytics/v1_beta/rate_limit/?api_context=buy&api_name=browse`
+  (client-credentials token); it reports count, remaining and the reset time.
 
 ## Error resilience
 

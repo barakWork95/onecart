@@ -16,7 +16,7 @@ import type {
 } from "@/domain/search/product-search-provider";
 import { groupProducts } from "@/domain/search/product-group";
 import { classifyOffers, searchIntent, type SearchIntent } from "@/domain/search/search-intent";
-import type { CircuitBreakerStore, SearchResultCache } from "@/domain/search/ports";
+import type { CircuitBreakerStore, SearchResultCache, StoreCallBudget } from "@/domain/search/ports";
 import { filterOffers, paginate, sortGroups } from "@/domain/search/result-ordering";
 import { searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import {
@@ -44,6 +44,8 @@ export interface SearchProductsDeps {
   readonly providerTimeoutMs?: number;
   readonly cacheTtlSeconds?: number;
   readonly maxStorePages?: number;
+  /** Daily cap on live calls per store; omitted = unlimited. */
+  readonly callBudget?: StoreCallBudget;
   /** Epoch milliseconds. Injected for deterministic tests. */
   readonly now?: () => number;
   readonly logger?: Logger;
@@ -210,6 +212,17 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const decision: CircuitDecision = decideCircuit(state, now(), policy);
     if (decision === "reject") {
       return { outcome: { ...base, status: "circuit_open" }, products: [], hasMore: false, unavailable: [] };
+    }
+    // Checked last, so cache hits and an open circuit never spend the budget.
+    const budget = deps.callBudget;
+    if (budget && !(await safely("call budget", true, () => budget(id), id))) {
+      logger.warn("search: store over its daily call budget, skipping", { provider: id });
+      return {
+        outcome: { ...base, status: "error", errorCode: "DAILY_BUDGET" },
+        products: [],
+        hasMore: false,
+        unavailable: [],
+      };
     }
 
     const startedAt = now();

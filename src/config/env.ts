@@ -35,6 +35,12 @@ const serverEnvSchema = z.object({
    * network). Unset: live only on Vercel production, recorded everywhere else.
    */
   SERPAPI_MODE: optional(z.enum(["live", "recorded"])),
+  /** Searches one IP may run (defaults in config/rate-limits.ts; E2E raises them). */
+  SEARCH_RATE_LIMIT_PER_MINUTE: optional(z.coerce.number().int().positive()),
+  SEARCH_RATE_LIMIT_PER_DAY: optional(z.coerce.number().int().positive()),
+  /** Live store API calls allowed per day across all shoppers; see config/rate-limits.ts. */
+  EBAY_DAILY_CALL_BUDGET: optional(z.coerce.number().int().positive()),
+  AMAZON_DAILY_CALL_BUDGET: optional(z.coerce.number().int().positive()),
   /** Set by Vercel: "production", "preview" or "development". */
   VERCEL_ENV: optional(z.enum(["production", "preview", "development"])),
   /** Amazon result pages fetched in parallel per uncached query (1–3); each costs one SerpApi credit. */

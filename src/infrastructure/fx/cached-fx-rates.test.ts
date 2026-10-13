@@ -1,7 +1,7 @@
 import { createFxRates, type FxRates } from "@/domain/pricing/fx-rates";
 import { createInMemoryRedis } from "@/infrastructure/cache/in-memory-redis";
 import type { RedisLike } from "@/infrastructure/cache/redis-client";
-import { createCachedFxRates, FX_KEY } from "@/infrastructure/fx/cached-fx-rates";
+import { createCachedFxRates, FALLBACK_RETRY_MS, FX_KEY } from "@/infrastructure/fx/cached-fx-rates";
 import { FxUnavailableError } from "@/infrastructure/fx/frankfurter-fx-source";
 
 const rates = (usd: number): FxRates =>
@@ -100,5 +100,53 @@ describe("createCachedFxRates", () => {
     const source = jest.fn(async () => rates(3.7));
     await setup(source, store).getFxRates();
     expect(source).toHaveBeenCalled();
+  });
+});
+
+describe("createCachedFxRates — static fallback", () => {
+  const fallback = rates(3.07);
+  const down = (): Promise<FxRates> => Promise.reject(new Error("The operation was aborted due to timeout"));
+
+  it("serves the fallback table when the source fails on a fresh instance, instead of throwing", async () => {
+    const logger = { warn: jest.fn() };
+    const source = jest.fn(down);
+    const getFxRates = createCachedFxRates({
+      source,
+      store: createInMemoryRedis(() => clock.ms),
+      fallback,
+      now: () => clock.ms,
+      logger,
+    });
+    await expect(getFxRates()).resolves.toBe(fallback);
+    expect(logger.warn).toHaveBeenCalledWith(
+      "fx: source failed and nothing cached, serving the static fallback table",
+      expect.objectContaining({ asOf: fallback.asOf }),
+    );
+  });
+
+  it("doesn't make every search wait on a down source: retries it after 5 minutes", async () => {
+    const source = jest.fn(down);
+    const getFxRates = createCachedFxRates({
+      source,
+      store: createInMemoryRedis(() => clock.ms),
+      fallback,
+      now: () => clock.ms,
+    });
+    await getFxRates();
+    await getFxRates();
+    expect(source).toHaveBeenCalledTimes(1);
+    clock.ms += FALLBACK_RETRY_MS + 1;
+    source.mockResolvedValueOnce(rates(3.1));
+    await expect(getFxRates()).resolves.toMatchObject({ toIls: { USD: 3.1 } });
+    expect(source).toHaveBeenCalledTimes(2);
+  });
+
+  it("still prefers last-known-good rates over the static table", async () => {
+    const store = createInMemoryRedis(() => clock.ms);
+    const warm = createCachedFxRates({ source: async () => rates(3.2), store, now: () => clock.ms });
+    await warm();
+    clock.ms += 7 * HOUR;
+    const cold = createCachedFxRates({ source: down, store, fallback, now: () => clock.ms });
+    await expect(cold()).resolves.toMatchObject({ toIls: { USD: 3.2 } });
   });
 });

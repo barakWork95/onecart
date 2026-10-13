@@ -27,8 +27,16 @@ function revive(value: unknown): StoredRates | null {
   }
 }
 
+/** After falling back to the static table, try the source again at most this often. */
+export const FALLBACK_RETRY_MS = 5 * 60 * 1000;
+
 export interface CachedFxDeps {
   readonly source: () => Promise<FxRates>;
+  /**
+   * Static last-resort rates for when the source fails and nothing was ever
+   * cached. Without it that case throws and every store's prices fail.
+   */
+  readonly fallback?: FxRates;
   readonly store: RedisLike;
   readonly now?: () => number;
   readonly logger?: Logger;
@@ -37,14 +45,17 @@ export interface CachedFxDeps {
 /**
  * `getFxRates()` for the landed-price calculator: in-process memo → Redis
  * (shared, fresh for 6h) → live source. If the source is down, serves the
- * last-known-good rates (up to 7 days old) and logs; throws only when no
- * rates were ever fetched.
+ * last-known-good rates (up to 7 days old); with none, the static fallback
+ * table, retrying the source at most every 5 minutes. Throws only when no
+ * rates were ever fetched and no fallback is configured.
  */
 export function createCachedFxRates(deps: CachedFxDeps): () => Promise<FxRates> {
   const now = deps.now ?? Date.now;
   const logger = deps.logger ?? noopLogger;
   let memo: StoredRates | null = null;
   let inFlight: Promise<FxRates> | null = null;
+  /** While serving the static table, when to try the source again. */
+  let fallbackUntilMs = 0;
 
   const isFresh = (s: StoredRates) => now() - s.fetchedAtMs < FRESH_FOR_MS;
   const toRates = (s: StoredRates) => createFxRates(s.toIls, s.asOf);
@@ -60,6 +71,8 @@ export function createCachedFxRates(deps: CachedFxDeps): () => Promise<FxRates> 
       memo = stored;
       return toRates(stored);
     }
+    // A recent failure with nothing cached: don't make every search wait on the source again.
+    if (!stored && !memo && deps.fallback && now() < fallbackUntilMs) return deps.fallback;
 
     try {
       const fresh = await deps.source();
@@ -76,6 +89,14 @@ export function createCachedFxRates(deps: CachedFxDeps): () => Promise<FxRates> 
           error: String(error),
         });
         return toRates(fallback);
+      }
+      if (deps.fallback) {
+        fallbackUntilMs = now() + FALLBACK_RETRY_MS;
+        logger.warn("fx: source failed and nothing cached, serving the static fallback table", {
+          asOf: deps.fallback.asOf,
+          error: String(error),
+        });
+        return deps.fallback;
       }
       throw error instanceof FxUnavailableError ? error : new FxUnavailableError(String(error));
     }
