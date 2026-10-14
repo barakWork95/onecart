@@ -109,6 +109,73 @@ describe("trending showcase", () => {
   });
 });
 
+describe("trending showcase — what a homepage card may feature (live listings, 2026-10-14)", () => {
+  const at14 = "2026-10-14T08:30:00.000Z";
+  const listing = (provider: ProviderId, sku: string, title: string, total: number, sellerName?: string) =>
+    makeProduct({ provider, sku, title, total: total * 100, ...(sellerName ? { sellerName } : {}) });
+
+  async function cardFrom(query: string, byStore: Partial<Record<ProviderId, ReturnType<typeof listing>[]>>) {
+    const cache = fakeSearchCache(() => at.ms);
+    for (const [provider, products] of Object.entries(byStore))
+      await cache.set(
+        key(provider as ProviderId, query),
+        { products, hasMore: false, cachedAt: at14 },
+        86_400,
+      );
+    const stores = (Object.keys(byStore) as ProviderId[]).map((id) => ({ id }));
+    const [card] = await createTrendingShowcase({ cache, stores })([{ label: query, query }]);
+    return card;
+  }
+
+  it("never features a clone that doesn't name the brand", async () => {
+    const card = await cardFrom("apple airtag", {
+      aliexpress: [
+        listing("aliexpress", "a1", "BOROFONE BC104 AirTag Bluetooth Tracker Find My iPhone Compatible", 31),
+      ],
+      ebay: [
+        listing("ebay", "e1", "Apple AirTag | For iPhone & iPad | Tracker for keys, wallet, luggage", 158),
+      ],
+    });
+    expect(card?.best).toEqual({ provider: "ebay", total: money(158_00, "ILS") });
+  });
+
+  it("never features a branded AliExpress listing from a non-official store", async () => {
+    const card = await cardFrom("jbl go 4", {
+      aliexpress: [
+        listing(
+          "aliexpress",
+          "a1",
+          "JBL GO 4 Music BRICS 4th Gen Wireless Bluetooth Portable",
+          106,
+          "Shop1105843138 Store",
+        ),
+      ],
+      ebay: [listing("ebay", "e1", "JBL Go 4 Ultra-Portable Bluetooth Speaker Black Waterproof IP67", 213)],
+    });
+    expect(card?.best.provider).toBe("ebay");
+  });
+
+  it("features a typical-priced listing, skipping the store's top result when it's an outlier", async () => {
+    const card = await cardFrom("cosori air fryer", {
+      ebay: [
+        listing("ebay", "e1", "Cosori Pro Gen 2 5.8-Quart Smart Air Fryer CS168-AF 11-in-1", 3304),
+        listing("ebay", "e2", "Cosori Air Fryer 8.6L TwinFry Ash Black", 1330),
+        listing("ebay", "e3", "Cosori Air Fryer 5.5L Dual Blaze", 980),
+      ],
+    });
+    expect(card?.best.total).toEqual(money(1330_00, "ILS"));
+  });
+
+  it("keeps the brand rule off Amazon, whose catalog titles often drop the brand", async () => {
+    const card = await cardFrom("sony wh-1000xm5", {
+      amazon: [
+        listing("amazon", "z1", "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black", 1100),
+      ],
+    });
+    expect(card?.best.provider).toBe("amazon");
+  });
+});
+
 describe("warmTrendingSearches", () => {
   it("runs each trending search through the normal search, asking only the given stores", async () => {
     const searchProducts = jest.fn(async (query): Promise<SearchResponse> => ({
@@ -197,5 +264,36 @@ describe("warmTrendingSearches", () => {
     });
     expect(warmed).toEqual([]);
     expect(searchProducts).not.toHaveBeenCalled();
+  });
+
+  it("runs up to `concurrency` searches at once and reports in query order", async () => {
+    let running = 0;
+    let peak = 0;
+    const searchProducts = jest.fn(async (query): Promise<SearchResponse> => {
+      running++;
+      peak = Math.max(peak, running);
+      // Later queries finish first, so order can't come from completion order.
+      await new Promise((r) => setTimeout(r, 30 - query.normalizedText.charCodeAt(0) + 97));
+      running--;
+      return {
+        query,
+        groups: [],
+        totalOffers: 0,
+        providers: [{ provider: "ebay", status: "ok", resultCount: 1, latencyMs: 1, fromCache: false }],
+        pagination: { page: 1, pageSize: 20, totalResults: 0, hasNextPage: false },
+        isPartial: false,
+        generatedAt: "2026-10-14T07:30:00.000Z",
+      };
+    }) as jest.MockedFunction<SearchProducts>;
+    const queries = ["a", "b", "c", "d", "e", "f", "g"].map((q) => ({ label: q, query: q }));
+
+    const warmed = await warmTrendingSearches(
+      searchProducts,
+      queries,
+      { daily: ["ebay"], rotating: [], atMs: at.ms },
+      { concurrency: 3 },
+    );
+    expect(peak).toBe(3);
+    expect(warmed.map((w) => w.query)).toEqual(["a", "b", "c", "d", "e", "f", "g"]);
   });
 });

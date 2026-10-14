@@ -416,6 +416,18 @@ SearchBar (client) → /search?q=… (Server Component)
       composition root), so it never spends shoppers' calls. Shoppers keep
       `AMAZON_DAILY_CALL_BUDGET` (default 3 calls × 2 pages). Total: 6 + 2 = 8 credits a day ≈
       248 a month, under the free plan's 250. Change both together.
+- **Homepage category rows** (`config/home.ts`, `categoryRows()` in the composition root): six
+  categories × five specific products (brand + model; `home.test.ts` checks each is a specific,
+  non-accessory query and none repeats a trending one). Each card is built like a trending card,
+  from cache only; empty rows are hidden. The warm-trending cron refreshes them after the trending
+  queries, 3 at a time, on `TRENDING_WARM_STORES` (default `ebay,aliexpress`; ~35 calls a day
+  each, ~15s locally). Amazon's rotation stays on the trending queries.
+- **What a homepage card may feature** (`domain/deals/featured-listing.ts`): a card reads as an
+  endorsement, so it's stricter than search. Marketplace listings must name a branded query's
+  brand (catalog stores like Amazon are exempt: their titles drop it), branded AliExpress
+  listings must come from an official store, and the featured product's price must be within
+  0.5–2× the median of listings naming it. This keeps clones ("BOROFONE … AirTag Compatible"
+  ₪31) and outliers (a ₪3,304 air fryer) off the homepage. Search results are unaffected.
   - Results from an older snapshot are dated: `ProviderOutcome.cachedAt` (oldest cached page)
     → "Amazon prices as of 13 Oct, 10:30" above the cards when older than an hour.
 

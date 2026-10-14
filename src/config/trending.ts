@@ -23,9 +23,10 @@ export const DEMO_TRENDING_QUERIES: readonly TrendingQuery[] = [
 ];
 
 /**
- * Stores the warm-trending cron refreshes for every query, every day. eBay by
- * default: 5 calls a day against its 5,000. Amazon isn't listed: SerpApi's
- * quota is too small for daily refreshes, so it's warmed on a rotation
- * (AMAZON_WARM_PER_DAY, see config/rate-limits.ts) that overrides this list.
+ * Stores the warm-trending cron refreshes for every trending and homepage
+ * category query (config/home.ts), every day: ~35 calls each, against eBay's
+ * 5,000 and AliExpress's 2,000 a day. Amazon isn't listed: SerpApi's quota is
+ * too small for daily refreshes, so it's warmed on a rotation of the trending
+ * queries only (AMAZON_WARM_PER_DAY, see config/rate-limits.ts).
  */
-export const DEFAULT_TRENDING_WARM_STORES = ["ebay"] as const;
+export const DEFAULT_TRENDING_WARM_STORES = ["ebay", "aliexpress"] as const;

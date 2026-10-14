@@ -1,7 +1,8 @@
 import { BadgeCheck, Globe2, ShieldCheck } from "lucide-react";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { trendingCards } from "@/app/_composition";
+import { categoryRows, trendingCards } from "@/app/_composition";
+import { CategoryRows, CategoryRowsSkeleton } from "@/components/features/home/category-rows";
 import { TrendingShowcase, TrendingShowcaseSkeleton } from "@/components/features/home/trending-showcase";
 import { PopularSearches } from "@/components/features/search/popular-searches";
 import { SearchBox } from "@/components/features/search/search-box";
@@ -27,6 +28,12 @@ async function Trending() {
   return <TrendingShowcase cards={await trendingCards()} />;
 }
 
+/** Category rows: cached results only, like the trending grid. */
+async function Categories() {
+  await connection();
+  return <CategoryRows rows={await categoryRows()} />;
+}
+
 export default function HomePage() {
   return (
     <main className="flex w-full flex-1 flex-col">
@@ -48,6 +55,10 @@ export default function HomePage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 pb-10">
         <Suspense fallback={<TrendingShowcaseSkeleton />}>
           <Trending />
+        </Suspense>
+
+        <Suspense fallback={<CategoryRowsSkeleton />}>
+          <Categories />
         </Suspense>
 
         <ul className="grid gap-3 sm:grid-cols-3">

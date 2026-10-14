@@ -24,6 +24,21 @@ test.describe("homepage trending showcase", () => {
     await expect(lifeP3.getByText(/^Prices as of /)).toBeVisible();
   });
 
+  test("category rows show cached products and link to the category search", async ({ page }) => {
+    await page.goto("/");
+    const headphones = page.getByRole("region", { name: "Headphones" });
+    const row = headphones.getByRole("list", { name: "Headphones products" });
+    await expect(row.getByRole("link", { name: "Soundcore Space A40" })).toHaveAttribute(
+      "href",
+      "/search?q=soundcore+space+a40",
+    );
+    await expect(row.getByText(/^Prices as of /)).toBeVisible();
+    await expect(headphones.getByRole("link", { name: "See all headphones" })).toHaveAttribute(
+      "href",
+      "/search?q=wireless+earbuds",
+    );
+  });
+
   test("a card opens the full comparison for its product", async ({ page }) => {
     await page.goto("/");
     await page

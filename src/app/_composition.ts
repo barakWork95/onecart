@@ -27,6 +27,7 @@ import { FALLBACK_FX_RATES } from "@/config/fallback-fx-rates";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
 import { DEFAULT_AMAZON_WARM_PER_DAY, DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
+import { DEMO_HOME_CATEGORIES, HOME_CATEGORIES, type HomeCategory } from "@/config/home";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
 import { amazonSource, ebayCredentials, env } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
@@ -73,6 +74,8 @@ interface Services {
   readonly trendingShowcase: TrendingShowcase;
   readonly trendingQueries: readonly TrendingQuery[];
   readonly trendingWarmStores: readonly ProviderId[];
+  /** Homepage category rows; their products are warmed with the trending ones. */
+  readonly homeCategories: readonly HomeCategory[];
   /** Amazon trending queries refreshed per day (0: Amazon isn't warmed). */
   readonly amazonWarmPerDay: number;
   /** The search path for cache warming: same stores and cache, its own Amazon budget. */
@@ -261,6 +264,7 @@ function buildServices(): Services {
       logger,
     }),
     trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
+    homeCategories: demoMode ? DEMO_HOME_CATEGORIES : HOME_CATEGORIES,
     // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.
     trendingWarmStores: demoMode
       ? providers.map((p) => p.id)
@@ -396,7 +400,20 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
 /** Showcase cards are cache reads; reuse them briefly so homepage traffic doesn't multiply Redis calls. */
 const SHOWCASE_MEMO_MS = 5 * 60 * 1000;
 const SHOWCASE_KEY = Symbol.for("onecart.showcaseMemo");
-type ShowcaseHolder = { [SHOWCASE_KEY]?: { readonly cards: TrendingCard[]; readonly atMs: number } };
+const CATEGORIES_KEY = Symbol.for("onecart.categoryRowsMemo");
+
+export interface CategoryRow {
+  readonly category: HomeCategory;
+  readonly cards: readonly TrendingCard[];
+}
+
+type Memo<T> = { readonly value: T; readonly atMs: number };
+type MemoHolder = {
+  [SHOWCASE_KEY]?: Memo<TrendingCard[]>;
+  [CATEGORIES_KEY]?: Memo<CategoryRow[]>;
+};
+
+const fresh = (memo: Memo<unknown> | undefined) => !!memo && Date.now() - memo.atMs < SHOWCASE_MEMO_MS;
 
 /**
  * The homepage "Trending" cards, from cached search results only (never a
@@ -404,24 +421,55 @@ type ShowcaseHolder = { [SHOWCASE_KEY]?: { readonly cards: TrendingCard[]; reado
  * as the cache is warmed.
  */
 export async function trendingCards(): Promise<TrendingCard[]> {
-  const holder = globalThis as ShowcaseHolder;
+  const holder = globalThis as MemoHolder;
   const memo = holder[SHOWCASE_KEY];
-  if (memo && Date.now() - memo.atMs < SHOWCASE_MEMO_MS) return memo.cards;
+  if (memo && fresh(memo)) return memo.value;
   const { trendingShowcase, trendingQueries } = getServices();
   const cards = await trendingShowcase(trendingQueries);
-  if (cards.length > 0) holder[SHOWCASE_KEY] = { cards, atMs: Date.now() };
+  if (cards.length > 0) holder[SHOWCASE_KEY] = { value: cards, atMs: Date.now() };
   return cards;
 }
 
-/** Runs the trending searches so the showcase has fresh cached results (cron). */
-export function warmTrending() {
-  const { warmSearchProducts, trendingQueries, trendingWarmStores, amazonWarmPerDay } = getServices();
-  delete (globalThis as ShowcaseHolder)[SHOWCASE_KEY];
-  return warmTrendingSearches(warmSearchProducts, trendingQueries, {
+/** The homepage category rows, cached results only; a category with no cards is left out. */
+export async function categoryRows(): Promise<CategoryRow[]> {
+  const holder = globalThis as MemoHolder;
+  const memo = holder[CATEGORIES_KEY];
+  if (memo && fresh(memo)) return memo.value;
+  const { trendingShowcase, homeCategories } = getServices();
+  const rows = await Promise.all(
+    homeCategories.map(async (category) => ({ category, cards: await trendingShowcase(category.products) })),
+  );
+  const filled = rows.filter((row) => row.cards.length > 0);
+  if (filled.length > 0) holder[CATEGORIES_KEY] = { value: filled, atMs: Date.now() };
+  return filled;
+}
+
+/** Category searches warmed at once: ~30 queries finish in well under a minute. */
+const CATEGORY_WARM_CONCURRENCY = 3;
+
+/**
+ * Runs the trending searches (Amazon on its rotation) and then every category
+ * product on the daily stores, so the homepage has fresh cached results (cron).
+ */
+export async function warmTrending() {
+  const { warmSearchProducts, trendingQueries, homeCategories, trendingWarmStores, amazonWarmPerDay } =
+    getServices();
+  const holder = globalThis as MemoHolder;
+  delete holder[SHOWCASE_KEY];
+  delete holder[CATEGORIES_KEY];
+  const atMs = Date.now();
+  const trending = await warmTrendingSearches(warmSearchProducts, trendingQueries, {
     daily: trendingWarmStores,
     rotating: amazonWarmPerDay > 0 ? [{ provider: "amazon", perDay: amazonWarmPerDay }] : [],
-    atMs: Date.now(),
+    atMs,
   });
+  const categories = await warmTrendingSearches(
+    warmSearchProducts,
+    homeCategories.flatMap((c) => c.products),
+    { daily: trendingWarmStores, rotating: [], atMs },
+    { concurrency: CATEGORY_WARM_CONCURRENCY },
+  );
+  return { trending, categories };
 }
 
 /** The /go/[id] decision; see `createResolveOutboundLink`. */

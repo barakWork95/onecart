@@ -8,6 +8,8 @@ import { bestOffer } from "@/domain/search/product-group";
 import { intentTier } from "@/domain/search/result-ordering";
 import { searchIntent } from "@/domain/search/search-intent";
 import { rotationFor, rotationTtlSeconds } from "@/domain/deals/warm-rotation";
+import { isFeaturableListing, isTypicalPrice, medianAmount } from "@/domain/deals/featured-listing";
+import { tokenizeTitle } from "@/domain/matching/title-tokens";
 import { normalizeQueryText, searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import type { Money } from "@/domain/shared/money";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
@@ -77,13 +79,19 @@ export function createTrendingShowcase(deps: TrendingShowcaseDeps) {
     if (!cached.some((e) => e.products.length > 0)) return null;
 
     const intent = searchIntent(text);
+    // A card is an endorsement: only listings it may feature (see `isFeaturableListing`).
     const stores: StoreResults[] = cached.map((e) => ({
-      products: e.products,
+      products: e.products.filter((p) => isFeaturableListing(p, tokenizeTitle(p.title), intent)),
       unavailable: e.unavailable ?? [],
     }));
     const { groups } = assembleResults(stores, { filters: {}, sort: "relevance" }, intent);
-    // The product the search names, never an accessory or a related item.
-    const top = groups.find((g) => !g.isAccessory && intentTier(g, intent) === 0);
+    // The product the search names, never an accessory or a related item…
+    const named = groups.filter((g) => !g.isAccessory && intentTier(g, intent) === 0);
+    // …at a typical price for it: the stores' top result can be an outlier.
+    const typical = medianAmount(named.map((g) => bestOffer(g).price.total.amountMinor));
+    const top = named.find(
+      (g) => typical !== null && isTypicalPrice(bestOffer(g).price.total.amountMinor, typical),
+    );
     if (!top) return null;
 
     const best = bestOffer(top);
@@ -143,11 +151,14 @@ export interface WarmedQuery {
  *   (`rotationTtlSeconds`), so a query's results never lapse between turns.
  *
  * Stores not listed are skipped. A query no store is asked about isn't searched.
+ * Queries run `concurrency` at a time (default 1: store APIs prefer no bursts),
+ * and results come back in query order.
  */
 export async function warmTrendingSearches(
   searchProducts: SearchProducts,
   queries: readonly TrendingQuery[],
   plan: WarmPlan,
+  options: { readonly concurrency?: number } = {},
 ): Promise<WarmedQuery[]> {
   const rotatingIds = new Set(plan.rotating.map((r) => r.provider));
   const daily = plan.daily.filter((p) => !rotatingIds.has(p));
@@ -157,12 +168,10 @@ export async function warmTrendingSearches(
     ttlSeconds: rotationTtlSeconds(queries.length, r.perDay),
   }));
 
-  const results: WarmedQuery[] = [];
-  // One query at a time: a cron run has minutes, store APIs prefer no bursts.
-  for (const { query } of queries) {
+  async function warm(query: string): Promise<WarmedQuery | null> {
     const rotatingToday = turns.filter((t) => t.today.has(query));
     const stores = [...daily, ...rotatingToday.map((t) => t.provider)];
-    if (stores.length === 0) continue;
+    if (stores.length === 0) return null;
     const text = normalizeQueryText(query);
     const searchQuery: SearchQuery = {
       rawText: text,
@@ -180,12 +189,24 @@ export async function warmTrendingSearches(
       lean: true,
       cacheTtlSeconds: Object.fromEntries(rotatingToday.map((t) => [t.provider, t.ttlSeconds])),
     });
-    results.push({
+    return {
       query: text,
       outcomes: response.providers
         .filter((o) => o.status !== "skipped")
         .map((o) => ({ provider: o.provider, status: o.status })),
-    });
+    };
   }
-  return results;
+
+  const results: (WarmedQuery | null)[] = new Array(queries.length).fill(null);
+  let next = 0;
+  const worker = async () => {
+    while (next < queries.length) {
+      const index = next++;
+      const item = queries[index];
+      if (item) results[index] = await warm(item.query);
+    }
+  };
+  const workers = Math.max(1, Math.min(queries.length, Math.floor(options.concurrency ?? 1)));
+  await Promise.all(Array.from({ length: workers }, worker));
+  return results.flatMap((r) => (r ? [r] : []));
 }
