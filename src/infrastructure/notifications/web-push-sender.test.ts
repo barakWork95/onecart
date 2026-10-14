@@ -40,7 +40,7 @@ describe("createWebPushSender", () => {
       {
         vapidDetails: { subject: CONFIG.subject, publicKey: "pub", privateKey: "priv" },
         TTL: 86_400,
-        urgency: "normal",
+        urgency: "high",
         timeout: 10_000,
       },
     );

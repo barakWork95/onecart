@@ -39,10 +39,11 @@ export function createWebPushSender(config: WebPushSenderConfig): PushSender {
   return {
     async send(subscription: PushSubscriptionKeys, message: PushMessage): Promise<PushDelivery> {
       try {
+        // "high": a notification the user asked for; push services may hold back lower urgencies.
         const response = await webpush.sendNotification(
           { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
           JSON.stringify(message),
-          { vapidDetails, TTL: TTL_SECONDS, urgency: "normal", timeout: TIMEOUT_MS },
+          { vapidDetails, TTL: TTL_SECONDS, urgency: "high", timeout: TIMEOUT_MS },
         );
         return { result: "sent", statusCode: response.statusCode, detail: null };
       } catch (error) {

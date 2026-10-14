@@ -69,9 +69,11 @@ describe("NotifyMe", () => {
     expect(push.register).toHaveBeenCalledWith("/sw.js");
   });
 
-  it("shows as on when this browser is already subscribed, and turns off", async () => {
+  it("shows as on when this browser is already subscribed, re-saves it, and turns off", async () => {
     const push = installPush({ permission: "granted", subscribed: true });
-    const { remove } = renderNotifyMe();
+    const { remove, save } = renderNotifyMe();
+    // The browser's current subscription, so the server never pushes to a replaced one.
+    await waitFor(() => expect(save).toHaveBeenCalledWith(JSON_SUB));
     await userEvent.click(await screen.findByRole("button", { name: "Turn off" }));
     expect(push.subscription.unsubscribe).toHaveBeenCalled();
     expect(remove).toHaveBeenCalledWith({ endpoint: JSON_SUB.endpoint });

@@ -1,7 +1,8 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { endpointHint } from "@/domain/notifications/push";
 import type { sendTestPushAction } from "@/app/internal/push-test/actions";
 
 type Result = Awaited<ReturnType<typeof sendTestPushAction>>;
@@ -18,8 +19,22 @@ export function TestPushButton({ action }: { action: typeof sendTestPushAction }
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [deliveries, setDeliveries] = useState<Extract<Result, { kind: "sent" }>["deliveries"]>([]);
+  // This browser's current subscription: a push sent to any other endpoint goes nowhere.
+  const [current, setCurrent] = useState<string | null>(null);
+  useEffect(() => {
+    (async () => {
+      if (!("serviceWorker" in navigator)) return setCurrent("(no service worker support)");
+      const registration = await navigator.serviceWorker.getRegistration("/");
+      const subscription = await registration?.pushManager.getSubscription();
+      setCurrent(subscription ? endpointHint(subscription.endpoint) : "(none in this browser)");
+    })().catch(() => setCurrent("(couldn't read)"));
+  }, []);
   return (
     <div className="flex flex-col items-start gap-3">
+      <p className="text-xs text-muted-foreground">
+        This browser&apos;s current subscription:{" "}
+        <span className="font-mono break-all">{current ?? "…"}</span>
+      </p>
       <button
         type="button"
         disabled={pending}
@@ -49,6 +64,7 @@ export function TestPushButton({ action }: { action: typeof sendTestPushAction }
           {deliveries.map((d) => (
             <li key={d.endpoint} className="border-t border-border/60 py-2 font-mono break-all">
               {d.endpoint} → {d.result} (HTTP {d.statusCode ?? "none"}){d.detail ? `: ${d.detail}` : ""}
+              {d.endpoint === current ? " ✓ this browser" : " ✗ not this browser's current subscription"}
             </li>
           ))}
         </ul>

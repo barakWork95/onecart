@@ -69,7 +69,11 @@ export function NotifyMe({
       try {
         const registration = await navigator.serviceWorker.register(SW_URL);
         const subscription = await registration.pushManager.getSubscription();
-        settle(subscription && Notification.permission === "granted" ? "on" : "off");
+        const on = !!subscription && Notification.permission === "granted";
+        settle(on ? "on" : "off");
+        // Browsers replace subscriptions over time (and on site-data resets); the server
+        // must push to this one, so it's re-saved on every visit. Idempotent.
+        if (on) await save(subscription.toJSON());
       } catch {
         settle("unsupported");
       }
@@ -77,7 +81,7 @@ export function NotifyMe({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [save]);
 
   async function turnOn() {
     setError(null);
