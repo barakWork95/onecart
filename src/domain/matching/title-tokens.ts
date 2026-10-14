@@ -313,6 +313,13 @@ const QUALIFIERS: Readonly<Record<string, string>> = {
   kit: "bundle",
 };
 
+/**
+ * Words naming a tier of a product line: a "Flip 6 Mini" isn't a Flip 6, nor
+ * "AirPods Pro" AirPods. Knock-off sellers lean on them ("JBL Flip 6 Mini …"
+ * at half the price). Not "air": it's in too many names (air fryer, air pump).
+ */
+const TIER_WORDS = new Set(["mini", "pro", "max", "plus", "ultra", "lite", "se"]);
+
 /** Alphanumeric tokens that are specs, not model numbers: IP67, USB3, 5G, 4K, 2nd. */
 const SPEC_CODE = /^(ipx?\d+|usb\w*|bt\d+|wifi\d+|[2-6]g|\d+(st|nd|rd|th)|tws\d*)$/;
 
@@ -334,6 +341,8 @@ export interface TitleTokens {
   readonly brandWords: ReadonlySet<string>;
   /** Condition or packaging that changes the deal: "refurbished", "used", "bundle". */
   readonly qualifiers: ReadonlySet<string>;
+  /** Tier words of a product line: "mini", "pro", "max"… (see `TIER_WORDS`). */
+  readonly tiers: ReadonlySet<string>;
   /**
    * How sure the title is about being an accessory, spare part or guide:
    * `strong` ("Earpads for Sony …", "Replacement hinge"), `weak` (an accessory
@@ -398,6 +407,7 @@ export function tokenizeTitle(title: string): TitleTokens {
   const variants = new Map<string, Set<string>>();
   const brands = new Set<string>();
   const qualifiers = new Set<string>();
+  const tiers = new Set<string>();
   const brandWords = new Set<string>();
   let weak = false;
   let strong = false;
@@ -421,6 +431,7 @@ export function tokenizeTitle(title: string): TitleTokens {
 
     const qualifier = QUALIFIERS[token];
     if (qualifier) qualifiers.add(qualifier);
+    if (TIER_WORDS.has(token)) tiers.add(token);
 
     if (STOPWORDS.has(token) || YEAR.test(token)) return;
     words.add(token);
@@ -447,6 +458,7 @@ export function tokenizeTitle(title: string): TitleTokens {
     brands,
     brandWords,
     qualifiers,
+    tiers,
     accessorySignal,
     isAccessory: accessorySignal !== "none",
   };

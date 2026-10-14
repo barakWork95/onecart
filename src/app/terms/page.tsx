@@ -20,9 +20,9 @@ export default function TermsPage() {
         <h2>What OneCart is</h2>
         <p>
           OneCart is a price comparison service. We show products and offers from third-party stores such as
-          eBay and Amazon, with an estimate of the total cost of getting each item to Israel. We don&apos;t
-          sell products, take orders or handle payments. When you buy, you buy from the store, under the
-          store&apos;s own terms, prices, shipping, returns and warranty.
+          eBay, Amazon and AliExpress, with an estimate of the total cost of getting each item to Israel. We
+          don&apos;t sell products, take orders or handle payments. When you buy, you buy from the store,
+          under the store&apos;s own terms, prices, shipping, returns and warranty.
         </p>
       </section>
 
@@ -31,8 +31,8 @@ export default function TermsPage() {
         <ul>
           <li>
             Prices, availability and delivery times come from the stores and can change at any moment. Prices
-            we show may be up to 24 hours old; cards show when prices were checked. The store&apos;s checkout
-            is always the final price.
+            we show may be up to a few days old; we show when older prices were checked. The store&apos;s
+            checkout is always the final price.
           </li>
           <li>
             Import VAT, customs duty and fees are our estimates under the Israeli import rules as we
@@ -49,10 +49,10 @@ export default function TermsPage() {
       <section>
         <h2>Affiliate relationships</h2>
         <p>
-          OneCart participates in affiliate programs, including the eBay Partner Network and Amazon
-          Associates. We may earn a commission when you buy through our links, at no additional cost to you.
-          Commissions never change the prices we show or how we rank offers: results follow the stores&apos;
-          own relevance and the landed price. {AMAZON_ASSOCIATES_DISCLOSURE}
+          OneCart participates in affiliate programs, including the eBay Partner Network, Amazon Associates
+          and the AliExpress Affiliate Program. We may earn a commission when you buy through our links, at no
+          additional cost to you. Commissions never change the prices we show or how we rank offers: results
+          follow the stores&apos; own relevance and the landed price. {AMAZON_ASSOCIATES_DISCLOSURE}
         </p>
       </section>
 
@@ -72,8 +72,9 @@ export default function TermsPage() {
         <p>
           Product names, images and descriptions belong to their owners and are shown to help you compare.
           eBay and the eBay logo are trademarks of eBay Inc. Amazon and the Amazon logo are trademarks of
-          Amazon.com, Inc. or its affiliates. OneCart is not affiliated with, sponsored by or endorsed by
-          eBay, Amazon or any other store, beyond the affiliate programs described above.
+          Amazon.com, Inc. or its affiliates. AliExpress is a trademark of Alibaba Group. OneCart is not
+          affiliated with, sponsored by or endorsed by eBay, Amazon, AliExpress or any other store, beyond the
+          affiliate programs described above.
         </p>
       </section>
 

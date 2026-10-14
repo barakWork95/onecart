@@ -4,4 +4,4 @@ export const SITE_URL = "https://www.onecartapp.com";
 export const SITE_NAME = "OneCart";
 
 export const SITE_DESCRIPTION =
-  "Compare Amazon and eBay by the real landed price to Israel: shipping, import VAT and customs included.";
+  "Compare Amazon, eBay and AliExpress by the real landed price to Israel: shipping, import VAT and customs included.";

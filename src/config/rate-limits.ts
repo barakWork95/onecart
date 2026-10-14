@@ -25,8 +25,11 @@ export function searchRateLimits(
  *   is SERPAPI_AMAZON_PAGES searches (default 2), so 3 calls = 6 searches a
  *   day. Cache warming has its own budget below: 6 + 2 = 8 a day ≈ 248 a month.
  *   Raise both with a bigger plan.
+ * - AliExpress Affiliate API (product.query): the app's quota is shown in the
+ *   Open Platform console; 2,000 a day is a conservative cap. Affiliate-link
+ *   calls at /go time are separate and cached for 30 days.
  */
-export const DEFAULT_DAILY_CALL_BUDGETS = { ebay: 4_500, amazon: 3 } as const;
+export const DEFAULT_DAILY_CALL_BUDGETS = { ebay: 4_500, amazon: 3, aliexpress: 2_000 } as const;
 
 /**
  * Trending queries warmed on Amazon per day (AMAZON_WARM_PER_DAY), one

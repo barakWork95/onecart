@@ -213,6 +213,7 @@ function buildServices(): Services {
     : createCallBudget(config, providers, logger, "budget", {
         ebay: config.EBAY_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.ebay,
         amazon: config.AMAZON_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.amazon,
+        aliexpress: config.ALIEXPRESS_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.aliexpress,
       });
   const warmBudget = demoMode
     ? null
@@ -233,7 +234,9 @@ function buildServices(): Services {
       affiliate: createAffiliateLinkBuilder({
         ...(config.AFFILIATE_AMAZON_TAG ? { amazonTag: config.AFFILIATE_AMAZON_TAG } : {}),
         ...(config.AFFILIATE_EBAY_CAMPAIGN_ID ? { ebayCampaignId: config.AFFILIATE_EBAY_CAMPAIGN_ID } : {}),
-        ...(config.ALIEXPRESS_APP_KEY &&
+        // Demo products aren't real listings: never send them to the live link API.
+        ...(!demoMode &&
+        config.ALIEXPRESS_APP_KEY &&
         config.ALIEXPRESS_APP_SECRET &&
         config.AFFILIATE_ALIEXPRESS_TRACKING_ID
           ? {

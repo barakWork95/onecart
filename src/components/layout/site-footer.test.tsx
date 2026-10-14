@@ -15,7 +15,7 @@ describe("SiteFooter", () => {
   it("declares both affiliate programs", () => {
     render(<SiteFooter />);
     expect(AFFILIATE_DISCLOSURE).toBe(
-      "OneCart is a participant in affiliate programs including the eBay Partner Network and Amazon Associates. We may earn a commission on qualifying purchases at no additional cost to you.",
+      "OneCart is a participant in affiliate programs including the eBay Partner Network, Amazon Associates and the AliExpress Affiliate Program. We may earn a commission on qualifying purchases at no additional cost to you.",
     );
     expect(screen.getByRole("contentinfo")).toHaveTextContent(AFFILIATE_DISCLOSURE);
   });

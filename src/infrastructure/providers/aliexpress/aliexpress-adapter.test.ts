@@ -12,6 +12,7 @@ import errorSignature from "./fixtures/error-signature.json";
 import searchEmpty from "./fixtures/search-empty.json";
 import searchMalformed from "./fixtures/search-malformed.json";
 import searchOk from "./fixtures/search-ok.json";
+import searchRecorded from "./fixtures/search-recorded.json";
 
 const QUERY: SearchQuery = {
   rawText: "אוזניות אלחוטיות",
@@ -295,5 +296,29 @@ describe("AliExpress adapter — FX outage", () => {
 describe("AliExpress adapter — identity", () => {
   it("identifies as the aliexpress provider", () => {
     expect(setup(async () => jsonResponse(searchEmpty)).provider.id).toBe("aliexpress");
+  });
+});
+
+describe("AliExpress adapter — recorded live response (2026-10-14)", () => {
+  it("maps every item of a real product.query page", async () => {
+    const result = await setup(async () => jsonResponse(searchRecorded)).search();
+    if (!result.ok) throw new Error(`expected ok, got ${result.error.code}`);
+    const { products, hasMore } = result.value;
+    expect(products).toHaveLength(7);
+    expect(hasMore).toBe(true);
+
+    const flip = products.find((p) => p.providerProductId === "1005013304541989");
+    expect(flip).toMatchObject({
+      id: "aliexpress:1005013304541989",
+      // Tracking params (pdp_npi…) are stripped from the canonical URL.
+      productUrl: "https://www.aliexpress.com/item/1005013304541989.html",
+      sellerName: "JBL Pro Sound Store",
+      rating: null,
+    });
+    expect(flip?.price.item).toEqual({ amountMinor: 149_00, currency: "ILS" });
+    // The product query quotes no shipping: the card must say "+ shipping".
+    expect(flip?.price.shippingKnown).toBe(false);
+    // Live photos come from aliexpress-media.com, not only alicdn.com.
+    expect(flip?.imageUrl).toMatch(/^https:\/\/ae-pic-a1\.aliexpress-media\.com\//);
   });
 });

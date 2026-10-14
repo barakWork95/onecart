@@ -5,7 +5,7 @@ export const AMAZON_ASSOCIATES_DISCLOSURE = "As an Amazon Associate I earn from 
 
 /** Our affiliate relationships, stated plainly on every page (eBay Partner Network, Amazon Associates). */
 export const AFFILIATE_DISCLOSURE =
-  "OneCart is a participant in affiliate programs including the eBay Partner Network and Amazon Associates. We may earn a commission on qualifying purchases at no additional cost to you.";
+  "OneCart is a participant in affiliate programs including the eBay Partner Network, Amazon Associates and the AliExpress Affiliate Program. We may earn a commission on qualifying purchases at no additional cost to you.";
 
 export const LEGAL_LINKS = [
   { href: "/privacy", label: "Privacy Policy" },

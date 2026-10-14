@@ -55,7 +55,7 @@ test.describe("compliance", () => {
       await page.goto(path);
       const footer = page.getByRole("contentinfo");
       await expect(footer).toContainText(
-        "OneCart is a participant in affiliate programs including the eBay Partner Network and Amazon Associates. We may earn a commission on qualifying purchases at no additional cost to you.",
+        "OneCart is a participant in affiliate programs including the eBay Partner Network, Amazon Associates and the AliExpress Affiliate Program. We may earn a commission on qualifying purchases at no additional cost to you.",
       );
       await expect(footer).toContainText("As an Amazon Associate I earn from qualifying purchases.");
       const legal = footer.getByRole("navigation", { name: "Legal" });

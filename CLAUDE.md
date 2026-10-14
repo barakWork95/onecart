@@ -282,7 +282,11 @@ SearchBar (client) → /search?q=… (Server Component)
   - they come from different stores;
   - both or neither are accessories;
   - their item prices are within 2.5× of each other;
-  - no conflict: different brands, model codes, variant values, series numbers or qualifiers;
+  - no conflict: different brands, model codes, variant values, series numbers, qualifiers, or
+    tier words (`TIER_WORDS`: mini, pro, max, plus, ultra, lite, se; "Flip 6 Mini" ≠ "Flip 6");
+  - not a branded AliExpress listing from a seller whose name lacks "official"
+    (`isUnverifiedBrandListing`): knock-offs ("JBL Flip 6" from "JBL Pro Sound Store" at ₪149)
+    keep their own card. Unbranded items and same-store collapsing are unaffected;
   - then one of: a shared model code with ≥ 50% containment (share of the shorter title found in
     the longer; Amazon titles run 3× longer than eBay's); a shared series number or generation of
     a branded item, no model codes, ≥ 80% containment; or ≥ 0.8 Dice title similarity
@@ -420,7 +424,8 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   429 with `Retry-After`. Router prefetches are excluded by the proxy **matcher** (`missing`
   headers): Next strips `next-router-prefetch` from `request.headers`, so code can't see it.
 - **Per-store daily budget** (`StoreCallBudget`, checked in the orchestrator after cache and
-  circuit): eBay 4,500 and Amazon 3 live calls a day by default (`EBAY_DAILY_CALL_BUDGET`,
+  circuit): eBay 4,500, Amazon 3 and AliExpress 2,000 live calls a day by default
+  (`ALIEXPRESS_DAILY_CALL_BUDGET`) (`EBAY_DAILY_CALL_BUDGET`,
   `AMAZON_DAILY_CALL_BUDGET`). Over budget → that store reports `DAILY_BUDGET`, the circuit is
   untouched, and the UI offers "Check <store>" links. This stops floods from rotating IPs.
 - Local runs may share production Redis (`.env.local` holds the `KV_*` vars). Non-live data is
@@ -444,7 +449,7 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
 ## Compliance
 
 - The footer on every page carries the general affiliate disclosure (`AFFILIATE_DISCLOSURE`:
-  eBay Partner Network and Amazon Associates) and Amazon's exact sentence
+  eBay Partner Network, Amazon Associates and the AliExpress Affiliate Program) and Amazon's exact sentence
   (`AMAZON_ASSOCIATES_DISCLOSURE`; keep the wording), plus links to `/privacy` and `/terms`.
 - `/privacy` and `/terms` describe what the app actually does (anonymous accounts, IP rate
   limiting, 24h query cache, click logging, the processors). Update them when that changes, and

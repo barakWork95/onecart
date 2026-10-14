@@ -52,11 +52,11 @@ export default function PrivacyPage() {
       <section>
         <h2>Affiliate links and the stores you visit</h2>
         <p>
-          OneCart participates in affiliate programs, including the eBay Partner Network and Amazon
-          Associates. Links to stores pass through our redirect, which adds our affiliate identifier so the
-          store can credit us if you buy; this costs you nothing. Once you reach a store, its own privacy
-          policy and cookies apply, including cookies the store or its affiliate program uses to attribute
-          your purchase. We don&apos;t receive your purchase or payment details.
+          OneCart participates in affiliate programs, including the eBay Partner Network, Amazon Associates
+          and the AliExpress Affiliate Program. Links to stores pass through our redirect, which adds our
+          affiliate identifier so the store can credit us if you buy; this costs you nothing. Once you reach a
+          store, its own privacy policy and cookies apply, including cookies the store or its affiliate
+          program uses to attribute your purchase. We don&apos;t receive your purchase or payment details.
         </p>
       </section>
 
@@ -69,8 +69,9 @@ export default function PrivacyPage() {
             Supabase, which stores anonymous accounts, saved items, price alerts and the store-visit counts.
           </li>
           <li>
-            eBay (Browse API) and SerpApi (for Amazon results), which receive your search text to return
-            products.
+            eBay (Browse API), SerpApi (for Amazon results) and AliExpress (Affiliate API), which receive your
+            search text to return products. When you follow a link to AliExpress, its Affiliate API also
+            receives that product&apos;s address to create our tracked link.
           </li>
           <li>DeepL, if enabled, which receives Hebrew search text to translate it.</li>
           <li>Frankfurter (European Central Bank rates), for exchange rates; no personal data is sent.</li>

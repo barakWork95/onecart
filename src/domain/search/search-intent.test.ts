@@ -93,3 +93,54 @@ describe("classifyOffers", () => {
     ).toBe(true);
   });
 });
+
+describe("classifyOffers — recorded AliExpress titles (2026-10-14)", () => {
+  // Real "jbl flip 6" results: AliExpress mixes parts and cases into a product search.
+  const LISTINGS: readonly [string, number, boolean][] = [
+    [
+      "EVA Speaker Carrying Case, Durable Protective Organizer for JBL Flip 3/4/5/6, Portable Outdoor",
+      26.1,
+      true,
+    ],
+    [
+      "For JBL Flip 6 TL GG Original Brand New USB Charge Jack Power Supply Board Connector Bluetooth",
+      17.91,
+      true,
+    ],
+    [
+      "Speaker Protection Bracket for JBL GO3 Protective Case Strap Bracket Portable GO 3 Speaker",
+      13.05,
+      true,
+    ],
+    [
+      "New 100% Original Battery Bluetooth For JBL Flip 6 Flip6 Player Speaker Rechargeable Battery",
+      34.75,
+      true,
+    ],
+    // Only a weak signal ("Case"): its price, a quarter of the speakers', settles it.
+    ["LTGEM Case Compatible with JBL Flip 7/5 / 6 / Grip Waterproof Portable Bluetooth Speaker", 38.02, true],
+    [
+      "JBL FLIP6 Cylinder Bluetooth Speaker IP67 Waterproof Dustproof Stereo Sound For Beach Camping",
+      136.3,
+      false,
+    ],
+    [
+      "JBL Flip 6 Compact Outdoor Bluetooth Speaker IP67 Waterproof Deep Bass Stereo USB-C Rechargeable",
+      189.34,
+      false,
+    ],
+    [
+      "JBL Flip 6 Portable Wireless Bluetooth Speaker - IP67 Waterproof Deep Bass Subwoofer for Outdoor",
+      147.5,
+      false,
+    ],
+  ];
+
+  it("demotes every part and case below the speakers", () => {
+    const products = LISTINGS.map(([title, price], i) =>
+      makeProduct({ provider: "aliexpress", sku: String(i), title, total: Math.round(price * 100) }),
+    );
+    const classes = classifyOffers(products, searchIntent("jbl flip 6"));
+    expect(products.map((p) => classes.get(p.id)?.isAccessory)).toEqual(LISTINGS.map(([, , acc]) => acc));
+  });
+});

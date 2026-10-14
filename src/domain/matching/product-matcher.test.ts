@@ -1,4 +1,10 @@
-import { findConflict, matchProducts, toMatchCandidate } from "@/domain/matching/product-matcher";
+import {
+  blocksGrouping,
+  findConflict,
+  isUnverifiedBrandListing,
+  matchProducts,
+  toMatchCandidate,
+} from "@/domain/matching/product-matcher";
 import { tokenizeTitle } from "@/domain/matching/title-tokens";
 import { makeProduct, type ProductSpec } from "@/test/product-factory";
 
@@ -281,6 +287,70 @@ describe("matchProducts", () => {
   });
 });
 
+describe("matchProducts — knock-offs (recorded AliExpress, 2026-10-14)", () => {
+  it("never puts a 'Flip 6 Mini' on the genuine JBL Flip 6's card", () => {
+    const knockoff = c({
+      provider: "aliexpress",
+      sku: "1005013304541989",
+      title:
+        "JBL Flip 6 Mini Outdoor Bluetooth Speaker IP67 Waterproof Heavy Bass Portable Camping Beach Travel Music Player",
+      total: 149_00,
+    });
+    const genuine = c({
+      provider: "ebay",
+      sku: "e",
+      title: "JBL Flip 6 Portable Waterproof Bluetooth Speaker - Grey Brand New & Sealed",
+      total: 250_58,
+    });
+    expect(matchProducts(knockoff, genuine)).toBeNull();
+    expect(matchProducts(genuine, knockoff)).toBeNull();
+  });
+
+  const GENUINE = c({
+    provider: "ebay",
+    sku: "e",
+    title: "JBL Flip 6 Portable Waterproof Bluetooth Speaker",
+    total: 250_58,
+  });
+  const aliexpress = (
+    sellerName: string | null,
+    title = "JBL Flip 6 Portable Waterproof Bluetooth Speaker",
+  ) => c({ provider: "aliexpress", sku: "1005013223553999", title, total: 149_00, sellerName });
+
+  it("keeps a branded listing from a non-official AliExpress seller on its own card", () => {
+    // Same words as the genuine listing, within the price ratio: only the seller gives it away.
+    const knockoff = aliexpress("JBL Pro Sound Store");
+    expect(isUnverifiedBrandListing(knockoff)).toBe(true);
+    expect(matchProducts(knockoff, GENUINE)).toBeNull();
+    expect(matchProducts(GENUINE, knockoff)).toBeNull();
+    expect(blocksGrouping(knockoff, GENUINE)).toBe(true);
+    // An unknown seller is no better than an unofficial one.
+    expect(matchProducts(aliexpress(null), GENUINE)).toBeNull();
+  });
+
+  it("compares an official store's listing across stores", () => {
+    const official = aliexpress("JBL Official Store");
+    expect(isUnverifiedBrandListing(official)).toBe(false);
+    expect(matchProducts(official, GENUINE)).toMatchObject({ basis: "model_number" });
+    expect(blocksGrouping(official, GENUINE)).toBe(false);
+  });
+
+  it("leaves unbranded items and same-store collapsing alone", () => {
+    const spoons = (provider: "aliexpress" | "ebay", sellerName: string | null) =>
+      c({
+        provider,
+        sku: provider,
+        title: "Natural Teak Wood Cooking Utensils Set 10 Pcs",
+        total: 120_00,
+        sellerName,
+      });
+    expect(isUnverifiedBrandListing(spoons("aliexpress", "Kitchen Shop Store"))).toBe(false);
+    expect(matchProducts(spoons("aliexpress", "Kitchen Shop Store"), spoons("ebay", null))).not.toBeNull();
+    // Two AliExpress sellers of the same item may still share a card.
+    expect(blocksGrouping(aliexpress("JBL Pro Sound Store"), aliexpress("Shop1105843138 Store"))).toBe(false);
+  });
+});
+
 describe("findConflict", () => {
   const conflict = (x: string, y: string) => findConflict(tokenizeTitle(x), tokenizeTitle(y));
 
@@ -290,6 +360,12 @@ describe("findConflict", () => {
     ["Sony WH-1000XM5", "Sony WH-1000XM4", "model"],
     ["Instant Pot Duo 6 Qt", "Instant Pot Duo 8 Qt", "variant"],
     ["JBL Flip 6", "JBL Flip 7", "number"],
+    // A tier word on one side, or different tiers, names a different product.
+    ["JBL Flip 6 Mini", "JBL Flip 6", "tier"],
+    ["Apple AirPods Pro", "Apple AirPods 3rd Gen", "tier"],
+    ["iPhone 15 Pro Max 256GB", "iPhone 15 Pro 256GB", "tier"],
+    ["Instant Pot Duo Plus 6 Qt", "Instant Pot Duo 6 Qt", "tier"],
+    ["Apple AirPods Pro 2", "AirPods Pro (2nd Generation)", null],
     ["JBL Flip 6", "JBL Flip 7/6/5", null],
     ["Duo 6 Qt", "Instant Pot Duo 6 Qt", null],
   ])("%p vs %p → %p (either order)", (x, y, expected) => {

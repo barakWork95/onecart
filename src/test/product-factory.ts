@@ -12,6 +12,7 @@ export interface ProductSpec {
   readonly deliveryDays?: readonly [number | null, number | null];
   readonly freeShipping?: boolean | null;
   readonly imageUrl?: string | null;
+  readonly sellerName?: string | null;
 }
 
 /** Builds a valid UnifiedProduct with only the fields a test cares about. */
@@ -44,7 +45,10 @@ export function makeProduct(spec: ProductSpec = {}): UnifiedProduct {
     rating: spec.rating === undefined ? null : spec.rating,
     delivery: { minDays, maxDays, isFreeShipping: spec.freeShipping ?? null, methodLabel: null },
     availability: "in_stock",
-    sellerName: null,
+    // AliExpress products group across stores only from official stores (see
+    // `isUnverifiedBrandListing`); unless a test is about sellers, assume one.
+    sellerName:
+      spec.sellerName !== undefined ? spec.sellerName : provider === "aliexpress" ? "Official Store" : null,
     fetchedAt: "2026-10-11T09:00:00.000Z",
   };
 }

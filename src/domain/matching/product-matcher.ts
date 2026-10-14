@@ -7,6 +7,7 @@ import {
   type TitleTokens,
 } from "@/domain/matching/title-tokens";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
+import type { ProviderId } from "@/domain/shared/provider";
 
 export type MatchBasis = "model_number" | "title_similarity";
 
@@ -72,6 +73,26 @@ export function toMatchCandidate(product: UnifiedProduct): MatchCandidate {
   return { product, tokens: tokenizeTitle(product.title) };
 }
 
+/**
+ * Open marketplaces where branded listings are often counterfeit: a "JBL Flip 6"
+ * from "JBL Pro Sound Store" at half the price (AliExpress, 2026-10-14) is not
+ * the speaker eBay sells. Add Temu once its adapter shows how sellers are named.
+ */
+const COUNTERFEIT_PRONE_STORES: ReadonlySet<ProviderId> = new Set(["aliexpress"]);
+
+/**
+ * A branded listing on a counterfeit-prone marketplace from a seller that
+ * isn't an official store. It keeps its own card: compared with another
+ * store's genuine item, a knock-off would read as "same item, cheaper".
+ */
+export function isUnverifiedBrandListing(c: MatchCandidate): boolean {
+  return (
+    COUNTERFEIT_PRONE_STORES.has(c.product.provider) &&
+    c.tokens.brands.size > 0 &&
+    !/\bofficial\b/i.test(c.product.sellerName ?? "")
+  );
+}
+
 function priceRatio(a: UnifiedProduct, b: UnifiedProduct): number {
   const x = a.price.item.amountMinor;
   const y = b.price.item.amountMinor;
@@ -91,18 +112,22 @@ function disagree(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
   return a.size > 0 && b.size > 0 && !sharesAny(a, b);
 }
 
-export type MatchConflict = "brand" | "model" | "variant" | "number" | "condition";
+export type MatchConflict = "brand" | "model" | "variant" | "number" | "condition" | "tier";
+
+const sameSet = (a: ReadonlySet<string>, b: ReadonlySet<string>) =>
+  a.size === b.size && [...a].every((x) => b.has(x));
 
 /**
  * Hard evidence the titles describe different products: different brands,
  * different model codes ("P3" vs "P2"), different variants of one unit
  * ("6 Qt" vs "8 Qt", "6-Pack" vs "12 Pack") or different series numbers
- * ("Flip 6" vs "Flip 7"), or a refurbished/used/bundle listing against a plain one.
+ * ("Flip 6" vs "Flip 7"), a refurbished/used/bundle listing against a plain one,
+ * or different tiers of a line ("Flip 6 Mini" vs "Flip 6", "Pro Max" vs "Pro").
  */
 export function findConflict(a: TitleTokens, b: TitleTokens): MatchConflict | null {
   if (disagree(a.brands, b.brands)) return "brand";
-  if (a.qualifiers.size !== b.qualifiers.size || [...a.qualifiers].some((q) => !b.qualifiers.has(q)))
-    return "condition";
+  if (!sameSet(a.qualifiers, b.qualifiers)) return "condition";
+  if (!sameSet(a.tiers, b.tiers)) return "tier";
   if (a.models.size > 0 && b.models.size > 0 && !sharesModel(a.models, b.models)) return "model";
   for (const [unit, values] of a.variants) {
     const other = b.variants.get(unit);
@@ -115,7 +140,8 @@ export function findConflict(a: TitleTokens, b: TitleTokens): MatchConflict | nu
 /**
  * Decides whether two listings from different stores are the same product.
  * Returns null for "not a match". Rules, in order:
- * 1. Same store → never (a group holds one offer per store).
+ * 1. Same store → never (a group holds one offer per store). A branded listing
+ *    from a counterfeit-prone marketplace's non-official seller → never either.
  * 2. One is an accessory and the other isn't ("case for AirPods" ≠ "AirPods").
  * 3. Prices too far apart → different products.
  * 4. Any conflict (brand, model, variant, series number) → different products.
@@ -134,6 +160,7 @@ export function matchProducts(
   policy: MatchingPolicy = DEFAULT_MATCHING_POLICY,
 ): MatchResult | null {
   if (a.product.provider === b.product.provider) return null;
+  if (isUnverifiedBrandListing(a) || isUnverifiedBrandListing(b)) return null;
   if (a.tokens.isAccessory !== b.tokens.isAccessory) return null;
   if (priceRatio(a.product, b.product) > policy.maxPriceRatio) return null;
   return matchTitles(a.tokens, b.tokens, policy);
@@ -220,8 +247,9 @@ export function matchSameStore(
 
 /**
  * Hard evidence two listings can't share a group, whatever else matches:
- * accessory vs product, prices too far apart, or a conflicting brand, model,
- * variant, series number or condition.
+ * accessory vs product, prices too far apart, a conflicting brand, model,
+ * variant, series number, condition or tier, or (across stores) an unverified
+ * branded marketplace listing.
  */
 export function blocksGrouping(
   a: MatchCandidate,
@@ -230,6 +258,7 @@ export function blocksGrouping(
 ): boolean {
   if (a.tokens.isAccessory !== b.tokens.isAccessory) return true;
   const sameStore = a.product.provider === b.product.provider;
+  if (!sameStore && (isUnverifiedBrandListing(a) || isUnverifiedBrandListing(b))) return true;
   const limit = sameStore ? policy.maxSameStorePriceRatio : policy.maxPriceRatio;
   if (priceRatio(a.product, b.product) > limit) return true;
   return findConflict(a.tokens, b.tokens) !== null;

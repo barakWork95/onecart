@@ -67,7 +67,7 @@ export function renderShareCard(): ImageResponse {
           Find the best price.
         </div>
         <div style={{ fontSize: 32, color: MUTED, lineHeight: 1.3 }}>
-          Amazon and eBay compared by the price you&apos;ll actually pay in Israel.
+          Amazon, eBay and AliExpress compared by the price you&apos;ll actually pay in Israel.
         </div>
       </div>
 

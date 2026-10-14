@@ -10,7 +10,7 @@ const VALUE_PROPS = [
   {
     icon: Globe2,
     title: "Every store, one search",
-    body: "Amazon and eBay side by side, sellers grouped per product.",
+    body: "Amazon, eBay and AliExpress side by side, sellers grouped per product.",
   },
   {
     icon: BadgeCheck,
@@ -37,7 +37,7 @@ export default function HomePage() {
               Find the best price.
             </h1>
             <p className="text-base text-muted-foreground">
-              Compare Amazon and eBay by the price you&apos;ll actually pay in Israel.
+              Compare Amazon, eBay and AliExpress by the price you&apos;ll actually pay in Israel.
             </p>
           </div>
           <SearchBox />

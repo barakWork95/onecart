@@ -17,7 +17,9 @@ export interface AliExpressMapContext {
   readonly fetchedAt: IsoDateTime;
   /**
    * Whether `target_sale_price` (queried with ship_to_country=IL) already includes
-   * Israeli VAT. Must be confirmed against a live response before launch.
+   * Israeli VAT. It doesn't (verified 2026-10-14 on a ₪286.84 item, above the $75
+   * exemption: the API sends `tax_rate` 0.00, the page says "Tax excluded", and
+   * checkout adds no VAT), so we estimate VAT like for any import: keep `false`.
    */
   readonly pricesIncludeImportVat: boolean;
 }
