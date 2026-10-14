@@ -1,4 +1,4 @@
-import { isAllowedPushEndpoint } from "@/domain/notifications/push";
+import { endpointHint, isAllowedPushEndpoint } from "@/domain/notifications/push";
 
 describe("isAllowedPushEndpoint", () => {
   it.each([
@@ -21,5 +21,14 @@ describe("isAllowedPushEndpoint", () => {
     ["an over-long URL", `https://fcm.googleapis.com/fcm/send/${"x".repeat(1000)}`],
   ])("rejects %s", (_label, endpoint) => {
     expect(isAllowedPushEndpoint(endpoint)).toBe(false);
+  });
+});
+
+describe("endpointHint", () => {
+  it("keeps the host and the token's start, never the whole capability URL", () => {
+    expect(endpointHint("https://fcm.googleapis.com/fcm/send/dQw4w9WgXcQ:APA91bHUNbHUN")).toBe(
+      "fcm.googleapis.com/…dQw4w9WgXc",
+    );
+    expect(endpointHint("not a url")).toBe("(invalid endpoint)");
   });
 });

@@ -24,8 +24,31 @@ export interface PushMessage {
  */
 export type PushResult = "sent" | "expired" | "failed";
 
+/** One send's outcome, with what the push service said (for logs and diagnostics). */
+export interface PushDelivery {
+  readonly result: PushResult;
+  /** The push service's HTTP status; null when the request never got an answer. */
+  readonly statusCode: number | null;
+  /** The push service's explanation or the network error, for failures; null on success. */
+  readonly detail: string | null;
+}
+
 export interface PushSender {
-  send(subscription: PushSubscriptionKeys, message: PushMessage): Promise<PushResult>;
+  send(subscription: PushSubscriptionKeys, message: PushMessage): Promise<PushDelivery>;
+}
+
+/**
+ * A loggable stand-in for an endpoint: the push service's host and the start
+ * of the token. The full URL is a capability for that browser; never log it.
+ */
+export function endpointHint(endpoint: string): string {
+  try {
+    const url = new URL(endpoint);
+    const token = url.pathname.split("/").pop() ?? "";
+    return `${url.host}/…${token.slice(0, 10)}`;
+  } catch {
+    return "(invalid endpoint)";
+  }
 }
 
 /**

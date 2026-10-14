@@ -17,6 +17,7 @@ const MESSAGES: Record<Exclude<Result["kind"], "sent">, string> = {
 export function TestPushButton({ action }: { action: typeof sendTestPushAction }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [deliveries, setDeliveries] = useState<Extract<Result, { kind: "sent" }>["deliveries"]>([]);
   return (
     <div className="flex flex-col items-start gap-3">
       <button
@@ -25,6 +26,7 @@ export function TestPushButton({ action }: { action: typeof sendTestPushAction }
         onClick={() =>
           startTransition(async () => {
             const result = await action();
+            setDeliveries(result.kind === "sent" ? result.deliveries : []);
             setMessage(
               result.kind === "sent"
                 ? `Sent to ${result.sent} browser(s)${result.expired ? `, ${result.expired} expired (removed)` : ""}${result.failed ? `, ${result.failed} failed` : ""}. It should appear within a few seconds.`
@@ -41,6 +43,15 @@ export function TestPushButton({ action }: { action: typeof sendTestPushAction }
         <p role="status" className="text-sm text-foreground">
           {message}
         </p>
+      )}
+      {deliveries.length > 0 && (
+        <ul aria-label="Deliveries" className="w-full text-xs text-muted-foreground">
+          {deliveries.map((d) => (
+            <li key={d.endpoint} className="border-t border-border/60 py-2 font-mono break-all">
+              {d.endpoint} → {d.result} (HTTP {d.statusCode ?? "none"}){d.detail ? `: ${d.detail}` : ""}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

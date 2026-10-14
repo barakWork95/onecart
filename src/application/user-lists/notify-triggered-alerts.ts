@@ -87,7 +87,7 @@ export function createNotifyTriggeredAlerts(deps: NotifyTriggeredAlertsDeps) {
           batch.map(async ({ alert, subscription }) => ({
             alertId: alert.id,
             subscription,
-            result: await deps.sender.send(subscription, alertMessage(alert)),
+            result: (await deps.sender.send(subscription, alertMessage(alert))).result,
           })),
         )),
       );

@@ -17,12 +17,17 @@ function tooManySearches(retryAfterSeconds: number): NextResponse {
   });
 }
 
-/** /internal pages: a browser password prompt, or a 404 when no password is configured. */
-function guardInternal(request: NextRequest): NextResponse {
-  const headers = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" };
+const INTERNAL_HEADERS = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" } as const;
+
+/**
+ * /internal pages: a browser password prompt, or a 404 when no password is
+ * configured. Null when access is granted: the request continues (session refresh included).
+ */
+function guardInternal(request: NextRequest): NextResponse | null {
+  const headers = INTERNAL_HEADERS;
   switch (adminAccess(request.headers.get("authorization"), env().ADMIN_DASHBOARD_PASSWORD)) {
     case "granted":
-      return NextResponse.next({ headers });
+      return null;
     case "denied":
       return new NextResponse("Authentication required.", {
         status: 401,
@@ -42,7 +47,11 @@ function guardInternal(request: NextRequest): NextResponse {
  *    returning visitor's Saved/Alerts look empty. No-op without Supabase.
  */
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/internal")) return guardInternal(request);
+  const internal = request.nextUrl.pathname.startsWith("/internal");
+  if (internal) {
+    const refused = guardInternal(request);
+    if (refused) return refused;
+  }
 
   const ip = clientIp(request.headers);
   // No client IP means a local run (Vercel always sets one): lumping every such request
@@ -54,7 +63,7 @@ export async function proxy(request: NextRequest) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return NextResponse.next();
+  if (!url || !key) return internal ? NextResponse.next({ headers: INTERNAL_HEADERS }) : NextResponse.next();
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(url, key, {
@@ -67,8 +76,11 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  // Validates the JWT and refreshes it via setAll() when it's about to expire.
+  // Validates the JWT and refreshes it via setAll() when it's about to expire. /internal
+  // needs it too: the push test identifies this browser's anonymous account.
   await supabase.auth.getClaims();
+  if (internal)
+    for (const [name, value] of Object.entries(INTERNAL_HEADERS)) response.headers.set(name, value);
   return response;
 }
 

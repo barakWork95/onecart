@@ -51,7 +51,8 @@ function setup(
   const sender: PushSender = {
     send: async (s, message) => {
       sent.push({ endpoint: s.endpoint, message });
-      return results[s.endpoint] ?? "sent";
+      const result = results[s.endpoint] ?? "sent";
+      return { result, statusCode: result === "sent" ? 201 : 410, detail: null };
     },
   };
   const notify = createNotifyTriggeredAlerts({ alerts, directory, sender, now: () => NOW });
@@ -119,7 +120,7 @@ describe("notifyTriggeredAlerts", () => {
         subscriptionsFor: async () => [sub("u1", 1)],
         recordDeliveries: () => Promise.reject(new Error("db down")),
       },
-      sender: { send: async () => "sent" },
+      sender: { send: async () => ({ result: "sent", statusCode: 201, detail: null }) },
       now: () => NOW,
       logger,
     });
