@@ -4,6 +4,7 @@ import type { TrendingQuery } from "@/domain/deals/trending-query";
 import type { IsoDateTime } from "@/domain/product/unified-product";
 import type { MatchBasis } from "@/domain/matching/product-matcher";
 import type { SearchResultCache } from "@/domain/search/ports";
+import type { SearchResponse } from "@/domain/search/search-response";
 import { bestOffer } from "@/domain/search/product-group";
 import { intentTier } from "@/domain/search/result-ordering";
 import { searchIntent } from "@/domain/search/search-intent";
@@ -158,7 +159,11 @@ export async function warmTrendingSearches(
   searchProducts: SearchProducts,
   queries: readonly TrendingQuery[],
   plan: WarmPlan,
-  options: { readonly concurrency?: number } = {},
+  options: {
+    readonly concurrency?: number;
+    /** Sees every warmed search's response (price history records from it). */
+    readonly onWarmed?: (query: string, response: SearchResponse) => void;
+  } = {},
 ): Promise<WarmedQuery[]> {
   const rotatingIds = new Set(plan.rotating.map((r) => r.provider));
   const daily = plan.daily.filter((p) => !rotatingIds.has(p));
@@ -189,6 +194,7 @@ export async function warmTrendingSearches(
       lean: true,
       cacheTtlSeconds: Object.fromEntries(rotatingToday.map((t) => [t.provider, t.ttlSeconds])),
     });
+    options.onWarmed?.(text, response);
     return {
       query: text,
       outcomes: response.providers

@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
  * A valid element id for a card: ids can't contain spaces, and
  * `aria-labelledby` splits on them ("airpods pro" would name two elements).
  */
-export function trendingCardId(query: string): string {
-  return `trending-${query
+export function trendingCardId(query: string, prefix = "trending"): string {
+  return `${prefix}-${query
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")}`;
@@ -26,9 +26,19 @@ export function trendingHref(query: string): string {
  * store's price (or that it won't ship to Israel), and when the prices were
  * checked. The whole card opens the full comparison.
  */
-export function TrendingCardView({ card }: { card: TrendingCard }) {
+export function TrendingCardView({
+  card,
+  idPrefix,
+  highlight,
+}: {
+  card: TrendingCard;
+  /** Ids must be unique on the page: a card shown in two sections needs another prefix. */
+  idPrefix?: string;
+  /** A one-line claim under the price, e.g. "Save ₪200 vs Amazon". */
+  highlight?: string;
+}) {
   const bestStore = STORE_META[card.best.provider].name;
-  const headingId = trendingCardId(card.query);
+  const headingId = trendingCardId(card.query, idPrefix);
   // Stores with a price; "won't ship to Israel" is shown in the store chips, not counted here.
   const storeCount = card.stores.length;
   return (
@@ -62,6 +72,11 @@ export function TrendingCardView({ card }: { card: TrendingCard }) {
           </span>
           <span className="text-xs text-muted-foreground">on {bestStore}</span>
         </p>
+        {highlight && (
+          <p className="w-fit rounded-full bg-success/10 px-2 py-0.5 text-xs font-bold text-success">
+            {highlight}
+          </p>
+        )}
         <ul className="flex flex-wrap gap-1.5" aria-label="Stores">
           {card.stores.map((store) => (
             <li

@@ -286,14 +286,17 @@ describe("warmTrendingSearches", () => {
       };
     }) as jest.MockedFunction<SearchProducts>;
     const queries = ["a", "b", "c", "d", "e", "f", "g"].map((q) => ({ label: q, query: q }));
+    const seen: string[] = [];
 
     const warmed = await warmTrendingSearches(
       searchProducts,
       queries,
       { daily: ["ebay"], rotating: [], atMs: at.ms },
-      { concurrency: 3 },
+      { concurrency: 3, onWarmed: (query) => seen.push(query) },
     );
+    seen.sort();
     expect(peak).toBe(3);
+    expect(seen).toEqual(["a", "b", "c", "d", "e", "f", "g"]);
     expect(warmed.map((w) => w.query)).toEqual(["a", "b", "c", "d", "e", "f", "g"]);
   });
 });

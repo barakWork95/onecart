@@ -422,6 +422,18 @@ SearchBar (client) → /search?q=… (Server Component)
   from cache only; empty rows are hidden. The warm-trending cron refreshes them after the trending
   queries, 3 at a time, on `TRENDING_WARM_STORES` (default `ebay,aliexpress`; ~35 calls a day
   each, ~15s locally). Amazon's rotation stays on the trending queries.
+- **Price history and "Price drops"** (`price_observations`, `application/deals/price-history.ts`):
+  after each warm run, the cron upserts one row per featurable, named-product listing per Israeli
+  day (`observationsFrom`), prunes days older than 120, and checks each product's last 30 days.
+  `detectPriceDrop` (domain) calls a drop only with ≥7 earlier days, a new 30-day low, and ≥15%
+  and ≥₪20 under the median. Cards (max 12, 2 per search) go to Redis (`deals:price-drops:v1`,
+  2-day TTL); the homepage reads only that. Visitors' searches are never recorded. Needs
+  `SUPABASE_SECRET_KEY`; without it the run reports `not_configured`, and a failure never fails
+  the warm-up.
+- **"Cheaper on another store"** (`application/deals/savings.ts`): from the homepage's own
+  trending and category cards, those priced on ≥2 stores and matched by **model number** (never
+  title similarity), saving ≥₪20 and ≥10% against the next store. Store "was" prices never count
+  as deals anywhere.
 - **What a homepage card may feature** (`domain/deals/featured-listing.ts`): a card reads as an
   endorsement, so it's stricter than search. Marketplace listings must name a branded query's
   brand (catalog stores like Amazon are exempt: their titles drop it), branded AliExpress

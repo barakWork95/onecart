@@ -2,7 +2,17 @@ import "server-only";
 
 import { randomBytes } from "node:crypto";
 import { after } from "next/server";
-import { createClickReport, type ClickReport } from "@/application/affiliate/click-report";
+import { createClickReport, israelDay, type ClickReport } from "@/application/affiliate/click-report";
+import {
+  createRecordPriceHistory,
+  observationsFrom,
+  type Observed,
+  type PriceHistoryRun,
+} from "@/application/deals/price-history";
+import { selectSavings, type SavingsCard } from "@/application/deals/savings";
+import type { PriceDropBoard, PriceDropCard } from "@/domain/deals/ports";
+import { createRedisPriceDropBoard } from "@/infrastructure/cache/redis-price-drop-board";
+import { createSupabasePriceHistory } from "@/infrastructure/db/supabase-price-history";
 import {
   createResolveOutboundLink,
   type OutboundLinkError,
@@ -85,6 +95,9 @@ interface Services {
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
   /** Null without Supabase's service key: clicks are only logged then. */
   readonly clickReport: ReturnType<typeof createClickReport> | null;
+  /** Null without Supabase's service key: no price history, so no drops. */
+  readonly recordPriceHistory: ReturnType<typeof createRecordPriceHistory> | null;
+  readonly priceDropBoard: PriceDropBoard;
   readonly demoMode: boolean;
   /** Stores answering from recorded samples (development); the UI labels them. */
   readonly sampleStores: readonly ProviderId[];
@@ -203,6 +216,8 @@ function buildServices(): Services {
         ? { kind: "memory", store: createInMemoryUserLists() }
         : { kind: "none" };
 
+  const priceDropBoard = createRedisPriceDropBoard(redis);
+
   const searchDeps = {
     providers,
     cache: searchCache,
@@ -222,8 +237,8 @@ function buildServices(): Services {
     ? null
     : createCallBudget(config, providers, logger, "budget-warm", { amazon: amazonWarmPerDay });
 
-  // Server-side only and never request-scoped: the click table has no policies for visitors.
-  const clicksDb =
+  // Server-side only and never request-scoped: the click and price tables have no policies for visitors.
+  const serviceDb =
     config.NEXT_PUBLIC_SUPABASE_URL && config.SUPABASE_SECRET_KEY
       ? createSupabaseServiceClient(config.NEXT_PUBLIC_SUPABASE_URL, config.SUPABASE_SECRET_KEY)
       : null;
@@ -231,7 +246,15 @@ function buildServices(): Services {
   return {
     userListsBackend,
     linkCodec,
-    clickReport: clicksDb ? createClickReport({ stats: createSupabaseClickStats(clicksDb) }) : null,
+    clickReport: serviceDb ? createClickReport({ stats: createSupabaseClickStats(serviceDb) }) : null,
+    priceDropBoard,
+    recordPriceHistory: serviceDb
+      ? createRecordPriceHistory({
+          history: createSupabasePriceHistory(serviceDb),
+          board: priceDropBoard,
+          logger,
+        })
+      : null,
     resolveOutboundLink: createResolveOutboundLink({
       codec: linkCodec,
       affiliate: createAffiliateLinkBuilder({
@@ -253,7 +276,7 @@ function buildServices(): Services {
             }
           : {}),
       }),
-      clicks: clicksDb ? createSupabaseClickRecorder(clicksDb) : consoleClickRecorder,
+      clicks: serviceDb ? createSupabaseClickRecorder(serviceDb) : consoleClickRecorder,
       // The redirect is sent first; the click is written after the response.
       defer: after,
       logger,
@@ -401,6 +424,7 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
 const SHOWCASE_MEMO_MS = 5 * 60 * 1000;
 const SHOWCASE_KEY = Symbol.for("onecart.showcaseMemo");
 const CATEGORIES_KEY = Symbol.for("onecart.categoryRowsMemo");
+const DROPS_KEY = Symbol.for("onecart.priceDropsMemo");
 
 export interface CategoryRow {
   readonly category: HomeCategory;
@@ -411,6 +435,7 @@ type Memo<T> = { readonly value: T; readonly atMs: number };
 type MemoHolder = {
   [SHOWCASE_KEY]?: Memo<TrendingCard[]>;
   [CATEGORIES_KEY]?: Memo<CategoryRow[]>;
+  [DROPS_KEY]?: Memo<{ readonly drop: PriceDropCard; readonly href: string }[]>;
 };
 
 const fresh = (memo: Memo<unknown> | undefined) => !!memo && Date.now() - memo.atMs < SHOWCASE_MEMO_MS;
@@ -444,6 +469,51 @@ export async function categoryRows(): Promise<CategoryRow[]> {
   return filled;
 }
 
+/** Price history after a warm run; its failure never fails the warm-up itself. */
+async function recordPrices(
+  observed: readonly Observed[],
+  today: string,
+): Promise<PriceHistoryRun | "not_configured" | "error"> {
+  const record = getServices().recordPriceHistory;
+  if (!record) return "not_configured";
+  try {
+    return await record(observed, today);
+  } catch (error) {
+    consoleLogger.warn("price-history: run failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "error";
+  }
+}
+
+/** Today's price drops (cache only), each with a signed /go link to the listing. */
+export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; readonly href: string }[]> {
+  const holder = globalThis as MemoHolder;
+  const memo = holder[DROPS_KEY];
+  if (memo && fresh(memo)) return memo.value;
+  const { priceDropBoard, linkCodec } = getServices();
+  let drops: readonly PriceDropCard[] = [];
+  try {
+    drops = await priceDropBoard.load();
+  } catch (error) {
+    consoleLogger.warn("price-drops: board read failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+  const cards = drops.map((drop) => ({
+    drop,
+    href: linkCodec.encode({ id: drop.productId, provider: drop.provider, url: drop.productUrl }),
+  }));
+  holder[DROPS_KEY] = { value: cards, atMs: Date.now() };
+  return cards;
+}
+
+/** Cross-store savings among the homepage's own cards (trending and categories). */
+export async function savingsCards(): Promise<SavingsCard[]> {
+  const [trending, rows] = await Promise.all([trendingCards(), categoryRows()]);
+  return selectSavings([...trending, ...rows.flatMap((r) => r.cards)]);
+}
+
 /** Category searches warmed at once: ~30 queries finish in well under a minute. */
 const CATEGORY_WARM_CONCURRENCY = 3;
 
@@ -458,18 +528,28 @@ export async function warmTrending() {
   delete holder[SHOWCASE_KEY];
   delete holder[CATEGORIES_KEY];
   const atMs = Date.now();
-  const trending = await warmTrendingSearches(warmSearchProducts, trendingQueries, {
-    daily: trendingWarmStores,
-    rotating: amazonWarmPerDay > 0 ? [{ provider: "amazon", perDay: amazonWarmPerDay }] : [],
-    atMs,
-  });
+  const today = israelDay(new Date(atMs));
+  const observed: Observed[] = [];
+  const onWarmed = (query: string, response: SearchResponse) =>
+    observed.push(...observationsFrom(query, response, today));
+  const trending = await warmTrendingSearches(
+    warmSearchProducts,
+    trendingQueries,
+    {
+      daily: trendingWarmStores,
+      rotating: amazonWarmPerDay > 0 ? [{ provider: "amazon", perDay: amazonWarmPerDay }] : [],
+      atMs,
+    },
+    { onWarmed },
+  );
   const categories = await warmTrendingSearches(
     warmSearchProducts,
     homeCategories.flatMap((c) => c.products),
     { daily: trendingWarmStores, rotating: [], atMs },
-    { concurrency: CATEGORY_WARM_CONCURRENCY },
+    { concurrency: CATEGORY_WARM_CONCURRENCY, onWarmed },
   );
-  return { trending, categories };
+  delete holder[DROPS_KEY];
+  return { trending, categories, priceHistory: await recordPrices(observed, today) };
 }
 
 /** The /go/[id] decision; see `createResolveOutboundLink`. */

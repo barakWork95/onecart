@@ -1,7 +1,9 @@
 import { BadgeCheck, Globe2, ShieldCheck } from "lucide-react";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { categoryRows, trendingCards } from "@/app/_composition";
+import { categoryRows, priceDropCards, savingsCards, trendingCards } from "@/app/_composition";
+import { PriceDrops } from "@/components/features/home/price-drops";
+import { Savings } from "@/components/features/home/savings";
 import { CategoryRows, CategoryRowsSkeleton } from "@/components/features/home/category-rows";
 import { TrendingShowcase, TrendingShowcaseSkeleton } from "@/components/features/home/trending-showcase";
 import { PopularSearches } from "@/components/features/search/popular-searches";
@@ -26,6 +28,18 @@ async function Trending() {
   // Cached prices and their timestamps are request-time data, never prerendered.
   await connection();
   return <TrendingShowcase cards={await trendingCards()} />;
+}
+
+/** Same item clearly cheaper on one store: from the cached cards below. */
+async function CrossStoreSavings() {
+  await connection();
+  return <Savings savings={await savingsCards()} />;
+}
+
+/** Real drops against our own daily price history, left in the cache by the cron. */
+async function Drops() {
+  await connection();
+  return <PriceDrops drops={await priceDropCards()} />;
 }
 
 /** Category rows: cached results only, like the trending grid. */
@@ -53,8 +67,17 @@ export default function HomePage() {
       </section>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 pb-10">
+        {/* Hidden until they have something true to show: no skeletons. */}
+        <Suspense fallback={null}>
+          <CrossStoreSavings />
+        </Suspense>
+
         <Suspense fallback={<TrendingShowcaseSkeleton />}>
           <Trending />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <Drops />
         </Suspense>
 
         <Suspense fallback={<CategoryRowsSkeleton />}>
