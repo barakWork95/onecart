@@ -3,8 +3,13 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { getServices } from "@/app/_composition";
-import { readUserLists } from "@/app/_user-lists";
-import { deleteAlertAction } from "@/app/alerts/actions";
+import { pushPublicKey, readUserLists } from "@/app/_user-lists";
+import {
+  deleteAlertAction,
+  removePushSubscriptionAction,
+  savePushSubscriptionAction,
+} from "@/app/alerts/actions";
+import { NotifyMe } from "@/components/features/user-lists/notify-me";
 import { STORE_META } from "@/components/features/store-meta";
 import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-lists/list-page";
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
@@ -96,9 +101,21 @@ async function AlertList() {
   );
 }
 
+/** The notifications switch, when push is configured; read per request like the list. */
+async function Notifications() {
+  await connection();
+  const publicKey = pushPublicKey();
+  return publicKey ? (
+    <NotifyMe publicKey={publicKey} save={savePushSubscriptionAction} remove={removePushSubscriptionAction} />
+  ) : null;
+}
+
 export default function AlertsPage() {
   return (
     <ListPage title="Price alerts" intro="We re-check landed prices daily and flag any that hit your target.">
+      <Suspense fallback={null}>
+        <Notifications />
+      </Suspense>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-3xl" />}>
         <AlertList />
       </Suspense>

@@ -3,6 +3,7 @@ import { money } from "@/domain/shared/money";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
 import {
   createSupabaseAlertCheckRepository,
+  createSupabaseTriggeredAlertRepository,
   createSupabaseUserListsRepository,
   RepositoryError,
 } from "@/infrastructure/db/supabase-user-lists";
@@ -21,7 +22,18 @@ function fakeClient(results: Result[] | ((call: string[]) => Result)) {
     const call = [`from(${table})`];
     calls.push(call);
     const builder: Record<string, unknown> = {};
-    for (const method of ["select", "eq", "order", "upsert", "single", "delete", "update", "limit"]) {
+    for (const method of [
+      "select",
+      "eq",
+      "order",
+      "upsert",
+      "single",
+      "delete",
+      "update",
+      "limit",
+      "is",
+      "in",
+    ]) {
       builder[method] = (...args: unknown[]) => {
         call.push(`${method}(${args.map((a) => JSON.stringify(a)).join(", ")})`);
         return builder;
@@ -221,5 +233,44 @@ describe("createSupabaseAlertCheckRepository", () => {
     await expect(
       createSupabaseAlertCheckRepository(client).saveObservations([{} as PriceAlert]),
     ).rejects.toBeInstanceOf(RepositoryError);
+  });
+});
+
+describe("createSupabaseTriggeredAlertRepository", () => {
+  it("lists triggered, unnotified alerts with their owners, oldest trigger first", async () => {
+    const triggered = {
+      ...ALERT_ROW,
+      status: "triggered",
+      triggered_at: "2026-10-15 05:00:00+00",
+      user_id: USER,
+    };
+    const { client, calls } = fakeClient([{ data: [triggered], error: null }]);
+    const [owned] = await createSupabaseTriggeredAlertRepository(client).listUnnotified(50);
+    expect(owned?.userId).toBe(USER);
+    expect(owned?.alert).toMatchObject({ id: "a1", status: "triggered" });
+    expect(calls[0]).toEqual([
+      "from(price_alerts)",
+      `select(${JSON.stringify(`${ALERT_COLUMNS}, user_id`)})`,
+      'eq("status", "triggered")',
+      'is("notified_at", null)',
+      'order("triggered_at", {"ascending":true})',
+      "limit(50)",
+    ]);
+  });
+
+  it("stamps notified_at on the given alerts, 100 at a time", async () => {
+    const { client, calls } = fakeClient(() => ({ data: null, error: null }));
+    const ids = Array.from({ length: 101 }, (_, i) => `a${i}`);
+    await createSupabaseTriggeredAlertRepository(client).markNotified(ids, "2026-10-15T05:00:00.000Z");
+    expect(calls).toHaveLength(2);
+    expect(calls[0]?.[1]).toBe('update({"notified_at":"2026-10-15T05:00:00.000Z"})');
+    expect(calls[1]?.[2]).toBe('in("id", ["a100"])');
+  });
+
+  it("throws on database errors", async () => {
+    const { client } = fakeClient(() => ({ data: null, error: { message: "boom" } }));
+    const repo = createSupabaseTriggeredAlertRepository(client);
+    await expect(repo.listUnnotified(1)).rejects.toThrow("listUnnotified: boom");
+    await expect(repo.markNotified(["a1"], "2026-10-15T05:00:00.000Z")).rejects.toThrow("markNotified: boom");
   });
 });

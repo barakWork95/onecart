@@ -26,7 +26,10 @@ describe("PriceDrops", () => {
     expect(card).toHaveTextContent("−19%");
     expect(card).toHaveTextContent("₪420on eBay");
     expect(card).toHaveTextContent("Typically ₪520 over the last 12 days we checked.");
-    expect(within(card).getByRole("link", { name: DROP.title })).toHaveAttribute("href", "/search?q=jbl+charge+5");
+    expect(within(card).getByRole("link", { name: DROP.title })).toHaveAttribute(
+      "href",
+      "/search?q=jbl+charge+5",
+    );
     const go = within(card).getByRole("link", { name: "View on eBay" });
     expect(go).toHaveAttribute("href", "/go/ebay%3A395012345678?d=x&s=y");
     expect(go).toHaveAttribute("rel", "nofollow sponsored noopener noreferrer");

@@ -35,6 +35,13 @@ export default function PrivacyPage() {
             and target prices you chose. A cookie keeps you signed in to that anonymous account.
           </li>
           <li>
+            <strong>Price-alert notifications.</strong> If you turn them on, we store your browser&apos;s push
+            subscription with your anonymous account: an address at your browser&apos;s push service and the
+            keys that encrypt each message to you. We use it only to tell you when a price you&apos;re
+            watching hits your target. You can turn notifications off on the{" "}
+            <Link href="/alerts">Alerts</Link> page or in your browser&apos;s settings.
+          </li>
+          <li>
             <strong>Store visits.</strong> When you follow a link to a store, we record which product and
             store it was, whether it carried our affiliate identifier, and when, without anything that
             identifies you, to understand which comparisons are useful. This is counted on our server when the
@@ -74,6 +81,10 @@ export default function PrivacyPage() {
             receives that product&apos;s address to create our tracked link.
           </li>
           <li>DeepL, if enabled, which receives Hebrew search text to translate it.</li>
+          <li>
+            Your browser&apos;s push service (Google, Mozilla, Apple or Microsoft), which delivers price-alert
+            notifications you turned on. Messages are encrypted for your browser.
+          </li>
           <li>Frankfurter (European Central Bank rates), for exchange rates; no personal data is sent.</li>
         </ul>
       </section>
@@ -85,6 +96,10 @@ export default function PrivacyPage() {
           <li>Rate-limit counters: up to one day.</li>
           <li>Store-visit records: kept to follow trends over time; they contain no personal data.</li>
           <li>Saved items and price alerts: until you delete them, which you can do on those pages.</li>
+          <li>
+            Notification subscriptions: until you turn notifications off, the browser ends the subscription,
+            or deliveries keep failing.
+          </li>
           <li>Hosting logs: as long as our hosting provider retains them.</li>
         </ul>
       </section>

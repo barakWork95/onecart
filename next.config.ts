@@ -12,6 +12,19 @@ const nextConfig: NextConfig = {
     ],
   },
   cacheComponents: true,
+  async headers() {
+    return [
+      {
+        // Browsers must always see the newest service worker, and it may only load our own scripts.
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
+        ],
+      },
+    ];
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {

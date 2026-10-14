@@ -48,3 +48,19 @@ test.describe("internal click report", () => {
     await context.close();
   });
 });
+
+test.describe("internal push test (temporary)", () => {
+  test("needs the password, and explains when this browser has no subscription", async ({
+    browser,
+    request,
+  }) => {
+    expect((await request.get("/internal/push-test")).status()).toBe(401);
+
+    const context = await browser.newContext({ httpCredentials: ADMIN });
+    const page = await context.newPage();
+    await page.goto("/internal/push-test");
+    await page.getByRole("button", { name: "Send test notification" }).click();
+    await expect(page.getByRole("status")).toContainText("This browser has no subscription");
+    await context.close();
+  });
+});

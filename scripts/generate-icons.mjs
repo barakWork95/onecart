@@ -2,7 +2,10 @@
  * Renders the browser icons from the vector source, so they always match it:
  *   node scripts/generate-icons.mjs src/app/icon.svg src/app
  * → src/app/favicon.ico (16/32/48, transparent) and src/app/apple-icon.png
- *   (180px, white, padded: iOS rounds the corners itself). Uses Playwright's
+ *   (180px, white, padded: iOS rounds the corners itself), plus public/icon-192.png
+ *   and public/icon-512.png for the web app manifest (white, padded to the
+ *   "maskable" safe zone, so Android's round or squircle masks never clip the
+ *   logo). Uses Playwright's
  *   Chromium (npx playwright install chromium).
  */
 import { createRequire } from "node:module";
@@ -50,6 +53,12 @@ const entries = sizes.map((s, i) => {
 fs.writeFileSync(`${outDir}/favicon.ico`, Buffer.concat([header, ...entries, ...images]));
 // Apple touch icon: opaque, with breathing room (iOS rounds the corners itself).
 fs.writeFileSync(`${outDir}/apple-icon.png`, await render(180, { background: "#ffffff", padding: 22 }));
+// Manifest icons: the maskable safe zone is the central 80%, so pad 10% (plus a little) per side.
+for (const size of [192, 512])
+  fs.writeFileSync(
+    `public/icon-${size}.png`,
+    await render(size, { background: "#ffffff", padding: Math.round(size * 0.14) }),
+  );
 
 await browser.close();
 process.stdout.write(`icons written to ${outDir}\n`);

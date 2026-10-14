@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/app/saved/actions";
-import { userListsService, writeUserLists } from "@/app/_user-lists";
+import { userListsService, writePushSubscriptions, writeUserLists } from "@/app/_user-lists";
+import { isAllowedPushEndpoint } from "@/domain/notifications/push";
 import type { AlertError } from "@/application/user-lists/user-lists";
 import { MAX_QUERY_LENGTH } from "@/domain/search/search-query";
 import { formatMoney } from "@/lib/format";
@@ -61,5 +62,53 @@ export async function deleteAlertAction(input: unknown): Promise<ActionResult> {
       error: error instanceof Error ? error.message : String(error),
     });
     return { ok: false, message: UNAVAILABLE };
+  }
+}
+
+const NOTIFY_UNAVAILABLE = "Notifications aren't available right now.";
+const base64url = (min: number, max: number) =>
+  z
+    .string()
+    .regex(/^[A-Za-z0-9_-]+=*$/)
+    .min(min)
+    .max(max);
+
+/** `PushSubscription.toJSON()` from the browser; only the major push services are accepted. */
+const subscriptionInput = z.object({
+  endpoint: z.string().max(1000).refine(isAllowedPushEndpoint),
+  keys: z.object({ p256dh: base64url(20, 200), auth: base64url(8, 100) }),
+});
+
+/** Turns price-alert notifications on for this browser. */
+export async function savePushSubscriptionAction(input: unknown): Promise<ActionResult> {
+  const parsed = subscriptionInput.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "This browser's notification setup isn't supported." };
+  try {
+    const repo = await writePushSubscriptions();
+    if (!repo) return { ok: false, message: NOTIFY_UNAVAILABLE };
+    await repo.save({ endpoint: parsed.data.endpoint, ...parsed.data.keys });
+    return { ok: true, value: undefined };
+  } catch (error) {
+    consoleLogger.warn("actions: savePushSubscription failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { ok: false, message: NOTIFY_UNAVAILABLE };
+  }
+}
+
+/** Turns them off for this browser. */
+export async function removePushSubscriptionAction(input: unknown): Promise<ActionResult> {
+  const parsed = z.object({ endpoint: z.string().max(1000) }).safeParse(input);
+  if (!parsed.success) return { ok: false, message: "Invalid request." };
+  try {
+    const repo = await writePushSubscriptions();
+    if (!repo) return { ok: false, message: NOTIFY_UNAVAILABLE };
+    await repo.remove(parsed.data.endpoint);
+    return { ok: true, value: undefined };
+  } catch (error) {
+    consoleLogger.warn("actions: removePushSubscription failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { ok: false, message: NOTIFY_UNAVAILABLE };
   }
 }

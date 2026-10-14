@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { AlertCheckRepository, UserListsRepository } from "@/domain/user-lists/ports";
+import { z } from "zod";
+import type {
+  AlertCheckRepository,
+  TriggeredAlertRepository,
+  UserListsRepository,
+} from "@/domain/user-lists/ports";
 import {
   ALERT_COLUMNS,
   alertFromRow,
@@ -101,6 +106,8 @@ export function createSupabaseUserListsRepository(
               last_checked_at: now,
               status: "active",
               triggered_at: null,
+              // Re-armed: its next trigger is news again.
+              notified_at: null,
             },
             { onConflict: "user_id,product_id" },
           )
@@ -147,6 +154,44 @@ export function createSupabaseAlertCheckRepository(serviceClient: SupabaseClient
             ),
         );
         for (const result of results) check("saveObservations", result);
+      }
+    },
+  };
+}
+
+const ownedAlertRowSchema = alertRowSchema.extend({ user_id: z.string().min(1) });
+
+/** Service-role repository for notifying triggered alerts. Never expose this client to user requests. */
+export function createSupabaseTriggeredAlertRepository(
+  serviceClient: SupabaseClient,
+): TriggeredAlertRepository {
+  return {
+    async listUnnotified(limit) {
+      const rows = unwrap(
+        "listUnnotified",
+        await serviceClient
+          .from("price_alerts")
+          .select(`${ALERT_COLUMNS}, user_id`)
+          .eq("status", "triggered")
+          .is("notified_at", null)
+          .order("triggered_at", { ascending: true })
+          .limit(limit),
+      );
+      return ownedAlertRowSchema
+        .array()
+        .parse(rows)
+        .map((row) => ({ userId: row.user_id, alert: alertFromRow(row) }));
+    },
+
+    async markNotified(alertIds, at) {
+      for (let i = 0; i < alertIds.length; i += 100) {
+        check(
+          "markNotified",
+          await serviceClient
+            .from("price_alerts")
+            .update({ notified_at: at })
+            .in("id", alertIds.slice(i, i + 100)),
+        );
       }
     },
   };

@@ -41,6 +41,12 @@ export default defineConfig({
       AFFILIATE_AMAZON_TAG: "onecart-e2e-20",
       AFFILIATE_EBAY_CAMPAIGN_ID: "5338000000",
       CRON_SECRET: "e2e-only-cron-secret-0123456789",
+      // A throwaway VAPID pair for E2E only (never used anywhere else): turns the
+      // notifications switch on. Tests never subscribe, so no push service is called.
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY:
+        "BNKok8kUL2tkLVxY3EC_6sEdDQUjlxAGnpWDiwtf-OmudVkeBQNtIAxFDz5792dRrU098S_3y-K83xantr4cydk",
+      VAPID_PRIVATE_KEY: "wlhw3_Cp_m9m5Alh9A95uzviu58rhgjfjXkpXjUuAgE",
+      VAPID_SUBJECT: "mailto:e2e@example.com",
       // The suite runs many searches from one IP within a minute; the throttle has its own tests.
       SEARCH_RATE_LIMIT_PER_MINUTE: "100000",
       SEARCH_RATE_LIMIT_PER_DAY: "100000",

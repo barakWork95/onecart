@@ -95,4 +95,28 @@ describe("createInMemoryUserLists", () => {
     const store = createInMemoryUserLists();
     expect((await store.forUser("a").save(snapshot("p1"))).savedAt).toMatch(/^\d{4}-/);
   });
+
+  it("lists triggered alerts until notified, and a re-armed alert notifies again", async () => {
+    const store = createInMemoryUserLists(() => new Date("2026-10-15T05:00:00.000Z"));
+    const repo = store.forUser("u1");
+    const created = await repo.upsertAlert(snapshot("p1"), money(80_00, "ILS"));
+    expect(await store.triggered.listUnnotified(10)).toEqual([]);
+
+    await store.alertCheck.saveObservations([
+      { ...created, status: "triggered", triggeredAt: "2026-10-15T05:00:00.000Z" },
+    ]);
+    expect((await store.triggered.listUnnotified(10)).map((o) => [o.userId, o.alert.id])).toEqual([
+      ["u1", created.id],
+    ]);
+
+    await store.triggered.markNotified([created.id], "2026-10-15T05:01:00.000Z");
+    expect(await store.triggered.listUnnotified(10)).toEqual([]);
+
+    // Re-creating the alert re-arms it; once it triggers again, it's news again.
+    const rearmed = await repo.upsertAlert(snapshot("p1"), money(70_00, "ILS"));
+    await store.alertCheck.saveObservations([
+      { ...rearmed, status: "triggered", triggeredAt: "2026-10-16T05:00:00.000Z" },
+    ]);
+    expect(await store.triggered.listUnnotified(10)).toHaveLength(1);
+  });
 });

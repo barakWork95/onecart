@@ -52,6 +52,7 @@ import { consoleClickRecorder } from "@/infrastructure/affiliate/console-click-r
 import { createHmacOutboundLinkCodec } from "@/infrastructure/affiliate/outbound-link-codec";
 import { createInMemoryRedis } from "@/infrastructure/cache/in-memory-redis";
 import { createInMemoryUserLists } from "@/infrastructure/db/in-memory-user-lists";
+import { createInMemoryPushSubscriptions } from "@/infrastructure/db/in-memory-push-subscriptions";
 import { createSupabaseServiceClient } from "@/infrastructure/db/supabase-clients";
 import {
   createSupabaseClickRecorder,
@@ -112,7 +113,11 @@ export type UserListsBackend =
       readonly publishableKey: string;
       readonly secretKey?: string;
     }
-  | { readonly kind: "memory"; readonly store: ReturnType<typeof createInMemoryUserLists> }
+  | {
+      readonly kind: "memory";
+      readonly store: ReturnType<typeof createInMemoryUserLists>;
+      readonly push: ReturnType<typeof createInMemoryPushSubscriptions>;
+    }
   | { readonly kind: "none" };
 
 /**
@@ -213,7 +218,7 @@ function buildServices(): Services {
           ...(config.SUPABASE_SECRET_KEY ? { secretKey: config.SUPABASE_SECRET_KEY } : {}),
         }
       : demoMode
-        ? { kind: "memory", store: createInMemoryUserLists() }
+        ? { kind: "memory", store: createInMemoryUserLists(), push: createInMemoryPushSubscriptions() }
         : { kind: "none" };
 
   const priceDropBoard = createRedisPriceDropBoard(redis);

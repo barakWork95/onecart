@@ -110,6 +110,16 @@ const serverEnvSchema = z.object({
   /** HMAC key for /go/ links (≥32 chars). Required in production; all instances must share it. */
   OUTBOUND_LINK_SECRET: optional(z.string().min(32)),
 
+  /**
+   * Web Push (price-alert notifications). Generate the pair with
+   * `npx web-push generate-vapid-keys`; the public key also reaches the
+   * browser. Any of the three missing: notifications are off, alerts still work.
+   */
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: optional(z.string().regex(/^[A-Za-z0-9_-]{80,100}$/, "base64url public key")),
+  VAPID_PRIVATE_KEY: optional(z.string().regex(/^[A-Za-z0-9_-]{40,50}$/, "base64url private key")),
+  /** Contact the push services can reach: "mailto:you@example.com" or an https URL. */
+  VAPID_SUBJECT: optional(z.string().regex(/^(mailto:\S+@\S+|https:\/\/\S+)$/)),
+
   /** Bearer token Vercel Cron sends to /api/cron/* (≥16 chars). */
   CRON_SECRET: optional(z.string().min(16)),
 
@@ -134,6 +144,18 @@ export function amazonSource(config: ServerEnv): "live" | "recorded" | "off" {
   const mode = config.SERPAPI_MODE ?? (config.VERCEL_ENV === "production" ? "live" : "recorded");
   if (mode === "recorded") return "recorded";
   return config.SERPAPI_API_KEY ? "live" : "off";
+}
+
+/** Web Push (VAPID) settings, or null unless all three are set. */
+export function webPushConfig(
+  config: ServerEnv,
+): { publicKey: string; privateKey: string; subject: string } | null {
+  const {
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: publicKey,
+    VAPID_PRIVATE_KEY: privateKey,
+    VAPID_SUBJECT: subject,
+  } = config;
+  return publicKey && privateKey && subject ? { publicKey, privateKey, subject } : null;
 }
 
 /** eBay OAuth client credentials under either naming, or null when not configured. */

@@ -156,12 +156,44 @@ test.describe("Price alerts", () => {
       headers: { Authorization: `Bearer ${CRON_SECRET}` },
     });
     expect(response.status()).toBe(200);
-    const summary = (await response.json()) as Record<string, number>;
+    const summary = (await response.json()) as Record<string, unknown>;
     expect(summary.checked).toBeGreaterThanOrEqual(1);
     expect(summary.failedSearches).toBe(0);
+    // Push is configured (test keys) and nothing triggered: nobody to notify.
+    expect(summary.notifications).toEqual({
+      alerts: 0,
+      notified: 0,
+      sent: 0,
+      expired: 0,
+      failed: 0,
+      skipped: 0,
+    });
 
     // Demo prices are static, so nothing drops: the alert keeps watching with today's price.
     await page.goto("/alerts");
     await expect(page.getByRole("list", { name: "Price alerts" })).toContainText("Watching");
+  });
+});
+
+test.describe("Price-alert notifications", () => {
+  test("explains when notifications are blocked (headless Chromium's default)", async ({ page }) => {
+    await page.goto("/alerts");
+    await expect(
+      page.getByRole("region", { name: "Price-alert notifications" }).getByText(/Notifications are blocked/),
+    ).toBeVisible();
+  });
+
+  // The "allowed" path (turn on → subscribe → saved) is covered by notify-me.test.tsx:
+  // headless Chromium reports Notification.permission as "denied" even when the
+  // context grants it, so it can't be exercised here.
+
+  test("serves the service worker uncached and the web app manifest", async ({ request }) => {
+    const sw = await request.get("/sw.js");
+    expect(sw.headers()["content-type"]).toContain("application/javascript");
+    expect(sw.headers()["cache-control"]).toBe("no-cache, no-store, must-revalidate");
+    expect(await sw.text()).toContain('addEventListener("push"');
+
+    const manifest = await request.get("/manifest.webmanifest");
+    expect(await manifest.json()).toMatchObject({ display: "standalone", start_url: "/" });
   });
 });

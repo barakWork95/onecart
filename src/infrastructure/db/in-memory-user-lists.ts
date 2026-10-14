@@ -1,4 +1,8 @@
-import type { AlertCheckRepository, UserListsRepository } from "@/domain/user-lists/ports";
+import type {
+  AlertCheckRepository,
+  TriggeredAlertRepository,
+  UserListsRepository,
+} from "@/domain/user-lists/ports";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
 import type { SavedItem } from "@/domain/user-lists/product-snapshot";
 
@@ -11,6 +15,7 @@ export function createInMemoryUserLists(now: () => Date = () => new Date()) {
   const saved = new Map<string, Map<string, SavedItem>>();
   const alerts = new Map<string, Map<string, PriceAlert>>();
   const owners = new Map<string, string>(); // alert id → user id
+  const notified = new Set<string>(); // alert ids already pushed
   let sequence = 0;
 
   const bucket = <T>(store: Map<string, Map<string, T>>, userId: string) => {
@@ -60,6 +65,8 @@ export function createInMemoryUserLists(now: () => Date = () => new Date()) {
         };
         bucket(alerts, userId).set(snapshot.productId, alert);
         owners.set(alert.id, userId);
+        // Re-armed: its next trigger is news again.
+        notified.delete(alert.id);
         return alert;
       },
       async deleteAlert(productId) {
@@ -86,5 +93,18 @@ export function createInMemoryUserLists(now: () => Date = () => new Date()) {
     },
   };
 
-  return { forUser, alertCheck };
+  const triggered: TriggeredAlertRepository = {
+    async listUnnotified(limit) {
+      return [...alerts.entries()]
+        .flatMap(([userId, m]) => [...m.values()].map((alert) => ({ userId, alert })))
+        .filter(({ alert }) => alert.status === "triggered" && !notified.has(alert.id))
+        .sort((a, b) => (a.alert.triggeredAt ?? "").localeCompare(b.alert.triggeredAt ?? ""))
+        .slice(0, limit);
+    },
+    async markNotified(alertIds) {
+      for (const id of alertIds) notified.add(id);
+    },
+  };
+
+  return { forUser, alertCheck, triggered };
 }

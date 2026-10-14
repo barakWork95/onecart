@@ -1,4 +1,5 @@
-import { amazonSource, ebayCredentials, parseServerEnv } from "@/config/env";
+import { generateVAPIDKeys } from "web-push";
+import { amazonSource, ebayCredentials, parseServerEnv, webPushConfig } from "@/config/env";
 
 describe("parseServerEnv", () => {
   it("treats empty values from an unfilled .env template as unset", () => {
@@ -128,5 +129,34 @@ describe("CONTACT_EMAIL", () => {
     expect(contact("")).toBeUndefined();
     expect(contact("not-an-email")).toBeUndefined();
     expect(() => parseServerEnv({ CONTACT_EMAIL: "owner@" })).not.toThrow();
+  });
+});
+
+describe("webPushConfig", () => {
+  // A real pair from web-push itself, so the format checks can't drift from what it generates.
+  const { publicKey, privateKey } = generateVAPIDKeys();
+  const full = {
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: publicKey,
+    VAPID_PRIVATE_KEY: privateKey,
+    VAPID_SUBJECT: "mailto:alerts@onecartapp.com",
+  };
+
+  it("is on only with all three settings", () => {
+    expect(webPushConfig(parseServerEnv(full))).toEqual({
+      publicKey,
+      privateKey,
+      subject: "mailto:alerts@onecartapp.com",
+    });
+    expect(webPushConfig(parseServerEnv({ ...full, VAPID_SUBJECT: "" }))).toBeNull();
+    expect(webPushConfig(parseServerEnv({}))).toBeNull();
+  });
+
+  it("rejects keys that aren't base64url VAPID keys, and a bare subject", () => {
+    expect(() => parseServerEnv({ ...full, VAPID_PRIVATE_KEY: "not a key" })).toThrow();
+    expect(() => parseServerEnv({ ...full, NEXT_PUBLIC_VAPID_PUBLIC_KEY: privateKey })).toThrow();
+    expect(() => parseServerEnv({ ...full, VAPID_SUBJECT: "alerts@onecartapp.com" })).toThrow();
+    expect(
+      webPushConfig(parseServerEnv({ ...full, VAPID_SUBJECT: "https://www.onecartapp.com" })),
+    ).not.toBeNull();
   });
 });

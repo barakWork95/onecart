@@ -374,6 +374,23 @@ SearchBar (client) → /search?q=… (Server Component)
   - It runs one search per distinct query, so cost scales with queries, not users.
   - A failed search leaves its alerts untouched for the next run.
   - A triggered alert stays triggered until the user deletes or re-creates it.
+- **Price-alert notifications (Web Push).** On when `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
+  `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` are all set (`webPushConfig`); otherwise the switch is
+  hidden and alerts work as before.
+  - `NotifyMe` (Alerts page) asks for permission only on a tap; it registers `public/sw.js`
+    (no caching, no fetch handler; clicks only open same-origin paths), subscribes with the
+    VAPID key, and saves via `savePushSubscriptionAction`. iPhone needs the site added to the
+    Home Screen (`app/manifest.ts`, standalone); the switch says so.
+  - `push_subscriptions` is one row per user and endpoint (RLS). **Endpoints must be one of the
+    major browsers' push services** (`isAllowedPushEndpoint`, checked in the action and by a
+    database CHECK): the server POSTs to them, so any other host would be an SSRF hole.
+  - The price-alerts cron runs `notifyTriggeredAlerts` after the check: triggered alerts with no
+    `notified_at` are pushed to every browser their owner subscribed, then stamped (every trigger
+    once; re-arming clears it). All sends failing → retried next run. 404/410 → subscription
+    deleted; 5 failures in a row → deleted. No subscription, or triggered over 3 days ago →
+    stamped without a push.
+  - Headless Chromium reports `Notification.permission` as "denied" even when granted, so the
+    "allowed" path is covered by `notify-me.test.tsx`, not E2E.
 - **Backends.**
   - Supabase when `NEXT_PUBLIC_SUPABASE_*` is set.
   - Otherwise, in demo mode, an in-memory store keyed by an httpOnly cookie (demo and E2E only).

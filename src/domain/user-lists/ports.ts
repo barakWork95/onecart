@@ -1,3 +1,4 @@
+import type { IsoDateTime } from "@/domain/product/unified-product";
 import type { Money } from "@/domain/shared/money";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
 import type { ProductSnapshot, SavedItem } from "@/domain/user-lists/product-snapshot";
@@ -22,6 +23,19 @@ export interface UserListsRepository {
 export interface AlertCheckRepository {
   listActiveAlerts(limit: number): Promise<readonly PriceAlert[]>;
   saveObservations(alerts: readonly PriceAlert[]): Promise<void>;
+}
+
+/** A triggered alert with its owner, for notifications. */
+export interface OwnedAlert {
+  readonly userId: string;
+  readonly alert: PriceAlert;
+}
+
+/** Cross-user access for notifying triggered alerts (service role; bypasses RLS). */
+export interface TriggeredAlertRepository {
+  /** Triggered alerts not yet notified, oldest trigger first. */
+  listUnnotified(limit: number): Promise<readonly OwnedAlert[]>;
+  markNotified(alertIds: readonly string[], at: IsoDateTime): Promise<void>;
 }
 
 /** Resolves who is making the request. Request-scoped. */
