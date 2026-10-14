@@ -11,22 +11,37 @@ function safePath(url) {
   return typeof url === "string" && url.startsWith("/") && !url.startsWith("//") ? url : "/alerts";
 }
 
-self.addEventListener("push", (event) => {
-  let message = {};
+/** The push's JSON message, or {} for anything else (DevTools sends plain text). */
+function readMessage(data) {
+  if (!data) return {};
   try {
-    message = event.data ? event.data.json() : {};
+    const parsed = JSON.parse(data.text());
+    return parsed && typeof parsed === "object" ? parsed : {};
   } catch {
-    // Not JSON: show a generic notification rather than nothing.
+    return {};
   }
-  const title = typeof message.title === "string" ? message.title : "OneCart price alert";
+}
+
+const text = (value, fallback) => (typeof value === "string" && value.trim() ? value : fallback);
+
+self.addEventListener("push", (event) => {
+  const message = readMessage(event.data);
+  const title = text(message.title, "OneCart price alert");
+  const options = {
+    body: text(message.body, "A price you're watching dropped."),
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    data: { url: safePath(message.url) },
+  };
+  // A tag replaces an earlier notification with the same tag; without `renotify` the
+  // replacement is silent (no banner), e.g. when the last one is still in Notification Center.
+  if (typeof message.tag === "string" && message.tag)
+    Object.assign(options, { tag: message.tag, renotify: true });
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: typeof message.body === "string" ? message.body : "A price you're watching dropped.",
-      tag: typeof message.tag === "string" ? message.tag : undefined,
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
-      data: { url: safePath(message.url) },
-    }),
+    self.registration
+      .showNotification(title, options)
+      // Options a browser rejects must not cost the user the alert: retry with the bare minimum.
+      .catch(() => self.registration.showNotification(title, { body: options.body, data: options.data })),
   );
 });
 

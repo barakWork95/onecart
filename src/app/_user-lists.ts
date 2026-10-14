@@ -172,7 +172,8 @@ export async function sendTestNotification(): Promise<TestPushResult> {
         title: "OneCart test notification",
         body: "Price-alert notifications work on this device.",
         url: "/alerts",
-        tag: "onecart-test",
+        // Unique per send: each test shows its own banner.
+        tag: `onecart-test-${Date.now()}`,
       }),
     })),
   );
