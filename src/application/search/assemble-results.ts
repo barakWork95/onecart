@@ -2,7 +2,8 @@ import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import { groupProducts, type ProductGroup } from "@/domain/search/product-group";
 import { filterOffers, sortGroups } from "@/domain/search/result-ordering";
-import { classifyOffers, type SearchIntent } from "@/domain/search/search-intent";
+import { tokenizeTitle } from "@/domain/matching/title-tokens";
+import { classifyOffers, isOffTopic, type SearchIntent } from "@/domain/search/search-intent";
 import type { SearchQuery } from "@/domain/search/search-query";
 
 /** One store's results so far, store pages in order. */
@@ -19,8 +20,9 @@ export interface AssembledResults {
 }
 
 /**
- * Stores' results → the cards a shopper sees: rank within each store, filter,
- * classify against the query's intent, group across and within stores, sort.
+ * Stores' results → the cards a shopper sees: drop off-topic listings from
+ * loose-search stores (`isOffTopic`), rank within each store, filter, classify
+ * against the query's intent, group across and within stores, sort.
  * Pure, so the search page and the homepage showcase can't drift apart.
  */
 export function assembleResults(
@@ -35,7 +37,7 @@ export function assembleResults(
     let rank = 0;
     for (const product of store.products) {
       // Stores repeat items across pages (sponsored slots); the first position counts.
-      if (ranks.has(product.id)) continue;
+      if (ranks.has(product.id) || isOffTopic(product, intent, tokenizeTitle(product.title))) continue;
       ranks.set(product.id, rank++);
       products.push(product);
     }

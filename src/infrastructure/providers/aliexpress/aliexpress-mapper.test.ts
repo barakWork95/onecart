@@ -57,7 +57,7 @@ describe("mapAliExpressProduct", () => {
         listed: ils(89_00),
         fxRate: 1,
       },
-      originalPrice: ils(143_55),
+      originalPrice: null,
       rating: null,
       delivery: { minDays: null, maxDays: null, isFreeShipping: null, methodLabel: null },
       availability: "in_stock",
@@ -117,25 +117,18 @@ describe("mapAliExpressProduct", () => {
     expect(product?.id).toBe("aliexpress:42");
   });
 
-  it("drops a strike-through price that isn't higher than the sale price", () => {
-    expect(mapAliExpressProduct(raw({ target_original_price: "80.00" }), ctx)?.originalPrice).toBeNull();
-    expect(mapAliExpressProduct(raw({ target_original_price: "89.00" }), ctx)?.originalPrice).toBeNull();
-  });
-
-  it("converts a strike-through price quoted in another currency", () => {
-    const product = mapAliExpressProduct(
-      raw({ target_original_price: "30.00", target_original_price_currency: "USD" }),
-      ctx,
-    );
-    expect(product?.originalPrice).toEqual(ils(111_00));
-  });
-
-  it("ignores a strike-through price in an unsupported currency", () => {
-    const product = mapAliExpressProduct(
-      raw({ target_original_price: "9999", target_original_price_currency: "RUB" }),
-      ctx,
-    );
-    expect(product?.originalPrice).toBeNull();
+  it("never keeps AliExpress's strike-through price: its claimed discounts are inflated", () => {
+    for (const [price, currency] of [
+      ["143.55", "ILS"],
+      ["30.00", "USD"],
+      ["80.00", "ILS"],
+    ] as const) {
+      const product = mapAliExpressProduct(
+        raw({ target_original_price: price, target_original_price_currency: currency }),
+        ctx,
+      );
+      expect(product?.originalPrice).toBeNull();
+    }
   });
 
   it("treats a blank shop name and missing image as null", () => {

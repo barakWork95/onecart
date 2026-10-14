@@ -1,5 +1,6 @@
 import { sharesModel, tokenizeTitle, type TitleTokens } from "@/domain/matching/title-tokens";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
+import type { ProviderId } from "@/domain/shared/provider";
 
 /** What the shopper typed, read the same way as listing titles. */
 export interface SearchIntent {
@@ -42,6 +43,22 @@ export function matchesIntent(intent: SearchIntent, tokens: TitleTokens): boolea
   const brandOk = tokens.brands.size === 0 || [...q.brands].some((b) => tokens.brands.has(b));
   const lineWords = [...q.words].filter((w) => !q.brandWords.has(w));
   return brandOk && lineWords.every((w) => hasWord(tokens, w));
+}
+
+/**
+ * Stores whose keyword search answers a product it doesn't stock with
+ * whatever shares a word: AliExpress returned kitchen faucets for "instant
+ * pot duo" (2026-10-14). Other stores' searches are trusted as they are.
+ */
+export const LOOSE_SEARCH_STORES: ReadonlySet<ProviderId> = new Set(["aliexpress"]);
+
+/**
+ * Off-topic: a loose-search store's listing that doesn't name the product a
+ * specific query asks for. The one exception to "never filter results by the
+ * query text"; the product's own accessories name it, so they stay.
+ */
+export function isOffTopic(product: UnifiedProduct, intent: SearchIntent, tokens: TitleTokens): boolean {
+  return intent.specific && LOOSE_SEARCH_STORES.has(product.provider) && !matchesIntent(intent, tokens);
 }
 
 export interface OfferClass {

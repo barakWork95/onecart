@@ -65,7 +65,7 @@ describe("createDemoProvider", () => {
         isFreeShipping: true,
         methodLabel: "AliExpress Standard Shipping",
       },
-      originalPrice: money(143_55, "ILS"),
+      originalPrice: null,
       productUrl:
         "https://www.aliexpress.com/wholesale?SearchText=SoundCore%20Life%20P3%20ANC%20Wireless%20Earbuds",
       fetchedAt: "2026-10-11T09:00:00.000Z",

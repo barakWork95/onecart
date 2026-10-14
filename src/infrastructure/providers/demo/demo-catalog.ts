@@ -42,7 +42,6 @@ export const DEMO_CATALOG: readonly DemoListing[] = [
     keywords: [...EARBUDS, "anker", "anc"],
     price: { amount: 89, currency: "ILS" },
     shipping: { amount: 0, currency: "ILS" },
-    originalPrice: { amount: 143.55, currency: "ILS" },
     deliveryDays: [10, 12],
     methodLabel: "AliExpress Standard Shipping",
     rating: { average: 4.8, count: 1420 },

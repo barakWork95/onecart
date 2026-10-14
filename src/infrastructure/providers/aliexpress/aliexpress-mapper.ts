@@ -1,14 +1,8 @@
-import { toIls, type FxRates } from "@/domain/pricing/fx-rates";
+import type { FxRates } from "@/domain/pricing/fx-rates";
 import { calculateLandedPrice } from "@/domain/pricing/landed-price-calculator";
 import type { ImportTaxPolicy } from "@/domain/pricing/import-tax-policy";
 import { unifiedProductId, type IsoDateTime, type UnifiedProduct } from "@/domain/product/unified-product";
-import {
-  isCurrencyCode,
-  moneyFromMajor,
-  zeroMoney,
-  type CurrencyCode,
-  type Money,
-} from "@/domain/shared/money";
+import { isCurrencyCode, moneyFromMajor, zeroMoney, type CurrencyCode } from "@/domain/shared/money";
 import type { AliExpressRawProduct } from "@/infrastructure/providers/aliexpress/aliexpress-raw-schema";
 
 export interface AliExpressMapContext {
@@ -95,7 +89,9 @@ export function mapAliExpressProduct(
     imageUrl: raw.product_main_image_url ? cleanUrl(raw.product_main_image_url) : null,
     productUrl,
     price,
-    originalPrice: originalPriceOf(raw, item, ctx.fx),
+    // AliExpress's strike-through ("was") prices are inflated: most listings claim 50–60% off
+    // (2026-10-14). Showing them would advertise discounts nobody can verify, so none are kept.
+    originalPrice: null,
     // `evaluate_rate` is a positive-feedback %, not stars; converting would invent data.
     rating: null,
     delivery: { minDays: null, maxDays: null, isFreeShipping: null, methodLabel: null },
@@ -104,13 +100,4 @@ export function mapAliExpressProduct(
     sellerName: raw.shop_name?.trim() || null,
     fetchedAt: ctx.fetchedAt,
   };
-}
-
-/** Strike-through price in ILS, only when it's genuinely higher than the sale price. */
-function originalPriceOf(raw: AliExpressRawProduct, item: Money, fx: FxRates): Money | null {
-  if (!raw.target_original_price) return null;
-  const currency = asCurrency(raw.target_original_price_currency ?? raw.target_sale_price_currency);
-  if (!currency) return null;
-  const original = toIls(moneyFromMajor(Number(raw.target_original_price), currency), fx);
-  return original.amountMinor > toIls(item, fx).amountMinor ? original : null;
 }

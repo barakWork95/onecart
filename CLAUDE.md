@@ -250,6 +250,13 @@ SearchBar (client) → /search?q=… (Server Component)
   and the compare sheet lists the store with a View link. Never invent a price for them.
 - **Never filter store results by the query text.** The store's own search decides what's relevant,
   synonyms included. Locally we only group, filter (by the user's explicit filters) and sort.
+  - **One exception, AliExpress** (`LOOSE_SEARCH_STORES`, `isOffTopic`): for a query naming a
+    specific product, its listings that don't name the product are dropped. It answers products it
+    doesn't stock with anything sharing a word ("instant pot duo" → kitchen faucets). Accessories
+    naming the product stay; category queries are untouched.
+- **AliExpress strike-through prices are never kept** (`originalPrice: null`): its "was" prices
+  are inflated (most listings claim 50–60% off), so no discount badge comes from them. Deals on
+  OneCart come only from our own price history and cross-store savings.
 - **A store can set its own deadline** with `ProductSearchProvider.timeoutMs`. Amazon/SerpApi
   takes about 3–4 seconds per page, so it gets 9 seconds; everything else keeps 4.
 - **SerpApi quota (250 searches a month) — never spend it on development.**
