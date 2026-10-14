@@ -3,13 +3,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import { getServices, findOffer, offersFor } from "@/app/_composition";
 import { createCheckPriceAlerts } from "@/application/user-lists/check-price-alerts";
-import {
-  createNotifyTriggeredAlerts,
-  MAX_DELIVERY_FAILURES,
-} from "@/application/user-lists/notify-triggered-alerts";
+import { createNotifyTriggeredAlerts } from "@/application/user-lists/notify-triggered-alerts";
 import { env, webPushConfig } from "@/config/env";
 import type { PushSubscriptionRepository } from "@/domain/notifications/ports";
-import { endpointHint } from "@/domain/notifications/push";
 import { createUserListsService } from "@/application/user-lists/user-lists";
 import type { CurrentUser, UserListsRepository } from "@/domain/user-lists/ports";
 import { createCookieCurrentUser } from "@/infrastructure/auth/cookie-current-user";
@@ -133,65 +129,6 @@ function pushStores() {
 export function triggeredAlertNotifier() {
   const stores = pushStores();
   return stores ? createNotifyTriggeredAlerts({ ...stores, logger: consoleLogger }) : null;
-}
-
-export type TestPushResult =
-  | { readonly kind: "not_configured" }
-  | { readonly kind: "no_subscription" }
-  | {
-      readonly kind: "sent";
-      readonly sent: number;
-      readonly expired: number;
-      readonly failed: number;
-      /** Per browser, what the push service answered: the diagnostics this page exists for. */
-      readonly deliveries: readonly {
-        readonly endpoint: string;
-        readonly result: string;
-        readonly statusCode: number | null;
-        readonly detail: string | null;
-      }[];
-    };
-
-/**
- * TEMPORARY (internal /internal/push-test): pushes a test notification to the
- * calling browser's own subscriptions, to check delivery end to end on a real
- * device. It can only ever reach the caller's own anonymous account.
- */
-export async function sendTestNotification(): Promise<TestPushResult> {
-  const stores = pushStores();
-  const wiring = await currentUserAndRepo();
-  if (!stores || !wiring) return { kind: "not_configured" };
-  const userId = await wiring.currentUser.getUserId();
-  const subscriptions = userId ? await stores.directory.subscriptionsFor([userId]) : [];
-  if (subscriptions.length === 0) return { kind: "no_subscription" };
-  // Every send is awaited before the page gets its answer.
-  const deliveries = await Promise.all(
-    subscriptions.map(async (subscription) => ({
-      subscription,
-      delivery: await stores.sender.send(subscription, {
-        title: "OneCart test notification",
-        body: "Price-alert notifications work on this device.",
-        url: "/alerts",
-        // Unique per send: each test shows its own banner.
-        tag: `onecart-test-${Date.now()}`,
-      }),
-    })),
-  );
-  await stores.directory.recordDeliveries(
-    deliveries.map(({ subscription, delivery }) => ({ subscription, result: delivery.result })),
-    MAX_DELIVERY_FAILURES,
-  );
-  const count = (r: string) => deliveries.filter((d) => d.delivery.result === r).length;
-  return {
-    kind: "sent",
-    sent: count("sent"),
-    expired: count("expired"),
-    failed: count("failed"),
-    deliveries: deliveries.map(({ subscription, delivery }) => ({
-      endpoint: endpointHint(subscription.endpoint),
-      ...delivery,
-    })),
-  };
 }
 
 /** Runs the notifier for the cron; a failure is logged and reported, never thrown. */
