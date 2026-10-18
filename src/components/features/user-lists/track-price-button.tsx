@@ -50,7 +50,7 @@ export function TrackPriceButton({
     event.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await createAlertAction({ productId, searchText, targetShekels: target });
+      const result = await createAlertAction({ productId, searchText, targetShekels: target, locale });
       if (result.ok) {
         setTracking(true);
         setConfirmed(result.value.target);

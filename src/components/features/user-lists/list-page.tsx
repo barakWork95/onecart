@@ -2,6 +2,8 @@ import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ProductImage } from "@/components/features/search/product-image";
 import type { ReactNode } from "react";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
 
 /** Shared chrome for /saved and /alerts. */
 export function ListPage({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
@@ -16,17 +18,27 @@ export function ListPage({ title, intro, children }: { title: string; intro: str
   );
 }
 
-export function EmptyList({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
+export function EmptyList({
+  icon: Icon,
+  title,
+  body,
+  locale = "en",
+}: {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  locale?: Locale;
+}) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-border px-6 py-12 text-center">
       <Icon className="size-10 text-muted-foreground" aria-hidden />
       <h2 className="text-lg font-bold text-foreground">{title}</h2>
       <p className="max-w-sm text-sm text-muted-foreground">{body}</p>
       <Link
-        href="/"
+        href={localizedPath(locale, "/")}
         className="mt-2 inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
       >
-        Find products
+        {dict(locale).lists.findProducts}
       </Link>
     </div>
   );

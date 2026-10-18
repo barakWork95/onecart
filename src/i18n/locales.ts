@@ -1,14 +1,11 @@
 /**
- * The interface languages. English is the default and keeps the unprefixed URLs
- * Google already indexes (/c/headphones); Hebrew lives under /he (/he/c/headphones).
+ * The interface languages (defined in the domain: subscriptions carry one). English is
+ * the default and keeps the unprefixed URLs Google already indexes (/c/headphones);
+ * Hebrew lives under /he (/he/c/headphones).
  */
-export const LOCALES = ["en", "he"] as const;
-export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = "en";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/domain/shared/locale";
 
-export function isLocale(value: string): value is Locale {
-  return (LOCALES as readonly string[]).includes(value);
-}
+export { DEFAULT_LOCALE, isLocale, LOCALES, type Locale } from "@/domain/shared/locale";
 
 export const LOCALE_DIR: Readonly<Record<Locale, "ltr" | "rtl">> = { en: "ltr", he: "rtl" };
 

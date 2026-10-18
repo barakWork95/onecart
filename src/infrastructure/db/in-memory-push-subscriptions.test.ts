@@ -4,15 +4,17 @@ const KEYS = {
   endpoint: "https://fcm.googleapis.com/fcm/send/abc",
   p256dh: "p".repeat(87),
   auth: "a".repeat(22),
+  locale: "en" as const,
 };
 
 describe("createInMemoryPushSubscriptions", () => {
   it("keeps users apart and follows the delivery rules", async () => {
     const store = createInMemoryPushSubscriptions();
     await store.forUser("u1").save(KEYS);
-    await store.forUser("u2").save(KEYS);
+    await store.forUser("u2").save({ ...KEYS, locale: "he" });
     const [u1] = await store.directory.subscriptionsFor(["u1"]);
     expect(u1).toEqual({ ...KEYS, userId: "u1", failureCount: 0 });
+    expect((await store.directory.subscriptionsFor(["u2"]))[0]?.locale).toBe("he");
 
     await store.directory.recordDeliveries([{ subscription: u1!, result: "failed" }], 2);
     const [after] = await store.directory.subscriptionsFor(["u1"]);

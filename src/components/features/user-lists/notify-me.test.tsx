@@ -64,7 +64,7 @@ describe("NotifyMe", () => {
       userVisibleOnly: true,
       applicationServerKey: base64UrlToBytes(PUBLIC_KEY),
     });
-    expect(save).toHaveBeenCalledWith(JSON_SUB);
+    expect(save).toHaveBeenCalledWith({ ...JSON_SUB, locale: "en" });
     expect(await screen.findByRole("button", { name: "Turn off" })).toBeInTheDocument();
     expect(push.register).toHaveBeenCalledWith("/sw.js");
   });
@@ -73,10 +73,10 @@ describe("NotifyMe", () => {
     const push = installPush({ permission: "granted", subscribed: true });
     const { remove, save } = renderNotifyMe();
     // The browser's current subscription, so the server never pushes to a replaced one.
-    await waitFor(() => expect(save).toHaveBeenCalledWith(JSON_SUB));
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ ...JSON_SUB, locale: "en" }));
     await userEvent.click(await screen.findByRole("button", { name: "Turn off" }));
     expect(push.subscription.unsubscribe).toHaveBeenCalled();
-    expect(remove).toHaveBeenCalledWith({ endpoint: JSON_SUB.endpoint });
+    expect(remove).toHaveBeenCalledWith({ endpoint: JSON_SUB.endpoint, locale: "en" });
     expect(await screen.findByRole("button", { name: "Turn on notifications" })).toBeInTheDocument();
   });
 
@@ -157,9 +157,23 @@ describe("NotifyMe as a list switch (ops alerts)", () => {
       />,
     );
     await userEvent.click(await screen.findByRole("button", { name: "Turn off" }));
-    expect(remove).toHaveBeenCalledWith({ endpoint: JSON_SUB.endpoint });
+    expect(remove).toHaveBeenCalledWith({ endpoint: JSON_SUB.endpoint, locale: "en" });
     expect(push.subscription.unsubscribe).not.toHaveBeenCalled();
     expect(screen.getByRole("region", { name: "Ops alerts" })).toBeInTheDocument();
+  });
+});
+
+describe("NotifyMe in Hebrew", () => {
+  it("speaks Hebrew and subscribes this browser in Hebrew, so its alerts arrive in Hebrew", async () => {
+    installPush();
+    const save = jest.fn(ok);
+    render(<NotifyMe publicKey={PUBLIC_KEY} save={save} remove={jest.fn(ok)} locale="he" />);
+    expect(await screen.findByRole("region", { name: "התראות על ירידת מחיר" })).toHaveTextContent(
+      "קבלו התראה כשמחיר מגיע ליעד שלכם.",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "הפעלת התראות" }));
+    expect(save).toHaveBeenCalledWith({ ...JSON_SUB, locale: "he" });
+    expect(await screen.findByRole("button", { name: "כיבוי" })).toBeInTheDocument();
   });
 });
 

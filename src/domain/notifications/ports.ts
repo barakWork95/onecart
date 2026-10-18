@@ -1,15 +1,18 @@
 import type { PushResult, PushSubscriptionKeys } from "@/domain/notifications/push";
+import type { Locale } from "@/domain/shared/locale";
 
 /** One user's push subscriptions (request-scoped; RLS limits it to their rows). */
 export interface PushSubscriptionRepository {
-  /** Idempotent per browser: subscribing again refreshes the keys. */
-  save(subscription: PushSubscriptionKeys): Promise<void>;
+  /** Idempotent per browser: subscribing again refreshes the keys and the language. */
+  save(subscription: PushSubscriptionKeys & { readonly locale: Locale }): Promise<void>;
   remove(endpoint: string): Promise<void>;
 }
 
 export interface StoredSubscription extends PushSubscriptionKeys {
   readonly userId: string;
   readonly failureCount: number;
+  /** The language the browser subscribed in: its notifications use it. */
+  readonly locale: Locale;
 }
 
 export interface DeliveryOutcome {

@@ -10,67 +10,67 @@ import { STORE_META } from "@/components/features/store-meta";
 import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-lists/list-page";
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
+import { currentLocale, getDictionary } from "@/i18n/server";
 import { formatMoney } from "@/lib/format";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
-export const metadata: Metadata = { title: "Saved" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getDictionary()).meta.savedTitle };
+}
 
-async function SavedList() {
+async function SavedList({ locale }: { locale: Locale }) {
   await connection();
+  const t = dict(locale).saved;
   const access = await readUserLists();
   if (access.kind === "unavailable") {
-    return (
-      <EmptyList
-        icon={Bookmark}
-        title="Saving isn't available"
-        body="Wishlists aren't configured on this server."
-      />
-    );
+    return <EmptyList icon={Bookmark} title={t.unavailableTitle} body={t.unavailableBody} locale={locale} />;
   }
   const items = access.kind === "user" ? await access.repo.listSaved() : [];
   if (items.length === 0) {
-    return (
-      <EmptyList
-        icon={Bookmark}
-        title="Nothing saved yet"
-        body="Tap the bookmark on any product to keep it here."
-      />
-    );
+    return <EmptyList icon={Bookmark} title={t.emptyTitle} body={t.emptyBody} locale={locale} />;
   }
 
   const { linkCodec } = getServices();
   return (
-    <ul className="flex flex-col gap-3" aria-label="Saved products">
+    <ul className="flex flex-col gap-3" aria-label={t.list}>
       {items.map((item) => (
         <li key={item.id} className="flex items-center gap-3 rounded-3xl border border-border/60 bg-card p-3">
           <ProductThumb imageUrl={item.imageUrl} />
           <div className="min-w-0 flex-1">
-            <h2 className="truncate font-semibold text-foreground">{item.title}</h2>
+            <h2 dir="auto" className="truncate font-semibold text-foreground rtl:text-right">
+              {item.title}
+            </h2>
             <p className="text-xs text-muted-foreground">
-              {formatMoney(item.price)} on {STORE_META[item.provider].name} when saved
+              {t.whenSaved(formatMoney(item.price, { locale }), STORE_META[item.provider].name)}
             </p>
             <div className="mt-1 flex gap-3 text-sm font-semibold">
               <a
                 href={linkCodec.encode({ id: item.productId, provider: item.provider, url: item.productUrl })}
                 {...OUTBOUND_LINK}
                 className="text-primary"
-                aria-label={`Go to ${STORE_META[item.provider].name} for ${item.title}`}
+                aria-label={t.goToStoreLabel(STORE_META[item.provider].name, item.title)}
               >
-                Go to store
+                {t.goToStore}
               </a>
               <Link
-                href={`/search?${new URLSearchParams({ q: item.searchText }).toString()}`}
+                href={localizedPath(
+                  locale,
+                  `/search?${new URLSearchParams({ q: item.searchText }).toString()}`,
+                )}
                 className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
               >
                 <RefreshCw className="size-3.5" aria-hidden />
-                Compare today&apos;s prices
+                {t.compareToday}
               </Link>
             </div>
           </div>
           <RemoveButton
-            label={`Remove ${item.title} from Saved`}
+            label={t.remove(item.title)}
             action={removeSavedAction}
             productId={item.productId}
+            locale={locale}
           />
         </li>
       ))}
@@ -78,11 +78,13 @@ async function SavedList() {
   );
 }
 
-export default function SavedPage() {
+export default async function SavedPage() {
+  const locale = await currentLocale();
+  const t = dict(locale).saved;
   return (
-    <ListPage title="Saved" intro="Products you bookmarked, with the landed price when you saved them.">
+    <ListPage title={t.title} intro={t.intro}>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-3xl" />}>
-        <SavedList />
+        <SavedList locale={locale} />
       </Suspense>
     </ListPage>
   );

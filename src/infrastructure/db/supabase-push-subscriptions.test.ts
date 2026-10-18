@@ -31,17 +31,18 @@ const KEYS = {
   p256dh: "p".repeat(87),
   auth: "a".repeat(22),
 };
-const STORED: StoredSubscription = { ...KEYS, userId: USER, failureCount: 2 };
+const STORED: StoredSubscription = { ...KEYS, userId: USER, failureCount: 2, locale: "he" };
 
 describe("createSupabasePushSubscriptions", () => {
   it("upserts per user and endpoint, resetting failures; removes by endpoint", async () => {
     const { client, chains } = fakeClient(() => ({ data: null, error: null }));
     const repo = createSupabasePushSubscriptions(client, USER);
-    await repo.save(KEYS);
+    await repo.save({ ...KEYS, locale: "he" });
     await repo.remove(KEYS.endpoint);
+    // The language is saved with the browser: its notifications are written in it.
     expect(chains[0]).toEqual([
       "from(push_subscriptions)",
-      `upsert(${JSON.stringify({ user_id: USER, ...KEYS, failure_count: 0 })}, {"onConflict":"user_id,endpoint"})`,
+      `upsert(${JSON.stringify({ user_id: USER, ...KEYS, locale: "he", failure_count: 0 })}, {"onConflict":"user_id,endpoint"})`,
     ]);
     expect(chains[1]).toEqual([
       "from(push_subscriptions)",
@@ -53,21 +54,34 @@ describe("createSupabasePushSubscriptions", () => {
 
   it("throws on database errors", async () => {
     const { client } = fakeClient(() => ({ data: null, error: { message: "new row violates check" } }));
-    await expect(createSupabasePushSubscriptions(client, USER).save(KEYS)).rejects.toThrow(
-      "savePushSubscription: new row violates check",
-    );
+    await expect(
+      createSupabasePushSubscriptions(client, USER).save({ ...KEYS, locale: "en" }),
+    ).rejects.toThrow("savePushSubscription: new row violates check");
   });
 });
 
 describe("createSupabasePushDirectory", () => {
   it("reads subscriptions for users, 100 at a time", async () => {
     const { client, chains } = fakeClient((chain) => ({
-      data: chain.some((c) => c.includes(USER)) ? [{ user_id: USER, ...KEYS, failure_count: 2 }] : [],
+      data: chain.some((c) => c.includes(USER))
+        ? [{ user_id: USER, ...KEYS, failure_count: 2, locale: "he" }]
+        : [],
       error: null,
     }));
     const users = [USER, ...Array.from({ length: 100 }, (_, i) => `u${i}`)];
     expect(await createSupabasePushDirectory(client).subscriptionsFor(users)).toEqual([STORED]);
     expect(chains).toHaveLength(2);
+    expect(chains[0]).toContain('select("user_id, endpoint, p256dh, auth, failure_count, locale")');
+  });
+
+  it("reads a missing or unknown language as English", async () => {
+    const rows = [
+      { user_id: USER, ...KEYS, failure_count: 0 },
+      { user_id: USER, ...KEYS, endpoint: `${KEYS.endpoint}2`, failure_count: 0, locale: "fr" },
+    ];
+    const { client } = fakeClient(() => ({ data: rows, error: null }));
+    const read = await createSupabasePushDirectory(client).subscriptionsFor([USER]);
+    expect(read.map((s) => s.locale)).toEqual(["en", "en"]);
   });
 
   it("records deliveries: success resets, expiry deletes, failures count up to the limit", async () => {

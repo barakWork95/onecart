@@ -191,6 +191,13 @@ locale)` (`he-IL`: "89 ₪"). Every internal link goes through `localizedPath(lo
   Store titles are never translated; they get `dir="auto"` (`rtl:text-right`) so English reads
   left to right inside Hebrew pages. Amazon's Associates sentence stays in English everywhere;
   the legal pages are English only (Hebrew pages link to them with `hrefLang="en"`).
+- **Server Actions answer in the page's language**: they can't read `[lang]`, so clients send
+  `locale` with their input and `localeOf(input)` (`app/_action-locale.ts`) reads it (unknown →
+  English); messages come from `dict(locale).actions`.
+- **Notifications in the subscriber's language**: `push_subscriptions.locale` (`en`/`he`, default
+  `en`) is saved with each browser (`NotifyMe` sends the page's locale); `alertMessage(alert,
+locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself lives in
+  `domain/shared/locale.ts` (re-exported by `src/i18n/locales.ts`).
 - **Hebrew suggestion.** English pages show a dismissible "OneCart זמין גם בעברית" note when
   the browser's first language is Hebrew (`LanguageSuggestion`, decided after mount); never a
   redirect.

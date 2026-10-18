@@ -33,7 +33,7 @@ export function SaveButton({
     setSaved(next); // optimistic
     setError(null);
     startTransition(async () => {
-      const result = await setSavedAction({ productId, searchText, saved: next });
+      const result = await setSavedAction({ productId, searchText, saved: next, locale });
       if (!result.ok) {
         setSaved(!next);
         setError(result.message);

@@ -1,6 +1,7 @@
 import { alertMessage, createNotifyTriggeredAlerts } from "@/application/user-lists/notify-triggered-alerts";
 import type { DeliveryOutcome, PushDirectory, StoredSubscription } from "@/domain/notifications/ports";
 import type { PushMessage, PushResult, PushSender } from "@/domain/notifications/push";
+import type { Locale } from "@/domain/shared/locale";
 import { money } from "@/domain/shared/money";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
 import type { OwnedAlert, TriggeredAlertRepository } from "@/domain/user-lists/ports";
@@ -24,12 +25,13 @@ const alert = (id: string, triggeredAt = "2026-10-15T05:00:00.000Z"): PriceAlert
   createdAt: "2026-10-10T08:00:00.000Z",
 });
 
-const sub = (userId: string, n: number, failureCount = 0): StoredSubscription => ({
+const sub = (userId: string, n: number, failureCount = 0, locale: Locale = "en"): StoredSubscription => ({
   userId,
   endpoint: `https://fcm.googleapis.com/fcm/send/${userId}-${n}`,
   p256dh: "p".repeat(87),
   auth: "a".repeat(22),
   failureCount,
+  locale,
 });
 
 function setup(
@@ -133,5 +135,33 @@ describe("notifyTriggeredAlerts", () => {
 describe("alertMessage", () => {
   it("says the price reached the target when today's price isn't known", () => {
     expect(alertMessage({ ...alert("a1"), lastSeen: null }).body).toBe("It reached your target of ₪450.00.");
+  });
+
+  it("speaks Hebrew to a Hebrew subscription, prices number-first", () => {
+    const plain = (s: string) => s.replace(/\u200f/g, "").replace(/\u00a0/g, " ");
+    const message = alertMessage(alert("a1"), "he");
+    expect(message.title).toMatch(/^ירידת מחיר: JBL Charge 5/);
+    expect(plain(message.body)).toBe("עכשיו 429.90 ₪ — מחיר היעד שלך היה 450.00 ₪.");
+    expect(plain(alertMessage({ ...alert("a1"), lastSeen: null }, "he").body)).toBe(
+      "המחיר הגיע ליעד שלך, 450.00 ₪.",
+    );
+    // The link opens the Alerts page in that language; the tag stays the same.
+    expect(message.url).toBe("/he/alerts");
+    expect(message.tag).toBe("alert-a1");
+  });
+});
+
+describe("notifyTriggeredAlerts, in each browser's language", () => {
+  it("sends one user's English browser English and their Hebrew browser Hebrew", async () => {
+    const { notify, sent } = setup(
+      [{ userId: "u1", alert: alert("a1") }],
+      [sub("u1", 1, 0, "en"), sub("u1", 2, 0, "he")],
+    );
+    await notify();
+    const byEndpoint = Object.fromEntries(sent.map((s) => [s.endpoint.split("/").pop(), s.message]));
+    expect(byEndpoint["u1-1"]?.title).toMatch(/^Price drop: /);
+    expect(byEndpoint["u1-1"]?.url).toBe("/alerts");
+    expect(byEndpoint["u1-2"]?.title).toMatch(/^ירידת מחיר: /);
+    expect(byEndpoint["u1-2"]?.url).toBe("/he/alerts");
   });
 });

@@ -3,6 +3,9 @@ import type { PushMessage, PushSender } from "@/domain/notifications/push";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
 import type { TriggeredAlertRepository } from "@/domain/user-lists/ports";
+import { DEFAULT_LOCALE, type Locale } from "@/domain/shared/locale";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath } from "@/i18n/locales";
 import { formatMoney } from "@/lib/format";
 
 /** Titles beyond this are cut: notification banners show a line or two. */
@@ -35,15 +38,17 @@ export interface NotificationSummary {
   readonly skipped: number;
 }
 
-export function alertMessage(alert: PriceAlert): PushMessage {
+/** The notification for a triggered alert, in the subscriber's language. */
+export function alertMessage(alert: PriceAlert, locale: Locale = DEFAULT_LOCALE): PushMessage {
+  const t = dict(locale).notifications;
   const title = alert.title.length > MAX_TITLE ? `${alert.title.slice(0, MAX_TITLE)}…` : alert.title;
-  const target = formatMoney(alert.target, { precise: true });
+  const target = formatMoney(alert.target, { precise: true, locale });
   return {
-    title: `Price drop: ${title}`,
+    title: t.priceDrop(title),
     body: alert.lastSeen
-      ? `Now ${formatMoney(alert.lastSeen, { precise: true })} — your target was ${target}.`
-      : `It reached your target of ${target}.`,
-    url: "/alerts",
+      ? t.nowAt(formatMoney(alert.lastSeen, { precise: true, locale }), target)
+      : t.reachedTarget(target),
+    url: localizedPath(locale, "/alerts"),
     tag: `alert-${alert.id}`,
   };
 }
@@ -87,7 +92,7 @@ export function createNotifyTriggeredAlerts(deps: NotifyTriggeredAlertsDeps) {
           batch.map(async ({ alert, subscription }) => ({
             alertId: alert.id,
             subscription,
-            result: (await deps.sender.send(subscription, alertMessage(alert))).result,
+            result: (await deps.sender.send(subscription, alertMessage(alert, subscription.locale))).result,
           })),
         )),
       );

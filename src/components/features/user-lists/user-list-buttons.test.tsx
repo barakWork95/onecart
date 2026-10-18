@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
 
@@ -33,6 +34,7 @@ describe("SaveButton", () => {
       productId: "aliexpress:1",
       searchText: "אוזניות אלחוטיות",
       saved: true,
+      locale: "en",
     });
   });
 
@@ -70,6 +72,7 @@ describe("TrackPriceButton", () => {
       productId: "aliexpress:1",
       searchText: "אוזניות אלחוטיות",
       targetShekels: "75.5",
+      locale: "en",
     });
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Change price alert for Life P3" })).toHaveAttribute(
@@ -86,5 +89,35 @@ describe("TrackPriceButton", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Update alert" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Pick a target below today's price.");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+});
+
+describe("in Hebrew", () => {
+  it("names the buttons in Hebrew and asks the server to answer in Hebrew", async () => {
+    setSavedAction.mockResolvedValue({ ok: true, value: { saved: true } });
+    createAlertAction.mockResolvedValue({ ok: true, value: { target: "80.00 ₪" } });
+    render(
+      <>
+        <SaveButton {...REF} initialSaved={false} locale="he" />
+        <TrackPriceButton {...REF} currentAgorot={89_00} initialTracking={false} locale="he" />
+      </>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "שמירת Life P3" }));
+    expect(setSavedAction).toHaveBeenCalledWith(expect.objectContaining({ locale: "he" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "מעקב מחיר עבור Life P3" }));
+    await screen.findByRole("spinbutton", { name: /התראה כשהמחיר יורד אל/ });
+    await userEvent.click(screen.getByRole("button", { name: "יצירת התראה" }));
+    expect(createAlertAction).toHaveBeenCalledWith(expect.objectContaining({ locale: "he" }));
+  });
+});
+
+describe("RemoveButton", () => {
+  it("sends the page's language with the product id, and shows the server's answer", async () => {
+    const action = jest.fn().mockResolvedValue({ ok: false, message: "השמירה לא זמינה כרגע." });
+    render(<RemoveButton label="הסרה" action={action} productId="ebay:1" locale="he" />);
+    await userEvent.click(screen.getByRole("button", { name: "הסרה" }));
+    expect(action).toHaveBeenCalledWith({ productId: "ebay:1", locale: "he" });
+    expect(await screen.findByRole("alert")).toHaveTextContent("השמירה לא זמינה כרגע.");
   });
 });

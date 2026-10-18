@@ -3,16 +3,20 @@
 import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import type { ActionResult } from "@/app/[lang]/saved/actions";
+import type { Locale } from "@/i18n/locales";
 
 /** Delete button for Saved/Alerts rows; the server re-renders the list on success. */
 export function RemoveButton({
   label,
   action,
   productId,
+  locale = "en",
 }: {
   label: string;
-  action: (input: { productId: string }) => Promise<ActionResult>;
+  /** Answers in `locale` (Server Actions can't read the page's language). */
+  action: (input: { productId: string; locale: Locale }) => Promise<ActionResult>;
   productId: string;
+  locale?: Locale;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +29,7 @@ export function RemoveButton({
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
-            const result = await action({ productId });
+            const result = await action({ productId, locale });
             setError(result.ok ? null : result.message);
           })
         }

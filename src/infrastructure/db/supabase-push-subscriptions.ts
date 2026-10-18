@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { PushDirectory, PushSubscriptionRepository } from "@/domain/notifications/ports";
+import { DEFAULT_LOCALE, isLocale } from "@/domain/shared/locale";
 import { RepositoryError } from "@/infrastructure/db/supabase-user-lists";
 
 function check(operation: string, result: { error: { message: string } | null }): void {
@@ -25,6 +26,7 @@ export function createSupabasePushSubscriptions(
             endpoint: subscription.endpoint,
             p256dh: subscription.p256dh,
             auth: subscription.auth,
+            locale: subscription.locale,
             failure_count: 0,
           },
           { onConflict: "user_id,endpoint" },
@@ -46,6 +48,8 @@ const subscriptionRowSchema = z.object({
   p256dh: z.string().min(1),
   auth: z.string().min(1),
   failure_count: z.number().int().nonnegative(),
+  /** Absent before the column existed; anything unexpected reads as the default. */
+  locale: z.string().nullish(),
 });
 
 /** Cross-user subscriptions for the daily sender. Service-role client only. */
@@ -59,7 +63,7 @@ export function createSupabasePushDirectory(
       for (let i = 0; i < userIds.length; i += 100) {
         const { data, error } = await serviceClient
           .from("push_subscriptions")
-          .select("user_id, endpoint, p256dh, auth, failure_count")
+          .select("user_id, endpoint, p256dh, auth, failure_count, locale")
           .in("user_id", userIds.slice(i, i + 100));
         if (error) throw new RepositoryError("pushSubscriptionsFor", error.message);
         out.push(...subscriptionRowSchema.array().parse(data ?? []));
@@ -70,6 +74,7 @@ export function createSupabasePushDirectory(
         p256dh: r.p256dh,
         auth: r.auth,
         failureCount: r.failure_count,
+        locale: r.locale && isLocale(r.locale) ? r.locale : DEFAULT_LOCALE,
       }));
     },
 

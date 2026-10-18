@@ -15,49 +15,45 @@ import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-li
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PriceAlert } from "@/domain/user-lists/price-alert";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
+import { currentLocale, getDictionary } from "@/i18n/server";
 import { formatMoney } from "@/lib/format";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
-export const metadata: Metadata = { title: "Price alerts" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getDictionary()).meta.alertsTitle };
+}
 
-function StatusChip({ alert }: { alert: PriceAlert }) {
+function StatusChip({ alert, locale }: { alert: PriceAlert; locale: Locale }) {
+  const t = dict(locale).alerts;
   return alert.status === "triggered" ? (
     <span className="rounded-full bg-success px-2 py-0.5 text-[11px] font-bold text-success-foreground">
-      Price dropped!
+      {t.dropped}
     </span>
   ) : (
     <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-semibold text-secondary-foreground">
-      Watching
+      {t.watching}
     </span>
   );
 }
 
-async function AlertList() {
+async function AlertList({ locale }: { locale: Locale }) {
   await connection();
+  const t = dict(locale).alerts;
+  const money = (m: PriceAlert["target"]) => formatMoney(m, { precise: true, locale });
   const access = await readUserLists();
   if (access.kind === "unavailable") {
-    return (
-      <EmptyList
-        icon={BellRing}
-        title="Alerts aren't available"
-        body="Price alerts aren't configured on this server."
-      />
-    );
+    return <EmptyList icon={BellRing} title={t.unavailableTitle} body={t.unavailableBody} locale={locale} />;
   }
   const alerts = access.kind === "user" ? await access.repo.listAlerts() : [];
   if (alerts.length === 0) {
-    return (
-      <EmptyList
-        icon={TrendingDown}
-        title="No price alerts yet"
-        body="Tap the bell on any product and pick a target price — we'll watch it daily."
-      />
-    );
+    return <EmptyList icon={TrendingDown} title={t.emptyTitle} body={t.emptyBody} locale={locale} />;
   }
 
   const { linkCodec } = getServices();
   return (
-    <ul className="flex flex-col gap-3" aria-label="Price alerts">
+    <ul className="flex flex-col gap-3" aria-label={t.list}>
       {alerts.map((alert) => (
         <li
           key={alert.id}
@@ -66,15 +62,18 @@ async function AlertList() {
           <ProductThumb imageUrl={alert.imageUrl} />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2">
-              <StatusChip alert={alert} />
+              <StatusChip alert={alert} locale={locale} />
               <span className="text-xs text-muted-foreground">{STORE_META[alert.provider].name}</span>
             </p>
-            <h2 className="truncate font-semibold text-foreground">{alert.title}</h2>
+            <h2 dir="auto" className="truncate font-semibold text-foreground rtl:text-right">
+              {alert.title}
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Target{" "}
-              <strong className="text-foreground">{formatMoney(alert.target, { precise: true })}</strong>
-              {" · "}Now {alert.lastSeen ? formatMoney(alert.lastSeen, { precise: true }) : "unavailable"}
-              {" · "}Was {formatMoney(alert.baseline, { precise: true })}
+              {t.target} <strong className="text-foreground">{money(alert.target)}</strong>
+              {" · "}
+              {t.now} {alert.lastSeen ? money(alert.lastSeen) : t.nowUnavailable}
+              {" · "}
+              {t.was} {money(alert.baseline)}
             </p>
             {alert.status === "triggered" && (
               <a
@@ -86,14 +85,15 @@ async function AlertList() {
                 {...OUTBOUND_LINK}
                 className="text-sm font-semibold text-primary"
               >
-                Buy now
+                {t.buyNow}
               </a>
             )}
           </div>
           <RemoveButton
-            label={`Delete price alert for ${alert.title}`}
+            label={t.remove(alert.title)}
             action={deleteAlertAction}
             productId={alert.productId}
+            locale={locale}
           />
         </li>
       ))}
@@ -102,22 +102,29 @@ async function AlertList() {
 }
 
 /** The notifications switch, when push is configured; read per request like the list. */
-async function Notifications() {
+async function Notifications({ locale }: { locale: Locale }) {
   await connection();
   const publicKey = pushPublicKey();
   return publicKey ? (
-    <NotifyMe publicKey={publicKey} save={savePushSubscriptionAction} remove={removePushSubscriptionAction} />
+    <NotifyMe
+      publicKey={publicKey}
+      save={savePushSubscriptionAction}
+      remove={removePushSubscriptionAction}
+      locale={locale}
+    />
   ) : null;
 }
 
-export default function AlertsPage() {
+export default async function AlertsPage() {
+  const locale = await currentLocale();
+  const t = dict(locale).alerts;
   return (
-    <ListPage title="Price alerts" intro="We re-check landed prices daily and flag any that hit your target.">
+    <ListPage title={t.title} intro={t.intro}>
       <Suspense fallback={null}>
-        <Notifications />
+        <Notifications locale={locale} />
       </Suspense>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-3xl" />}>
-        <AlertList />
+        <AlertList locale={locale} />
       </Suspense>
     </ListPage>
   );

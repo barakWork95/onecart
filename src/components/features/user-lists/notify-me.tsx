@@ -3,6 +3,8 @@
 import { Bell, BellOff, Share } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ActionResult } from "@/app/[lang]/saved/actions";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 
 type State =
   | "checking"
@@ -16,12 +18,6 @@ type State =
   | "busy";
 
 const SW_URL = "/sw.js";
-
-const DEFAULT_COPY = {
-  label: "Price-alert notifications",
-  off: "Get a notification when a price hits your target.",
-  on: "Notifications are on: this browser hears from us when a price hits your target.",
-} as const;
 
 /** VAPID keys are base64url; PushManager wants the raw bytes. */
 export function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
@@ -58,13 +54,15 @@ export function NotifyMe({
   publicKey,
   save,
   remove,
-  copy = DEFAULT_COPY,
+  copy,
   keepBrowserSubscription = false,
   isSaved,
+  locale = "en",
 }: {
   publicKey: string;
-  save: (subscription: PushSubscriptionJSON) => Promise<ActionResult>;
-  remove: (input: { endpoint: string }) => Promise<ActionResult>;
+  /** Saves the browser with the page's language: its notifications are written in it. */
+  save: (subscription: PushSubscriptionJSON & { locale: Locale }) => Promise<ActionResult>;
+  remove: (input: { endpoint: string; locale: Locale }) => Promise<ActionResult>;
   /** The panel's name and its off/on sentences. */
   copy?: { readonly label: string; readonly off: string; readonly on: string };
   /**
@@ -77,7 +75,10 @@ export function NotifyMe({
    * subscription counts as on (the browser's one subscription serves the list).
    */
   isSaved?: (input: { endpoint: string }) => Promise<boolean>;
+  locale?: Locale;
 }) {
+  const t = dict(locale).notify;
+  const text = copy ?? { label: t.label, off: t.off, on: t.on };
   const [state, setState] = useState<State>("checking");
   const [error, setError] = useState<string | null>(null);
 
@@ -97,7 +98,7 @@ export function NotifyMe({
         settle(on ? "on" : "off");
         // Browsers replace subscriptions over time (and on site-data resets); the server
         // must push to this one, so it's re-saved on every visit. Idempotent.
-        if (on) await save(subscription.toJSON());
+        if (on) await save({ ...subscription.toJSON(), locale });
       } catch {
         settle("unsupported");
       }
@@ -105,7 +106,7 @@ export function NotifyMe({
     return () => {
       cancelled = true;
     };
-  }, [save, isSaved]);
+  }, [save, isSaved, locale]);
 
   async function turnOn() {
     setError(null);
@@ -118,13 +119,13 @@ export function NotifyMe({
         userVisibleOnly: true,
         applicationServerKey: base64UrlToBytes(publicKey),
       });
-      const result = await save(subscription.toJSON());
+      const result = await save({ ...subscription.toJSON(), locale });
       if (result.ok) return setState("on");
       await subscription.unsubscribe();
       setError(result.message);
       setState("off");
     } catch {
-      setError("Couldn't turn on notifications in this browser. Please try again.");
+      setError(t.turnOnFailed);
       setState("off");
     }
   }
@@ -138,11 +139,11 @@ export function NotifyMe({
       if (subscription) {
         const { endpoint } = subscription;
         if (!keepBrowserSubscription) await subscription.unsubscribe();
-        await remove({ endpoint });
+        await remove({ endpoint, locale });
       }
       setState("off");
     } catch {
-      setError("Couldn't turn off notifications. Please try again.");
+      setError(t.turnOffFailed);
       setState("on");
     }
   }
@@ -155,30 +156,18 @@ export function NotifyMe({
     "inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 font-semibold disabled:opacity-60";
 
   return (
-    <section aria-label={copy.label} className={box}>
-      {state === "unsupported" && (
-        <p className="text-muted-foreground">
-          This browser can&apos;t show notifications. Drops still show up on this page.
-        </p>
-      )}
+    <section aria-label={text.label} className={box}>
+      {state === "unsupported" && <p className="text-muted-foreground">{t.unsupported}</p>}
       {state === "ios_install" && (
         <p className="flex items-start gap-2 text-muted-foreground">
           <Share className="mt-0.5 size-4 shrink-0" aria-hidden />
-          <span>
-            To get notifications on iPhone, add OneCart to your Home Screen (Share → Add to Home Screen), then
-            open it from there.
-          </span>
+          <span>{t.iosInstall}</span>
         </p>
       )}
-      {state === "denied" && (
-        <p className="text-muted-foreground">
-          Notifications are blocked for this site. Allow them in your browser&apos;s site settings, then
-          reload this page.
-        </p>
-      )}
+      {state === "denied" && <p className="text-muted-foreground">{t.denied}</p>}
       {(state === "off" || state === "on" || state === "busy") && (
         <>
-          <p className="text-foreground">{state === "on" ? copy.on : copy.off}</p>
+          <p className="text-foreground">{state === "on" ? text.on : text.off}</p>
           {state === "on" ? (
             <button
               type="button"
@@ -186,7 +175,7 @@ export function NotifyMe({
               className={`${button} border border-border text-foreground`}
             >
               <BellOff className="size-4" aria-hidden />
-              Turn off
+              {t.turnOff}
             </button>
           ) : (
             <button
@@ -196,7 +185,7 @@ export function NotifyMe({
               className={`${button} bg-primary text-primary-foreground`}
             >
               <Bell className="size-4" aria-hidden />
-              {state === "busy" ? "Working…" : "Turn on notifications"}
+              {state === "busy" ? t.working : t.turnOn}
             </button>
           )}
         </>

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.describe("languages: English unprefixed, Hebrew under /he", () => {
   test("English keeps its URLs, left to right, linked to its Hebrew version", async ({ page }) => {
@@ -55,5 +55,47 @@ test.describe("languages: English unprefixed, Hebrew under /he", () => {
     await page.goto("/he/c/headphones");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
+  });
+});
+
+test.describe("Saved and Alerts in Hebrew", () => {
+  const lifeP3 = (page: Page) => page.getByRole("article").filter({ hasText: "Soundcore Life P3" }).first();
+
+  test("save from a Hebrew search, see it on the Hebrew Saved page, remove it", async ({ page }) => {
+    await page.goto("/he/saved");
+    await expect(page.getByRole("heading", { level: 1, name: "שמורים" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "עדיין לא שמרתם כלום" })).toBeVisible();
+
+    await page.goto("/he/search?q=wireless+earbuds");
+    await lifeP3(page)
+      .getByRole("button", { name: /^שמירת / })
+      .click();
+    await expect(lifeP3(page).getByRole("button", { name: /^הסרת .* מהשמורים$/ })).toBeVisible();
+
+    await page.getByRole("navigation", { name: "ראשי" }).getByRole("link", { name: "שמורים" }).click();
+    await expect(page).toHaveURL(/\/he\/saved$/);
+    const list = page.getByRole("list", { name: "מוצרים שמורים" });
+    await expect(list).toContainText("בזמן השמירה");
+    await expect(list.getByRole("link", { name: "השוואת המחירים של היום" })).toHaveAttribute(
+      "href",
+      /^\/he\/search\?/,
+    );
+    await list.getByRole("button", { name: /^הסרת .* מהשמורים$/ }).click();
+    await expect(page.getByRole("heading", { name: "עדיין לא שמרתם כלום" })).toBeVisible();
+  });
+
+  test("a refused alert is explained in Hebrew by the server", async ({ page }) => {
+    await page.goto("/he/search?q=wireless+earbuds");
+    await lifeP3(page)
+      .getByRole("button", { name: /^מעקב מחיר עבור / })
+      .click();
+    const sheet = page.getByRole("dialog");
+    await sheet.getByRole("spinbutton").fill("95");
+    await sheet.getByRole("button", { name: "יצירת התראה" }).click();
+    await expect(sheet.getByRole("alert")).toHaveText("בחרו מחיר יעד נמוך מהמחיר של היום.");
+
+    await page.goto("/he/alerts");
+    await expect(page.getByRole("heading", { level: 1, name: "התראות מחיר" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "עדיין אין התראות מחיר" })).toBeVisible();
   });
 });
