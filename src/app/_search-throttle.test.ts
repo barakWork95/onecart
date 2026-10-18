@@ -17,6 +17,8 @@ describe("isSearchRequest", () => {
   it("counts a GET of /search with a query", () => {
     expect(isSearchRequest("GET", url("/search?q=jbl+flip+6"))).toBe(true);
     expect(isSearchRequest("GET", url("/search?q=jbl&page=3"))).toBe(true);
+    // The Hebrew interface's search spends the same store quota.
+    expect(isSearchRequest("GET", url("/he/search?q=jbl"))).toBe(true);
   });
 
   it("ignores the empty search page, other pages and Server Actions", () => {

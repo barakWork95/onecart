@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ActionResult } from "@/app/saved/actions";
+import type { ActionResult } from "@/app/[lang]/saved/actions";
 import { base64UrlToBytes, NotifyMe } from "@/components/features/user-lists/notify-me";
 
 const PUBLIC_KEY = "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U";

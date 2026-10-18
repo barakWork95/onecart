@@ -2,7 +2,7 @@
 
 import { Bookmark } from "lucide-react";
 import { useState, useTransition } from "react";
-import { setSavedAction } from "@/app/saved/actions";
+import { setSavedAction } from "@/app/[lang]/saved/actions";
 import { cn } from "@/lib/utils";
 
 export function SaveButton({

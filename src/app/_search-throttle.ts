@@ -6,6 +6,7 @@ import { searchRateLimits } from "@/config/rate-limits";
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
 import { createUpstashCounterStore } from "@/infrastructure/cache/upstash";
 import { consoleLogger } from "@/infrastructure/logging/console-logger";
+import { splitLocale } from "@/i18n/locales";
 
 /**
  * Per-IP limit on searches, applied in the proxy before a search page renders
@@ -47,5 +48,7 @@ export function clientIp(headers: Headers): string | null {
  * their headers from `request`, so the proxy matcher excludes them instead.
  */
 export function isSearchRequest(method: string, url: URL): boolean {
-  return method === "GET" && url.pathname === "/search" && !!url.searchParams.get("q")?.trim();
+  return (
+    method === "GET" && splitLocale(url.pathname).path === "/search" && !!url.searchParams.get("q")?.trim()
+  );
 }

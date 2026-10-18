@@ -22,4 +22,11 @@ describe("isActive", () => {
     expect(isActive("/saved", "/saved/archive")).toBe(true);
     expect(isActive("/saved", "/savedsearches")).toBe(false);
   });
+
+  it("reads the same section in every language, and behind the English rewrite", () => {
+    expect(isActive("/saved", "/he/saved")).toBe(true);
+    expect(isActive("/search", "/en/search")).toBe(true);
+    expect(isActive("/", "/he")).toBe(true);
+    expect(isActive("/", "/en")).toBe(true);
+  });
 });

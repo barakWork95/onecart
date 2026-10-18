@@ -8,8 +8,8 @@ import type { ProviderId } from "@/domain/shared/provider";
 import { makeProduct } from "@/test/product-factory";
 
 // Server Actions run on the server; cards only need callable stand-ins here.
-jest.mock("@/app/saved/actions", () => ({ setSavedAction: jest.fn() }));
-jest.mock("@/app/alerts/actions", () => ({ createAlertAction: jest.fn() }));
+jest.mock("@/app/[lang]/saved/actions", () => ({ setSavedAction: jest.fn() }));
+jest.mock("@/app/[lang]/alerts/actions", () => ({ createAlertAction: jest.fn() }));
 
 const QUERY: SearchQuery = {
   rawText: "אוזניות אלחוטיות",

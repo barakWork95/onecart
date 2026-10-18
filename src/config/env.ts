@@ -25,6 +25,14 @@ const serverEnvSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  /**
+   * Serve the Hebrew interface under /he, with hreflang links and sitemap entries.
+   * Off: /he answers 404 and nothing links to it (until its text is translated).
+   */
+  HEBREW_UI: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 
   // Search data providers
   ALIEXPRESS_APP_KEY: optional(z.string().min(1)),

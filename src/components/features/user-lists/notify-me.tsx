@@ -2,7 +2,7 @@
 
 import { Bell, BellOff, Share } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { ActionResult } from "@/app/saved/actions";
+import type { ActionResult } from "@/app/[lang]/saved/actions";
 
 type State =
   | "checking"

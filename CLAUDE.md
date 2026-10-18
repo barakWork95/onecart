@@ -167,6 +167,28 @@ SearchBar (client) → /search?q=… (Server Component)
   missing or fails to load. Routing every product photo through the optimizer counted each one
   against the host's quota.
 
+### Languages (English and Hebrew)
+
+- **Routing.** Every page lives under `app/[lang]` (`en`, `he`); `[lang]/layout.tsx` is the root
+  layout and sets `<html lang dir>`. English keeps its unprefixed URLs through `next.config`
+  rewrites (`/c/x` → `/en/c/x`; listed explicitly so `/api`, `/go`, `/internal` and metadata
+  files never match), and `/en/…` 308s to the unprefixed URL. Hebrew is `/he/…`. `/internal`
+  has its own root layout; unmatched URLs render `app/global-not-found.tsx`
+  (`experimental.globalNotFound`). Don't add `dynamicParams` (incompatible with Cache Components).
+- **The language** comes from `currentLocale()` / `getDictionary()` (`src/i18n/server.ts`, via
+  `next/root-params`) in Server Components; never in route handlers (use `src/i18n/enabled.ts`).
+  `usePathname()` reports the rewritten `/en/…` path: compare paths with `splitLocale()`.
+- **`HEBREW_UI`** switches the Hebrew interface on. Off (production until translated): the
+  proxy answers `/he/…` with 404, and no switcher, hreflang or sitemap entry points to it. It's
+  baked into prerendered pages at build time, so changing it needs a rebuild (Vercel redeploys
+  on env changes). E2E runs with it on (`e2e/i18n.spec.ts`).
+- **Text** lives in typed dictionaries (`src/i18n/dictionaries/`): `en.ts` defines the shape,
+  every other language must match it (a missing key is a type error), and a test fails on
+  untranslated strings. Store titles are never translated.
+- **SEO.** Indexable pages set `alternates: await pageAlternates(path)` (canonical, plus en/he/
+  x-default hreflang when Hebrew is live); the sitemap lists each language with its alternates.
+- **Fonts.** `--font-ui` is Plus Jakarta Sans, or Heebo on `:lang(he)` (Jakarta has no Hebrew).
+
 ### UI conventions
 
 - Design mobile first.

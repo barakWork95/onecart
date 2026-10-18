@@ -14,6 +14,13 @@ jest.mock("@/app/_composition", () => ({
   }),
 }));
 
+let hebrew = false;
+jest.mock("@/i18n/enabled", () => ({ hebrewEnabled: () => hebrew }));
+
+beforeEach(() => {
+  hebrew = false;
+});
+
 describe("sitemap.xml", () => {
   it("lists the static pages and indexable category pages on the canonical host", async () => {
     expect((await sitemap()).map((e) => e.url)).toEqual([
@@ -33,5 +40,22 @@ describe("sitemap.xml", () => {
       const path = new URL(url).pathname;
       expect(disallowed.some((d) => path.startsWith(d))).toBe(false);
     }
+  });
+
+  it("with Hebrew live, lists every page in both languages, each linked to the other", async () => {
+    hebrew = true;
+    const entries = await sitemap();
+    expect(entries.map((e) => e.url)).toContain("https://www.onecartapp.com/he/c/headphones");
+    expect(entries).toHaveLength(10);
+    expect(entries.find((e) => e.url === "https://www.onecartapp.com/c")?.alternates).toEqual({
+      languages: {
+        en: "https://www.onecartapp.com/c",
+        he: "https://www.onecartapp.com/he/c",
+        "x-default": "https://www.onecartapp.com/c",
+      },
+    });
+    const rules = robots().rules;
+    const rule = Array.isArray(rules) ? rules[0] : rules;
+    expect([rule?.disallow ?? []].flat()).toContain("/he/search");
   });
 });

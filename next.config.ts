@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
 
+/**
+ * English pages keep their unprefixed URLs: "/c/x" is served by app/[lang] as "/en/c/x".
+ * Listed explicitly so /api, /go, /internal, assets and metadata files never match.
+ */
+const ENGLISH_PAGES = ["/", "/c", "/c/:slug", "/search", "/saved", "/alerts", "/privacy", "/terms"];
+
 const nextConfig: NextConfig = {
   images: {
     // Provider image CDNs (see CLAUDE.md → "Onboarding a new provider").
@@ -12,6 +18,25 @@ const nextConfig: NextConfig = {
     ],
   },
   cacheComponents: true,
+  experimental: {
+    // Pages sit under app/[lang] (no top-level root layout): unmatched URLs need a global 404.
+    globalNotFound: true,
+  },
+  async rewrites() {
+    return {
+      beforeFiles: ENGLISH_PAGES.map((source) => ({
+        source,
+        destination: source === "/" ? "/en" : `/en${source}`,
+      })),
+    };
+  },
+  async redirects() {
+    // One URL per English page: "/en/…" is internal only.
+    return [
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/:path*", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

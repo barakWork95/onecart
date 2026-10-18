@@ -1,4 +1,5 @@
 import { BadgeCheck, Globe2, ShieldCheck } from "lucide-react";
+import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { categoryRows, priceDropCards, savingsCards, trendingCards } from "@/app/_composition";
@@ -8,6 +9,11 @@ import { CategoryRows, CategoryRowsSkeleton } from "@/components/features/home/c
 import { TrendingShowcase, TrendingShowcaseSkeleton } from "@/components/features/home/trending-showcase";
 import { PopularSearches } from "@/components/features/search/popular-searches";
 import { SearchBox } from "@/components/features/search/search-box";
+import { pageAlternates } from "@/i18n/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { alternates: await pageAlternates("/") };
+}
 
 const VALUE_PROPS = [
   {

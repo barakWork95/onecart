@@ -5,7 +5,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { getServices } from "@/app/_composition";
 import { readUserLists } from "@/app/_user-lists";
-import { removeSavedAction } from "@/app/saved/actions";
+import { removeSavedAction } from "@/app/[lang]/saved/actions";
 import { STORE_META } from "@/components/features/store-meta";
 import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-lists/list-page";
 import { RemoveButton } from "@/components/features/user-lists/remove-button";

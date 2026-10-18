@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { adminAccess } from "@/app/_admin-auth";
 import { opsAlertTargets, sendTestOpsAlert } from "@/app/_composition";
-import type { ActionResult } from "@/app/saved/actions";
+import type { ActionResult } from "@/app/[lang]/saved/actions";
 import { env } from "@/config/env";
 import { isAllowedPushEndpoint } from "@/domain/notifications/push";
 

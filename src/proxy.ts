@@ -4,6 +4,7 @@ import { ADMIN_REALM, adminAccess } from "@/app/_admin-auth";
 import { clientIp, isSearchRequest, searchThrottle } from "@/app/_search-throttle";
 import { CATEGORIES, DEMO_CATEGORIES } from "@/config/categories";
 import { env } from "@/config/env";
+import { splitLocale } from "@/i18n/locales";
 
 /** A plain 429 for a client over its search limit; noindex so crawlers drop the URL. */
 function tooManySearches(retryAfterSeconds: number): NextResponse {
@@ -24,12 +25,22 @@ function tooManySearches(retryAfterSeconds: number): NextResponse {
  * Components), which search engines read as a "soft 404".
  */
 function unknownCategory(request: NextRequest): NextResponse | null {
-  const slug = /^\/c\/([^/]+)\/?$/.exec(request.nextUrl.pathname)?.[1];
+  const slug = /^\/c\/([^/]+)\/?$/.exec(splitLocale(request.nextUrl.pathname).path)?.[1];
   if (slug === undefined) return null;
   const categories = env().ONECART_DEMO_PROVIDERS ? DEMO_CATEGORIES : CATEGORIES;
   if (categories.some((c) => c.slug === slug)) return null;
-  // Any unmatched path renders the app's not-found page.
-  return NextResponse.rewrite(new URL("/_category-not-found", request.url), { status: 404 });
+  return notFound(request);
+}
+
+/** A real 404: no route matches this path, so the global not-found page renders. */
+function notFound(request: NextRequest): NextResponse {
+  return NextResponse.rewrite(new URL("/_not-found-page", request.url), { status: 404 });
+}
+
+/** The Hebrew interface while it's switched off (`HEBREW_UI`): it doesn't exist yet. */
+export function hebrewOff(request: NextRequest): NextResponse | null {
+  if (env().HEBREW_UI || splitLocale(request.nextUrl.pathname).locale !== "he") return null;
+  return notFound(request);
 }
 
 const INTERNAL_HEADERS = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" } as const;
@@ -54,7 +65,8 @@ function guardInternal(request: NextRequest): NextResponse | null {
 }
 
 /**
- * 0. 404s unknown category slugs (/c/{slug}); password-protects /internal.
+ * 0. 404s the Hebrew interface while it's off, and unknown category slugs (/c/{slug},
+ *    /he/c/{slug}); password-protects /internal.
  * 1. Throttles searches per IP: each one can call the stores' rate-limited
  *    APIs (see `_search-throttle.ts`).
  * 2. Keeps the Supabase session cookie fresh. Server Components can read but
@@ -62,6 +74,8 @@ function guardInternal(request: NextRequest): NextResponse | null {
  *    returning visitor's Saved/Alerts look empty. No-op without Supabase.
  */
 export async function proxy(request: NextRequest) {
+  const off = hebrewOff(request);
+  if (off) return off;
   const missing = unknownCategory(request);
   if (missing) return missing;
   const internal = request.nextUrl.pathname.startsWith("/internal");
@@ -117,5 +131,20 @@ export const config = {
     "/alerts",
     "/internal/:path*",
     "/c/:slug",
+    // The Hebrew interface: the same pages under /he, plus the switch that hides it.
+    {
+      source: "/he/search",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+    "/he",
+    "/he/c",
+    "/he/c/:slug",
+    "/he/saved",
+    "/he/alerts",
+    "/he/privacy",
+    "/he/terms",
   ],
 };

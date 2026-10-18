@@ -8,7 +8,7 @@ import {
   deleteAlertAction,
   removePushSubscriptionAction,
   savePushSubscriptionAction,
-} from "@/app/alerts/actions";
+} from "@/app/[lang]/alerts/actions";
 import { NotifyMe } from "@/components/features/user-lists/notify-me";
 import { STORE_META } from "@/components/features/store-meta";
 import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-lists/list-page";

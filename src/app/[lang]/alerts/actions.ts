@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { ActionResult } from "@/app/saved/actions";
+import type { ActionResult } from "@/app/[lang]/saved/actions";
 import { userListsService, writePushSubscriptions, writeUserLists } from "@/app/_user-lists";
 import { isAllowedPushEndpoint } from "@/domain/notifications/push";
 import type { AlertError } from "@/application/user-lists/user-lists";

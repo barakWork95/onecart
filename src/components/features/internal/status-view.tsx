@@ -1,4 +1,5 @@
 import { CircleAlert, CircleCheck } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Section, StatusReport } from "@/application/ops/status-report";
 import { isExhausted } from "@/domain/ops/status";
@@ -190,9 +191,9 @@ export function StatusView({ report, alertsPanel }: { report: StatusReport; aler
               <span className="text-2xl font-bold tabular-nums">{n(c.clicks)}</span>{" "}
               <span className="text-muted-foreground">
                 clicks, {n(c.affiliated)} affiliate-tagged.{" "}
-                <a href="/internal/clicks" className="font-medium text-primary underline">
+                <Link href="/internal/clicks" className="font-medium text-primary underline">
                   Click report
-                </a>
+                </Link>
               </span>
             </p>
           )}

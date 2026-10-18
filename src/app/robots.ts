@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/config/site";
+import { hebrewEnabled } from "@/i18n/enabled";
 
 /**
  * Every /search URL is a live query to the stores' APIs: SerpApi bills each
@@ -12,7 +13,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/search", "/go/", "/api/", "/saved", "/alerts", "/internal"],
+      disallow: [
+        "/search",
+        "/go/",
+        "/api/",
+        "/saved",
+        "/alerts",
+        "/internal",
+        ...(hebrewEnabled() ? ["/he/search", "/he/saved", "/he/alerts"] : []),
+      ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

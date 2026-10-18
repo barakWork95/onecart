@@ -1,9 +1,11 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { DesktopNav } from "@/components/layout/desktop-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
-export function AppHeader() {
+/** `language`: the language switcher, when the page has another language. */
+export function AppHeader({ language = null }: { language?: ReactNode } = {}) {
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/75">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-4 md:h-16">
@@ -24,6 +26,7 @@ export function AppHeader() {
           >
             ₪ ILS
           </span>
+          {language}
           <ThemeToggle />
         </div>
       </div>

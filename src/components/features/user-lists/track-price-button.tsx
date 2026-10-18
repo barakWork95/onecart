@@ -2,7 +2,7 @@
 
 import { BellRing, X } from "lucide-react";
 import { useState, useTransition } from "react";
-import { createAlertAction } from "@/app/alerts/actions";
+import { createAlertAction } from "@/app/[lang]/alerts/actions";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Drawer,

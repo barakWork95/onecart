@@ -36,7 +36,7 @@ export function CategoryRows({ rows }: { rows: readonly CategoryRowView[] }) {
                 className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline"
               >
                 See all<span className="sr-only"> {category.label.toLowerCase()}</span>
-                <ArrowRight className="size-4" aria-hidden />
+                <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
               </Link>
             </div>
             <ol className={ROW} aria-label={`${category.label} products`}>

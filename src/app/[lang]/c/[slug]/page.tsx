@@ -7,6 +7,7 @@ import { CategoryProductCard } from "@/components/features/category/category-pro
 import { HowWePrice } from "@/components/features/category/how-we-price";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
 import { SITE_URL } from "@/config/site";
+import { pageAlternates } from "@/i18n/server";
 import { formatSnapshotTime } from "@/lib/format";
 
 /** Every category is prebuilt; its data refreshes with the warm-up (see `categoryPageData`). */
@@ -14,23 +15,28 @@ export async function generateStaticParams() {
   return categoryList().map(({ slug }) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/c/[slug]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/[lang]/c/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const data = await categoryPageData(slug);
   if (!data) return {};
   const { category, indexable } = data.page;
-  const path = `/c/${category.slug}`;
+  const alternates = await pageAlternates(`/c/${category.slug}`);
   return {
     title: category.seoTitle,
     description: category.description,
-    alternates: { canonical: path },
-    openGraph: { title: category.seoTitle, description: category.description, url: path, type: "website" },
+    alternates,
+    openGraph: {
+      title: category.seoTitle,
+      description: category.description,
+      url: alternates.canonical,
+      type: "website",
+    },
     // Thin until the warm-up fills it: followed, not indexed.
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
-export default async function CategoryPageRoute({ params }: PageProps<"/c/[slug]">) {
+export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c/[slug]">) {
   const { slug } = await params;
   const data = await categoryPageData(slug);
   if (!data) notFound();

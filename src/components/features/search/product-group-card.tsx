@@ -187,7 +187,7 @@ export function ProductGroupCard({
               )}
             >
               View deal {formatMoney(best.price.total)}
-              <ArrowRight className="size-4" aria-hidden />
+              <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
             </a>
           )}
           {storeCount === 1 && checkStore && (

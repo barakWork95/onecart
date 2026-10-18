@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Results are live store queries (see robots.ts); they're never worth indexing.
 export const metadata: Metadata = { title: "Compare prices", robots: { index: false, follow: false } };
 
-type SearchParams = PageProps<"/search">["searchParams"];
+type SearchParams = PageProps<"/[lang]/search">["searchParams"];
 
 async function Results({ searchParams }: { searchParams: SearchParams }) {
   // Live prices, clocks and caches: always render at request time, never prerender.
@@ -66,7 +66,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
   );
 }
 
-export default function SearchPage({ searchParams }: PageProps<"/search">) {
+export default function SearchPage({ searchParams }: PageProps<"/[lang]/search">) {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 pt-4 pb-8">
       <h1 className="sr-only">Compare prices across stores</h1>

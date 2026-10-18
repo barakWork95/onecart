@@ -13,13 +13,17 @@ describe("parseServerEnv", () => {
     expect(parseServerEnv({})).toMatchObject({
       NODE_ENV: "development",
       ONECART_DEMO_PROVIDERS: false,
+      HEBREW_UI: false,
       SEARCH_CACHE_TTL_SECONDS: 86_400,
     });
   });
 
   it("parses the demo flag and numeric TTL", () => {
-    expect(parseServerEnv({ ONECART_DEMO_PROVIDERS: "true", SEARCH_CACHE_TTL_SECONDS: "60" })).toMatchObject({
+    expect(
+      parseServerEnv({ ONECART_DEMO_PROVIDERS: "true", HEBREW_UI: "true", SEARCH_CACHE_TTL_SECONDS: "60" }),
+    ).toMatchObject({
       ONECART_DEMO_PROVIDERS: true,
+      HEBREW_UI: true,
       SEARCH_CACHE_TTL_SECONDS: 60,
     });
   });

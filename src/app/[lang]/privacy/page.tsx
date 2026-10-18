@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/i18n/server";
 import Link from "next/link";
 import { ContactLine, LegalPage } from "@/components/features/legal/legal-page";
 import { env } from "@/config/env";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "What OneCart collects, why, who processes it and how long it's kept.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Privacy Policy",
+    description: "What OneCart collects, why, who processes it and how long it's kept.",
+    alternates: await pageAlternates("/privacy"),
+  };
+}
 
 export default function PrivacyPage() {
   const email = env().CONTACT_EMAIL;

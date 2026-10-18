@@ -9,12 +9,23 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * The interface font, per language: Plus Jakarta Sans has no Hebrew letters, so Hebrew
+ * pages use Heebo (Hebrew and Latin). The fonts are loaded in app/[lang]/layout.tsx.
+ */
+:root {
+  --font-ui: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+:root:lang(he) {
+  --font-ui: var(--font-heebo), ui-sans-serif, system-ui, sans-serif;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-jakarta);
+  --font-sans: var(--font-ui);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-jakarta);
+  --font-heading: var(--font-ui);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

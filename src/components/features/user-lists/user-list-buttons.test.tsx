@@ -5,8 +5,10 @@ import { TrackPriceButton } from "@/components/features/user-lists/track-price-b
 
 const setSavedAction = jest.fn();
 const createAlertAction = jest.fn();
-jest.mock("@/app/saved/actions", () => ({ setSavedAction: (input: unknown) => setSavedAction(input) }));
-jest.mock("@/app/alerts/actions", () => ({
+jest.mock("@/app/[lang]/saved/actions", () => ({
+  setSavedAction: (input: unknown) => setSavedAction(input),
+}));
+jest.mock("@/app/[lang]/alerts/actions", () => ({
   createAlertAction: (input: unknown) => createAlertAction(input),
 }));
 

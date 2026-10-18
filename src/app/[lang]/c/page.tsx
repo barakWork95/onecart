@@ -3,14 +3,17 @@ import Link from "next/link";
 import { categoryList, categoryPageData } from "@/app/_composition";
 import { Breadcrumbs } from "@/components/features/category/breadcrumbs";
 import { ProductImage } from "@/components/features/search/product-image";
+import { pageAlternates } from "@/i18n/server";
 import type { CategoryPage } from "@/application/deals/category-page";
 
-export const metadata: Metadata = {
-  title: "Categories: prices in Israel compared",
-  description:
-    "Branded electronics and everyday gadgets for the kitchen, car and desk, compared by the full price delivered to Israel.",
-  alternates: { canonical: "/c" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Categories: prices in Israel compared",
+    description:
+      "Branded electronics and everyday gadgets for the kitchen, car and desk, compared by the full price delivered to Israel.",
+    alternates: await pageAlternates("/c"),
+  };
+}
 
 /** Branded products first, then everyday gadgets matched by photo. */
 const SECTIONS = [

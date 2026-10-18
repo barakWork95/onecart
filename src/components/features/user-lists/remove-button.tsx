@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
-import type { ActionResult } from "@/app/saved/actions";
+import type { ActionResult } from "@/app/[lang]/saved/actions";
 
 /** Delete button for Saved/Alerts rows; the server re-renders the list on success. */
 export function RemoveButton({
