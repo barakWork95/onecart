@@ -33,7 +33,7 @@ describe("CategoryRows", () => {
       within(row)
         .getAllByRole("article")
         .map((a) => a.getAttribute("aria-labelledby")),
-    ).toEqual(["trending-sony-wh-ch720n", "trending-jbl-tune-520bt"]);
+    ).toEqual(["category-sony-wh-ch720n", "category-jbl-tune-520bt"]);
     expect(within(row).getByRole("link", { name: "Sony WH-CH720N" })).toHaveAttribute(
       "href",
       "/search?q=sony+wh-ch720n",
@@ -41,13 +41,10 @@ describe("CategoryRows", () => {
     expect(screen.getByRole("region", { name: "Gaming" })).toBeInTheDocument();
   });
 
-  it("links each row to its category search, with an accessible name per row", () => {
+  it("links each row to its category page, with an accessible name per row", () => {
     render(<CategoryRows rows={[HEADPHONES, GAMING]} />);
-    expect(screen.getByRole("link", { name: "See all headphones" })).toHaveAttribute(
-      "href",
-      "/search?q=wireless+headphones",
-    );
-    expect(screen.getByRole("link", { name: "See all gaming" })).toHaveAttribute("href", "/search?q=gaming");
+    expect(screen.getByRole("link", { name: "See all headphones" })).toHaveAttribute("href", "/c/headphones");
+    expect(screen.getByRole("link", { name: "See all gaming" })).toHaveAttribute("href", "/c/gaming");
   });
 
   it("renders nothing without rows; the skeleton is hidden from assistive tech", () => {

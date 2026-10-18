@@ -433,12 +433,24 @@ SearchBar (client) → /search?q=… (Server Component)
       composition root), so it never spends shoppers' calls. Shoppers keep
       `AMAZON_DAILY_CALL_BUDGET` (default 3 calls × 2 pages). Total: 6 + 2 = 8 credits a day ≈
       248 a month, under the free plan's 250. Change both together.
-- **Homepage category rows** (`config/home.ts`, `categoryRows()` in the composition root): six
-  categories × five specific products (brand + model; `home.test.ts` checks each is a specific,
+- **Homepage category rows** (`config/categories.ts`, `categoryRows()` in the composition root): six
+  categories × ten specific products (brand + model; `home.test.ts` checks each is a specific,
   non-accessory query and none repeats a trending one). Each card is built like a trending card,
   from cache only; empty rows are hidden. The warm-trending cron refreshes them after the trending
   queries, 3 at a time, on `TRENDING_WARM_STORES` (default `ebay,aliexpress`; ~35 calls a day
   each, ~15s locally). Amazon's rotation stays on the trending queries.
+- **Category pages** (`/c`, `/c/[slug]`, for search engines): built only from cached results via
+  `categoryPageData()` (`"use cache"`, `cacheLife("hours")`, tag `category:{slug}`), so a crawl never
+  reaches Redis, let alone a store. Products are picked by `createFeaturedLookup`, the same as
+  homepage cards, and `CategoryProductCard` shows the full landed-price breakdown.
+  - The warm-up revalidates each tag; the first visit after it may still get the previous copy
+    while it rebuilds (E2E polls for the fresh one).
+  - Fewer than `MIN_INDEXABLE_PRODUCTS` (3) priced products → `noindex, follow` and left out of
+    the sitemap. Unknown slugs get a real 404 from `src/proxy.ts` (the page's own `notFound()`
+    would come after a streamed 200).
+  - JSON-LD: `BreadcrumbList` + `ItemList` of names only, no prices (our landed price isn't the
+    store's price). Category copy states no tax figures; `HowWePrice` reads them from the policy.
+  - Linked from homepage "See all", the footer (`SiteFooter categories`), `/c` and the sitemap.
 - **Price history and "Price drops"** (`price_observations`, `application/deals/price-history.ts`):
   after each warm run, the cron upserts one row per featurable, named-product listing per Israeli
   day (`observationsFrom`), prunes days older than 120, and checks each product's last 30 days.

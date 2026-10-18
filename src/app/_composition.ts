@@ -1,7 +1,10 @@
 import "server-only";
 
 import { randomBytes } from "node:crypto";
+import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { after } from "next/server";
+import { createCategoryPage, type CategoryPage } from "@/application/deals/category-page";
+import { categoryBySlug } from "@/domain/deals/category";
 import { createClickReport, israelDay, type ClickReport } from "@/application/affiliate/click-report";
 import {
   createRecordPriceHistory,
@@ -37,7 +40,7 @@ import { FALLBACK_FX_RATES } from "@/config/fallback-fx-rates";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
 import { DEFAULT_AMAZON_WARM_PER_DAY, DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
-import { DEMO_HOME_CATEGORIES, HOME_CATEGORIES, type HomeCategory } from "@/config/home";
+import { CATEGORIES, DEMO_CATEGORIES, type Category } from "@/config/categories";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
 import { amazonSource, ebayCredentials, env } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
@@ -83,10 +86,11 @@ import { createQueryTranslator } from "@/infrastructure/translation/query-transl
 interface Services {
   readonly searchProducts: SearchProducts;
   readonly trendingShowcase: TrendingShowcase;
+  readonly categoryPage: ReturnType<typeof createCategoryPage>;
   readonly trendingQueries: readonly TrendingQuery[];
   readonly trendingWarmStores: readonly ProviderId[];
-  /** Homepage category rows; their products are warmed with the trending ones. */
-  readonly homeCategories: readonly HomeCategory[];
+  /** Categories (homepage rows and /c pages); their products are warmed with the trending ones. */
+  readonly categories: readonly Category[];
   /** Amazon trending queries refreshed per day (0: Amazon isn't warmed). */
   readonly amazonWarmPerDay: number;
   /** The search path for cache warming: same stores and cache, its own Amazon budget. */
@@ -222,6 +226,10 @@ function buildServices(): Services {
         : { kind: "none" };
 
   const priceDropBoard = createRedisPriceDropBoard(redis);
+  const showcaseStores = providers.map((p) => ({
+    id: p.id,
+    ...(p.cacheScope ? { cacheScope: p.cacheScope } : {}),
+  }));
 
   const searchDeps = {
     providers,
@@ -286,13 +294,10 @@ function buildServices(): Services {
       defer: after,
       logger,
     }),
-    trendingShowcase: createTrendingShowcase({
-      cache: searchCache,
-      stores: providers.map((p) => ({ id: p.id, ...(p.cacheScope ? { cacheScope: p.cacheScope } : {}) })),
-      logger,
-    }),
+    trendingShowcase: createTrendingShowcase({ cache: searchCache, stores: showcaseStores, logger }),
+    categoryPage: createCategoryPage({ cache: searchCache, stores: showcaseStores, logger }),
     trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
-    homeCategories: demoMode ? DEMO_HOME_CATEGORIES : HOME_CATEGORIES,
+    categories: demoMode ? DEMO_CATEGORIES : CATEGORIES,
     // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.
     trendingWarmStores: demoMode
       ? providers.map((p) => p.id)
@@ -432,7 +437,7 @@ const CATEGORIES_KEY = Symbol.for("onecart.categoryRowsMemo");
 const DROPS_KEY = Symbol.for("onecart.priceDropsMemo");
 
 export interface CategoryRow {
-  readonly category: HomeCategory;
+  readonly category: Category;
   readonly cards: readonly TrendingCard[];
 }
 
@@ -465,9 +470,9 @@ export async function categoryRows(): Promise<CategoryRow[]> {
   const holder = globalThis as MemoHolder;
   const memo = holder[CATEGORIES_KEY];
   if (memo && fresh(memo)) return memo.value;
-  const { trendingShowcase, homeCategories } = getServices();
+  const { trendingShowcase, categories } = getServices();
   const rows = await Promise.all(
-    homeCategories.map(async (category) => ({ category, cards: await trendingShowcase(category.products) })),
+    categories.map(async (category) => ({ category, cards: await trendingShowcase(category.products) })),
   );
   const filled = rows.filter((row) => row.cards.length > 0);
   if (filled.length > 0) holder[CATEGORIES_KEY] = { value: filled, atMs: Date.now() };
@@ -519,7 +524,7 @@ export async function savingsCards(): Promise<SavingsCard[]> {
   return selectSavings([...trending, ...rows.flatMap((r) => r.cards)]);
 }
 
-/** Category searches warmed at once: ~30 queries finish in well under a minute. */
+/** Category searches warmed at once: ~60 queries finish in well under a minute. */
 const CATEGORY_WARM_CONCURRENCY = 3;
 
 /**
@@ -527,7 +532,7 @@ const CATEGORY_WARM_CONCURRENCY = 3;
  * product on the daily stores, so the homepage has fresh cached results (cron).
  */
 export async function warmTrending() {
-  const { warmSearchProducts, trendingQueries, homeCategories, trendingWarmStores, amazonWarmPerDay } =
+  const { warmSearchProducts, trendingQueries, categories, trendingWarmStores, amazonWarmPerDay } =
     getServices();
   const holder = globalThis as MemoHolder;
   delete holder[SHOWCASE_KEY];
@@ -547,14 +552,54 @@ export async function warmTrending() {
     },
     { onWarmed },
   );
-  const categories = await warmTrendingSearches(
+  const categoriesWarmed = await warmTrendingSearches(
     warmSearchProducts,
-    homeCategories.flatMap((c) => c.products),
+    categories.flatMap((c) => c.products),
     { daily: trendingWarmStores, rotating: [], atMs },
     { concurrency: CATEGORY_WARM_CONCURRENCY, onWarmed },
   );
   delete holder[DROPS_KEY];
-  return { trending, categories, priceHistory: await recordPrices(observed, today) };
+  // The category pages are cached HTML: rebuilt on their next visit (not served stale).
+  for (const { slug } of categories) revalidateTag(categoryTag(slug), { expire: 0 });
+  return { trending, categories: categoriesWarmed, priceHistory: await recordPrices(observed, today) };
+}
+
+/** Cache tag of one category page's data; the warm-up revalidates it. */
+export const categoryTag = (slug: string) => `category:${slug}`;
+
+/** The categories, for routes, the sitemap and navigation. */
+export function categoryList(): readonly { readonly slug: string; readonly label: string }[] {
+  return getServices().categories.map(({ slug, label }) => ({ slug, label }));
+}
+
+export interface CategoryPageData {
+  readonly page: CategoryPage;
+  /** Best listing id → signed /go href. */
+  readonly goLinks: Readonly<Record<string, string>>;
+}
+
+/**
+ * A category page's data, from cached search results only, cached as the
+ * page itself: crawlers never reach Redis, let alone a store. Refreshed when
+ * the warm-up revalidates its tag, or hourly if a run is missed. Null for an
+ * unknown slug.
+ */
+export async function categoryPageData(slug: string): Promise<CategoryPageData | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(categoryTag(slug));
+  const { categories, categoryPage, linkCodec } = getServices();
+  const category = categoryBySlug(categories, slug);
+  if (!category) return null;
+  const page = await categoryPage(category);
+  const goLinks: Record<string, string> = {};
+  for (const { bestListing } of page.products)
+    goLinks[bestListing.id] = linkCodec.encode({
+      id: bestListing.id,
+      provider: bestListing.provider,
+      url: bestListing.productUrl,
+    });
+  return { page, goLinks };
 }
 
 /** The /go/[id] decision; see `createResolveOutboundLink`. */

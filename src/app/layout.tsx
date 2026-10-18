@@ -3,6 +3,7 @@ import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { categoryList } from "@/app/_composition";
 import { THEME_INIT_SCRIPT } from "@/components/layout/theme";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/config/site";
 import "./globals.css";
@@ -56,7 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <AppHeader />
         {children}
-        <SiteFooter />
+        <SiteFooter categories={categoryList()} />
         <BottomNav />
       </body>
     </html>

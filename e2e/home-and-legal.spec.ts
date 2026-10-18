@@ -24,7 +24,7 @@ test.describe("homepage trending showcase", () => {
     await expect(lifeP3.getByText(/^Prices as of /)).toBeVisible();
   });
 
-  test("category rows show cached products and link to the category search", async ({ page }) => {
+  test("category rows show cached products and link to the category page", async ({ page }) => {
     await page.goto("/");
     const headphones = page.getByRole("region", { name: "Headphones" });
     const row = headphones.getByRole("list", { name: "Headphones products" });
@@ -32,10 +32,10 @@ test.describe("homepage trending showcase", () => {
       "href",
       "/search?q=soundcore+space+a40",
     );
-    await expect(row.getByText(/^Prices as of /)).toBeVisible();
+    await expect(row.getByText(/^Prices as of /).first()).toBeVisible();
     await expect(headphones.getByRole("link", { name: "See all headphones" })).toHaveAttribute(
       "href",
-      "/search?q=wireless+earbuds",
+      "/c/headphones",
     );
   });
 

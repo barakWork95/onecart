@@ -17,10 +17,31 @@ export const LEGAL_LINKS = [
  * mobile its bottom padding clears the fixed tab bar (h-16 + safe area); from
  * `md` up the tab bar is gone, so it doesn't.
  */
-export function SiteFooter() {
+export function SiteFooter({
+  categories = [],
+}: {
+  /** Category pages to link (`/c/{slug}`): crawlable paths into them from every page. */
+  categories?: readonly { readonly slug: string; readonly label: string }[];
+}) {
   return (
     <footer className="border-t border-border/60 pb-[calc(4rem+env(safe-area-inset-bottom)+1.25rem)] md:pb-6">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 pt-5 text-center text-xs text-muted-foreground sm:text-start">
+        {categories.length > 0 && (
+          <nav aria-label="Categories">
+            <ul className="flex flex-wrap justify-center gap-x-4 sm:justify-start">
+              {categories.map(({ slug, label }) => (
+                <li key={slug}>
+                  <Link
+                    href={`/c/${slug}`}
+                    className="inline-flex min-h-11 items-center font-medium text-foreground/80 underline-offset-4 hover:underline"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
         <p className="max-w-3xl leading-relaxed">
           {AFFILIATE_DISCLOSURE} {AMAZON_ASSOCIATES_DISCLOSURE}
         </p>

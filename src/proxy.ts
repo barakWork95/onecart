@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_REALM, adminAccess } from "@/app/_admin-auth";
 import { clientIp, isSearchRequest, searchThrottle } from "@/app/_search-throttle";
+import { CATEGORIES, DEMO_CATEGORIES } from "@/config/categories";
 import { env } from "@/config/env";
 
 /** A plain 429 for a client over its search limit; noindex so crawlers drop the URL. */
@@ -15,6 +16,20 @@ function tooManySearches(retryAfterSeconds: number): NextResponse {
       "Content-Type": "text/plain; charset=utf-8",
     },
   });
+}
+
+/**
+ * /c/{slug} for a category that doesn't exist: a real 404. The page itself
+ * can only call notFound() after its shell has streamed with a 200 (Cache
+ * Components), which search engines read as a "soft 404".
+ */
+function unknownCategory(request: NextRequest): NextResponse | null {
+  const slug = /^\/c\/([^/]+)\/?$/.exec(request.nextUrl.pathname)?.[1];
+  if (slug === undefined) return null;
+  const categories = env().ONECART_DEMO_PROVIDERS ? DEMO_CATEGORIES : CATEGORIES;
+  if (categories.some((c) => c.slug === slug)) return null;
+  // Any unmatched path renders the app's not-found page.
+  return NextResponse.rewrite(new URL("/_category-not-found", request.url), { status: 404 });
 }
 
 const INTERNAL_HEADERS = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" } as const;
@@ -39,7 +54,7 @@ function guardInternal(request: NextRequest): NextResponse | null {
 }
 
 /**
- * 0. Password-protects /internal.
+ * 0. 404s unknown category slugs (/c/{slug}); password-protects /internal.
  * 1. Throttles searches per IP: each one can call the stores' rate-limited
  *    APIs (see `_search-throttle.ts`).
  * 2. Keeps the Supabase session cookie fresh. Server Components can read but
@@ -47,6 +62,8 @@ function guardInternal(request: NextRequest): NextResponse | null {
  *    returning visitor's Saved/Alerts look empty. No-op without Supabase.
  */
 export async function proxy(request: NextRequest) {
+  const missing = unknownCategory(request);
+  if (missing) return missing;
   const internal = request.nextUrl.pathname.startsWith("/internal");
   if (internal) {
     const refused = guardInternal(request);
@@ -99,5 +116,6 @@ export const config = {
     "/saved",
     "/alerts",
     "/internal/:path*",
+    "/c/:slug",
   ],
 };

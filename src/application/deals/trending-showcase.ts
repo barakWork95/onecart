@@ -5,7 +5,7 @@ import type { IsoDateTime } from "@/domain/product/unified-product";
 import type { MatchBasis } from "@/domain/matching/product-matcher";
 import type { SearchResultCache } from "@/domain/search/ports";
 import type { SearchResponse } from "@/domain/search/search-response";
-import { bestOffer } from "@/domain/search/product-group";
+import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import { intentTier } from "@/domain/search/result-ordering";
 import { searchIntent } from "@/domain/search/search-intent";
 import { rotationFor, rotationTtlSeconds } from "@/domain/deals/warm-rotation";
@@ -50,16 +50,26 @@ export interface TrendingShowcaseDeps {
 
 const DESTINATION = { country: "IL" } as const;
 
+/** The product a query names, as cached: what a card or a category page features. */
+export interface Featured {
+  /** The query, normalized. */
+  readonly query: string;
+  readonly group: ProductGroup;
+  /** When the oldest price behind it was fetched: it's a snapshot. */
+  readonly pricesAsOf: IsoDateTime;
+}
+
 /**
- * Homepage "Trending" cards, built only from cached search results: the
- * homepage must never call a store's API (crawlers are welcome there; store
- * quotas are not). A product with nothing cached is simply left out. Each
- * card is the search's top result, so it matches the comparison it links to.
+ * Reads a query's cached results (never a store's API: crawlers are welcome
+ * on pages built from this; store quotas are not) and picks the product the
+ * query names that a page may feature: the search's top result among
+ * featurable listings, never an accessory or a related item, at a typical
+ * price. Null when nothing suitable is cached.
  */
-export function createTrendingShowcase(deps: TrendingShowcaseDeps) {
+export function createFeaturedLookup(deps: TrendingShowcaseDeps) {
   const logger = deps.logger ?? noopLogger;
 
-  async function cardFor({ label, query }: TrendingQuery): Promise<TrendingCard | null> {
+  return async function featured(query: string): Promise<Featured | null> {
     const text = normalizeQueryText(query);
     const entries = await Promise.all(
       deps.stores.map(async (store) => {
@@ -90,31 +100,52 @@ export function createTrendingShowcase(deps: TrendingShowcaseDeps) {
     const named = groups.filter((g) => !g.isAccessory && intentTier(g, intent) === 0);
     // …at a typical price for it: the stores' top result can be an outlier.
     const typical = medianAmount(named.map((g) => bestOffer(g).price.total.amountMinor));
-    const top = named.find(
+    const group = named.find(
       (g) => typical !== null && isTypicalPrice(bestOffer(g).price.total.amountMinor, typical),
     );
-    if (!top) return null;
-
-    const best = bestOffer(top);
+    if (!group) return null;
     return {
-      label,
       query: text,
-      title: top.title,
-      imageUrl: top.imageUrl,
-      best: { provider: best.provider, total: best.price.total },
-      stores: top.offers.map((offer) => ({
-        provider: offer.provider,
-        total: offer.price.total,
-        listings: top.listings.filter((l) => l.provider === offer.provider).length,
-      })),
-      unshippedStores: top.unavailable.map((u) => u.provider),
-      matchedBy: top.matchedBy,
-      pricesAsOf: cached.map((e) => e.cachedAt).sort()[0] ?? best.fetchedAt,
+      group,
+      pricesAsOf: cached.map((e) => e.cachedAt).sort()[0] ?? bestOffer(group).fetchedAt,
     };
-  }
+  };
+}
 
+/** A featured product as a compact comparison card. */
+export function toTrendingCard(label: string, { query, group, pricesAsOf }: Featured): TrendingCard {
+  const best = bestOffer(group);
+  return {
+    label,
+    query,
+    title: group.title,
+    imageUrl: group.imageUrl,
+    best: { provider: best.provider, total: best.price.total },
+    stores: group.offers.map((offer) => ({
+      provider: offer.provider,
+      total: offer.price.total,
+      listings: group.listings.filter((l) => l.provider === offer.provider).length,
+    })),
+    unshippedStores: group.unavailable.map((u) => u.provider),
+    matchedBy: group.matchedBy,
+    pricesAsOf,
+  };
+}
+
+/**
+ * Homepage "Trending" cards, from cached search results only. A product with
+ * nothing suitable cached is left out. Each card is the search's top result,
+ * so it matches the comparison it links to.
+ */
+export function createTrendingShowcase(deps: TrendingShowcaseDeps) {
+  const featured = createFeaturedLookup(deps);
   return async function trendingCards(queries: readonly TrendingQuery[]): Promise<TrendingCard[]> {
-    const cards = await Promise.all(queries.map(cardFor));
+    const cards = await Promise.all(
+      queries.map(async ({ label, query }) => {
+        const found = await featured(query);
+        return found ? toTrendingCard(label, found) : null;
+      }),
+    );
     return cards.flatMap((card) => (card ? [card] : []));
   };
 }

@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
-import { TrendingCardView, trendingHref } from "@/components/features/home/trending-card";
+import { TrendingCardView } from "@/components/features/home/trending-card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export interface CategoryRowView {
@@ -30,10 +30,9 @@ export function CategoryRows({ rows }: { rows: readonly CategoryRowView[] }) {
               <h2 id={headingId} className="text-xl font-bold tracking-tight text-foreground">
                 {category.label}
               </h2>
-              {/* A live search: never prefetched, so it can't spend store quota on its own. */}
+              {/* The category's own page: cached, indexable, and free (no store calls). */}
               <Link
-                href={trendingHref(category.searchQuery)}
-                prefetch={false}
+                href={`/c/${category.slug}`}
                 className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline"
               >
                 See all<span className="sr-only"> {category.label.toLowerCase()}</span>
@@ -43,7 +42,7 @@ export function CategoryRows({ rows }: { rows: readonly CategoryRowView[] }) {
             <ol className={ROW} aria-label={`${category.label} products`}>
               {cards.map((card) => (
                 <li key={card.query} className={ITEM}>
-                  <TrendingCardView card={card} />
+                  <TrendingCardView card={card} idPrefix="category" />
                 </li>
               ))}
             </ol>
