@@ -5,7 +5,6 @@
 insert into auth.users (id) values
   ('00000000-0000-0000-0000-0000000000c1'),
   ('00000000-0000-0000-0000-0000000000c2');
-grant select, insert, update, delete on public.price_alerts to service_role;
 
 create function pg_temp.act_as(uid text) returns void language plpgsql as $$
 begin

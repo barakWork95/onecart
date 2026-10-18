@@ -6,7 +6,8 @@
 insert into auth.users (id) values
   ('00000000-0000-0000-0000-00000000000a'),
   ('00000000-0000-0000-0000-00000000000b');
-grant select, insert, update, delete on public.saved_items, public.price_alerts to service_role;
+-- No test-side grants: the service role's access must come from the migrations alone (a grant
+-- added here once hid that production's service role couldn't read price_alerts).
 
 create function pg_temp.act_as(uid text) returns void language plpgsql as $$
 begin

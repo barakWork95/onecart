@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseOpsStats } from "@/infrastructure/db/supabase-ops-stats";
 
-type Result = { count: number | null; error: { message: string } | null };
+type Result = { count: number | null; error: { message: string; code?: string } | null; status?: number };
 
 function fakeClient(respond: (chain: string[]) => Result) {
   const chains: string[][] = [];
@@ -57,9 +57,24 @@ describe("createSupabaseOpsStats", () => {
     ]);
   });
 
+  it("names the failing count and its HTTP status when the error has no body (HEAD)", async () => {
+    const denied = fakeClient((c) =>
+      c[0] === "from(price_alerts)"
+        ? { count: null, error: { message: "" }, status: 401 }
+        : { count: 1, error: null },
+    ).client;
+    await expect(createSupabaseOpsStats(denied).push()).rejects.toThrow(
+      "pushStats price_alerts active: HTTP 401",
+    );
+    const coded = fakeClient(() => ({ count: null, error: { message: "", code: "42501" } })).client;
+    await expect(createSupabaseOpsStats(coded).push()).rejects.toThrow("HTTP ? 42501");
+  });
+
   it("throws database errors, and reads a missing count as zero", async () => {
     const failing = fakeClient(() => ({ count: null, error: { message: "boom" } })).client;
-    await expect(createSupabaseOpsStats(failing).push()).rejects.toThrow("pushStats: boom");
+    await expect(createSupabaseOpsStats(failing).push()).rejects.toThrow(
+      "pushStats push_subscriptions: boom",
+    );
     const empty = fakeClient(() => ({ count: null, error: null })).client;
     expect(await createSupabaseOpsStats(empty).priceObservationsByDay(["2026-10-19"])).toEqual([
       { day: "2026-10-19", count: 0 },
