@@ -46,7 +46,10 @@ describe("sitemap.xml", () => {
     hebrew = true;
     const entries = await sitemap();
     expect(entries.map((e) => e.url)).toContain("https://www.onecartapp.com/he/c/headphones");
-    expect(entries).toHaveLength(10);
+    // The legal pages are English only: listed once, with no Hebrew alternate.
+    expect(entries.map((e) => e.url)).not.toContain("https://www.onecartapp.com/he/privacy");
+    expect(entries.find((e) => e.url === "https://www.onecartapp.com/privacy")?.alternates).toBeUndefined();
+    expect(entries).toHaveLength(8);
     expect(entries.find((e) => e.url === "https://www.onecartapp.com/c")?.alternates).toEqual({
       languages: {
         en: "https://www.onecartapp.com/c",

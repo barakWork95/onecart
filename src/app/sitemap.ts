@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { categoryList, categoryPageData } from "@/app/_composition";
 import { SITE_URL } from "@/config/site";
 import { hebrewEnabled } from "@/i18n/enabled";
-import { alternatesFor, LOCALES, type Locale } from "@/i18n/locales";
+import { alternatesFor, ENGLISH_ONLY_PAGES, LOCALES, type Locale } from "@/i18n/locales";
 
 type Entry = MetadataRoute.Sitemap[number];
 
@@ -20,28 +20,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pages.flatMap((data): [string, Entry["changeFrequency"], number][] =>
       data?.page.indexable ? [[`/c/${data.page.category.slug}`, "daily", 0.8]] : [],
     ),
-    ["/privacy", "yearly", 0.2],
-    ["/terms", "yearly", 0.2],
   ];
   const hebrew = hebrewEnabled();
   const locales: readonly Locale[] = hebrew ? LOCALES : ["en"];
-  return locales.flatMap((locale) =>
-    paths.map(([path, changeFrequency, priority]): Entry => {
-      const { canonical, languages } = alternatesFor(locale, path, { hebrew });
-      return {
-        url: `${SITE_URL}${canonical}`,
-        changeFrequency,
-        priority,
-        ...(languages
-          ? {
-              alternates: {
-                languages: Object.fromEntries(
-                  Object.entries(languages).map(([lang, href]) => [lang, `${SITE_URL}${href}`]),
-                ),
-              },
-            }
-          : {}),
-      };
-    }),
-  );
+  // The legal pages exist in English only (/he/privacy redirects to /privacy).
+  const legal: Entry[] = ENGLISH_ONLY_PAGES.map((path) => ({
+    url: `${SITE_URL}${path}`,
+    changeFrequency: "yearly",
+    priority: 0.2,
+  }));
+  return [
+    ...locales.flatMap((locale) =>
+      paths.map(([path, changeFrequency, priority]): Entry => {
+        const { canonical, languages } = alternatesFor(locale, path, { hebrew });
+        return {
+          url: `${SITE_URL}${canonical}`,
+          changeFrequency,
+          priority,
+          ...(languages
+            ? {
+                alternates: {
+                  languages: Object.fromEntries(
+                    Object.entries(languages).map(([lang, href]) => [lang, `${SITE_URL}${href}`]),
+                  ),
+                },
+              }
+            : {}),
+        };
+      }),
+    ),
+    ...legal,
+  ];
 }

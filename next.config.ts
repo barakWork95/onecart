@@ -35,6 +35,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/en", destination: "/", permanent: true },
       { source: "/en/:path*", destination: "/:path*", permanent: true },
+      // English-only pages (ENGLISH_ONLY_PAGES): temporary, so a translation can take the URL later.
+      { source: "/he/privacy", destination: "/privacy", permanent: false },
+      { source: "/he/terms", destination: "/terms", permanent: false },
     ];
   },
   async headers() {

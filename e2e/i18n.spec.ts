@@ -44,6 +44,22 @@ test.describe("languages: English unprefixed, Hebrew under /he", () => {
     await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
   });
 
+  test("the legal pages are English only: /he/privacy and /he/terms go to them", async ({
+    request,
+    page,
+  }) => {
+    for (const [from, to] of [
+      ["/he/privacy", "/privacy"],
+      ["/he/terms", "/terms"],
+    ] as const) {
+      const response = await request.get(from, { maxRedirects: 0 });
+      expect([from, response.status()]).toEqual([from, 307]);
+      expect(response.headers()["location"]).toBe(to);
+    }
+    await page.goto("/privacy");
+    await expect(page.locator('link[rel="alternate"][hreflang="he"]')).toHaveCount(0);
+  });
+
   test("unknown languages, pages and categories are real 404s", async ({ request }) => {
     for (const path of ["/fr", "/no-such-page", "/he/c/not-a-category"]) {
       expect([path, (await request.get(path)).status()]).toEqual([path, 404]);

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { pageAlternates } from "@/i18n/server";
 import Link from "next/link";
 import { ContactLine, LegalPage } from "@/components/features/legal/legal-page";
 import { AMAZON_ASSOCIATES_DISCLOSURE } from "@/components/layout/site-footer";
@@ -9,7 +8,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Terms of Use",
     description: "The terms for using OneCart's price comparison service.",
-    alternates: await pageAlternates("/terms"),
+    // English only: one canonical URL, no Hebrew alternate (/he/terms redirects here).
+    alternates: { canonical: "/terms" },
   };
 }
 

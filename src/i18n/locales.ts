@@ -49,3 +49,9 @@ export function alternatesFor(
     },
   };
 }
+
+/**
+ * Pages that exist in English only (the legal pages, until translated): the Hebrew URL
+ * redirects to them (next.config.ts), and they carry no hreflang alternates.
+ */
+export const ENGLISH_ONLY_PAGES = ["/privacy", "/terms"] as const;
