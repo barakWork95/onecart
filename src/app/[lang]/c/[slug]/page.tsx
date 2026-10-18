@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { categoryList, categoryPageData } from "@/app/_composition";
 import { JsonLd } from "@/app/_json-ld";
+import { OG_IMAGES } from "@/app/_share-card";
 import { Breadcrumbs } from "@/components/features/category/breadcrumbs";
 import { CategoryProductCard } from "@/components/features/category/category-product";
 import { HowWePrice } from "@/components/features/category/how-we-price";
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/c/[slug]">
       description: category.description,
       url: alternates.canonical,
       type: "website",
+      images: OG_IMAGES,
     },
     // Thin until the warm-up fills it: followed, not indexed.
     ...(indexable ? {} : { robots: { index: false, follow: true } }),

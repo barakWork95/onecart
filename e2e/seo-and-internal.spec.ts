@@ -14,6 +14,19 @@ test.describe("share previews and sitemap", () => {
     const image = await request.get(new URL(og ?? "").pathname);
     expect(image.status()).toBe(200);
     expect(image.headers()["content-type"]).toBe("image/png");
+
+    // Pages with their own Open Graph tags keep the card too, in every language.
+    for (const path of ["/c", "/c/headphones", "/privacy", "/he/c/headphones"]) {
+      await page.goto(path);
+      await expect(page.locator('meta[property="og:image"]'), path).toHaveAttribute(
+        "content",
+        /\/opengraph-image/,
+      );
+      await expect(page.locator('meta[name="twitter:image"]'), path).toHaveAttribute(
+        "content",
+        /\/twitter-image/,
+      );
+    }
   });
 
   test("the sitemap lists the static pages and robots.txt points to it", async ({ request }) => {

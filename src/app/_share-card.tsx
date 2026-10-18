@@ -6,6 +6,12 @@ export const SHARE_CARD_SIZE = { width: 1200, height: 630 };
 
 export const SHARE_CARD_ALT = `OneCart: find the best price. ${SITE_DESCRIPTION}`;
 
+/**
+ * The share card as Open Graph metadata. Pages under app/[lang] don't inherit the root
+ * image files, and a page's own `openGraph` replaces the layout's: spread this into each.
+ */
+export const OG_IMAGES = [{ url: "/opengraph-image", ...SHARE_CARD_SIZE, alt: SHARE_CARD_ALT }];
+
 // Satori has no CSS variables: these mirror the brand tokens in globals.css and the theme color.
 const NAVY = "#0f2a5f";
 const BLUE = "#1a5fe0";
