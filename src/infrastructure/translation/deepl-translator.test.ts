@@ -26,8 +26,25 @@ describe("createDeepLTranslator", () => {
       expect.objectContaining({
         method: "POST",
         headers: { Authorization: "DeepL-Auth-Key key:fx", "Content-Type": "application/json" },
-        body: JSON.stringify({ text: ["אוזניות אלחוטיות"], source_lang: "HE", target_lang: "EN-US" }),
+        body: JSON.stringify({
+          text: ["אוזניות אלחוטיות"],
+          source_lang: "HE",
+          target_lang: "EN-US",
+          tag_handling: "xml",
+          ignore_tags: ["x"],
+        }),
       }),
+    );
+  });
+
+  it("leaves <x> markup alone and returns plain text: brands, models and entities intact", async () => {
+    const translator = createDeepLTranslator({
+      apiKey: "k",
+      fetch: async () =>
+        json({ translations: [{ text: "Steam iron <x>sony</x>  <x>wh-1000</x> &amp; co" }] }),
+    });
+    await expect(translator.translate("מגהץ קיטור <x>sony</x> <x>wh-1000</x> &amp; co")).resolves.toBe(
+      "Steam iron sony wh-1000 & co",
     );
   });
 

@@ -3,7 +3,10 @@ import { normalizeQueryText } from "@/domain/search/search-query";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
 import type { RedisLike } from "@/infrastructure/cache/redis-client";
 import { TranslationError } from "@/infrastructure/translation/deepl-translator";
-import { translateWithGlossary } from "@/infrastructure/translation/hebrew-glossary";
+import {
+  protectForMachineTranslation,
+  translateWithGlossary,
+} from "@/infrastructure/translation/hebrew-glossary";
 
 /** Translations of the same phrase don't change; keep them a month. */
 const TRANSLATION_TTL_SECONDS = 60 * 60 * 24 * 30;
@@ -18,9 +21,10 @@ export interface QueryTranslatorDeps {
 }
 
 /**
- * Chain: cache → DeepL → offline glossary. Successful machine translations are
- * cached. The glossary may translate only part of a query (`partial`), which
- * still beats sending Hebrew to English-language stores.
+ * Chain: cache → glossary (when it knows every word: free, instant, predictable) →
+ * DeepL (brand names and model codes protected, see `protectForMachineTranslation`;
+ * cached) → the glossary's partial translation (`partial`), which still beats sending
+ * Hebrew to English-language stores.
  */
 export function createQueryTranslator(deps: QueryTranslatorDeps): QueryTranslator {
   const logger = deps.logger ?? noopLogger;
@@ -49,19 +53,23 @@ export function createQueryTranslator(deps: QueryTranslatorDeps): QueryTranslato
       const cached = await fromCache(key);
       if (cached) return { text: cached, source: "cache" };
 
+      const glossary = translateWithGlossary(text);
+      if (glossary && glossary.untranslated.length === 0) {
+        return { text: glossary.text, source: "glossary", partial: false };
+      }
+
       if (deps.deepl) {
         try {
-          const translated = await deps.deepl.translate(text);
+          const translated = await deps.deepl.translate(protectForMachineTranslation(text));
           await remember(key, translated);
           return { text: translated, source: "deepl" };
         } catch (error) {
-          logger.warn("translate: DeepL failed, trying glossary", {
+          logger.warn("translate: DeepL failed, using the glossary", {
             code: error instanceof TranslationError ? error.code : "UNKNOWN",
           });
         }
       }
 
-      const glossary = translateWithGlossary(text);
       if (glossary) {
         if (glossary.untranslated.length > 0) {
           // Grow the glossary from these (or configure DEEPL_API_KEY).

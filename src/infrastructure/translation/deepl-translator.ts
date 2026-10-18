@@ -25,7 +25,23 @@ export function deeplBaseUrl(apiKey: string): string {
   return apiKey.endsWith(":fx") ? "https://api-free.deepl.com" : "https://api.deepl.com";
 }
 
-/** Hebrew → US English via DeepL `/v2/translate`. Throws `TranslationError` on any failure. */
+/** DeepL's answer as plain text: the `<x>` markers removed, entities decoded, spaces collapsed. */
+function plainText(xml: string): string {
+  return xml
+    .replace(/<\/?x>/g, "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Hebrew → US English via DeepL `/v2/translate`. Input may mark text that must not be
+ * translated (brand names, model codes) with `<x>…</x>`. Throws `TranslationError` on any failure.
+ */
 export function createDeepLTranslator(config: DeepLConfig): { translate(text: string): Promise<string> } {
   const doFetch = config.fetch ?? fetch;
   return {
@@ -35,7 +51,13 @@ export function createDeepLTranslator(config: DeepLConfig): { translate(text: st
         response = await doFetch(`${deeplBaseUrl(config.apiKey)}/v2/translate`, {
           method: "POST",
           headers: { Authorization: `DeepL-Auth-Key ${config.apiKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ text: [text], source_lang: "HE", target_lang: "EN-US" }),
+          body: JSON.stringify({
+            text: [text],
+            source_lang: "HE",
+            target_lang: "EN-US",
+            tag_handling: "xml",
+            ignore_tags: ["x"],
+          }),
           signal: AbortSignal.timeout(config.timeoutMs ?? 2_000),
         });
       } catch (error) {
@@ -45,7 +67,7 @@ export function createDeepLTranslator(config: DeepLConfig): { translate(text: st
       if (!response.ok) throw new TranslationError(`HTTP_${response.status}`);
 
       const parsed = responseSchema.safeParse(await response.json().catch(() => null));
-      const translated = parsed.success ? parsed.data.translations[0]?.text.trim() : undefined;
+      const translated = parsed.success ? plainText(parsed.data.translations[0]?.text ?? "") : undefined;
       if (!translated) throw new TranslationError("PARSE_ERROR");
       return translated;
     },

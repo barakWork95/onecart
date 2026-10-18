@@ -9,35 +9,47 @@ const brokenRedis: RedisLike = {
 };
 
 describe("createQueryTranslator", () => {
-  it("uses DeepL first and caches the result for 30 days", async () => {
+  it("uses the glossary alone when it knows every word: no DeepL call", async () => {
+    const deepl = { translate: jest.fn(async () => "never") };
+    const translator = createQueryTranslator({ cache: createInMemoryRedis(), deepl });
+    await expect(translator.translateToEnglish("אוזניות אלחוטיות")).resolves.toEqual({
+      text: "wireless earbuds",
+      source: "glossary",
+      partial: false,
+    });
+    expect(deepl.translate).not.toHaveBeenCalled();
+  });
+
+  it("asks DeepL when the glossary falls short, protecting brands and models, and caches 30 days", async () => {
     const cache = createInMemoryRedis();
     const set = jest.spyOn(cache, "set");
-    const deepl = { translate: jest.fn(async () => "wireless headphones") };
+    const deepl = { translate: jest.fn(async () => "Steam iron sony wh-1000") };
     const translator = createQueryTranslator({ cache, deepl });
 
-    await expect(translator.translateToEnglish("אוזניות אלחוטיות")).resolves.toEqual({
-      text: "wireless headphones",
+    await expect(translator.translateToEnglish("מגהץ קיטור סוני wh-1000")).resolves.toEqual({
+      text: "Steam iron sony wh-1000",
       source: "deepl",
     });
-    expect(set).toHaveBeenCalledWith(translationKey("אוזניות אלחוטיות"), "wireless headphones", {
+    // The Hebrew brand spelling and the Latin model code reach DeepL as untranslatable markup.
+    expect(deepl.translate).toHaveBeenCalledWith("מגהץ קיטור <x>sony</x> <x>wh-1000</x>");
+    expect(set).toHaveBeenCalledWith(translationKey("מגהץ קיטור סוני wh-1000"), "Steam iron sony wh-1000", {
       ex: 2_592_000,
     });
-    await expect(translator.translateToEnglish("אוזניות אלחוטיות")).resolves.toEqual({
-      text: "wireless headphones",
+    await expect(translator.translateToEnglish("מגהץ קיטור סוני wh-1000")).resolves.toMatchObject({
       source: "cache",
     });
     expect(deepl.translate).toHaveBeenCalledTimes(1);
   });
 
-  it("falls back to the glossary when DeepL fails", async () => {
+  it("falls back to the glossary's partial translation when DeepL fails", async () => {
     const logger = { warn: jest.fn() };
     const deepl = { translate: () => Promise.reject(new TranslationError("HTTP_456")) };
     const translator = createQueryTranslator({ cache: createInMemoryRedis(), deepl, logger });
 
-    await expect(translator.translateToEnglish("אוזניות אלחוטיות")).resolves.toEqual({
-      text: "wireless earbuds",
+    await expect(translator.translateToEnglish("אוזניות מגניבות")).resolves.toEqual({
+      text: "headphones",
       source: "glossary",
-      partial: false,
+      partial: true,
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("DeepL failed"), { code: "HTTP_456" });
   });
@@ -49,7 +61,7 @@ describe("createQueryTranslator", () => {
       deepl: { translate: () => Promise.reject(new Error("x")) },
       logger,
     });
-    await translator.translateToEnglish("אוזניות");
+    await expect(translator.translateToEnglish("מגהץ")).rejects.toMatchObject({ code: "UNTRANSLATABLE" });
     expect(logger.warn).toHaveBeenCalledWith(expect.any(String), { code: "UNKNOWN" });
   });
 
@@ -89,13 +101,10 @@ describe("createQueryTranslator", () => {
     const logger = { warn: jest.fn() };
     const translator = createQueryTranslator({
       cache: brokenRedis,
-      deepl: { translate: async () => "earbuds" },
+      deepl: { translate: async () => "iron" },
       logger,
     });
-    await expect(translator.translateToEnglish("אוזניות")).resolves.toEqual({
-      text: "earbuds",
-      source: "deepl",
-    });
+    await expect(translator.translateToEnglish("מגהץ")).resolves.toEqual({ text: "iron", source: "deepl" });
     expect(logger.warn).toHaveBeenCalledWith("translate: cache read failed", expect.anything());
     expect(logger.warn).toHaveBeenCalledWith("translate: cache write failed", expect.anything());
   });

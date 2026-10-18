@@ -2,6 +2,7 @@ import {
   HEBREW_PHRASES,
   HEBREW_WORDS,
   translateWithGlossary,
+  protectForMachineTranslation,
 } from "@/infrastructure/translation/hebrew-glossary";
 
 const t = (text: string) => translateWithGlossary(text);
@@ -68,5 +69,19 @@ describe("translateWithGlossary", () => {
       expect(en).toBe(en.toLowerCase());
       expect(en).not.toMatch(/[א-ת]/);
     }
+  });
+});
+
+describe("protectForMachineTranslation", () => {
+  it("marks brands and model codes untranslatable, Hebrew brand spellings included", () => {
+    expect(protectForMachineTranslation("מגהץ סוני sony wh-1000xm5")).toBe(
+      "מגהץ <x>sony</x> <x>sony</x> <x>wh-1000xm5</x>",
+    );
+    // Prefixed Hebrew brand ("ל" + "סמסונג"): the brand is protected, the meaning of the prefix is DeepL's.
+    expect(protectForMachineTranslation("כיסוי לסמסונג")).toBe("כיסוי <x>samsung</x>");
+  });
+
+  it("escapes markup characters and leaves plain Hebrew to the translator", () => {
+    expect(protectForMachineTranslation("מגהץ & <קיטור>")).toBe("מגהץ &amp; &lt;קיטור&gt;");
   });
 });

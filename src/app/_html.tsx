@@ -1,7 +1,9 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Heebo, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { THEME_INIT_SCRIPT } from "@/components/layout/theme";
+import { env } from "@/config/env";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/config/site";
 import "./globals.css";
 
@@ -11,6 +13,9 @@ const heebo = Heebo({ variable: "--font-heebo", subsets: ["hebrew", "latin"], pr
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const DEFAULT_TITLE = "OneCart — Find the best price";
+
+/** Vercel's production and preview deployments (where /_vercel/insights is served). */
+const onVercel = () => env().VERCEL_ENV === "production" || env().VERCEL_ENV === "preview";
 
 /** Metadata every page shares, whichever root layout renders it. */
 export const BASE_METADATA: Metadata = {
@@ -52,7 +57,12 @@ export function HtmlShell({
         {/* Server-rendered inline script: runs before paint, so no theme flash. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        {/* Cookieless page-view counts (Vercel Web Analytics). Its script is served only on
+            Vercel's own deployments: elsewhere (local runs, E2E) it would just 404. */}
+        {onVercel() && <Analytics />}
+      </body>
     </html>
   );
 }

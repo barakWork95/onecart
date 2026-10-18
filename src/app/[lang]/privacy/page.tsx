@@ -53,6 +53,12 @@ export default function PrivacyPage() {
             session is stored with it.
           </li>
           <li>
+            <strong>Page views.</strong> We count visits with Vercel Web Analytics: the page address, the
+            referring site, and your country, browser and device type. It uses no cookies and stores no IP
+            address; a visitor is recognized only within one day, by an anonymous code that resets daily, so
+            visits can&apos;t be linked over time or across sites.
+          </li>
+          <li>
             <strong>Preferences.</strong> Your light or dark theme choice is kept in your browser&apos;s local
             storage and never sent to us.
           </li>
@@ -74,7 +80,7 @@ export default function PrivacyPage() {
       <section>
         <h2>Who processes data for us</h2>
         <ul>
-          <li>Vercel, which hosts the site.</li>
+          <li>Vercel, which hosts the site and counts page views (Web Analytics).</li>
           <li>Upstash, which stores the search cache and the rate-limit counters.</li>
           <li>
             Supabase, which stores anonymous accounts, saved items, price alerts and the store-visit counts.
@@ -84,7 +90,10 @@ export default function PrivacyPage() {
             search text to return products. When you follow a link to AliExpress, its Affiliate API also
             receives that product&apos;s address to create our tracked link.
           </li>
-          <li>DeepL, if enabled, which receives Hebrew search text to translate it.</li>
+          <li>
+            DeepL, which receives Hebrew search text our built-in dictionary can&apos;t translate (brand names
+            and model numbers are marked to be left as they are).
+          </li>
           <li>
             Your browser&apos;s push service (Google, Mozilla, Apple or Microsoft), which delivers price-alert
             notifications you turned on. Messages are encrypted for your browser.

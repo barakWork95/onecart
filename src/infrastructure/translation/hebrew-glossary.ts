@@ -299,3 +299,26 @@ export function translateWithGlossary(text: string): GlossaryTranslation | null 
   if (translatedHebrew === 0) return null;
   return { text: out.join(" "), untranslated };
 }
+
+const BRAND_NAMES = new Set(Object.values(BRANDS));
+const escapeXml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/**
+ * The query as machine-translation input: brand names and model codes inside `<x>…</x>`
+ * (DeepL leaves that tag alone), so "סוני wh-1000xm5" can't come back as "Sunny WH thousand".
+ * Latin words and numbers are protected as they are; Hebrew brand spellings the glossary
+ * knows become the brand ("לסמסונג" → samsung). Everything else stays for the translator.
+ */
+export function protectForMachineTranslation(text: string): string {
+  return normalizeHebrew(text)
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => {
+      if (!HEBREW.test(word)) return /[A-Za-z0-9]/.test(word) ? `<x>${escapeXml(word)}</x>` : escapeXml(word);
+      const result = lookup(word);
+      return result.kind === "word" && BRAND_NAMES.has(result.english)
+        ? `<x>${escapeXml(result.english)}</x>`
+        : escapeXml(word);
+    })
+    .join(" ");
+}

@@ -428,8 +428,13 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
 
 - Hebrew queries (any Hebrew letter) are translated before reaching stores. The chain is:
   1. the Redis cache (30-day TTL);
-  2. DeepL (`DEEPL_API_KEY`; keys ending in `:fx` use the free endpoint);
-  3. the offline glossary in `src/infrastructure/translation/hebrew-glossary.ts`.
+  2. the offline glossary in `src/infrastructure/translation/hebrew-glossary.ts`, when it knows
+     every word (free and predictable; not cached);
+  3. DeepL (`DEEPL_API_KEY`, set in production; keys ending in `:fx` use the free endpoint), cached.
+     Its input comes from `protectForMachineTranslation`: Latin brand names and model codes, and
+     Hebrew brand spellings the glossary knows ("סוני" → sony), are wrapped in `<x>…</x>`, which
+     DeepL leaves untouched (`tag_handling: "xml"`, `ignore_tags: ["x"]`);
+  4. the glossary's partial translation.
 
   The glossary handles phrases, common Hebrew prefixes (ל/ב/ה/ו/ש/מ/כ, up to two letters), every
   gender and number form of adjectives, brand transliterations, and filler words ("של", "עם").
@@ -595,6 +600,11 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   `UPSTASH_REDIS_REST_*` when that pair is unset, so every Redis user finds it. A counter outage allows the request: the limiter must never take the site down.
 - Check eBay's usage: `GET https://api.ebay.com/developer/analytics/v1_beta/rate_limit/?api_context=buy&api_name=browse`
   (client-credentials token); it reports count, remaining and the reset time.
+
+## Analytics
+
+- Vercel Web Analytics (`<Analytics />` from `@vercel/analytics/next`, in `HtmlShell`): cookieless
+  page-view counts, no IP stored. It's described on `/privacy`; any other tracking needs the same.
 
 ## Share previews and sitemap
 

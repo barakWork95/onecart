@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export const LEGAL_LAST_UPDATED = "14 October 2026";
+export const LEGAL_LAST_UPDATED = "18 October 2026";
 
 /** Shared layout for /privacy and /terms: one h1, readable line length, dated. */
 export function LegalPage({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
