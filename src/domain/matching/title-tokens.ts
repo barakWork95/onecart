@@ -335,6 +335,11 @@ export interface TitleTokens {
   /** Canonical brand names found in the title. */
   readonly brands: ReadonlySet<string>;
   /**
+   * The brands named before "for", "fits" or "compatible": who made the item. "Magnetic Holder
+   * for iPhone 17 Samsung" has brands but no maker; it's an unbranded holder.
+   */
+  readonly makers: ReadonlySet<string>;
+  /**
    * Words that only name a brand ("sony", "instant" + "pot"). A product line
    * that implies its brand ("airpods", "galaxy") is not one: it identifies the item.
    */
@@ -394,6 +399,14 @@ function brandOf(token: string): string | null {
   return BRANDS.has(brand) ? brand : null;
 }
 
+/**
+ * Two listings compared as commodities: neither names its maker. Brands they're made for
+ * ("Holder for iPhone 17 Samsung") don't make a listing branded.
+ */
+export function isGenericPair(a: TitleTokens, b: TitleTokens): boolean {
+  return a.makers.size === 0 && b.makers.size === 0;
+}
+
 export function tokenizeTitle(title: string): TitleTokens {
   const raw = normalizePhrases(title)
     .split(/[^a-z0-9]+/)
@@ -406,6 +419,8 @@ export function tokenizeTitle(title: string): TitleTokens {
   const numbers = new Set<string>();
   const variants = new Map<string, Set<string>>();
   const brands = new Set<string>();
+  const makers = new Set<string>();
+  let madeFor = false;
   const qualifiers = new Set<string>();
   const tiers = new Set<string>();
   const brandWords = new Set<string>();
@@ -418,7 +433,9 @@ export function tokenizeTitle(title: string): TitleTokens {
     const next = raw[i + 1];
     const pair = next ? brandOf(`${token}${next}`) : null;
     const brand = pair ?? brandOf(token);
+    if (MADE_FOR_WORDS.has(token)) madeFor = true;
     if (brand) brands.add(brand);
+    if (brand && !madeFor) makers.add(brand);
     if (pair && next) brandWords.add(token).add(next);
     else if (BRANDS.has(token)) brandWords.add(token);
 
@@ -456,6 +473,7 @@ export function tokenizeTitle(title: string): TitleTokens {
     numbers,
     variants,
     brands,
+    makers,
     brandWords,
     qualifiers,
     tiers,

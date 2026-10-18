@@ -1,6 +1,7 @@
 import {
   containment,
   diceSimilarity,
+  isGenericPair,
   sharesAny,
   sharesModel,
   tokenizeTitle,
@@ -174,5 +175,22 @@ describe("sharesModel", () => {
     expect(sharesModel(m("rtx4090"), m("rtx4090ti"))).toBe(false);
     expect(sharesModel(m("rtx4070ti"), m("rtx4070super"))).toBe(false);
     expect(sharesModel(m("sm9100"), m("sm9100max"))).toBe(false);
+  });
+});
+
+describe("makers and isGenericPair", () => {
+  const makers = (title: string) => [...tokenizeTitle(title).makers];
+
+  it("counts only the brands named before what the item is made for", () => {
+    expect(makers("Anker USB C Cable for iPhone 15 Samsung")).toEqual(["anker"]);
+    expect(makers("Magnetic Car Phone Holder for iPhone Samsung")).toEqual([]);
+    expect(makers("Earpads Compatible with Sony WH-1000XM5")).toEqual([]);
+    expect(makers("Sony WH-1000XM5 Headphones")).toEqual(["sony"]);
+  });
+
+  it("compares two listings as commodities only when neither names its maker", () => {
+    const t = tokenizeTitle;
+    expect(isGenericPair(t("Cable Clip for iPhone"), t("Magnetic Cable Clip"))).toBe(true);
+    expect(isGenericPair(t("Baseus Cable Clip"), t("Magnetic Cable Clip"))).toBe(false);
   });
 });

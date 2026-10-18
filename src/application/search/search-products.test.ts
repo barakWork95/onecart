@@ -845,3 +845,60 @@ describe("searchProducts — cache warming options", () => {
     expect(outcome(allCached, "amazon")).toMatchObject({ fromCache: true, cachedAt: first });
   });
 });
+
+describe("searchProducts — photo matching for generic searches", () => {
+  const CLIP = {
+    ebay: makeProduct({
+      provider: "ebay",
+      sku: "e1",
+      title: "Magnetic Cable Holder Clip Organizer",
+      total: 12_40,
+    }),
+    aliexpress: makeProduct({
+      provider: "aliexpress",
+      sku: "a1",
+      title: "Magnetic Cable Organizer Clip",
+      total: 2_99,
+    }),
+  };
+  const CLIPS: SearchQuery = { ...QUERY, rawText: "cable clips", normalizedText: "cable clips" };
+  const photos = {
+    [CLIP.ebay.imageUrl!]: "e0b2b6969e9c9c9c",
+    [CLIP.aliexpress.imageUrl!]: "e0b2b6969fb80ed5",
+  };
+  const providers = () => [
+    fakeProvider("ebay", () => okPage([CLIP.ebay])).provider,
+    fakeProvider("aliexpress", () => okPage([CLIP.aliexpress])).provider,
+  ];
+
+  it("groups unbranded look-alikes by their cached photo hashes", async () => {
+    const cached = jest.fn((urls: readonly string[]) =>
+      Promise.resolve(new Map(urls.flatMap((u) => (photos[u] ? [[u, photos[u]] as const] : [])))),
+    );
+    const { search } = setup(providers(), { imageHashes: { cached } });
+    const response = await search(CLIPS);
+    expect(response.groups).toHaveLength(1);
+    expect(response.groups[0]).toMatchObject({ matchedBy: "visual_match" });
+    expect(cached).toHaveBeenCalledWith(expect.arrayContaining(Object.keys(photos)));
+  });
+
+  it("keeps them apart without hashes, and when the lookup fails", async () => {
+    expect((await setup(providers()).search(CLIPS)).groups).toHaveLength(2);
+
+    const failing = { cached: () => Promise.reject(new Error("redis down")) };
+    const { search, logger } = setup(providers(), { imageHashes: failing });
+    expect((await search(CLIPS)).groups).toHaveLength(2);
+    expect(logger.warn).toHaveBeenCalledWith("search: photo hash lookup failed, grouping without photos", {
+      error: "redis down",
+    });
+  });
+
+  it("never reads photo hashes for a branded search", async () => {
+    const cached = jest.fn(() => Promise.resolve(new Map<string, string>()));
+    const { search } = setup([fakeProvider("amazon", () => okPage([EARBUDS.amazon])).provider], {
+      imageHashes: { cached },
+    });
+    await search({ ...QUERY, rawText: "soundcore life p3", normalizedText: "soundcore life p3" });
+    expect(cached).not.toHaveBeenCalled();
+  });
+});

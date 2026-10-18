@@ -4,6 +4,8 @@ import {
   fastestOfferId,
   findMatchesLink,
   listingsPerStore,
+  matchCaveat,
+  matchLabel,
   outboundHref,
   premiumOverBest,
   storeComparison,
@@ -202,5 +204,20 @@ describe("storeComparison — several listings per store", () => {
       bestDeal: null,
     });
     expect(g && comparisonScope(g)).toEqual({ stores: 1, listings: 2, hasSheet: true });
+  });
+});
+
+describe("matchLabel and matchCaveat", () => {
+  it("say how sure a grouping is", () => {
+    expect(matchLabel("model_number")).toBe("Same item");
+    expect(matchLabel("single")).toBe("Same item");
+    expect(matchLabel("title_similarity")).toBe("Similar item");
+    expect(matchLabel("visual_match")).toBe("Looks identical");
+  });
+
+  it("caveat only the weaker matches", () => {
+    expect(matchCaveat("model_number")).toBeNull();
+    expect(matchCaveat("title_similarity")).toMatch(/similar titles/);
+    expect(matchCaveat("visual_match")).toMatch(/product photo and specs, sold by different sellers/);
   });
 });

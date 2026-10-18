@@ -5,6 +5,7 @@ import { Fragment } from "react";
 import {
   comparisonScope,
   fastestOfferId,
+  matchCaveat,
   outboundHref,
   premiumOverBest,
 } from "@/components/features/search/group-view";
@@ -248,8 +249,7 @@ export function CompareSheet({
               </DrawerTitle>
               <DrawerDescription className="mt-1 text-sm text-muted-foreground">
                 Shipping, estimated import VAT and duty included where stores quote them.
-                {group.matchedBy === "title_similarity" &&
-                  " Matched by similar titles — check the listing before buying."}
+                {matchCaveat(group.matchedBy)}
               </DrawerDescription>
             </div>
             <DrawerClose

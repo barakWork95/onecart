@@ -128,8 +128,8 @@ describe("ResultsView", () => {
 
   it("labels a title-only match as a similar item", () => {
     const pillows = groupProducts([
-      makeProduct({ provider: "amazon", sku: "p1", title: "Cervical Memory Foam Pillow" }),
-      makeProduct({ provider: "ebay", sku: "p2", title: "Memory Foam Pillow, Cervical" }),
+      makeProduct({ provider: "amazon", sku: "p1", title: "Philips Cervical Memory Foam Pillow" }),
+      makeProduct({ provider: "ebay", sku: "p2", title: "Philips Memory Foam Pillow, Cervical" }),
     ]);
     renderView({ response: response({ groups: pillows }) });
     expect(screen.getByText("Similar item · 2 stores")).toBeInTheDocument();

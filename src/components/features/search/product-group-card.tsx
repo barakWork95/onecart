@@ -5,6 +5,7 @@ import { ProductImage } from "@/components/features/search/product-image";
 import {
   comparisonScope,
   discountPercent,
+  matchLabel,
   outboundHref,
   storeComparison,
   type FindMatchesLink,
@@ -85,7 +86,7 @@ export function ProductGroupCard({
   const storeCount = group.offers.length;
   const discount = discountPercent(best);
   const storeName = STORE_META[best.provider].name;
-  const matchLabel = group.matchedBy === "title_similarity" ? "Similar item" : "Same item";
+  const label = matchLabel(group.matchedBy);
 
   return (
     <article
@@ -129,7 +130,7 @@ export function ProductGroupCard({
         <p className="truncate text-xs text-muted-foreground">
           <span className="font-medium text-foreground/80">
             {storeCount > 1
-              ? `${matchLabel} · ${storeCount} stores`
+              ? `${label} · ${storeCount} stores`
               : group.listings.length > 1
                 ? `${storeName} · ${group.listings.length} listings`
                 : storeName}

@@ -10,6 +10,7 @@ import {
   type CircuitState,
 } from "@/domain/search/circuit-breaker";
 import { assembleResults } from "@/application/search/assemble-results";
+import { photoHashesFor, type PhotoHashReader } from "@/application/search/photo-hashes";
 import type {
   ProductSearchProvider,
   ProviderError,
@@ -47,6 +48,11 @@ export interface SearchProductsDeps {
   readonly maxStorePages?: number;
   /** Daily cap on live calls per store; omitted = unlimited. */
   readonly callBudget?: StoreCallBudget;
+  /**
+   * Photo hashes the warm-up computed, read (never computed) for generic searches so
+   * unbranded look-alikes can group by photo. Omitted = titles and specs only.
+   */
+  readonly imageHashes?: PhotoHashReader;
   /** Epoch milliseconds. Injected for deterministic tests. */
   readonly now?: () => number;
   readonly logger?: Logger;
@@ -356,15 +362,14 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
   }
 
   /** Every store page loaded so far, assembled into the cards a shopper sees. */
-  function merge(progress: readonly ProviderProgress[], query: SearchQuery, intent: SearchIntent) {
-    return assembleResults(
-      progress.map(({ runs }) => ({
-        products: runs.flatMap((r) => r.products),
-        unavailable: runs.flatMap((r) => r.unavailable),
-      })),
-      query,
-      intent,
-    );
+  async function merge(progress: readonly ProviderProgress[], query: SearchQuery, intent: SearchIntent) {
+    const stores = progress.map(({ runs }) => ({
+      products: runs.flatMap((r) => r.products),
+      unavailable: runs.flatMap((r) => r.unavailable),
+    }));
+    const products = stores.flatMap((s) => s.products);
+    const hashes = await photoHashesFor(deps.imageHashes, products, intent, logger);
+    return assembleResults(stores, query, intent, hashes);
   }
 
   /** Page 1's outcome, with counts and cache status covering every page loaded. */
@@ -405,12 +410,12 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     // Already-loaded results fill pages first; a store is asked for its next page only
     // when they run out. One extra group tells us whether a next results page exists.
     const intent = searchIntent(query.normalizedText);
-    let merged = merge(progress, query, intent);
+    let merged = await merge(progress, query, intent);
     while (mode !== "none" && merged.groups.length <= page * pageSize) {
       const deeper = progress.filter(canGoDeeper);
       if (deeper.length === 0) break;
       await Promise.all(deeper.map((p) => loadNextPage(p, query, mode, run)));
-      merged = merge(progress, query, intent);
+      merged = await merge(progress, query, intent);
     }
 
     const { items, pagination } = paginate(merged.groups, page, pageSize);

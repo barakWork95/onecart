@@ -2,6 +2,7 @@ import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import { groupProducts, type ProductGroup } from "@/domain/search/product-group";
 import { filterOffers, sortGroups } from "@/domain/search/result-ordering";
+import type { ImageHash } from "@/domain/matching/image-hash";
 import { tokenizeTitle } from "@/domain/matching/title-tokens";
 import { classifyOffers, isOffTopic, type SearchIntent } from "@/domain/search/search-intent";
 import type { SearchQuery } from "@/domain/search/search-query";
@@ -29,6 +30,8 @@ export function assembleResults(
   stores: readonly StoreResults[],
   query: Pick<SearchQuery, "filters" | "sort">,
   intent: SearchIntent,
+  /** Cached photo hashes by image URL, for generic matching; none means titles and specs only. */
+  imageHashes?: ReadonlyMap<string, ImageHash>,
 ): AssembledResults {
   const ranks = new Map<string, number>();
   const products: UnifiedProduct[] = [];
@@ -48,7 +51,12 @@ export function assembleResults(
   const classes = classifyOffers(products, intent);
   const rankOf = (id: string) => ranks.get(id);
   const groups = sortGroups(
-    groupProducts(offers, { classes, unavailable: [...unavailable.values()], rankOf }),
+    groupProducts(offers, {
+      classes,
+      unavailable: [...unavailable.values()],
+      rankOf,
+      ...(imageHashes ? { imageHashes } : {}),
+    }),
     query.sort,
     rankOf,
     intent,

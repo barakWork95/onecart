@@ -146,3 +146,22 @@ export function findMatchesLink(
     label: only && others.length === 1 ? `Find on ${STORE_META[only].name}` : "Find on other stores",
   };
 }
+
+/**
+ * The card's claim about a multi-store group, never stronger than the
+ * evidence: a model number is the same item; a photo match (generic items)
+ * only looks identical; title similarity alone is a similar item.
+ */
+export function matchLabel(matchedBy: ProductGroup["matchedBy"]): string {
+  if (matchedBy === "visual_match") return "Looks identical";
+  return matchedBy === "title_similarity" ? "Similar item" : "Same item";
+}
+
+/** The compare sheet's caveat for weaker matches; null when there is none. */
+export function matchCaveat(matchedBy: ProductGroup["matchedBy"]): string | null {
+  if (matchedBy === "visual_match")
+    return " Matched by product photo and specs, sold by different sellers. Check the listing details before you buy.";
+  return matchedBy === "title_similarity"
+    ? " Matched by similar titles — check the listing before buying."
+    : null;
+}

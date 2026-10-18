@@ -1,15 +1,23 @@
 import {
   containment,
   diceSimilarity,
+  isGenericPair,
   sharesAny,
   sharesModel,
   tokenizeTitle,
   type TitleTokens,
 } from "@/domain/matching/title-tokens";
+import { GENERIC_MATCHING_POLICY, attributesFor } from "@/domain/matching/generic-matcher";
+import type { ImageHash } from "@/domain/matching/image-hash";
+import { attributeConflict } from "@/domain/matching/item-attributes";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProviderId } from "@/domain/shared/provider";
 
-export type MatchBasis = "model_number" | "title_similarity";
+/**
+ * How a group's listings were found to be one item: a shared model number,
+ * title similarity alone, or (generic items) the same photo plus specs.
+ */
+export type MatchBasis = "model_number" | "title_similarity" | "visual_match";
 
 export interface MatchResult {
   readonly basis: MatchBasis;
@@ -67,6 +75,8 @@ export const DEFAULT_MATCHING_POLICY: MatchingPolicy = {
 export interface MatchCandidate {
   readonly product: UnifiedProduct;
   readonly tokens: TitleTokens;
+  /** The product photo's cached hash (generic matching); absent when not hashed. */
+  readonly imageHash?: ImageHash | null;
 }
 
 export function toMatchCandidate(product: UnifiedProduct): MatchCandidate {
@@ -133,10 +143,14 @@ const sameSet = (a: ReadonlySet<string>, b: ReadonlySet<string>) =>
  * ("Flip 6" vs "Flip 7"), a refurbished/used/bundle listing against a plain one,
  * or different tiers of a line ("Flip 6 Mini" vs "Flip 6", "Pro Max" vs "Pro").
  */
-export function findConflict(a: TitleTokens, b: TitleTokens): MatchConflict | null {
+export function findConflict(
+  a: TitleTokens,
+  b: TitleTokens,
+  { ignoreTiers = false }: { readonly ignoreTiers?: boolean } = {},
+): MatchConflict | null {
   if (disagree(a.brands, b.brands)) return "brand";
   if (!sameSet(a.qualifiers, b.qualifiers)) return "condition";
-  if (!sameSet(a.tiers, b.tiers)) return "tier";
+  if (!ignoreTiers && !sameSet(a.tiers, b.tiers)) return "tier";
   if (a.models.size > 0 && b.models.size > 0 && !sharesModel(a.models, b.models)) return "model";
   for (const [unit, values] of a.variants) {
     const other = b.variants.get(unit);
@@ -268,7 +282,17 @@ export function blocksGrouping(
   if (a.tokens.isAccessory !== b.tokens.isAccessory) return true;
   const sameStore = a.product.provider === b.product.provider;
   if (!sameStore && (isUnverifiedBrandListing(a) || isUnverifiedBrandListing(b))) return true;
-  const limit = sameStore ? policy.maxSameStorePriceRatio : policy.maxPriceRatio;
+  // Two unbranded listings: a stated quantity, pack size or colour that differs vetoes, and
+  // commodity markups are wider (generic matching still needs a photo to match).
+  const generic = isGenericPair(a.tokens, b.tokens);
+  if (generic && attributeConflict(attributesFor(a), attributesFor(b))) return true;
+  const limit = generic
+    ? GENERIC_MATCHING_POLICY.maxItemPriceRatio
+    : sameStore
+      ? policy.maxSameStorePriceRatio
+      : policy.maxPriceRatio;
   if (priceRatio(a.product, b.product) > limit) return true;
-  return findConflict(a.tokens, b.tokens) !== null;
+  // Tier words name a branded line ("Flip 6 Mini"); on an unbranded gadget "mini" is sales copy,
+  // and real size differences show up as attributes or in the photo.
+  return findConflict(a.tokens, b.tokens, { ignoreTiers: generic }) !== null;
 }

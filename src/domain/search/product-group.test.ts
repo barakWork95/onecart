@@ -142,8 +142,8 @@ describe("groupProducts", () => {
   });
 
   it("reports the weakest match basis in the group", () => {
-    const a = makeProduct({ provider: "amazon", sku: "1", title: "Cervical Memory Foam Pillow" });
-    const b = makeProduct({ provider: "ebay", sku: "2", title: "Memory Foam Pillow Cervical" });
+    const a = makeProduct({ provider: "amazon", sku: "1", title: "Philips Cervical Memory Foam Pillow" });
+    const b = makeProduct({ provider: "ebay", sku: "2", title: "Philips Memory Foam Pillow Cervical" });
     expect(groupProducts([a, b])[0]?.matchedBy).toBe("title_similarity");
   });
 
@@ -151,15 +151,42 @@ describe("groupProducts", () => {
     const a = makeProduct({
       provider: "amazon",
       sku: "1",
-      title: "Cervical Memory Foam Pillow",
+      title: "Philips Cervical Memory Foam Pillow",
       total: 50_00,
       imageUrl: null,
     });
-    const b = makeProduct({ provider: "ebay", sku: "2", title: "Memory Foam Pillow Cervical", total: 60_00 });
+    const b = makeProduct({
+      provider: "ebay",
+      sku: "2",
+      title: "Philips Memory Foam Pillow Cervical",
+      total: 60_00,
+    });
     expect(groupProducts([b, a])[0]).toMatchObject({
-      title: "Cervical Memory Foam Pillow",
+      title: "Philips Cervical Memory Foam Pillow",
       imageUrl: "https://img.example/2.jpg",
     });
+  });
+
+  it("never groups unbranded listings by their titles, only by photo", () => {
+    // "MP3" and "QC3.0" read like model codes; unbranded, they're formats and standards.
+    const fm = makeProduct({ provider: "ebay", sku: "1", title: "Car MP3 Player Bluetooth FM Transmitter" });
+    const radio = makeProduct({ provider: "aliexpress", sku: "2", title: "Vintage Car Radio MP3 Player FM" });
+    const twin = makeProduct({
+      provider: "amazon",
+      sku: "3",
+      title: "Car MP3 Player Bluetooth FM Transmitter",
+    });
+    expect(groupProducts([fm, radio, twin])).toHaveLength(3);
+
+    const hashes = new Map([
+      [fm.imageUrl!, "e0b2b6969e9c9c9c"],
+      [twin.imageUrl!, "e0b2b6969fb80ed5"],
+    ]);
+    const grouped = groupProducts([fm, radio, twin], { imageHashes: hashes });
+    const pair = grouped.find((g) => g.offers.length === 2);
+    expect(pair?.offers.map((o) => o.providerProductId).sort()).toEqual(["1", "3"]);
+    expect(pair?.matchedBy).toBe("visual_match");
+    expect(grouped).toHaveLength(2);
   });
 
   it("is deterministic regardless of input order", () => {

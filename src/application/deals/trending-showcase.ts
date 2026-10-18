@@ -1,4 +1,5 @@
 import { assembleResults, type StoreResults } from "@/application/search/assemble-results";
+import { photoHashesFor, type PhotoHashReader } from "@/application/search/photo-hashes";
 import type { SearchProducts } from "@/application/search/search-products";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
 import type { IsoDateTime } from "@/domain/product/unified-product";
@@ -45,6 +46,8 @@ export interface TrendingCard {
 export interface TrendingShowcaseDeps {
   readonly cache: SearchResultCache;
   readonly stores: readonly ShowcaseStore[];
+  /** Cached photo hashes, so a generic query's card groups look-alikes as its search does. */
+  readonly imageHashes?: PhotoHashReader;
   readonly logger?: Logger;
 }
 
@@ -95,7 +98,9 @@ export function createFeaturedLookup(deps: TrendingShowcaseDeps) {
       products: e.products.filter((p) => isFeaturableListing(p, tokenizeTitle(p.title), intent)),
       unavailable: e.unavailable ?? [],
     }));
-    const { groups } = assembleResults(stores, { filters: {}, sort: "relevance" }, intent);
+    const products = stores.flatMap((s) => s.products);
+    const hashes = await photoHashesFor(deps.imageHashes, products, intent, logger);
+    const { groups } = assembleResults(stores, { filters: {}, sort: "relevance" }, intent, hashes);
     // The product the search names, never an accessory or a related item…
     const named = groups.filter((g) => !g.isAccessory && intentTier(g, intent) === 0);
     // …at a typical price for it: the stores' top result can be an outlier.

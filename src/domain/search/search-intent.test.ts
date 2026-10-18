@@ -175,6 +175,16 @@ describe("pairMode", () => {
     );
     expect(pairMode(t("Car Phone Mount Magnetic"), t("Anker Car Mount"))).toBe("branded");
   });
+
+  it("ignores the brands a listing is made for: a holder for iPhone is an unbranded holder", () => {
+    expect(
+      pairMode(
+        t("Foldable Magnet Car Mobile Phone Holder for MagSafe 360° for iPhone 17 Huawei Xiaomi"),
+        t("360 Degrees Magnetic Car Phone Holder Stand In Car For IPhone Xiaomi"),
+      ),
+    ).toBe("generic");
+    expect(pairMode(t("Baseus Magnetic Holder for iPhone"), t("Magnetic Holder for iPhone"))).toBe("branded");
+  });
 });
 
 describe("classifyOffers — generic queries", () => {

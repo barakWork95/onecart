@@ -1,4 +1,4 @@
-import { sharesModel, tokenizeTitle, type TitleTokens } from "@/domain/matching/title-tokens";
+import { isGenericPair, sharesModel, tokenizeTitle, type TitleTokens } from "@/domain/matching/title-tokens";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProviderId } from "@/domain/shared/provider";
 
@@ -31,12 +31,12 @@ function modeOf(tokens: TitleTokens): MatchMode {
 }
 
 /**
- * How two listings are compared. Generic only when neither names a known
- * brand: a branded listing keeps the strict rules even in a generic search
- * (a "Baseus Car Phone Holder" among "car phone holder" results).
+ * How two listings are compared. Generic only when neither names its maker
+ * (`isGenericPair`): a branded listing keeps the strict rules even in a generic
+ * search (a "Baseus Car Phone Holder" among "car phone holder" results).
  */
 export function pairMode(a: TitleTokens, b: TitleTokens): MatchMode {
-  return a.brands.size === 0 && b.brands.size === 0 ? "generic" : "branded";
+  return isGenericPair(a, b) ? "generic" : "branded";
 }
 
 export function searchIntent(normalizedText: string): SearchIntent {

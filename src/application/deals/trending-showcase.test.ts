@@ -68,6 +68,32 @@ describe("trending showcase", () => {
     });
   });
 
+  it("groups a generic query's look-alikes by their cached photos, as its search does", async () => {
+    const cache = fakeSearchCache(() => at.ms);
+    const clip = (provider: ProviderId, sku: string, title: string, total: number) =>
+      makeProduct({ provider, sku, title, total, sellerName: null });
+    const ebay = clip("ebay", "e1", "Magnetic Cable Holder Clip Organizer", 12_40);
+    const ali = clip("aliexpress", "a1", "Magnetic Cable Organizer Clip", 2_99);
+    for (const product of [ebay, ali])
+      await cache.set(
+        key(product.provider, "cable clips"),
+        { products: [product], hasMore: false, cachedAt: "2026-10-13T07:30:00.000Z" },
+        86_400,
+      );
+    const photos = new Map([
+      [ebay.imageUrl!, "e0b2b6969e9c9c9c"],
+      [ali.imageUrl!, "e0b2b6969fb80ed5"],
+    ]);
+    const showcase = createTrendingShowcase({
+      cache,
+      stores: [{ id: "ebay" }, { id: "aliexpress" }],
+      imageHashes: { cached: () => Promise.resolve(photos) },
+    });
+    const [card] = await showcase([{ label: "Cable clips", query: "cable clips" }]);
+    expect(card).toMatchObject({ matchedBy: "visual_match", best: { provider: "aliexpress" } });
+    expect(card?.stores).toHaveLength(2);
+  });
+
   it("leaves out products with nothing cached, or with only accessories cached", async () => {
     const cache = await seeded();
     await cache.set(

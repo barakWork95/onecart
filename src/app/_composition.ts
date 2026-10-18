@@ -268,11 +268,19 @@ function buildServices(): Services {
     ...(p.cacheScope ? { cacheScope: p.cacheScope } : {}),
   }));
 
+  const imageHashes = createRedisImageHashIndex({
+    redis,
+    hashImage: async (url) => {
+      const bytes = await fetchImage(url);
+      return bytes ? dHash(bytes).catch(() => null) : null;
+    },
+  });
   const searchDeps = {
     providers,
     cache: searchCache,
     circuitBreaker: createRedisCircuitBreakerStore(redis),
     cacheTtlSeconds: config.SEARCH_CACHE_TTL_SECONDS,
+    imageHashes,
     logger,
   };
   const amazonWarmPerDay = config.AMAZON_WARM_PER_DAY ?? DEFAULT_AMAZON_WARM_PER_DAY;
@@ -330,13 +338,7 @@ function buildServices(): Services {
     opsStore,
     recordCronRun: createRecordCronRun({ store: opsStore, logger }),
     opsAlertState,
-    imageHashes: createRedisImageHashIndex({
-      redis,
-      hashImage: async (url) => {
-        const bytes = await fetchImage(url);
-        return bytes ? dHash(bytes).catch(() => null) : null;
-      },
-    }),
+    imageHashes,
     statusReport: createStatusReport({
       ops: opsStore,
       quotas: opsQuotas,
@@ -383,8 +385,13 @@ function buildServices(): Services {
       defer: after,
       logger,
     }),
-    trendingShowcase: createTrendingShowcase({ cache: searchCache, stores: showcaseStores, logger }),
-    categoryPage: createCategoryPage({ cache: searchCache, stores: showcaseStores, logger }),
+    trendingShowcase: createTrendingShowcase({
+      cache: searchCache,
+      stores: showcaseStores,
+      imageHashes,
+      logger,
+    }),
+    categoryPage: createCategoryPage({ cache: searchCache, stores: showcaseStores, imageHashes, logger }),
     trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
     categories: demoMode ? DEMO_CATEGORIES : CATEGORIES,
     // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.

@@ -324,11 +324,13 @@ SearchBar (client) → /search?q=… (Server Component)
   - Add a test case to `product-matcher.test.ts` for every real mismatch you find. The four
     recorded live searches in `src/integration/recorded-searches.test.ts` ("sony wh-1000xm5",
     "jbl flip 6", "airpods pro", "instant pot duo") pin the end-to-end result.
-- **Branded vs generic (dual-mode matching, Phase 1 of 4).** `searchIntent(...).mode` is `branded`
+- **Branded vs generic (dual-mode matching, Phases 1–3 of 4).** `searchIntent(...).mode` is `branded`
   when the query names a known brand or carries a model code, `generic` otherwise ("vegetable
-  peeler", "car phone holder"); dimensions like `80x30` are specs, not model codes. `pairMode(a, b)`
-  is generic only when neither listing names a known brand, so branded listings always keep the
-  strict rules (brand verification, the brand's own store on AliExpress, the knock-off price guard).
+  peeler", "car phone holder"); dimensions like `80x30` are specs, not model codes. A pair of
+  listings is generic (`isGenericPair`, `pairMode`) only when neither names its **maker**
+  (`TitleTokens.makers`: brands before "for/fits/compatible"; "Holder for iPhone 17 Samsung" is
+  unbranded). Branded listings always keep the strict rules (brand verification, the brand's own
+  store on AliExpress, the knock-off price guard).
   - `item-attributes.ts` reads stated quantities and colours, normalized (5M = 500cm = 16.4ft =
     5,000 mm; 1.5L = 1,500 ml; set of 4 = pack 4); `attributeConflict` is the generic veto (a 5 m
     and a 10 m strip differ). One side silent is no conflict; several colours conflict only if
@@ -337,8 +339,26 @@ SearchBar (client) → /search?q=… (Server Component)
     doesn't demote listings for weak accessory words: they're the product. Strong signals
     ("Replacement clip for …") still do; generic category queries ("wireless headphones") demote
     cases as before.
-  - Still to come: photo hashes in the warm-up (Phase 2), the generic matcher with gates A–E and
-    `visual_match` (Phase 3), "Looks identical · Best value" and per-unit prices (Phase 4).
+  - **Photo hashes (Phase 2).** The warm-up hashes generic searches' photos (`photoUrlsToHash`,
+    25 per store, ≤1,500 a run): dHash with `sharp` (borders trimmed, 9×8 greyscale), cached in
+    Redis 30 days (`img:dhash:v1:{sha256(url)}`; failures 1 day). Photos come only from the
+    allowlisted store CDNs (`image-fetcher.ts`: https, no redirects, 5 s, 2 MB). **Searches never
+    compute a hash**: `photoHashesFor` reads cached ones, for generic intents only, and a failed
+    read means "no photos".
+  - **Generic matcher (Phase 3, `generic-matcher.ts`).** A generic pair matches **only** through
+    `matchGeneric`, never the branded rules: unbranded titles carry format codes ("MP3",
+    "QC3.0") that read as model numbers. Gates: (A) no `attributeConflict`; (B) photos within
+    10 bits across stores, 6 within one; (C) ≥ 50% core-word containment; (D) item prices
+    within 6×; (E) both accessories or neither. Tier words ("mini") don't conflict on generic
+    pairs. Basis `visual_match` ("Looks identical"; compare-sheet caveat), joined by every
+    member like `title_similarity`. No hashes → generic listings stay single cards.
+  - `fixtures/generic-recorded.json` (10 queries, 449 eBay + AliExpress listings, hashed) and
+    `generic-recorded.test.ts` pin the calibration: no cross-store photo within 8 bits, the
+    only ≤ 12-bit pair is the same cable clip (9 bits), different products from 14; exactly one
+    cross-store group (those clips) and 21 within-store collapses (reviewed by title, photo distance
+    and price). Re-record and re-check when tuning.
+  - Still to come (Phase 4): "Looks identical · Best value", per-unit prices, generic savings,
+    and the generic categories.
 - **AliExpress seller verification** (`isUnverifiedBrandListing`): a branded AliExpress listing
   counts only from the brand's own store: the seller's name says Official or Flagship **and**
   names the listing's brand (aliases count). "Official" alone means official for the seller's own

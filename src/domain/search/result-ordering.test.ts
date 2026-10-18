@@ -93,8 +93,8 @@ describe("sortGroups", () => {
   it("prefers groups with more stores on a price tie, then id", () => {
     const tied = groupProducts([
       makeProduct({ provider: "amazon", sku: "solo", title: "Solo Item Q9", total: 100_00 }),
-      makeProduct({ provider: "amazon", sku: "pair-a", title: "Pair Item K7", total: 100_00 }),
-      makeProduct({ provider: "ebay", sku: "pair-b", title: "Pair Item K7", total: 100_00 }),
+      makeProduct({ provider: "amazon", sku: "pair-a", title: "Anker Pair Item K7", total: 100_00 }),
+      makeProduct({ provider: "ebay", sku: "pair-b", title: "Anker Pair Item K7", total: 100_00 }),
       makeProduct({ provider: "temu", sku: "alone", title: "Another Thing M5", total: 100_00 }),
     ]);
     expect(sortGroups(tied, "landed_price_asc").map((g) => g.id)).toEqual([
@@ -121,8 +121,8 @@ describe("sortGroups", () => {
   it("puts groups found in more stores first on a relevance tie, and unranked groups last", () => {
     const tied = groupProducts([
       makeProduct({ provider: "amazon", sku: "solo", title: "Solo Item Q9", total: 10_00 }),
-      makeProduct({ provider: "amazon", sku: "pair-a", title: "Pair Item K7", total: 100_00 }),
-      makeProduct({ provider: "ebay", sku: "pair-b", title: "Pair Item K7", total: 100_00 }),
+      makeProduct({ provider: "amazon", sku: "pair-a", title: "Anker Pair Item K7", total: 100_00 }),
+      makeProduct({ provider: "ebay", sku: "pair-b", title: "Anker Pair Item K7", total: 100_00 }),
       makeProduct({ provider: "temu", sku: "unranked", title: "Another Thing M5", total: 1_00 }),
     ]);
     const ranks = new Map([

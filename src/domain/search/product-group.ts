@@ -1,3 +1,5 @@
+import { matchGeneric } from "@/domain/matching/generic-matcher";
+import type { ImageHash } from "@/domain/matching/image-hash";
 import {
   blocksGrouping,
   DEFAULT_MATCHING_POLICY,
@@ -10,7 +12,7 @@ import {
   type MatchCandidate,
   type MatchingPolicy,
 } from "@/domain/matching/product-matcher";
-import { tokenizeTitle } from "@/domain/matching/title-tokens";
+import { isGenericPair, tokenizeTitle } from "@/domain/matching/title-tokens";
 import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { ProductRating, UnifiedProduct } from "@/domain/product/unified-product";
 import { heroImage, heroTitleListing, type ListingRank } from "@/domain/search/hero-listing";
@@ -65,6 +67,8 @@ export interface GroupingOptions {
   readonly unavailable?: readonly UnavailableListing[];
   /** Each listing's position in its store's results; picks the card's photo and title. */
   readonly rankOf?: ListingRank;
+  /** Cached photo hashes by image URL: generic (unbranded) listings can match by photo. */
+  readonly imageHashes?: ReadonlyMap<string, ImageHash>;
 }
 
 export function bestOffer(group: ProductGroup): UnifiedProduct {
@@ -82,24 +86,43 @@ interface Cluster {
 }
 
 /** A product's match candidate, with the search's accessory decision when there is one. */
-function candidateFor(product: UnifiedProduct, classes: GroupingOptions["classes"]): MatchCandidate {
+function candidateFor(product: UnifiedProduct, options: GroupingOptions): MatchCandidate {
   const candidate = toMatchCandidate(product);
-  const cls = classes?.get(product.id);
-  return cls ? { product, tokens: { ...candidate.tokens, isAccessory: cls.isAccessory } } : candidate;
+  const cls = options.classes?.get(product.id);
+  const imageHash = (product.imageUrl && options.imageHashes?.get(product.imageUrl)) || null;
+  return {
+    product,
+    tokens: cls ? { ...candidate.tokens, isAccessory: cls.isAccessory } : candidate.tokens,
+    imageHash,
+  };
 }
 
-const BASIS_STRENGTH: Record<MatchBasis, number> = { title_similarity: 0, model_number: 1 };
+/** Weakest first: a group is only as sure as its weakest link. */
+const BASIS_STRENGTH: Record<MatchBasis, number> = { title_similarity: 0, visual_match: 1, model_number: 2 };
 
 function weaker(a: MatchBasis | null, b: MatchBasis): MatchBasis {
   return a === null || BASIS_STRENGTH[b] < BASIS_STRENGTH[a] ? b : a;
 }
 
-/** A listing's positive match with a group member: across stores, or a second listing at one store. */
+/**
+ * A listing's positive match with a group member: across stores, or a second
+ * listing at one store. Two unbranded listings can also match by photo
+ * (`matchGeneric`); branded ones only by the branded rules.
+ */
 function memberMatch(candidate: MatchCandidate, member: MatchCandidate, policy: MatchingPolicy) {
+  // Unbranded titles carry format and standard codes ("MP3", "QC3.0") that the branded
+  // rules would read as model numbers; a generic pair matches on its photo or not at all.
+  if (isGenericPair(candidate.tokens, member.tokens)) {
+    return matchGeneric(candidate, member);
+  }
   return candidate.product.provider === member.product.provider
     ? matchSameStore(candidate, member, policy)
     : matchProducts(candidate, member, policy);
 }
+
+/** Title-only and photo matches must hold with every member, not just most. */
+const needsEveryMember = (basis: MatchBasis | null) =>
+  basis === "title_similarity" || basis === "visual_match";
 
 /**
  * Best placement for a candidate. Two rules keep groups precise:
@@ -137,7 +160,7 @@ function findCluster(
     }
 
     const size = cluster.members.length;
-    const enough = basis === "title_similarity" ? matched === size : matched * 2 > size;
+    const enough = needsEveryMember(basis) ? matched === size : matched * 2 > size;
     const share = matched / size;
     if (blocked || !basis || !enough) continue;
     if (!best || share > best.share || (share === best.share && minScore > best.score))
@@ -180,7 +203,7 @@ function mergeClusters(clusters: Cluster[], policy: MatchingPolicy): Cluster[] {
           }
           if (blocked) break;
         }
-        const enough = basis === "title_similarity" ? matched === pairs : matched * 2 > pairs;
+        const enough = needsEveryMember(basis) ? matched === pairs : matched * 2 > pairs;
         if (blocked || !basis || !enough) continue;
         clusters[i] = {
           members: [...a.members, ...b.members],
@@ -280,7 +303,7 @@ export function groupProducts(
   const clusters: Cluster[] = [];
 
   for (const product of [...products].sort(compareOffers)) {
-    const candidate = candidateFor(product, options.classes);
+    const candidate = candidateFor(product, options);
     const placement = findCluster(candidate, clusters, policy);
     if (placement) {
       placement.cluster.members.push(candidate);
