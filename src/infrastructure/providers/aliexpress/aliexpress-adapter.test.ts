@@ -10,6 +10,7 @@ import { TEST_FX } from "@/test/fx";
 import errorRateLimit from "./fixtures/error-rate-limit.json";
 import errorSignature from "./fixtures/error-signature.json";
 import searchEmpty from "./fixtures/search-empty.json";
+import searchEmptyRecorded from "./fixtures/search-empty-recorded.json";
 import searchMalformed from "./fixtures/search-malformed.json";
 import searchOk from "./fixtures/search-ok.json";
 import searchRecorded from "./fixtures/search-recorded.json";
@@ -183,6 +184,15 @@ describe("AliExpress adapter — failures never throw", () => {
     expect(await search()).toMatchObject({
       ok: false,
       error: { kind: "upstream_error", code: "GATEWAY_15" },
+    });
+  });
+
+  it("reads the live API's empty answer (resp_code 405) as zero results, not an outage", async () => {
+    // Recorded 2026-10-18 for "belkin boostcharge pro": an empty search, not an error. Treating
+    // it as one would skip caching it and count it against the store's circuit breaker.
+    expect(await setup(async () => jsonResponse(searchEmptyRecorded)).search()).toEqual({
+      ok: true,
+      value: { products: [], hasMore: false },
     });
   });
 

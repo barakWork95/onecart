@@ -25,6 +25,8 @@ import {
 const API_METHOD = "aliexpress.affiliate.product.query";
 const DEFAULT_TIMEOUT_MS = 4_000;
 const DEFAULT_PAGE_SIZE = 20;
+/** product.query's "no matches" answer (verified live 2026-10-18). */
+const EMPTY_RESULT_CODE = 405;
 
 export interface AliExpressProviderConfig extends AliExpressGatewayConfig {
   readonly trackingId?: string;
@@ -78,6 +80,9 @@ export function createAliExpressProvider(config: AliExpressProviderConfig): Prod
 
     const { resp_code, resp_msg, result } =
       envelope.data.aliexpress_affiliate_product_query_response.resp_result;
+    // The live API answers a search with no matches with 405 "The result is empty": a
+    // legitimate 0 results (cached like any other), not an outage.
+    if (resp_code === EMPTY_RESULT_CODE) return ok({ products: [], hasMore: false });
     if (resp_code !== 200) return err(providerError("upstream_error", `RESP_${resp_code}`, resp_msg));
 
     const rawProducts = result?.products?.product ?? [];
