@@ -35,6 +35,8 @@ export const metadata: Metadata = {
     locale: "en_IL",
   },
   twitter: { card: "summary_large_image", title: DEFAULT_TITLE, description: SITE_DESCRIPTION },
+  // Google Search Console ownership (public by design: it only proves we control the site).
+  verification: { google: "zx9klYgnllmBGOvctmFv39iffk8k4HUr60bNS6gdhNw" },
   // Icons come from the file conventions: app/icon.svg, app/favicon.ico, app/apple-icon.png.
 };
 
