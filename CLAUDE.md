@@ -405,7 +405,10 @@ SearchBar (client) → /search?q=… (Server Component)
   has row-level security, so users touch only their own rows; the service role (the price checker)
   is the only cross-user reader.
 - **Schema changes.** Every change ships with assertions in `supabase/tests/*.test.sql`, and
-  `npm run test:db` must pass. It applies the migrations to a throwaway Postgres with a minimal
+  `npm run test:db` must pass. **Grant the service role explicitly in the migration** whenever
+  it reads or writes a table (production's default privileges don't); tests never add grants
+  themselves. Missing it once broke the price checker silently (`price_alerts`, fixed by
+  `20261018120000_price_alerts_service_role.sql`). It applies the migrations to a throwaway Postgres with a minimal
   `auth` shim (`supabase/tests/auth-shim.sql`).
 - **Identity is Supabase anonymous sign-in**, so there's no sign-up wall:
   - `readUserLists()` (for rendering) never creates a user;
@@ -512,8 +515,10 @@ SearchBar (client) → /search?q=… (Server Component)
 - **What a homepage card may feature** (`domain/deals/featured-listing.ts`): a card reads as an
   endorsement, so it's stricter than search. Marketplace listings must name a branded query's
   brand (catalog stores like Amazon are exempt: their titles drop it), branded AliExpress
-  listings must come from an official store, and the featured product's price must be within
-  0.5–2× the median of listings naming it. This keeps clones ("BOROFONE … AirTag Compatible"
+  listings must come from an official store, the featured product's price must be within
+  0.5–2× the median of listings naming it, and **its shipping must be quoted** (a card shows
+  landed prices only; AliExpress's API never quotes shipping, so its listings stay in live
+  search as "+ shipping" but don't make cards). This keeps clones ("BOROFONE … AirTag Compatible"
   ₪31) and outliers (a ₪3,304 air fryer) off the homepage. Search results are unaffected.
   - Results from an older snapshot are dated: `ProviderOutcome.cachedAt` (oldest cached page)
     → "Amazon prices as of 13 Oct, 10:30" above the cards when older than an hour.

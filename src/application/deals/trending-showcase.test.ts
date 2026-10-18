@@ -1,4 +1,8 @@
-import { createTrendingShowcase, warmTrendingSearches } from "@/application/deals/trending-showcase";
+import {
+  createTrendingShowcase,
+  WARM_PAGE_SIZE,
+  warmTrendingSearches,
+} from "@/application/deals/trending-showcase";
 import type { SearchProducts } from "@/application/search/search-products";
 import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import { searchCacheKey } from "@/domain/search/search-query";
@@ -94,6 +98,44 @@ describe("trending showcase", () => {
     const [card] = await showcase([{ label: "Cable clips", query: "cable clips" }]);
     expect(card).toMatchObject({ matchedBy: "visual_match", best: { provider: "aliexpress" } });
     expect(card?.stores).toHaveLength(2);
+  });
+
+  it("features only landed prices: a listing without quoted shipping never makes a card", async () => {
+    const cache = fakeSearchCache(() => at.ms);
+    const unquoted = (sku: string, title: string, total: number) => {
+      const p = makeProduct({ provider: "aliexpress", sku, title, total, sellerName: null });
+      return { ...p, price: { ...p.price, shippingKnown: false } };
+    };
+    await cache.set(
+      key("aliexpress", "steering wheel cover"),
+      {
+        products: [unquoted("a1", "Leather Steering Wheel Cover", 42_00)],
+        hasMore: false,
+        cachedAt: "2026-10-13T07:30:00.000Z",
+      },
+      86_400,
+    );
+    await cache.set(
+      key("ebay", "steering wheel cover"),
+      {
+        products: [
+          makeProduct({ provider: "ebay", sku: "e1", title: "Steering Wheel Cover Black", total: 75_00 }),
+        ],
+        hasMore: false,
+        cachedAt: "2026-10-13T07:30:00.000Z",
+      },
+      86_400,
+    );
+    const showcase = createTrendingShowcase({ cache, stores: [{ id: "ebay" }, { id: "aliexpress" }] });
+    const [card] = await showcase([{ label: "Steering wheel cover", query: "steering wheel cover" }]);
+    expect(card?.best).toEqual({ provider: "ebay", total: money(75_00, "ILS") });
+    expect(card?.stores.map((s) => s.provider)).toEqual(["ebay"]);
+
+    // Nothing with a quoted shipping price → no card at all.
+    const onlyUnquoted = createTrendingShowcase({ cache, stores: [{ id: "aliexpress" }] });
+    expect(await onlyUnquoted([{ label: "Steering wheel cover", query: "steering wheel cover" }])).toEqual(
+      [],
+    );
   });
 
   it("leaves out products with nothing cached, or with only accessories cached", async () => {
@@ -231,6 +273,8 @@ describe("warmTrendingSearches", () => {
       normalizedText: "sony wh-1000xm5",
       providers: ["ebay"],
       page: 1,
+      // Every loaded group, for photo hashing: not just a shopper's first page.
+      pageSize: WARM_PAGE_SIZE,
       sort: "relevance",
     });
     expect(warmed).toEqual([

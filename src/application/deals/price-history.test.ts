@@ -1,4 +1,9 @@
-import { createRecordPriceHistory, observationsFrom, type Observed } from "@/application/deals/price-history";
+import {
+  createRecordPriceHistory,
+  observationsFrom,
+  PRICE_HISTORY_GROUPS,
+  type Observed,
+} from "@/application/deals/price-history";
 import { assembleResults } from "@/application/search/assemble-results";
 import type { DailyPrice } from "@/domain/deals/price-drop";
 import type {
@@ -68,6 +73,16 @@ describe("observationsFrom", () => {
         title: "JBL Charge 5 Portable Bluetooth Speaker",
       },
     ]);
+  });
+
+  it("follows only the first results page, however many groups a warm-up returns", () => {
+    // Distinct JBL models never group, so each listing is its own group, in store order.
+    const many = Array.from({ length: PRICE_HISTORY_GROUPS + 5 }, (_, i) =>
+      listing("ebay", `m${i}`, `JBL Charge ${i + 100} Speaker`, 300 + i),
+    );
+    const observed = observationsFrom("jbl charge", response("jbl charge", many), TODAY);
+    expect(observed.length).toBeLessThanOrEqual(PRICE_HISTORY_GROUPS);
+    expect(observed.length).toBeGreaterThan(0);
   });
 });
 

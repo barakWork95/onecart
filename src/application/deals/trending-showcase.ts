@@ -100,9 +100,13 @@ export function createFeaturedLookup(deps: TrendingShowcaseDeps) {
     if (!cached.some((e) => e.products.length > 0)) return null;
 
     const intent = searchIntent(text);
-    // A card is an endorsement: only listings it may feature (see `isFeaturableListing`).
+    // A card is an endorsement: only listings it may feature (see `isFeaturableListing`), and
+    // only landed prices. A store that didn't quote shipping (AliExpress never does) has an
+    // item price, not a total: it stays in live search as "+ shipping", never on a card.
     const stores: StoreResults[] = cached.map((e) => ({
-      products: e.products.filter((p) => isFeaturableListing(p, tokenizeTitle(p.title), intent)),
+      products: e.products.filter(
+        (p) => p.price.shippingKnown && isFeaturableListing(p, tokenizeTitle(p.title), intent),
+      ),
       unavailable: e.unavailable ?? [],
     }));
     const products = stores.flatMap((s) => s.products);
@@ -187,6 +191,9 @@ export interface WarmedQuery {
   readonly outcomes: readonly { provider: ProviderId; status: string }[];
 }
 
+/** Groups a warm-up search returns: all of them (store pages hold ~70 listings). */
+export const WARM_PAGE_SIZE = 200;
+
 /**
  * Runs the trending searches through the normal search path (circuit breaker,
  * daily call budget) with `refresh`, so each store asked is called even when
@@ -233,7 +240,9 @@ export async function warmTrendingSearches(
       destination: DESTINATION,
       providers: stores,
       page: 1,
-      pageSize: 20,
+      // Every group the store pages hold, not one results page: photo hashing and price
+      // history read the response, and a bigger page costs no store calls.
+      pageSize: WARM_PAGE_SIZE,
     };
     const response = await searchProducts(searchQuery, {
       refresh: true,

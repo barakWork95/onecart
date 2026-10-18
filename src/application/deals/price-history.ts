@@ -25,9 +25,13 @@ export interface Observed {
  * names (no accessories, no related items) that a homepage card could feature.
  * Only these can become drop cards, so only these are worth a row.
  */
+/** The first results page a shopper sees: what price history follows. */
+export const PRICE_HISTORY_GROUPS = 20;
+
 export function observationsFrom(query: string, response: SearchResponse, day: string): Observed[] {
   const intent = searchIntent(response.query.normalizedText);
   return response.groups
+    .slice(0, PRICE_HISTORY_GROUPS)
     .filter((g) => !g.isAccessory && intentTier(g, intent) === 0)
     .flatMap((g) => g.listings)
     .filter((p) => isFeaturableListing(p, tokenizeTitle(p.title), intent))

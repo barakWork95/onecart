@@ -1,8 +1,11 @@
 import { searchIntent } from "@/domain/search/search-intent";
 import type { SearchResponse } from "@/domain/search/search-response";
 
-/** Listings per store whose photos are hashed for one generic search. */
-export const PHOTOS_PER_STORE = 25;
+/**
+ * Listings per store whose photos are hashed for one generic search: a full store page
+ * (eBay returns 50). A listing without a hash can't be matched by photo at all.
+ */
+export const PHOTOS_PER_STORE = 50;
 
 /**
  * Photo URLs to hash after warming a search: only for generic searches (the
