@@ -119,6 +119,50 @@ describe("NotifyMe", () => {
   });
 });
 
+describe("NotifyMe as a list switch (ops alerts)", () => {
+  const COPY = {
+    label: "Ops alerts",
+    off: "Send ops alerts to this browser.",
+    on: "Ops alerts come to this browser.",
+  };
+
+  it("is off for a subscribed browser the server doesn't list, and doesn't enrol it on its own", async () => {
+    installPush({ permission: "granted", subscribed: true });
+    const save = jest.fn(ok);
+    render(
+      <NotifyMe
+        publicKey={PUBLIC_KEY}
+        save={save}
+        remove={jest.fn(ok)}
+        copy={COPY}
+        keepBrowserSubscription
+        isSaved={async () => false}
+      />,
+    );
+    expect(await screen.findByText(COPY.off)).toBeInTheDocument();
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it("turning off removes it from the list but keeps the browser subscribed", async () => {
+    const push = installPush({ permission: "granted", subscribed: true });
+    const remove = jest.fn(ok);
+    render(
+      <NotifyMe
+        publicKey={PUBLIC_KEY}
+        save={jest.fn(ok)}
+        remove={remove}
+        copy={COPY}
+        keepBrowserSubscription
+        isSaved={async () => true}
+      />,
+    );
+    await userEvent.click(await screen.findByRole("button", { name: "Turn off" }));
+    expect(remove).toHaveBeenCalledWith({ endpoint: JSON_SUB.endpoint });
+    expect(push.subscription.unsubscribe).not.toHaveBeenCalled();
+    expect(screen.getByRole("region", { name: "Ops alerts" })).toBeInTheDocument();
+  });
+});
+
 describe("base64UrlToBytes", () => {
   it("decodes base64url without padding", () => {
     expect([...base64UrlToBytes("AQID_-8")]).toEqual([1, 2, 3, 255, 239]);

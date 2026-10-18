@@ -1,13 +1,20 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { warmTrending } from "@/app/_composition";
+import { checkOpsAlerts, recordCronRun, warmTrending } from "@/app/_composition";
 import { rejectUnlessCron } from "@/app/api/cron/_auth";
+import { warmRunProblems } from "@/domain/ops/cron-run";
 
 /**
- * Daily: re-runs the homepage's trending searches so their results stay
- * cached for the "Trending" grid, which only ever reads the cache.
+ * Daily: re-runs the homepage's trending and category searches so their
+ * results stay cached, records prices, and records how the run went.
  */
 export async function GET(request: NextRequest) {
   const rejected = rejectUnlessCron(request);
   if (rejected) return rejected;
-  return NextResponse.json({ warmed: await warmTrending() }, { headers: { "Cache-Control": "no-store" } });
+  const { result, run } = await recordCronRun("warm-trending", warmTrending, warmRunProblems);
+  // Also catches a missed price-alerts run: a cron that didn't run can't report itself.
+  const alerts = await checkOpsAlerts();
+  return NextResponse.json(
+    { warmed: result, ok: run.ok, problems: run.problems, alerts },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

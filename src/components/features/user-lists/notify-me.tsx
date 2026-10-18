@@ -17,6 +17,12 @@ type State =
 
 const SW_URL = "/sw.js";
 
+const DEFAULT_COPY = {
+  label: "Price-alert notifications",
+  off: "Get a notification when a price hits your target.",
+  on: "Notifications are on: this browser hears from us when a price hits your target.",
+} as const;
+
 /** VAPID keys are base64url; PushManager wants the raw bytes. */
 export function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
   const base64 = (value + "=".repeat((4 - (value.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
@@ -52,10 +58,25 @@ export function NotifyMe({
   publicKey,
   save,
   remove,
+  copy = DEFAULT_COPY,
+  keepBrowserSubscription = false,
+  isSaved,
 }: {
   publicKey: string;
   save: (subscription: PushSubscriptionJSON) => Promise<ActionResult>;
   remove: (input: { endpoint: string }) => Promise<ActionResult>;
+  /** The panel's name and its off/on sentences. */
+  copy?: { readonly label: string; readonly off: string; readonly on: string };
+  /**
+   * Turning off only removes this browser from the server's list; the browser
+   * stays subscribed (its other notifications, e.g. price alerts, keep working).
+   */
+  keepBrowserSubscription?: boolean;
+  /**
+   * Whether the server already has this browser on its list. Without it, any
+   * subscription counts as on (the browser's one subscription serves the list).
+   */
+  isSaved?: (input: { endpoint: string }) => Promise<boolean>;
 }) {
   const [state, setState] = useState<State>("checking");
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +90,10 @@ export function NotifyMe({
       try {
         const registration = await navigator.serviceWorker.register(SW_URL);
         const subscription = await registration.pushManager.getSubscription();
-        const on = !!subscription && Notification.permission === "granted";
+        const on =
+          !!subscription &&
+          Notification.permission === "granted" &&
+          (!isSaved || (await isSaved({ endpoint: subscription.endpoint })));
         settle(on ? "on" : "off");
         // Browsers replace subscriptions over time (and on site-data resets); the server
         // must push to this one, so it's re-saved on every visit. Idempotent.
@@ -81,7 +105,7 @@ export function NotifyMe({
     return () => {
       cancelled = true;
     };
-  }, [save]);
+  }, [save, isSaved]);
 
   async function turnOn() {
     setError(null);
@@ -113,7 +137,7 @@ export function NotifyMe({
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
         const { endpoint } = subscription;
-        await subscription.unsubscribe();
+        if (!keepBrowserSubscription) await subscription.unsubscribe();
         await remove({ endpoint });
       }
       setState("off");
@@ -131,7 +155,7 @@ export function NotifyMe({
     "inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 font-semibold disabled:opacity-60";
 
   return (
-    <section aria-label="Price-alert notifications" className={box}>
+    <section aria-label={copy.label} className={box}>
       {state === "unsupported" && (
         <p className="text-muted-foreground">
           This browser can&apos;t show notifications. Drops still show up on this page.
@@ -154,11 +178,7 @@ export function NotifyMe({
       )}
       {(state === "off" || state === "on" || state === "busy") && (
         <>
-          <p className="text-foreground">
-            {state === "on"
-              ? "Notifications are on: this browser hears from us when a price hits your target."
-              : "Get a notification when a price hits your target."}
-          </p>
+          <p className="text-foreground">{state === "on" ? copy.on : copy.off}</p>
           {state === "on" ? (
             <button
               type="button"

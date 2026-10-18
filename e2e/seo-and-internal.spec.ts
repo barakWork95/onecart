@@ -48,3 +48,37 @@ test.describe("internal click report", () => {
     await context.close();
   });
 });
+
+test.describe("internal status", () => {
+  const CRON = { Authorization: "Bearer e2e-only-cron-secret-0123456789" };
+
+  test("crons record their runs, which the password-protected status page shows", async ({
+    browser,
+    request,
+  }) => {
+    const warmed = await request.get("/api/cron/warm-trending", { headers: CRON });
+    const body = (await warmed.json()) as { ok: boolean; problems: string[]; alerts: unknown };
+    expect(body.ok).toBe(true);
+    expect(body.problems).toEqual([]);
+    expect(body.alerts).toMatchObject({ delivered: 0 });
+
+    expect((await request.get("/internal/status")).status()).toBe(401);
+    const context = await browser.newContext({ httpCredentials: ADMIN });
+    const page = await context.newPage();
+    await page.goto("/internal/status");
+    await expect(page.getByRole("heading", { level: 1, name: "Status" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Cron runs" })).toContainText("warm-trending ok");
+    // Demo data: no live store quotas, no database.
+    await expect(page.getByRole("region", { name: "Quotas" })).toContainText(
+      "No live stores configured here.",
+    );
+    await expect(page.getByRole("region", { name: "Price history (rows per day)" })).toContainText(
+      "Not configured here.",
+    );
+    // Push is configured (test keys): the ops alert switch is there (blocked in headless Chromium).
+    await expect(page.getByRole("region", { name: "Ops alerts" })).toBeVisible();
+    await page.getByRole("button", { name: "Send a test alert" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "No browser is listed yet" })).toBeVisible();
+    await context.close();
+  });
+});

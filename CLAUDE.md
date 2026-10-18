@@ -506,6 +506,22 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   (static). The logo is inlined there; a test keeps it equal to `app/icon.svg`.
 - `sitemap.ts` lists only static pages; never add `/search` URLs (they spend store quota).
 
+## Operations: /internal/status and ops alerts
+
+- Both crons run through `recordCronRun` (`application/ops`): each run is stored in Redis
+  (`ops:cron:v1:{job}`: last run and last ok run) with plain-language problems from
+  `warmRunProblems` / `alertRunProblems` (a store failing ≥50% of its searches, price history or
+  notifications erroring, failed alert searches). A throwing run is recorded, then rethrown.
+- `/internal/status` (admin password, like `/internal/clicks`): current problems, each job's last
+  and last ok run, quotas, price rows per day (14 days), push and alert counts, clicks today.
+  Quotas cost nothing to read: SerpApi's account endpoint, eBay's rate-limit analytics, and our
+  own budget counters (`budget:day:{store}:{day}`, `budget-warm:…`) read directly.
+- **Ops alerts** (`createCheckOpsAlerts`, after every cron run): issues = failing last runs, missed
+  runs (a recorded job over 26h old; each cron checks the other), quotas at zero. Only changes
+  push: new issues once, then "recovered". If every push failed, nothing is marked alerted, so
+  the next run retries. Targets are admin browsers in Redis (`ops:alerts:targets:v1`), added
+  with the status page's switch; turning it off keeps the browser's own subscription.
+
 ## Compliance
 
 - The footer on every page carries the general affiliate disclosure (`AFFILIATE_DISCLOSURE`:

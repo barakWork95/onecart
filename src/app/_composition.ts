@@ -4,6 +4,29 @@ import { randomBytes } from "node:crypto";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { createCategoryPage, type CategoryPage } from "@/application/deals/category-page";
+import { createCheckOpsAlerts, type OpsAlertRun } from "@/application/ops/ops-alerts";
+import { createRecordCronRun } from "@/application/ops/record-cron-run";
+import { createStatusReport } from "@/application/ops/status-report";
+import { webPushConfig } from "@/config/env";
+import type { PushSubscriptionKeys } from "@/domain/notifications/push";
+import type { OpsAlertState, OpsStore } from "@/domain/ops/ports";
+import type { QuotaSource } from "@/domain/ops/status";
+import type { ProviderId as StoreId } from "@/domain/shared/provider";
+import { createRedisOpsAlertState } from "@/infrastructure/cache/redis-ops-alert-state";
+import { createRedisOpsStore } from "@/infrastructure/cache/redis-ops-store";
+import { createSupabaseOpsStats } from "@/infrastructure/db/supabase-ops-stats";
+import { createWebPushSender } from "@/infrastructure/notifications/web-push-sender";
+import { createBudgetQuota, type BudgetCounter } from "@/infrastructure/ops/budget-quota";
+import { createEbayQuota } from "@/infrastructure/ops/ebay-quota";
+import { createSerpApiQuota } from "@/infrastructure/ops/serpapi-quota";
+
+/** Store names for status labels (the UI's STORE_META lives in components). */
+const STORE_NAMES: Record<StoreId, string> = {
+  amazon: "Amazon",
+  aliexpress: "AliExpress",
+  temu: "Temu",
+  ebay: "eBay",
+};
 import { categoryBySlug } from "@/domain/deals/category";
 import { createClickReport, israelDay, type ClickReport } from "@/application/affiliate/click-report";
 import {
@@ -103,6 +126,12 @@ interface Services {
   /** Null without Supabase's service key: no price history, so no drops. */
   readonly recordPriceHistory: ReturnType<typeof createRecordPriceHistory> | null;
   readonly priceDropBoard: PriceDropBoard;
+  /** Cron run records (status page, alerts). */
+  readonly opsStore: OpsStore;
+  readonly recordCronRun: ReturnType<typeof createRecordCronRun>;
+  readonly opsAlertState: OpsAlertState;
+  readonly statusReport: ReturnType<typeof createStatusReport>;
+  readonly checkOpsAlerts: ReturnType<typeof createCheckOpsAlerts>;
   readonly demoMode: boolean;
   /** Stores answering from recorded samples (development); the UI labels them. */
   readonly sampleStores: readonly ProviderId[];
@@ -226,6 +255,7 @@ function buildServices(): Services {
         : { kind: "none" };
 
   const priceDropBoard = createRedisPriceDropBoard(redis);
+  const opsStore = createRedisOpsStore(redis);
   const showcaseStores = providers.map((p) => ({
     id: p.id,
     ...(p.cacheScope ? { cacheScope: p.cacheScope } : {}),
@@ -239,16 +269,45 @@ function buildServices(): Services {
     logger,
   };
   const amazonWarmPerDay = config.AMAZON_WARM_PER_DAY ?? DEFAULT_AMAZON_WARM_PER_DAY;
+  const shopperLimits = {
+    ebay: config.EBAY_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.ebay,
+    amazon: config.AMAZON_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.amazon,
+    aliexpress: config.ALIEXPRESS_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.aliexpress,
+  };
   const shopperBudget = demoMode
     ? null
-    : createCallBudget(config, providers, logger, "budget", {
-        ebay: config.EBAY_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.ebay,
-        amazon: config.AMAZON_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.amazon,
-        aliexpress: config.ALIEXPRESS_DAILY_CALL_BUDGET ?? DEFAULT_DAILY_CALL_BUDGETS.aliexpress,
-      });
+    : createCallBudget(config, providers, logger, "budget", shopperLimits);
   const warmBudget = demoMode
     ? null
     : createCallBudget(config, providers, logger, "budget-warm", { amazon: amazonWarmPerDay });
+
+  // Quotas for the status page and alerts. Reading them spends nothing: SerpApi's account
+  // endpoint is free, eBay's analytics call isn't a Browse call, and counters are plain reads.
+  const liveStores = providers.filter((p) => !p.cacheScope).map((p) => p.id);
+  const opsQuotas: QuotaSource[] = [];
+  if (!demoMode && config.SERPAPI_API_KEY)
+    opsQuotas.push(createSerpApiQuota({ apiKey: config.SERPAPI_API_KEY }));
+  const ebayKeys = ebayCredentials(config);
+  if (!demoMode && ebayKeys) opsQuotas.push(createEbayQuota({ tokens: createEbayTokenProvider(ebayKeys) }));
+  const counterRedis = createUpstashRedis(config);
+  if (!demoMode && counterRedis) {
+    const budgets: BudgetCounter[] = liveStores.map((store) => ({
+      name: `Our ${STORE_NAMES[store]} budget today`,
+      prefix: "budget",
+      subject: store,
+      limit: shopperLimits[store as keyof typeof shopperLimits] ?? 0,
+    }));
+    if (liveStores.includes("amazon") && amazonWarmPerDay > 0)
+      budgets.push({
+        name: "Our Amazon warming budget today",
+        prefix: "budget-warm",
+        subject: "amazon",
+        limit: amazonWarmPerDay,
+      });
+    opsQuotas.push(createBudgetQuota({ redis: counterRedis, budgets: budgets.filter((b) => b.limit > 0) }));
+  }
+  const opsAlertState = createRedisOpsAlertState(redis);
+  const push = webPushConfig(config);
 
   // Server-side only and never request-scoped: the click and price tables have no policies for visitors.
   const serviceDb =
@@ -261,6 +320,22 @@ function buildServices(): Services {
     linkCodec,
     clickReport: serviceDb ? createClickReport({ stats: createSupabaseClickStats(serviceDb) }) : null,
     priceDropBoard,
+    opsStore,
+    recordCronRun: createRecordCronRun({ store: opsStore, logger }),
+    opsAlertState,
+    statusReport: createStatusReport({
+      ops: opsStore,
+      quotas: opsQuotas,
+      stats: serviceDb ? createSupabaseOpsStats(serviceDb) : null,
+      clicks: serviceDb ? createSupabaseClickStats(serviceDb) : null,
+    }),
+    checkOpsAlerts: createCheckOpsAlerts({
+      ops: opsStore,
+      quotas: opsQuotas,
+      state: opsAlertState,
+      sender: push ? createWebPushSender({ ...push, logger }) : null,
+      logger,
+    }),
     recordPriceHistory: serviceDb
       ? createRecordPriceHistory({
           history: createSupabasePriceHistory(serviceDb),
@@ -563,6 +638,63 @@ export async function warmTrending() {
   for (const { slug } of categories) revalidateTag(categoryTag(slug), { expire: 0 });
   return { trending, categories: categoriesWarmed, priceHistory: await recordPrices(observed, today) };
 }
+
+/** Runs a cron's work and records how it went (see `createRecordCronRun`). */
+export function recordCronRun<T>(
+  job: Parameters<Services["recordCronRun"]>[0],
+  work: () => Promise<T>,
+  problemsOf: (result: T) => readonly string[],
+) {
+  return getServices().recordCronRun(job, work, problemsOf);
+}
+
+/** Everything /internal/status shows. */
+export function statusReport() {
+  return getServices().statusReport();
+}
+
+/**
+ * After a cron run: alerts the admin browsers about new problems or recoveries.
+ * Never throws: an alerting failure is logged, and the cron still succeeds.
+ */
+export async function checkOpsAlerts(): Promise<OpsAlertRun | "error"> {
+  try {
+    return await getServices().checkOpsAlerts();
+  } catch (error) {
+    consoleLogger.warn("ops: alert check failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "error";
+  }
+}
+
+/** Admin browsers that receive ops alerts (the status page's switch). */
+export function opsAlertTargets() {
+  return getServices().opsAlertState;
+}
+
+/** Sends a test ops alert to every admin browser; how many accepted it. */
+export async function sendTestOpsAlert(): Promise<{ readonly targets: number; readonly delivered: number }> {
+  const config = webPushConfig(env());
+  const state = getServices().opsAlertState;
+  const targets = await state.targets();
+  if (!config) return { targets: targets.length, delivered: 0 };
+  const sender = createWebPushSender({ ...config, logger: consoleLogger });
+  let delivered = 0;
+  for (const target of targets) {
+    const { result } = await sender.send(target, {
+      title: "OneCart ops alerts",
+      body: "Test alert: this browser will hear about failed crons and empty quotas.",
+      url: "/internal/status",
+      tag: `ops-test-${Date.now()}`,
+    });
+    if (result === "sent") delivered++;
+    else if (result === "expired") await state.removeTarget(target.endpoint);
+  }
+  return { targets: targets.length, delivered };
+}
+
+export type { PushSubscriptionKeys };
 
 /** Cache tag of one category page's data; the warm-up revalidates it. */
 export const categoryTag = (slug: string) => `category:${slug}`;
