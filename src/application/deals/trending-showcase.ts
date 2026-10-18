@@ -35,6 +35,8 @@ export interface TrendingCard {
   readonly stores: readonly {
     readonly provider: ProviderId;
     readonly total: Money;
+    /** False when the store didn't quote shipping: the total is the item alone. */
+    readonly shippingKnown: boolean;
     readonly listings: number;
   }[];
   /** Stores that list the product but won't ship it to Israel. */
@@ -134,6 +136,7 @@ export function toTrendingCard(label: string, { query, group, pricesAsOf }: Feat
     stores: group.offers.map((offer) => ({
       provider: offer.provider,
       total: offer.price.total,
+      shippingKnown: offer.price.shippingKnown,
       listings: group.listings.filter((l) => l.provider === offer.provider).length,
     })),
     unshippedStores: group.unavailable.map((u) => u.provider),

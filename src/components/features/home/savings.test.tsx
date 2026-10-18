@@ -11,8 +11,8 @@ const SAVING: SavingsCard = {
     imageUrl: null,
     best: { provider: "ebay", total: money(520_00, "ILS") },
     stores: [
-      { provider: "ebay", total: money(520_00, "ILS"), listings: 3 },
-      { provider: "amazon", total: money(690_00, "ILS"), listings: 1 },
+      { provider: "ebay", total: money(520_00, "ILS"), shippingKnown: true, listings: 3 },
+      { provider: "amazon", total: money(690_00, "ILS"), shippingKnown: true, listings: 1 },
     ],
     unshippedStores: [],
     matchedBy: "model_number",

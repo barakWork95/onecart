@@ -60,7 +60,7 @@ describe("trending showcase", () => {
       title: "Sony WH-1000XM5 Noise Cancelling Wireless Headphones Black",
       imageUrl: noOffer.imageUrl,
       best: { provider: "ebay", total: money(1012_00, "ILS") },
-      stores: [{ provider: "ebay", total: money(1012_00, "ILS"), listings: 2 }],
+      stores: [{ provider: "ebay", total: money(1012_00, "ILS"), shippingKnown: true, listings: 2 }],
       unshippedStores: ["amazon"],
       matchedBy: "single",
       lookAlike: false,

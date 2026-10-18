@@ -9,7 +9,7 @@ const card = (label: string, query: string): TrendingCard => ({
   title: `${label} — store title`,
   imageUrl: null,
   best: { provider: "ebay", total: money(499_00, "ILS") },
-  stores: [{ provider: "ebay", total: money(499_00, "ILS"), listings: 3 }],
+  stores: [{ provider: "ebay", total: money(499_00, "ILS"), shippingKnown: true, listings: 3 }],
   unshippedStores: [],
   matchedBy: "single",
   lookAlike: false,

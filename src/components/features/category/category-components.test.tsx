@@ -15,8 +15,8 @@ const PRODUCT: CategoryProduct = {
   imageUrl: null,
   best: { provider: "ebay", total: ils(612.12) },
   stores: [
-    { provider: "ebay", total: ils(612.12), listings: 4 },
-    { provider: "aliexpress", total: ils(689), listings: 1 },
+    { provider: "ebay", total: ils(612.12), shippingKnown: true, listings: 4 },
+    { provider: "aliexpress", total: ils(689), shippingKnown: true, listings: 1 },
   ],
   unshippedStores: ["amazon"],
   matchedBy: "model_number",

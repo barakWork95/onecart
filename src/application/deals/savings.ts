@@ -38,7 +38,8 @@ export function selectSavings(
     if (seen.has(card.query) || !SAVINGS_BASES.has(card.matchedBy)) continue;
     seen.add(card.query);
     const [first, second] = [...card.stores].sort((a, b) => a.total.amountMinor - b.total.amountMinor);
-    if (!first || !second) continue;
+    // A total without shipping isn't a landed price: no saving can be claimed from it.
+    if (!first || !second || !first.shippingKnown || !second.shippingKnown) continue;
     const savedMinor = second.total.amountMinor - first.total.amountMinor;
     const savedShare = savedMinor / second.total.amountMinor;
     if (savedMinor < policy.minSavedMinor || savedShare < policy.minSavedShare) continue;

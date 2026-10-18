@@ -11,6 +11,7 @@ function card(
   const stores = Object.entries(prices).map(([provider, shekels]) => ({
     provider: provider as ProviderId,
     total: money((shekels ?? 0) * 100, "ILS"),
+    shippingKnown: true,
     listings: 1,
   }));
   return {
@@ -48,6 +49,13 @@ describe("selectSavings", () => {
         card("similar", { ebay: 100, amazon: 300 }, "title_similarity"),
       ]),
     ).toEqual([]);
+  });
+
+  it("claims nothing when either store's shipping isn't quoted: its total isn't landed", () => {
+    const unquoted = card("cable clips", { aliexpress: 3, ebay: 413 }, "visual_match");
+    const [ali, ebay] = unquoted.stores;
+    expect(selectSavings([{ ...unquoted, stores: [{ ...ali!, shippingKnown: false }, ebay!] }])).toEqual([]);
+    expect(selectSavings([{ ...unquoted, stores: [ali!, { ...ebay!, shippingKnown: false }] }])).toEqual([]);
   });
 
   it("counts photo matches of unbranded items too", () => {
