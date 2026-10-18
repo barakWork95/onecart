@@ -1,6 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
 import { CategoryRows, CategoryRowsSkeleton } from "@/components/features/home/category-rows";
+import { CATEGORIES } from "@/config/categories";
+import { categoryBySlug } from "@/domain/deals/category";
 import { money } from "@/domain/shared/money";
 
 const card = (label: string, query: string): TrendingCard => ({
@@ -17,16 +19,40 @@ const card = (label: string, query: string): TrendingCard => ({
   pricesAsOf: "2026-10-14T07:30:00.000Z",
 });
 
+const category = (slug: string) => {
+  const found = categoryBySlug(CATEGORIES, slug);
+  if (!found) throw new Error(`no category ${slug}`);
+  return found;
+};
+
 const HEADPHONES = {
-  category: { slug: "headphones", label: "Headphones", searchQuery: "wireless headphones" },
+  category: category("headphones"),
   cards: [card("Sony WH-CH720N", "sony wh-ch720n"), card("JBL Tune 520BT", "jbl tune 520bt")],
 };
 const GAMING = {
-  category: { slug: "gaming", label: "Gaming", searchQuery: "gaming" },
+  category: category("gaming"),
   cards: [card("Nintendo Switch OLED", "nintendo switch oled")],
 };
 
 describe("CategoryRows", () => {
+  it("names the row and its products in Hebrew, and links within /he", () => {
+    const gadgets = {
+      category: category("kitchen-gadgets"),
+      cards: [card("Vegetable peeler", "vegetable peeler"), card("Garlic press", "garlic press")],
+    };
+    render(<CategoryRows rows={[gadgets]} locale="he" />);
+    const region = screen.getByRole("region", { name: "גאדג׳טים למטבח" });
+    const row = within(region).getByRole("list", { name: "מוצרים בקטגוריה גאדג׳טים למטבח" });
+    expect(within(row).getByRole("link", { name: "קולפן ירקות" })).toHaveAttribute(
+      "href",
+      "/he/search?q=vegetable+peeler",
+    );
+    expect(within(region).getByRole("link", { name: /^לכל המוצרים/ })).toHaveAttribute(
+      "href",
+      "/he/c/kitchen-gadgets",
+    );
+  });
+
   it("renders one named section per category with its product cards", () => {
     render(<CategoryRows rows={[HEADPHONES, GAMING]} />);
     const headphones = screen.getByRole("region", { name: "Headphones" });

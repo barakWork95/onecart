@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export interface Crumb {
@@ -7,13 +8,14 @@ export interface Crumb {
 }
 
 /** "Home › Categories › Headphones", with the current page marked for assistive tech. */
-export function Breadcrumbs({ crumbs }: { crumbs: readonly Crumb[] }) {
+export function Breadcrumbs({ crumbs, label = "Breadcrumb" }: { crumbs: readonly Crumb[]; label?: string }) {
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+    <nav aria-label={label} className="text-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-1.5">
         {crumbs.map((crumb, i) => (
           <li key={crumb.label} className="flex items-center gap-1.5">
-            {i > 0 && <span aria-hidden>›</span>}
+            {/* An icon, not "›": text mirroring isn't reliable here, so right-to-left pages flip it. */}
+            {i > 0 && <ChevronRight className="size-3.5 rtl:rotate-180" aria-hidden />}
             {crumb.href ? (
               <Link href={crumb.href} className="hover:text-foreground hover:underline">
                 {crumb.label}

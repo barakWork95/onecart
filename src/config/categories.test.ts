@@ -21,11 +21,26 @@ describe.each([
         expect([p.query, searchIntent(normalizeQueryText(p.query)).mode]).toEqual([p.query, c.mode]);
   });
 
-  it("have search-friendly copy: a title, a description under 160 characters, an intro", () => {
+  it("have search-friendly copy in both languages: a title, a description under 160 characters, an intro", () => {
     for (const c of categories) {
-      expect(c.seoTitle.length).toBeGreaterThan(10);
-      expect(c.description.length).toBeLessThanOrEqual(160);
-      expect(c.intro.length).toBeGreaterThan(40);
+      for (const text of [c, c.he]) {
+        expect([c.slug, text.seoTitle.length > 10]).toEqual([c.slug, true]);
+        expect([c.slug, text.description.length <= 160]).toEqual([c.slug, true]);
+        expect([c.slug, text.intro.length > 40]).toEqual([c.slug, true]);
+      }
+      expect(c.he.seoTitle).toMatch(/[\u0590-\u05FF]/);
+    }
+  });
+
+  it("translate only their own products, and name every unbranded one in Hebrew", () => {
+    for (const c of categories) {
+      const queries = new Set(c.products.map((p) => p.query));
+      for (const query of Object.keys(c.he.products))
+        expect([c.slug, query, queries.has(query)]).toEqual([c.slug, query, true]);
+      // Brand and model names read the same in Hebrew; a generic item ("vegetable peeler") doesn't.
+      if (c.mode === "generic")
+        for (const p of c.products)
+          expect([c.slug, p.query, p.query in c.he.products]).toEqual([c.slug, p.query, true]);
     }
   });
 });
@@ -72,7 +87,8 @@ describe("live categories", () => {
 
   it("state no tax figures: those come from the import policy, so they can't go stale", () => {
     for (const c of CATEGORIES)
-      expect(`${c.seoTitle} ${c.description} ${c.intro}`).not.toMatch(/\$|₪|\d+\s*%/);
+      for (const text of [c, c.he])
+        expect(`${text.seoTitle} ${text.description} ${text.intro}`).not.toMatch(/\$|₪|\d+\s*%/);
   });
 });
 

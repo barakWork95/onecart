@@ -22,6 +22,13 @@ const CATEGORY: Category = {
     { label: "Sony SRS-XB100", query: "sony srs-xb100" },
     { label: "Bose SoundLink Micro", query: "bose soundlink micro" },
   ],
+  he: {
+    label: "רמקולים",
+    seoTitle: "רמקולים",
+    description: "רמקולים",
+    intro: "רמקולים בהשוואה",
+    products: {},
+  },
 };
 
 async function cacheWith(entries: Record<string, { title: string; shekels: number; cachedAt: string }>) {

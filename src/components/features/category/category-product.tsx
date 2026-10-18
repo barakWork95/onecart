@@ -2,10 +2,11 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { CategoryProduct } from "@/application/deals/category-page";
 import { trendingCardId, trendingHref } from "@/components/features/home/trending-card";
-import { LOOK_ALIKE_BADGE } from "@/components/features/search/group-view";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -13,27 +14,34 @@ import { cn } from "@/lib/utils";
  * A category page's product: the best landed price, what it's made of, every
  * store's price, and links to the full comparison and the store.
  */
-export function CategoryProductCard({ product, goHref }: { product: CategoryProduct; goHref: string }) {
+export function CategoryProductCard({
+  product,
+  goHref,
+  locale = "en",
+}: {
+  product: CategoryProduct;
+  goHref: string;
+  locale?: Locale;
+}) {
+  const t = dict(locale).category.card;
+  const precise = (m: typeof product.bestListing.price.item) => formatMoney(m, { precise: true, locale });
   const { price, provider } = product.bestListing;
   const store = STORE_META[provider].name;
   const headingId = trendingCardId(product.query, "product");
   const rows: [string, string][] = [
-    ["Item", formatMoney(price.item, { precise: true })],
+    [t.item, precise(price.item)],
     [
-      "Shipping to Israel",
+      t.shippingToIsrael,
       !price.shippingKnown
-        ? "Not quoted"
+        ? t.notQuoted
         : price.shipping.amountMinor === 0
-          ? "Free"
-          : formatMoney(price.shipping, { precise: true }),
+          ? t.free
+          : precise(price.shipping),
     ],
-    [
-      price.taxesCollectedAtCheckout ? "Import VAT (charged at checkout)" : "Import VAT (estimated)",
-      formatMoney(price.importVat, { precise: true }),
-    ],
-    ["Customs duty", formatMoney(price.customsDuty, { precise: true })],
+    [price.taxesCollectedAtCheckout ? t.vatAtCheckout : t.vatEstimated, precise(price.importVat)],
+    [t.customs, precise(price.customsDuty)],
   ];
-  if (price.fees.amountMinor > 0) rows.push(["Fees", formatMoney(price.fees, { precise: true })]);
+  if (price.fees.amountMinor > 0) rows.push([t.fees, precise(price.fees)]);
 
   return (
     <article
@@ -45,7 +53,7 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
         <ProductImage src={product.imageUrl} sizes="(min-width: 640px) 192px, 100vw" className="p-5" />
         {product.lookAlike && (
           <span className="absolute start-2.5 bottom-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
-            {LOOK_ALIKE_BADGE}
+            {dict(locale).group.lookAlikeBadge}
           </span>
         )}
       </div>
@@ -54,27 +62,26 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
           <h2 id={headingId} className="text-lg font-bold text-foreground">
             {product.label}
           </h2>
-          <p className="line-clamp-2 text-xs text-muted-foreground">{product.bestListing.title}</p>
+          <p dir="auto" className="line-clamp-2 text-xs text-muted-foreground rtl:text-right">
+            {product.bestListing.title}
+          </p>
         </div>
 
         <p className="flex flex-wrap items-baseline gap-x-1.5">
           <span className="text-3xl font-extrabold tracking-tight text-foreground">
-            {formatMoney(price.total)}
+            {formatMoney(price.total, { locale })}
           </span>
           <span className="text-sm text-muted-foreground">
-            {price.shippingKnown ? "landed" : "+ shipping"} on {store}
+            {price.shippingKnown ? t.landedOn(store) : t.shippingOn(store)}
           </span>
           {product.unitPrice && (
             <span className="text-sm text-muted-foreground">
-              · {formatMoney(product.unitPrice.perUnit, { precise: true })} per piece
+              · {dict(locale).card.perPiece(precise(product.unitPrice.perUnit))}
             </span>
           )}
         </p>
 
-        <dl
-          className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm"
-          aria-label={`Price breakdown on ${store}`}
-        >
+        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm" aria-label={t.breakdownOn(store)}>
           {rows.map(([label, value]) => (
             <div key={label} className="contents">
               <dt className="text-muted-foreground">{label}</dt>
@@ -82,13 +89,13 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
             </div>
           ))}
           <div className="col-span-2 flex justify-between border-t border-border/60 pt-1 font-semibold">
-            <dt>Total</dt>
-            <dd className="tabular-nums">{formatMoney(price.total, { precise: true })}</dd>
+            <dt>{t.total}</dt>
+            <dd className="tabular-nums">{precise(price.total)}</dd>
           </div>
         </dl>
 
         {product.stores.length + product.unshippedStores.length > 1 && (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Every store">
+          <ul className="flex flex-wrap gap-1.5" aria-label={t.everyStore}>
             {product.stores.map((s) => (
               <li
                 key={s.provider}
@@ -97,7 +104,7 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
                   STORE_META[s.provider].chip,
                 )}
               >
-                {STORE_META[s.provider].name} {formatMoney(s.total)}
+                {STORE_META[s.provider].name} {formatMoney(s.total, { locale })}
               </li>
             ))}
             {product.unshippedStores.map((p) => (
@@ -105,7 +112,7 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
                 key={p}
                 className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
               >
-                {STORE_META[p].name}: no offer to Israel
+                {dict(locale).card.noOffer(STORE_META[p].name)}
               </li>
             ))}
           </ul>
@@ -114,11 +121,11 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
         <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-center">
           {/* Live searches: never prefetched, so a crawler can't spend store quota through them. */}
           <Link
-            href={trendingHref(product.query)}
+            href={trendingHref(product.query, locale)}
             prefetch={false}
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold whitespace-nowrap text-foreground hover:bg-accent"
           >
-            Compare every store
+            {t.compareEvery}
             <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
           </Link>
           <a
@@ -126,11 +133,12 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
             {...OUTBOUND_LINK}
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold whitespace-nowrap text-primary-foreground"
           >
-            View on {store}
+            {t.viewOn(store)}
             <ExternalLink className="size-4" aria-hidden />
           </a>
           <p className="text-[11px] text-muted-foreground sm:ms-auto">
-            Prices as of <time dateTime={product.pricesAsOf}>{formatSnapshotTime(product.pricesAsOf)}</time>
+            {t.pricesAsOf}{" "}
+            <time dateTime={product.pricesAsOf}>{formatSnapshotTime(product.pricesAsOf, locale)}</time>
           </p>
         </div>
       </div>

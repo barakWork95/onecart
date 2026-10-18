@@ -8,7 +8,10 @@ import { CategoryProductCard } from "@/components/features/category/category-pro
 import { HowWePrice } from "@/components/features/category/how-we-price";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
 import { SITE_URL } from "@/config/site";
-import { pageAlternates } from "@/i18n/server";
+import { categoryText, productLabel } from "@/domain/deals/category";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath } from "@/i18n/locales";
+import { currentLocale, pageAlternates } from "@/i18n/server";
 import { formatSnapshotTime } from "@/lib/format";
 
 /** Every category is prebuilt; its data refreshes with the warm-up (see `categoryPageData`). */
@@ -22,13 +25,14 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/c/[slug]">
   if (!data) return {};
   const { category, indexable } = data.page;
   const alternates = await pageAlternates(`/c/${category.slug}`);
+  const text = categoryText(category, await currentLocale());
   return {
-    title: category.seoTitle,
-    description: category.description,
+    title: text.seoTitle,
+    description: text.description,
     alternates,
     openGraph: {
-      title: category.seoTitle,
-      description: category.description,
+      title: text.seoTitle,
+      description: text.description,
       url: alternates.canonical,
       type: "website",
       images: OG_IMAGES,
@@ -43,8 +47,17 @@ export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c
   const data = await categoryPageData(slug);
   if (!data) notFound();
   const { page, goLinks } = data;
-  const { category, products, pricesAsOf } = page;
-  const url = `${SITE_URL}/c/${category.slug}`;
+  const { category, pricesAsOf } = page;
+  const locale = await currentLocale();
+  const t = dict(locale).category;
+  const text = categoryText(category, locale);
+  // The cached page is language-neutral: product names are translated as it renders.
+  const products = page.products.map((p) => ({
+    ...p,
+    label: productLabel(category, p.query, p.label, locale),
+  }));
+  const at = (path: string) => `${SITE_URL}${localizedPath(locale, path)}`;
+  const url = at(`/c/${category.slug}`);
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 pt-6 pb-10">
@@ -55,16 +68,17 @@ export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c
             {
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
-                { "@type": "ListItem", position: 2, name: "Categories", item: `${SITE_URL}/c` },
-                { "@type": "ListItem", position: 3, name: category.label, item: url },
+                { "@type": "ListItem", position: 1, name: t.home, item: at("/") },
+                { "@type": "ListItem", position: 2, name: t.categories, item: at("/c") },
+                { "@type": "ListItem", position: 3, name: text.label, item: url },
               ],
             },
             // Names only: our landed prices aren't the stores' own prices, so no offers here.
             {
               "@type": "ItemList",
-              name: category.seoTitle,
+              name: text.seoTitle,
               url,
+              inLanguage: locale,
               numberOfItems: products.length,
               itemListElement: products.map((p, i) => ({
                 "@type": "ListItem",
@@ -76,38 +90,43 @@ export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c
         }}
       />
       <Breadcrumbs
+        label={t.breadcrumb}
         crumbs={[
-          { label: "Home", href: "/" },
-          { label: "Categories", href: "/c" },
-          { label: category.label },
+          { label: t.home, href: localizedPath(locale, "/") },
+          { label: t.categories, href: localizedPath(locale, "/c") },
+          { label: text.label },
         ]}
       />
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">{category.seoTitle}</h1>
-        <p className="text-base leading-relaxed text-muted-foreground">{category.intro}</p>
+        <h1 className="text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">{text.seoTitle}</h1>
+        <p className="text-base leading-relaxed text-muted-foreground">{text.intro}</p>
         {pricesAsOf && (
           <p className="text-xs text-muted-foreground">
-            Prices checked daily; these as of{" "}
-            <time dateTime={pricesAsOf}>{formatSnapshotTime(pricesAsOf)}</time>.
+            {t.pricesCheckedDaily} <time dateTime={pricesAsOf}>{formatSnapshotTime(pricesAsOf, locale)}</time>
+            .
           </p>
         )}
       </header>
 
       {products.length === 0 ? (
         <p className="rounded-3xl border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-          Prices for this category are being checked. Please come back later today.
+          {t.beingChecked}
         </p>
       ) : (
-        <ol className="flex flex-col gap-4" aria-label={`${category.label} products`}>
+        <ol className="flex flex-col gap-4" aria-label={t.products(text.label)}>
           {products.map((product) => (
             <li key={product.query}>
-              <CategoryProductCard product={product} goHref={goLinks[product.bestListing.id] ?? "/"} />
+              <CategoryProductCard
+                product={product}
+                goHref={goLinks[product.bestListing.id] ?? "/"}
+                locale={locale}
+              />
             </li>
           ))}
         </ol>
       )}
 
-      <HowWePrice policy={ISRAEL_IMPORT_POLICY} />
+      <HowWePrice policy={ISRAEL_IMPORT_POLICY} locale={locale} />
     </main>
   );
 }

@@ -74,7 +74,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[lang]">)
         }
       />
       {children}
-      <SiteFooter categories={categoryList()} locale={locale} />
+      <SiteFooter categories={categoryList(locale)} locale={locale} />
       <BottomNav locale={locale} />
     </HtmlShell>
   );

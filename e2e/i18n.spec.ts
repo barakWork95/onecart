@@ -99,3 +99,56 @@ test.describe("Saved and Alerts in Hebrew", () => {
     await expect(page.getByRole("heading", { name: "עדיין אין התראות מחיר" })).toBeVisible();
   });
 });
+
+test.describe("Hebrew category pages and their SEO", () => {
+  test("a Hebrew category page: Hebrew copy, canonical, hreflang and structured data", async ({ page }) => {
+    await page.goto("/he/c/headphones");
+    await expect(page).toHaveTitle("אוזניות: השוואת מחירים בישראל · OneCart");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /^אוזניות לדוגמה/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("אוזניות: השוואת מחירים בישראל");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/he\/c\/headphones$/);
+    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
+      "href",
+      /\/c\/headphones$/,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
+      "href",
+      /\/c\/headphones$/,
+    );
+
+    const crumbs = page.getByRole("navigation", { name: "נתיב ניווט" });
+    await expect(crumbs.getByRole("link", { name: "קטגוריות" })).toHaveAttribute("href", "/he/c");
+
+    const jsonLd = JSON.parse(
+      (await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}",
+    );
+    const [breadcrumbs, list] = jsonLd["@graph"];
+    expect(breadcrumbs.itemListElement.map((i: { name: string }) => i.name)).toEqual([
+      "דף הבית",
+      "קטגוריות",
+      "אוזניות",
+    ]);
+    expect(list).toMatchObject({ inLanguage: "he", url: "https://www.onecartapp.com/he/c/headphones" });
+    await expect(page.getByRole("region", { name: "איך אנחנו משווים מחירים" })).toBeVisible();
+  });
+
+  test("the Hebrew index lists the categories in Hebrew, by section", async ({ page }) => {
+    await page.goto("/he/c");
+    await expect(page.getByRole("heading", { level: 1, name: "קטגוריות" })).toBeVisible();
+    await expect(
+      page.getByRole("list", { name: "מותגים ודגמים" }).getByRole("link", { name: /^אוזניות/ }),
+    ).toHaveAttribute("href", "/he/c/headphones");
+    await expect(
+      page.getByRole("list", { name: "גאדג׳טים יומיומיים" }).getByRole("link", { name: /^כריות/ }),
+    ).toHaveAttribute("href", "/he/c/pillows");
+  });
+
+  test("the sitemap lists both languages of a category, each linked to the other", async ({ request }) => {
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    expect(sitemap).toContain("<loc>https://www.onecartapp.com/he/c/headphones</loc>");
+    expect(sitemap).toMatch(/hreflang="he"\s+href="https:\/\/www\.onecartapp\.com\/he\/c\/headphones"/);
+    expect(sitemap).toMatch(/hreflang="en"\s+href="https:\/\/www\.onecartapp\.com\/c\/headphones"/);
+    // Still thin: neither language of the one-product demo category is listed.
+    expect(sitemap).not.toContain("/c/pillows");
+  });
+});

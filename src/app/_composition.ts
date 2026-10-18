@@ -32,7 +32,8 @@ const STORE_NAMES: Record<StoreId, string> = {
   temu: "Temu",
   ebay: "eBay",
 };
-import { categoryBySlug } from "@/domain/deals/category";
+import { categoryBySlug, categoryText } from "@/domain/deals/category";
+import type { Locale } from "@/domain/shared/locale";
 import { createClickReport, israelDay, type ClickReport } from "@/application/affiliate/click-report";
 import {
   createRecordPriceHistory,
@@ -745,8 +746,14 @@ export type { PushSubscriptionKeys };
 export const categoryTag = (slug: string) => `category:${slug}`;
 
 /** The categories, for routes, the sitemap and navigation. */
-export function categoryList(): readonly { readonly slug: string; readonly label: string }[] {
-  return getServices().categories.map(({ slug, label }) => ({ slug, label }));
+/** Every category's slug and name in `locale` (footer links, sitemap). */
+export function categoryList(
+  locale: Locale = "en",
+): readonly { readonly slug: string; readonly label: string }[] {
+  return getServices().categories.map((category) => ({
+    slug: category.slug,
+    label: categoryText(category, locale).label,
+  }));
 }
 
 export interface CategoryPageData {

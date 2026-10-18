@@ -31,6 +31,15 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Soundcore Space Q45", query: "soundcore space q45" },
       { label: "Galaxy Buds3 Pro", query: "samsung galaxy buds 3 pro" },
     ],
+    he: {
+      label: "אוזניות",
+      seoTitle: "אוזניות: השוואת מחירים בישראל",
+      description:
+        "אוזניות אלחוטיות של Sony, Bose, JBL, Soundcore ועוד, בהשוואה בין חנויות לפי המחיר הסופי עד ישראל.",
+      intro:
+        "אוזניות מבטלות רעשים ואוזניות אלחוטיות של Sony, Bose, Sennheiser, JBL, Apple, Samsung ו-Soundcore, כל אחת בהשוואה בין חנויות לפי מה שהיא באמת עולה עד ישראל: המוצר, המשלוח, ומע״מ או מכס ביבוא.",
+      products: { "apple airpods 4": "AirPods 4" },
+    },
   },
   {
     slug: "speakers",
@@ -54,6 +63,15 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Sony SRS-XE300", query: "sony srs-xe300" },
       { label: "Soundcore Boom 2", query: "anker soundcore boom 2" },
     ],
+    he: {
+      label: "רמקולים",
+      seoTitle: "רמקולי בלוטות׳: השוואת מחירים בישראל",
+      description:
+        "רמקולים ניידים של JBL, Bose, Sony ו-Soundcore, בהשוואה בין חנויות לפי המחיר הסופי עד ישראל.",
+      intro:
+        "רמקולי בלוטות׳ ניידים של JBL, Bose, Sony ו-Soundcore, מגודל כיס ועד גודל מסיבה, כל אחד בהשוואה בין חנויות לפי המחיר הסופי לישראל, כולל משלוח וחיובי יבוא.",
+      products: {},
+    },
   },
   {
     slug: "smart-home",
@@ -77,6 +95,20 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Philips Hue Go", query: "philips hue go" },
       { label: "Roborock Q7 Max", query: "roborock q7 max" },
     ],
+    he: {
+      label: "בית חכם",
+      seoTitle: "מוצרי בית חכם: השוואת מחירים בישראל",
+      description:
+        "מצלמות אבטחה, רמקולים חכמים, תאורה ושואבי רובוט, בהשוואה בין חנויות לפי המחיר הסופי עד ישראל.",
+      intro:
+        "מצלמות Wi-Fi, רמקולים ומסכים חכמים, תאורה חכמה ושואבי רובוט של TP-Link, Xiaomi, Amazon, Google, Philips, Aqara ו-Roborock, בהשוואה בין חנויות לפי המחיר הסופי לישראל.",
+      products: {
+        "tp-link tapo c200": "מצלמת Tapo C200",
+        "tp-link tapo c210": "מצלמת Tapo C210",
+        "echo dot 5th gen": "Echo Dot (דור 5)",
+        "philips hue starter kit": "ערכת פתיחה Philips Hue",
+      },
+    },
   },
   {
     slug: "kitchen",
@@ -100,6 +132,20 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Tefal OptiGrill", query: "tefal optigrill" },
       { label: "Ninja Foodi Dual Zone", query: "ninja foodi dual zone" },
     ],
+    he: {
+      label: "מטבח",
+      seoTitle: "מוצרי חשמל למטבח: השוואת מחירים בישראל",
+      description:
+        "סירי טיגון באוויר, מכונות קפה, בלנדרים וקומקומים של Ninja, Cosori, Nespresso, Philips ועוד, לפי המחיר הסופי עד ישראל.",
+      intro:
+        "סירי טיגון באוויר, מכונות אספרסו וקפסולות, בלנדרים, קומקומים וגרילים של Ninja, Cosori, Nespresso, Philips, Breville, Tefal ו-Xiaomi, בהשוואה בין חנויות לפי המחיר הסופי לישראל. כדאי לבדוק את סוג התקע והמתח בכל הצעה לפני הקנייה.",
+      products: {
+        "ninja air fryer af101": "סיר טיגון באוויר Ninja AF101",
+        "cosori air fryer": "סיר טיגון באוויר Cosori",
+        "xiaomi electric kettle 2": "קומקום חשמלי Xiaomi 2",
+        "ninja professional blender": "בלנדר Ninja Professional",
+      },
+    },
   },
   {
     slug: "phone-accessories",
@@ -123,6 +169,23 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Belkin BoostCharge Pro", query: "belkin boostcharge pro" },
       { label: "Anker MagGo Power Bank", query: "anker maggo power bank" },
     ],
+    he: {
+      label: "אביזרים לטלפון",
+      seoTitle: "סוללות ניידות וגאדג׳טים לטלפון: השוואת מחירים בישראל",
+      description:
+        "סוללות ניידות, מאתרים וסוללות MagSafe של Anker, Apple, Samsung, Ugreen ו-Baseus, לפי המחיר הסופי עד ישראל.",
+      intro:
+        "סוללות ניידות, סוללות MagSafe ומאתרי חפצים של Anker, Apple, Samsung, Xiaomi, Ugreen, Baseus ו-Belkin, בהשוואה בין חנויות לפי המחיר הסופי לישראל.",
+      products: {
+        "anker 737 power bank": "סוללה ניידת Anker 737",
+        "anker nano power bank": "סוללה ניידת Anker Nano",
+        "xiaomi power bank 20000": "סוללה ניידת Xiaomi 20000",
+        "anker 622 magnetic battery": "סוללה מגנטית Anker 622",
+        "ugreen nexode power bank": "סוללה ניידת Ugreen Nexode",
+        "baseus blade power bank": "סוללה ניידת Baseus Blade",
+        "anker maggo power bank": "סוללה ניידת Anker MagGo",
+      },
+    },
   },
   {
     slug: "gaming",
@@ -146,6 +209,19 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Razer BlackShark V2", query: "razer blackshark v2" },
       { label: "HyperX Cloud III", query: "hyperx cloud iii" },
     ],
+    he: {
+      label: "גיימינג",
+      seoTitle: "קונסולות וציוד גיימינג: השוואת מחירים בישראל",
+      description:
+        "קונסולות, בקרים, עכברים ואוזניות גיימינג של Nintendo, Xbox, Sony, Logitech, Razer ועוד, לפי המחיר הסופי עד ישראל.",
+      intro:
+        "קונסולות, בקרים, עכברי גיימינג ואוזניות של Nintendo, Microsoft, Sony, Logitech, Razer, SteelSeries ו-HyperX, בהשוואה בין חנויות לפי המחיר הסופי לישראל.",
+      products: {
+        "xbox wireless controller": "בקר אלחוטי Xbox",
+        "sony dualsense controller": "בקר DualSense",
+        "nintendo switch pro controller": "בקר Switch Pro",
+      },
+    },
   },
 
   {
@@ -170,6 +246,26 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Silicone baking mat", query: "silicone baking mat" },
       { label: "Handheld milk frother", query: "milk frother handheld" },
     ],
+    he: {
+      label: "גאדג׳טים למטבח",
+      seoTitle: "גאדג׳טים למטבח: השוואת מחירים בישראל",
+      description:
+        "קולפנים, קוצצים, משקלים וסטים של מרית: גאדג׳טים יומיומיים למטבח, בהשוואה בין חנויות לפי המחיר הסופי עד ישראל.",
+      intro:
+        "גאדג׳טים למטבח בלי מותג נמכרים אצל עשרות מוכרים בשמות שונים. אנחנו מזהים הצעות שנראות זהות לפי תמונת המוצר והמפרט, ומציגים את המחיר הסופי הנמוך עד ישראל, כולל משלוח וחיובי יבוא.",
+      products: {
+        "vegetable peeler": "קולפן ירקות",
+        "garlic press": "מכתש שום",
+        "silicone spatula set": "סט מריות סיליקון",
+        "digital kitchen scale": "משקל מטבח דיגיטלי",
+        "vegetable chopper": "קוצץ ירקות",
+        "measuring spoons set": "כפות מדידה",
+        "jar opener": "פותחן צנצנות",
+        "herb scissors": "מספרי עשבי תיבול",
+        "silicone baking mat": "משטח אפייה מסיליקון",
+        "milk frother handheld": "מקציף חלב ידני",
+      },
+    },
   },
   {
     slug: "car-accessories",
@@ -193,6 +289,26 @@ export const CATEGORIES: readonly Category[] = [
       { label: "Handheld car vacuum", query: "handheld car vacuum" },
       { label: "Steering wheel cover", query: "steering wheel cover" },
     ],
+    he: {
+      label: "אביזרים לרכב",
+      seoTitle: "אביזרים לרכב: השוואת מחירים בישראל",
+      description:
+        "מחזיקי טלפון, מטענים, משדרי FM ומארגנים לרכב, בהשוואה בין חנויות לפי המחיר הסופי עד ישראל.",
+      intro:
+        "מחזיקי טלפון, מטענים, משדרי FM, מארגנים וכיסויים לרכב. מוכרים רבים מציעים את אותו מוצר בלי מותג; אנחנו מזהים הצעות שנראות זהות לפי תמונת המוצר והמפרט, ומראים איזו מגיעה לישראל במחיר הנמוך ביותר.",
+      products: {
+        "magnetic car phone holder": "מחזיק טלפון מגנטי לרכב",
+        "car fm transmitter bluetooth": "משדר FM בלוטות׳ לרכב",
+        "dual usb car charger": "מטען USB כפול לרכב",
+        "car seat gap filler": "ממלא רווח למושב הרכב",
+        "digital tire pressure gauge": "מד לחץ אוויר דיגיטלי",
+        "car trash can": "פח אשפה לרכב",
+        "windshield sun shade": "מגן שמש לשמשה",
+        "car interior led lights": "תאורת LED פנימית לרכב",
+        "handheld car vacuum": "שואב אבק ידני לרכב",
+        "steering wheel cover": "כיסוי להגה",
+      },
+    },
   },
   {
     slug: "desk-gadgets",
@@ -216,6 +332,26 @@ export const CATEGORIES: readonly Category[] = [
       { label: "USB desk fan", query: "usb desk fan" },
       { label: "Keyboard wrist rest", query: "keyboard wrist rest" },
     ],
+    he: {
+      label: "גאדג׳טים לשולחן העבודה",
+      seoTitle: "גאדג׳טים לשולחן העבודה: השוואת מחירים בישראל",
+      description:
+        "תפסני כבלים, מעמדים למחשב נייד, מנורות שולחן ומארגנים, בהשוואה בין חנויות לפי המחיר הסופי עד ישראל.",
+      intro:
+        "תפסני כבלים, מעמדים למחשב נייד, מגביהי מסך, מנורות ומארגנים למשרד הביתי. אנחנו מקבצים הצעות שנראות זהות לפי תמונת המוצר והמפרט, כדי שתראו את המחיר הסופי הטוב ביותר לישראל בין מוכרים של אותו מוצר.",
+      products: {
+        "cable organizer clips": "תפסני כבלים",
+        "adjustable laptop stand": "מעמד מתכוונן למחשב נייד",
+        "monitor riser": "מגביה מסך",
+        "cable management box": "קופסה לסידור כבלים",
+        "large mouse pad": "פד עכבר גדול",
+        "led desk lamp": "מנורת שולחן LED",
+        "desk phone stand": "מעמד טלפון לשולחן",
+        "desk organizer": "מארגן שולחני",
+        "usb desk fan": "מאוורר שולחני USB",
+        "keyboard wrist rest": "משענת יד למקלדת",
+      },
+    },
   },
 ];
 
@@ -239,6 +375,13 @@ export const DEMO_CATEGORIES: readonly Category[] = [
       { label: "Sony WH-CH720N", query: "sony wh-ch720n" },
       { label: "Baseus Bowie M2+", query: "baseus bowie m2" },
     ],
+    he: {
+      label: "אוזניות",
+      seoTitle: "אוזניות: השוואת מחירים בישראל",
+      description: "אוזניות לדוגמה בהשוואה לפי המחיר הסופי עד ישראל.",
+      intro: "אוזניות לדוגמה, בהשוואה בין חנויות ההדגמה לפי המחיר הסופי לישראל.",
+      products: {},
+    },
   },
   {
     slug: "pillows",
@@ -249,5 +392,12 @@ export const DEMO_CATEGORIES: readonly Category[] = [
     intro: "A demo category with a single product: too thin to be indexed.",
     searchQuery: "pillow",
     products: [{ label: "Memory foam pillow", query: "memory foam pillow" }],
+    he: {
+      label: "כריות",
+      seoTitle: "כריות: השוואת מחירים בישראל",
+      description: "כריות לדוגמה בהשוואה לפי המחיר הסופי עד ישראל.",
+      intro: "קטגוריית הדגמה עם מוצר אחד בלבד: דלה מכדי להופיע במנועי חיפוש.",
+      products: { "memory foam pillow": "כרית ויסקו" },
+    },
   },
 ];

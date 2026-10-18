@@ -3,11 +3,12 @@ import Link from "next/link";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
 import { TrendingCardView } from "@/components/features/home/trending-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { categoryText, productLabel, type Category } from "@/domain/deals/category";
 import { dict } from "@/i18n/dictionaries";
 import { localizedPath, type Locale } from "@/i18n/locales";
 
 export interface CategoryRowView {
-  readonly category: { readonly slug: string; readonly label: string; readonly searchQuery: string };
+  readonly category: Category;
   readonly cards: readonly TrendingCard[];
 }
 
@@ -27,11 +28,12 @@ export function CategoryRows({ rows, locale = "en" }: { rows: readonly CategoryR
     <div className="flex flex-col gap-8">
       {rows.map(({ category, cards }) => {
         const headingId = `category-${category.slug}`;
+        const label = categoryText(category, locale).label;
         return (
           <section key={category.slug} aria-labelledby={headingId} className="flex flex-col gap-3">
             <div className="flex items-baseline justify-between gap-3">
               <h2 id={headingId} className="text-xl font-bold tracking-tight text-foreground">
-                {category.label}
+                {label}
               </h2>
               {/* The category's own page: cached, indexable, and free (no store calls). */}
               <Link
@@ -39,17 +41,18 @@ export function CategoryRows({ rows, locale = "en" }: { rows: readonly CategoryR
                 className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline"
               >
                 {t.seeAll}
-                <span className="sr-only">
-                  {" "}
-                  {locale === "en" ? category.label.toLowerCase() : category.label}
-                </span>
+                <span className="sr-only"> {locale === "en" ? label.toLowerCase() : label}</span>
                 <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
               </Link>
             </div>
-            <ol className={ROW} aria-label={t.products(category.label)}>
+            <ol className={ROW} aria-label={t.products(label)}>
               {cards.map((card) => (
                 <li key={card.query} className={ITEM}>
-                  <TrendingCardView card={card} idPrefix="category" locale={locale} />
+                  <TrendingCardView
+                    card={{ ...card, label: productLabel(category, card.query, card.label, locale) }}
+                    idPrefix="category"
+                    locale={locale}
+                  />
                 </li>
               ))}
             </ol>

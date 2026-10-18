@@ -132,3 +132,28 @@ describe("Breadcrumbs", () => {
     expect(within(nav).getByText("Kitchen")).toHaveAttribute("aria-current", "page");
   });
 });
+
+describe("category components in Hebrew", () => {
+  const plain = (s: string | null) => (s ?? "").replace(/‏/g, "").replace(/ /g, " ");
+
+  it("break the landed price down in Hebrew, number-first, linking within /he", () => {
+    render(<CategoryProductCard product={PRODUCT} goHref="/go/x" locale="he" />);
+    const card = screen.getByRole("article", { name: "JBL Charge 5" });
+    const breakdown = within(card).getByLabelText("פירוט המחיר ב-eBay");
+    expect(within(breakdown).getByText("משלוח לישראל")).toBeInTheDocument();
+    expect(within(breakdown).getByText("סה״כ")).toBeInTheDocument();
+    expect(plain(card.textContent)).toContain("612 ₪");
+    expect(card).toHaveTextContent("מחיר סופי ב-eBay");
+    expect(
+      within(card)
+        .getByRole("link", { name: /השוואה בכל החנויות/ })
+        .getAttribute("href"),
+    ).toMatch(/^\/he\/search\?/);
+  });
+
+  it("explain the landed price in Hebrew with the policy's own figures", () => {
+    render(<HowWePrice policy={ISRAEL_IMPORT_POLICY} locale="he" />);
+    const section = screen.getByRole("region", { name: "איך אנחנו משווים מחירים" });
+    expect(section).toHaveTextContent(`מע״מ ביבוא של ${ISRAEL_IMPORT_POLICY.vatRateBps / 100}%`);
+  });
+});

@@ -198,6 +198,12 @@ locale)` (`he-IL`: "89 ₪"). Every internal link goes through `localizedPath(lo
   `en`) is saved with each browser (`NotifyMe` sends the page's locale); `alertMessage(alert,
 locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself lives in
   `domain/shared/locale.ts` (re-exported by `src/i18n/locales.ts`).
+- **Category copy per language**: every `Category` carries `he` (label, SEO title, description
+  under 160 characters, intro, and product names by query; brand/model names may stay as they
+  are, every generic item needs one). Search queries stay English, so cached results and the
+  warm-up are shared. The cached page data is language-neutral; pages translate as they render
+  (`categoryText`, `productLabel`). Hebrew category pages carry Hebrew metadata, JSON-LD
+  (`inLanguage`, `/he` URLs) and breadcrumbs; `categories.test.ts` checks the Hebrew copy.
 - **Hebrew suggestion.** English pages show a dismissible "OneCart זמין גם בעברית" note when
   the browser's first language is Hebrew (`LanguageSuggestion`, decided after mount); never a
   redirect.

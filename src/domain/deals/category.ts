@@ -1,5 +1,26 @@
 import type { TrendingQuery } from "@/domain/deals/trending-query";
 import type { MatchMode } from "@/domain/search/search-intent";
+import type { Locale } from "@/domain/shared/locale";
+
+/** A category's copy in another language (Hebrew): search queries stay English. */
+export interface CategoryTranslation {
+  readonly label: string;
+  readonly seoTitle: string;
+  /** Under 160 characters, like the English one. */
+  readonly description: string;
+  /** Never states tax figures (see `Category.intro`). */
+  readonly intro: string;
+  /** Product names by query; a missing one falls back to the English label. */
+  readonly products: Readonly<Record<string, string>>;
+}
+
+/** The copy a page shows for a category in one language. */
+export interface CategoryText {
+  readonly label: string;
+  readonly seoTitle: string;
+  readonly description: string;
+  readonly intro: string;
+}
 
 /**
  * A product category: a homepage row and an indexable page (`/c/{slug}`),
@@ -31,6 +52,18 @@ export interface Category {
    * query: those have their own grid.
    */
   readonly products: readonly TrendingQuery[];
+  /** The Hebrew page's copy (`/he/c/{slug}`). */
+  readonly he: CategoryTranslation;
+}
+
+export function categoryText(category: Category, locale: Locale): CategoryText {
+  const { label, seoTitle, description, intro } = locale === "he" ? category.he : category;
+  return { label, seoTitle, description, intro };
+}
+
+/** A product's name in `locale`: its translation, else the English label. */
+export function productLabel(category: Category, query: string, english: string, locale: Locale): string {
+  return locale === "he" ? (category.he.products[query] ?? english) : english;
 }
 
 /** Looks a category up by its URL segment. */
