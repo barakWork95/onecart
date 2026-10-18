@@ -80,17 +80,26 @@ export function toMatchCandidate(product: UnifiedProduct): MatchCandidate {
  */
 const COUNTERFEIT_PRONE_STORES: ReadonlySet<ProviderId> = new Set(["aliexpress"]);
 
+/** A store's own label for being the brand's store: "BASEUS Official Store", "UGREEN Flagship Store". */
+const BRAND_STORE_WORD = /\b(official|flagship)\b/i;
+
 /**
- * A branded listing on a counterfeit-prone marketplace from a seller that
- * isn't an official store. It keeps its own card: compared with another
- * store's genuine item, a knock-off would read as "same item, cheaper".
+ * A branded listing on a counterfeit-prone marketplace whose seller isn't the
+ * brand's own store. It keeps its own card: compared with another store's
+ * genuine item, a knock-off would read as "same item, cheaper".
+ *
+ * "Official" alone isn't enough: on AliExpress it means official for the
+ * seller's own brand ("Geekria Official Store" lists "Sony WH-1000XM4…" ear
+ * pads; "GONIANIA … Official Store" lists Bose look-alikes). The seller's name
+ * must say official or flagship and name the listing's brand (aliases count:
+ * "Soundcore Official Store" sells Anker).
  */
 export function isUnverifiedBrandListing(c: MatchCandidate): boolean {
-  return (
-    COUNTERFEIT_PRONE_STORES.has(c.product.provider) &&
-    c.tokens.brands.size > 0 &&
-    !/\bofficial\b/i.test(c.product.sellerName ?? "")
-  );
+  if (!COUNTERFEIT_PRONE_STORES.has(c.product.provider) || c.tokens.brands.size === 0) return false;
+  const seller = c.product.sellerName ?? "";
+  if (!BRAND_STORE_WORD.test(seller)) return true;
+  const sellerBrands = tokenizeTitle(seller).brands;
+  return ![...c.tokens.brands].some((brand) => sellerBrands.has(brand));
 }
 
 function priceRatio(a: UnifiedProduct, b: UnifiedProduct): number {

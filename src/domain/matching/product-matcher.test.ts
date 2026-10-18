@@ -335,6 +335,25 @@ describe("matchProducts — knock-offs (recorded AliExpress, 2026-10-14)", () =>
     expect(blocksGrouping(official, GENUINE)).toBe(false);
   });
 
+  // Real sellers from production's AliExpress results (2026-10-18). "Official" usually means
+  // official for the seller's own brand, not for what it lists.
+  it.each([
+    [
+      "GONIANIA Audio Devices Official Store",
+      "Bose QuietComfort Ultra Wireless Noise Cancelling Headphones",
+      true,
+    ],
+    ["Geekria Official Store", "Sony WH-1000XM4 Wireless Noise Canceling Over-Ear Headphones", true],
+    ["Ugreen Official Store", "Anker Nano Power Bank 10000mAh 30W", true],
+    ["BASEUS Official Store", "Baseus 100W Power Bank 20000mAh Capacity PD Fast Charging", false],
+    ["UGREEN Flagship Store", "UGREEN 5000mAh Power Bank Magnetic Mini Portable PD 15W", false],
+    ["Soundcore Official Store", "Anker Soundcore Liberty 4 NC Wireless Earbuds", false],
+    ["JBL Pro Sound Store", "JBL Flip 6 Portable Waterproof Bluetooth Speaker", true],
+  ])("%p selling %p: unverified = %p", (sellerName, title, unverified) => {
+    const listing = c({ provider: "aliexpress", sku: "a", title, total: 200_00, sellerName });
+    expect(isUnverifiedBrandListing(listing)).toBe(unverified);
+  });
+
   it("leaves unbranded items and same-store collapsing alone", () => {
     const spoons = (provider: "aliexpress" | "ebay", sellerName: string | null) =>
       c({

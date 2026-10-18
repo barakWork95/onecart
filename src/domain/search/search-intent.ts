@@ -14,6 +14,29 @@ export interface SearchIntent {
   readonly specific: boolean;
   /** The shopper is after an accessory ("wh-1000xm5 case"), so accessories aren't demoted. */
   readonly wantsAccessory: boolean;
+  /**
+   * `branded`: the query names a known brand or a model code, so strict matching
+   * applies (brand verification, official stores, knock-off price guard).
+   * `generic`: a commodity ("vegetable peeler", "car phone holder"), where
+   * shoppers compare on price and the item itself, not the seller's name.
+   */
+  readonly mode: MatchMode;
+}
+
+export type MatchMode = "branded" | "generic";
+
+/** Branded when the text names a known brand or carries a model code (maybe a brand we don't know). */
+function modeOf(tokens: TitleTokens): MatchMode {
+  return tokens.brands.size > 0 || tokens.models.size > 0 ? "branded" : "generic";
+}
+
+/**
+ * How two listings are compared. Generic only when neither names a known
+ * brand: a branded listing keeps the strict rules even in a generic search
+ * (a "Baseus Car Phone Holder" among "car phone holder" results).
+ */
+export function pairMode(a: TitleTokens, b: TitleTokens): MatchMode {
+  return a.brands.size === 0 && b.brands.size === 0 ? "generic" : "branded";
 }
 
 export function searchIntent(normalizedText: string): SearchIntent {
@@ -23,7 +46,7 @@ export function searchIntent(normalizedText: string): SearchIntent {
   // "jbl flip 6"). A brand plus a category word ("sony headphones") counts too: the
   // shopper still asked for Sony headphones before Sony accessories.
   const specific = tokens.models.size > 0 || (tokens.brands.size > 0 && lineWords.length > 0);
-  return { tokens, specific, wantsAccessory: tokens.isAccessory };
+  return { tokens, specific, wantsAccessory: tokens.isAccessory, mode: modeOf(tokens) };
 }
 
 /** A query word found in a listing; "gen2" also matches a bare "2" ("AirPods Pro 2"). */
@@ -112,7 +135,12 @@ export function classifyOffers(
   const classes = new Map<string, OfferClass>();
   for (const { product, tokens, onIntent } of rows) {
     const signal = tokens.accessorySignal;
-    let isAccessory = signal !== "none";
+    // A generic search that itself names an accessory-type item ("car phone holder", "cable
+    // organizer") is after that item: its listings' "holder"/"cable" words are the product,
+    // and only a strong signal ("Replacement clip for …") still marks a part. A generic
+    // category search ("wireless headphones") keeps demoting cases like any other.
+    let isAccessory =
+      intent.mode === "generic" && intent.wantsAccessory ? signal === "strong" : signal !== "none";
     if (typical !== null && onIntent && signal !== "strong") {
       const share = product.price.item.amountMinor / typical;
       isAccessory = share < ACCESSORY_PRICE_SHARE[signal];

@@ -320,8 +320,8 @@ const QUALIFIERS: Readonly<Record<string, string>> = {
  */
 const TIER_WORDS = new Set(["mini", "pro", "max", "plus", "ultra", "lite", "se"]);
 
-/** Alphanumeric tokens that are specs, not model numbers: IP67, USB3, 5G, 4K, 2nd. */
-const SPEC_CODE = /^(ipx?\d+|usb\w*|bt\d+|wifi\d+|[2-6]g|\d+(st|nd|rd|th)|tws\d*)$/;
+/** Alphanumeric tokens that are specs, not model numbers: IP67, USB3, 5G, 4K, 2nd, 80x30 (a size). */
+const SPEC_CODE = /^(ipx?\d+|usb\w*|bt\d+|wifi\d+|[2-6]g|\d+(st|nd|rd|th)|tws\d*|\d+x\d+)$/;
 
 export interface TitleTokens {
   /** All meaningful tokens, for similarity. */

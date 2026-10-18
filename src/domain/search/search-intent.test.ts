@@ -1,4 +1,4 @@
-import { classifyOffers, matchesIntent, searchIntent } from "@/domain/search/search-intent";
+import { classifyOffers, matchesIntent, pairMode, searchIntent } from "@/domain/search/search-intent";
 import { tokenizeTitle } from "@/domain/matching/title-tokens";
 import { makeProduct } from "@/test/product-factory";
 
@@ -142,5 +142,73 @@ describe("classifyOffers — recorded AliExpress titles (2026-10-14)", () => {
     );
     const classes = classifyOffers(products, searchIntent("jbl flip 6"));
     expect(products.map((p) => classes.get(p.id)?.isAccessory)).toEqual(LISTINGS.map(([, , acc]) => acc));
+  });
+});
+
+describe("searchIntent — mode", () => {
+  it.each([
+    ["airpods pro", "branded"],
+    ["sony wh-1000xm5", "branded"],
+    ["anker nano power bank", "branded"],
+    ["sony", "branded"],
+    // A model code alone is treated strictly: it may be a brand we don't know.
+    ["xr7 earbuds", "branded"],
+    ["vegetable peeler", "generic"],
+    ["car phone holder", "generic"],
+    ["led strip 5m", "generic"],
+    ["desk mat 80x30", "generic"],
+    ["wireless headphones", "generic"],
+  ])("%p is %p", (query, mode) => {
+    expect(searchIntent(query).mode).toBe(mode);
+  });
+});
+
+describe("pairMode", () => {
+  const t = (title: string) => tokenizeTitle(title);
+
+  it("is generic only when neither listing names a known brand", () => {
+    expect(
+      pairMode(t("Magnetic Car Phone Holder 360 Rotation"), t("Car Phone Mount Magnetic Dashboard")),
+    ).toBe("generic");
+    expect(pairMode(t("Baseus Magnetic Car Phone Holder"), t("Car Phone Mount Magnetic Dashboard"))).toBe(
+      "branded",
+    );
+    expect(pairMode(t("Car Phone Mount Magnetic"), t("Anker Car Mount"))).toBe("branded");
+  });
+});
+
+describe("classifyOffers — generic queries", () => {
+  it("keeps weak accessory words (holder, mount, strip) as the product, but not replacement parts", () => {
+    const products = [
+      makeProduct({
+        provider: "ebay",
+        sku: "1",
+        title: "Magnetic Car Phone Holder Dashboard Mount",
+        total: 45_00,
+      }),
+      makeProduct({
+        provider: "aliexpress",
+        sku: "2",
+        title: "Car Phone Holder Air Vent Clip 360",
+        total: 12_00,
+      }),
+      makeProduct({
+        provider: "ebay",
+        sku: "3",
+        title: "Replacement Clip for Car Phone Holder",
+        total: 8_00,
+      }),
+    ];
+    const classes = classifyOffers(products, searchIntent("car phone holder"));
+    expect(products.map((p) => classes.get(p.id)?.isAccessory)).toEqual([false, false, true]);
+  });
+
+  it("still demotes weak accessory words for a branded query", () => {
+    const products = [
+      makeProduct({ provider: "ebay", sku: "1", title: "Case for AirPods Pro", total: 30_00 }),
+    ];
+    expect(classifyOffers(products, searchIntent("airpods pro")).get(products[0]!.id)?.isAccessory).toBe(
+      true,
+    );
   });
 });

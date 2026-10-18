@@ -324,6 +324,25 @@ SearchBar (client) → /search?q=… (Server Component)
   - Add a test case to `product-matcher.test.ts` for every real mismatch you find. The four
     recorded live searches in `src/integration/recorded-searches.test.ts` ("sony wh-1000xm5",
     "jbl flip 6", "airpods pro", "instant pot duo") pin the end-to-end result.
+- **Branded vs generic (dual-mode matching, Phase 1 of 4).** `searchIntent(...).mode` is `branded`
+  when the query names a known brand or carries a model code, `generic` otherwise ("vegetable
+  peeler", "car phone holder"); dimensions like `80x30` are specs, not model codes. `pairMode(a, b)`
+  is generic only when neither listing names a known brand, so branded listings always keep the
+  strict rules (brand verification, the brand's own store on AliExpress, the knock-off price guard).
+  - `item-attributes.ts` reads stated quantities and colours, normalized (5M = 500cm = 16.4ft =
+    5,000 mm; 1.5L = 1,500 ml; set of 4 = pack 4); `attributeConflict` is the generic veto (a 5 m
+    and a 10 m strip differ). One side silent is no conflict; several colours conflict only if
+    none matches.
+  - A generic query that itself names an accessory-type item ("car phone holder", "led strip")
+    doesn't demote listings for weak accessory words: they're the product. Strong signals
+    ("Replacement clip for …") still do; generic category queries ("wireless headphones") demote
+    cases as before.
+  - Still to come: photo hashes in the warm-up (Phase 2), the generic matcher with gates A–E and
+    `visual_match` (Phase 3), "Looks identical · Best value" and per-unit prices (Phase 4).
+- **AliExpress seller verification** (`isUnverifiedBrandListing`): a branded AliExpress listing
+  counts only from the brand's own store: the seller's name says Official or Flagship **and**
+  names the listing's brand (aliases count). "Official" alone means official for the seller's own
+  brand ("Geekria Official Store" lists Sony ear pads).
 - `ProductGroup.matchedBy === "title_similarity"` is the weakest grouping. The card labels it
   "Similar item", others "Same item". Grouped cards spell out "Available on N stores: Amazon ₪X vs
   eBay ₪Y — Best deal on …"; single-store cards offer "Find on <other store>", a focused search
