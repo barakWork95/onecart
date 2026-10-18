@@ -25,7 +25,7 @@ export function DesktopNav({ locale = "en" }: { locale?: Locale } = {}) {
                 className={cn(
                   "inline-flex h-9 items-center gap-2 rounded-full px-3.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/5 text-primary"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                 )}
               >

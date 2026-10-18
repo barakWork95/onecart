@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
-import { dict } from "@/i18n/dictionaries";
+import { dict, beforeValue } from "@/i18n/dictionaries";
 import { localizedPath, type Locale } from "@/i18n/locales";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -121,7 +121,7 @@ export function TrendingCardView({
         </ul>
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <p className="text-[11px] text-muted-foreground">
-            {t.pricesAsOf}{" "}
+            {beforeValue(t.pricesAsOf)}
             <time dateTime={card.pricesAsOf}>{formatSnapshotTime(card.pricesAsOf, locale)}</time>
           </p>
           <ArrowRight

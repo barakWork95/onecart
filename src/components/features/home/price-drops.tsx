@@ -6,7 +6,7 @@ import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
-import { dict } from "@/i18n/dictionaries";
+import { dict, beforeValue } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 
 export interface PriceDropView {
@@ -85,7 +85,7 @@ export function PriceDrops({ drops, locale = "en" }: { drops: readonly PriceDrop
                       <ExternalLink className="size-4" aria-hidden />
                     </a>
                     <p className="text-[11px] text-muted-foreground">
-                      {t.priceAsOf}{" "}
+                      {beforeValue(t.priceAsOf)}
                       <time dateTime={drop.observedAt}>{formatSnapshotTime(drop.observedAt, locale)}</time>
                     </p>
                   </div>

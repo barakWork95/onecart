@@ -223,6 +223,9 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   in. Never crop products with `object-cover`.
 - Use brand tokens from `globals.css` (`bg-primary`, `text-brand-navy`, `bg-success` for "VAT
   included" and "free delivery" chips). Do not use ad-hoc hex colors in components.
+- Text meets WCAG AA (4.5:1; 3:1 for large text) in both themes; the 2026-10-19 audit measured
+  every screen. So: no faded text (`text-muted-foreground/80`), tinted chips behind text at most
+  `bg-primary/5`, and light `--success` at `oklch(0.5 …)` (white on it and it on white both pass).
 - Format prices with `formatMoney` from `src/lib/format.ts`. It uses the `en-IL` locale, so the
   symbol comes first ("₪89"); `he-IL` would render "89 ₪" in the English UI. Headline prices round
   to whole shekels; breakdowns pass `{ precise: true }`. Never concatenate `"₪" + n`.

@@ -91,7 +91,7 @@ function OfferRow({
               </span>
             )}
             {offer.id === fastestId && (
-              <span className="rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase">
+              <span className="rounded border border-primary/40 bg-primary/5 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase">
                 {t.fastest}
               </span>
             )}
@@ -122,7 +122,7 @@ function OfferRow({
           {t.go}
         </a>
       </div>
-      <p className="mt-1.5 ps-14 text-[11px] leading-snug text-muted-foreground/80">
+      <p className="mt-1.5 ps-14 text-[11px] leading-snug text-muted-foreground">
         {[breakdown(offer, locale), unitPriceLabel(offer, locale)].filter(Boolean).join(" · ")}
       </p>
     </li>

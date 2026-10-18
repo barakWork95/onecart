@@ -5,7 +5,7 @@ import { trendingCardId, trendingHref } from "@/components/features/home/trendin
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
-import { dict } from "@/i18n/dictionaries";
+import { dict, beforeValue } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -137,7 +137,7 @@ export function CategoryProductCard({
             <ExternalLink className="size-4" aria-hidden />
           </a>
           <p className="text-[11px] text-muted-foreground sm:ms-auto">
-            {t.pricesAsOf}{" "}
+            {beforeValue(t.pricesAsOf)}
             <time dateTime={product.pricesAsOf}>{formatSnapshotTime(product.pricesAsOf, locale)}</time>
           </p>
         </div>

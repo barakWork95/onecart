@@ -27,3 +27,11 @@ export function joinList(
   }
   return f.format(items);
 }
+
+/**
+ * A label followed by its value: "Prices as of 13 Oct", but Hebrew joins a prefix to the
+ * value with its hyphen, no space ("נכונים ל-13 באוק׳").
+ */
+export function beforeValue(label: string): string {
+  return label.endsWith("-") ? label : `${label} `;
+}

@@ -15,7 +15,7 @@ import { ProductGroupCard } from "@/components/features/search/product-group-car
 import { SortChips } from "@/components/features/search/sort-chips";
 import { STORE_META } from "@/components/features/store-meta";
 import { buttonVariants } from "@/components/ui/button";
-import { dict, joinList } from "@/i18n/dictionaries";
+import { dict, joinList, beforeValue } from "@/i18n/dictionaries";
 import { localizedPath, type Locale } from "@/i18n/locales";
 import { formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -129,7 +129,7 @@ function SnapshotNotice({ stores, locale }: { stores: ReturnType<typeof datedSto
         {stores.map(({ provider, cachedAt }, i) => (
           <span key={provider}>
             {i > 0 && " · "}
-            {t.pricesAsOf(STORE_META[provider].name)}{" "}
+            {beforeValue(t.pricesAsOf(STORE_META[provider].name))}
             <time dateTime={cachedAt}>{formatSnapshotTime(cachedAt, locale)}</time>
           </span>
         ))}

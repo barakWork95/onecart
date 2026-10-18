@@ -1,4 +1,4 @@
-import { DICTIONARIES } from "@/i18n/dictionaries";
+import { beforeValue, DICTIONARIES } from "@/i18n/dictionaries";
 
 /** Every leaf as text: strings as they are, functions called with sample arguments. */
 function leaves(value: unknown, prefix = ""): [string, string][] {
@@ -41,5 +41,12 @@ describe("dictionaries", () => {
     expect(DICTIONARIES.he.compare.trayAll(2, "eBay")).toBe("שתי ההצעות ב-eBay");
     expect(DICTIONARIES.he.compare.trayAll(5, "eBay")).toBe("כל 5 ההצעות ב-eBay");
     expect(DICTIONARIES.he.group.listings(1)).toBe("הצעה אחת");
+  });
+});
+
+describe("beforeValue", () => {
+  it("joins a Hebrew prefix to its value, and spaces an English label", () => {
+    expect(beforeValue(DICTIONARIES.he.card.pricesAsOf) + "13 באוק׳").toBe("המחירים נכונים ל-13 באוק׳");
+    expect(beforeValue(DICTIONARIES.en.card.pricesAsOf) + "13 Oct").toBe("Prices as of 13 Oct");
   });
 });

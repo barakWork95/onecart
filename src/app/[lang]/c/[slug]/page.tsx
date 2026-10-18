@@ -9,7 +9,7 @@ import { HowWePrice } from "@/components/features/category/how-we-price";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
 import { SITE_URL } from "@/config/site";
 import { categoryText, productLabel } from "@/domain/deals/category";
-import { dict } from "@/i18n/dictionaries";
+import { dict, beforeValue } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/locales";
 import { currentLocale, pageAlternates } from "@/i18n/server";
 import { formatSnapshotTime } from "@/lib/format";
@@ -102,8 +102,8 @@ export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c
         <p className="text-base leading-relaxed text-muted-foreground">{text.intro}</p>
         {pricesAsOf && (
           <p className="text-xs text-muted-foreground">
-            {t.pricesCheckedDaily} <time dateTime={pricesAsOf}>{formatSnapshotTime(pricesAsOf, locale)}</time>
-            .
+            {beforeValue(t.pricesCheckedDaily)}
+            <time dateTime={pricesAsOf}>{formatSnapshotTime(pricesAsOf, locale)}</time>.
           </p>
         )}
       </header>
