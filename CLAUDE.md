@@ -324,7 +324,7 @@ SearchBar (client) → /search?q=… (Server Component)
   - Add a test case to `product-matcher.test.ts` for every real mismatch you find. The four
     recorded live searches in `src/integration/recorded-searches.test.ts` ("sony wh-1000xm5",
     "jbl flip 6", "airpods pro", "instant pot duo") pin the end-to-end result.
-- **Branded vs generic (dual-mode matching, Phases 1–3 of 4).** `searchIntent(...).mode` is `branded`
+- **Branded vs generic (dual-mode matching).** `searchIntent(...).mode` is `branded`
   when the query names a known brand or carries a model code, `generic` otherwise ("vegetable
   peeler", "car phone holder"); dimensions like `80x30` are specs, not model codes. A pair of
   listings is generic (`isGenericPair`, `pairMode`) only when neither names its **maker**
@@ -357,8 +357,15 @@ SearchBar (client) → /search?q=… (Server Component)
     only ≤ 12-bit pair is the same cable clip (9 bits), different products from 14; exactly one
     cross-store group (those clips) and 21 within-store collapses (reviewed by title, photo distance
     and price). Re-record and re-check when tuning.
-  - Still to come (Phase 4): "Looks identical · Best value", per-unit prices, generic savings,
-    and the generic categories.
+  - **UI (Phase 4).** `ProductGroup.lookAlike` (any photo link, across stores or within one) →
+    a "Looks identical · Best value" badge (`LOOK_ALIKE_BADGE`) on search, homepage and category
+    cards; the compare sheet's caveat names up to three sellers (`matchCaveat(group)`), and the
+    listings tray shows "Sold by …". A listing stating exactly one pack size ≥ 2 shows "₪3.20 per
+    piece" (`unitPrice`; menus like "2/5PCS" never do). "Cheaper on another store" accepts photo
+    matches, worded "Looks identical, ₪X less on AliExpress".
+  - **Generic categories** (`Category.mode: "generic"`): kitchen-gadgets, car-accessories,
+    desk-gadgets, ten commodity queries each; `categories.test.ts` checks every query reads as its
+    category's mode. `/c` lists "Brands and models" and "Everyday gadgets" separately.
 - **AliExpress seller verification** (`isUnverifiedBrandListing`): a branded AliExpress listing
   counts only from the brand's own store: the seller's name says Official or Flagship **and**
   names the listing's brand (aliases count). "Official" alone means official for the seller's own
@@ -473,11 +480,11 @@ SearchBar (client) → /search?q=… (Server Component)
       `AMAZON_DAILY_CALL_BUDGET` (default 3 calls × 2 pages). Total: 6 + 2 = 8 credits a day ≈
       248 a month, under the free plan's 250. Change both together.
 - **Homepage category rows** (`config/categories.ts`, `categoryRows()` in the composition root): six
-  categories × ten specific products (brand + model; `home.test.ts` checks each is a specific,
-  non-accessory query and none repeats a trending one). Each card is built like a trending card,
+  branded categories × ten specific products (brand + model) and three generic ones × ten commodity
+  items (`categories.test.ts` checks each query's mode, and that none repeats a trending one). Each card is built like a trending card,
   from cache only; empty rows are hidden. The warm-trending cron refreshes them after the trending
-  queries, 3 at a time, on `TRENDING_WARM_STORES` (default `ebay,aliexpress`; ~35 calls a day
-  each, ~15s locally). Amazon's rotation stays on the trending queries.
+  queries, 3 at a time, on `TRENDING_WARM_STORES` (default `ebay,aliexpress`; ~95 calls a day
+  each), and hashes the generic queries' photos (≤ 1,500 a run, cached 30 days). Amazon's rotation stays on the trending queries.
 - **Category pages** (`/c`, `/c/[slug]`, for search engines): built only from cached results via
   `categoryPageData()` (`"use cache"`, `cacheLife("hours")`, tag `category:{slug}`), so a crawl never
   reaches Redis, let alone a store. Products are picked by `createFeaturedLookup`, the same as

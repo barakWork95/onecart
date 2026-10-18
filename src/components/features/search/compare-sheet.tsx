@@ -8,6 +8,7 @@ import {
   matchCaveat,
   outboundHref,
   premiumOverBest,
+  unitPriceLabel,
 } from "@/components/features/search/group-view";
 import { StoreChip } from "@/components/features/search/store-chip";
 import { STORE_META } from "@/components/features/store-meta";
@@ -114,7 +115,9 @@ function OfferRow({
           Go
         </a>
       </div>
-      <p className="mt-1.5 ps-14 text-[11px] leading-snug text-muted-foreground/80">{breakdown(offer)}</p>
+      <p className="mt-1.5 ps-14 text-[11px] leading-snug text-muted-foreground/80">
+        {[breakdown(offer), unitPriceLabel(offer)].filter(Boolean).join(" · ")}
+      </p>
     </li>
   );
 }
@@ -178,7 +181,14 @@ function ListingsTray({
               <div className="min-w-0 flex-1">
                 <p className="line-clamp-2 text-xs leading-snug text-foreground">{listing.title}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {[formatDeliveryDays(listing.delivery), shippingLabel(listing)].filter(Boolean).join(" • ")}
+                  {[
+                    listing.sellerName && `Sold by ${listing.sellerName}`,
+                    formatDeliveryDays(listing.delivery),
+                    shippingLabel(listing),
+                    unitPriceLabel(listing),
+                  ]
+                    .filter(Boolean)
+                    .join(" • ")}
                 </p>
               </div>
               <p className="shrink-0 text-sm font-bold text-foreground">{formatMoney(listing.price.total)}</p>
@@ -249,7 +259,7 @@ export function CompareSheet({
               </DrawerTitle>
               <DrawerDescription className="mt-1 text-sm text-muted-foreground">
                 Shipping, estimated import VAT and duty included where stores quote them.
-                {matchCaveat(group.matchedBy)}
+                {matchCaveat(group)}
               </DrawerDescription>
             </div>
             <DrawerClose

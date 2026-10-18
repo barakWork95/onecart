@@ -13,6 +13,8 @@ const XM5: TrendingCard = {
   stores: [{ provider: "ebay", total: money(907_00, "ILS"), listings: 19 }],
   unshippedStores: ["amazon"],
   matchedBy: "single",
+  lookAlike: false,
+  unitPrice: null,
   pricesAsOf: "2026-10-13T07:30:00.000Z",
 };
 
@@ -28,6 +30,8 @@ const DUO: TrendingCard = {
   ],
   unshippedStores: [],
   matchedBy: "title_similarity",
+  lookAlike: false,
+  unitPrice: null,
 };
 
 describe("TrendingShowcase", () => {
@@ -59,6 +63,21 @@ describe("TrendingShowcase", () => {
     const card = screen.getByRole("article", { name: "AirPods Pro" });
     expect(card).toHaveAttribute("aria-labelledby", "trending-airpods-pro");
     expect(trendingCardId("Sony WH-1000XM5")).toBe("trending-sony-wh-1000xm5");
+  });
+
+  it("badges a photo-matched card and prices a multi-pack per piece", () => {
+    const clips: TrendingCard = {
+      ...XM5,
+      label: "Cable clips",
+      query: "cable clips",
+      matchedBy: "visual_match",
+      lookAlike: true,
+      unitPrice: { pack: 10, perUnit: money(3_20, "ILS") },
+    };
+    render(<TrendingShowcase cards={[clips]} />);
+    const card = screen.getByRole("article", { name: "Cable clips" });
+    expect(within(card).getByText("Looks identical · Best value")).toBeInTheDocument();
+    expect(within(card).getByText("₪3.20 per piece")).toBeInTheDocument();
   });
 
   it("renders nothing while no trending product is cached", () => {

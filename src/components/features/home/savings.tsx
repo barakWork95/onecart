@@ -5,9 +5,18 @@ import { STORE_META } from "@/components/features/store-meta";
 import { formatMoney } from "@/lib/format";
 import { money } from "@/domain/shared/money";
 
+/** "Save ₪170 vs Amazon"; a photo match claims no more than it knows. */
+export function savingClaim(s: SavingsCard): string {
+  const saved = formatMoney(money(s.savedMinor, "ILS"));
+  return s.card.lookAlike
+    ? `Looks identical, ${saved} less on ${STORE_META[s.cheapest].name}`
+    : `Save ${saved} vs ${STORE_META[s.against].name}`;
+}
+
 /**
- * "Cheaper on another store": the same item (matched by model number) priced
- * clearly lower on one store than the next, from the homepage's cached cards.
+ * "Cheaper on another store": the same item (matched by model number, or an
+ * unbranded item by photo) priced clearly lower on one store than the next,
+ * from the homepage's cached cards.
  */
 export function Savings({ savings }: { savings: readonly SavingsCard[] }) {
   if (savings.length === 0) return null;
@@ -31,11 +40,7 @@ export function Savings({ savings }: { savings: readonly SavingsCard[] }) {
       >
         {savings.map((s) => (
           <li key={s.card.query} className="min-w-0">
-            <TrendingCardView
-              card={s.card}
-              idPrefix="savings"
-              highlight={`Save ${formatMoney(money(s.savedMinor, "ILS"))} vs ${STORE_META[s.against].name}`}
-            />
+            <TrendingCardView card={s.card} idPrefix="savings" highlight={savingClaim(s)} />
           </li>
         ))}
       </ol>

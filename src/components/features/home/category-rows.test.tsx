@@ -12,6 +12,8 @@ const card = (label: string, query: string): TrendingCard => ({
   stores: [{ provider: "ebay", total: money(499_00, "ILS"), listings: 3 }],
   unshippedStores: [],
   matchedBy: "single",
+  lookAlike: false,
+  unitPrice: null,
   pricesAsOf: "2026-10-14T07:30:00.000Z",
 });
 

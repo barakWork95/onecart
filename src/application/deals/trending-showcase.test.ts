@@ -63,6 +63,8 @@ describe("trending showcase", () => {
       stores: [{ provider: "ebay", total: money(1012_00, "ILS"), listings: 2 }],
       unshippedStores: ["amazon"],
       matchedBy: "single",
+      lookAlike: false,
+      unitPrice: null,
       // The older of the two snapshots: the card is only as fresh as its stalest price.
       pricesAsOf: "2026-10-13T06:00:00.000Z",
     });

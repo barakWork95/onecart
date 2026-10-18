@@ -18,10 +18,14 @@ export interface SavingsCard {
   readonly savedShare: number;
 }
 
+/** Matches strong enough to claim one store sells the same thing for less. */
+const SAVINGS_BASES: ReadonlySet<TrendingCard["matchedBy"]> = new Set(["model_number", "visual_match"]);
+
 /**
  * Cards where one store is clearly cheaper than another for the same item,
- * biggest saving (₪) first. Only model-number matches count: a "similar item"
- * grouped by title alone can't back a claim that the same thing costs less.
+ * biggest saving (₪) first. Model-number matches count, and photo matches of
+ * unbranded items (worded "Looks identical"): a "similar item" grouped by
+ * title alone can't back a claim that the same thing costs less.
  */
 export function selectSavings(
   cards: readonly TrendingCard[],
@@ -31,7 +35,7 @@ export function selectSavings(
   const seen = new Set<string>();
   const savings: SavingsCard[] = [];
   for (const card of cards) {
-    if (seen.has(card.query) || card.matchedBy !== "model_number") continue;
+    if (seen.has(card.query) || !SAVINGS_BASES.has(card.matchedBy)) continue;
     seen.add(card.query);
     const [first, second] = [...card.stores].sort((a, b) => a.total.amountMinor - b.total.amountMinor);
     if (!first || !second) continue;

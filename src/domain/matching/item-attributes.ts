@@ -97,7 +97,7 @@ export function extractAttributes(title: string): ItemAttributes {
     if (m[2] === "g" && Number.isInteger(grams) && grams < 10) return;
     add("weight_g", format(grams));
   });
-  each(String.raw`(?<![\w.])(\d+)\s*-?\s*(pcs|pc|pieces|pack|pk)(?![a-z])`, (m) => add("pack", m[1]!));
+  each(String.raw`(?<![\w.])(\d+)\s*-?\s*(pcs|pc|pieces?|pack|pk)(?![a-z])`, (m) => add("pack", m[1]!));
   each(String.raw`\b(?:set|pack) of (\d+)\b`, (m) => add("pack", m[1]!));
   for (const word of text.split(/[^a-z]+/)) {
     const color = COLORS[word];

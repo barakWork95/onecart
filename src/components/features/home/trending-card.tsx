@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { LOOK_ALIKE_BADGE } from "@/components/features/search/group-view";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
@@ -57,6 +58,11 @@ export function TrendingCardView({
             {storeCount} stores
           </span>
         )}
+        {card.lookAlike && (
+          <span className="absolute start-2.5 bottom-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
+            {LOOK_ALIKE_BADGE}
+          </span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <h3 id={headingId} className="text-sm leading-snug font-bold text-foreground sm:text-base">
@@ -72,6 +78,11 @@ export function TrendingCardView({
           </span>
           <span className="text-xs text-muted-foreground">on {bestStore}</span>
         </p>
+        {card.unitPrice && (
+          <p className="-mt-1.5 text-xs text-muted-foreground">
+            {formatMoney(card.unitPrice.perUnit, { precise: true })} per piece
+          </p>
+        )}
         {highlight && (
           <p className="w-fit rounded-full bg-success/10 px-2 py-0.5 text-xs font-bold text-success">
             {highlight}

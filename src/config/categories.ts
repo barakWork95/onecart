@@ -4,13 +4,14 @@ export type { Category };
 
 /**
  * The categories. The daily warm-trending cron refreshes every product here on
- * TRENDING_WARM_STORES (eBay and AliExpress by default): 60 searches a day
- * per store. A product with nothing cached has no card; a page with too few
+ * TRENDING_WARM_STORES (eBay and AliExpress by default): 90 searches a day
+ * per store, and hashes the generic categories' photos. A product with nothing cached has no card; a page with too few
  * priced products is kept out of search engines until it fills.
  */
 export const CATEGORIES: readonly Category[] = [
   {
     slug: "headphones",
+    mode: "branded",
     label: "Headphones",
     seoTitle: "Headphones and earbuds: prices in Israel compared",
     description:
@@ -33,6 +34,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     slug: "speakers",
+    mode: "branded",
     label: "Speakers",
     seoTitle: "Bluetooth speakers: prices in Israel compared",
     description:
@@ -55,6 +57,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     slug: "smart-home",
+    mode: "branded",
     label: "Smart home",
     seoTitle: "Smart home devices: prices in Israel compared",
     description:
@@ -77,6 +80,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     slug: "kitchen",
+    mode: "branded",
     label: "Kitchen",
     seoTitle: "Kitchen appliances: prices in Israel compared",
     description:
@@ -99,6 +103,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     slug: "phone-accessories",
+    mode: "branded",
     label: "Phone accessories",
     seoTitle: "Power banks and phone gadgets: prices in Israel compared",
     description:
@@ -121,6 +126,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     slug: "gaming",
+    mode: "branded",
     label: "Gaming",
     seoTitle: "Gaming consoles and gear: prices in Israel compared",
     description:
@@ -141,6 +147,76 @@ export const CATEGORIES: readonly Category[] = [
       { label: "HyperX Cloud III", query: "hyperx cloud iii" },
     ],
   },
+
+  {
+    slug: "kitchen-gadgets",
+    mode: "generic",
+    label: "Kitchen gadgets",
+    seoTitle: "Kitchen gadgets: prices in Israel compared",
+    description:
+      "Peelers, choppers, scales and spatula sets: everyday kitchen gadgets compared across stores by the full price delivered to Israel.",
+    intro:
+      "Unbranded kitchen gadgets are sold by dozens of sellers under different titles. We match listings that look identical by their product photo and specs, then show the cheapest landed price to Israel, shipping and import charges included.",
+    searchQuery: "kitchen gadgets",
+    products: [
+      { label: "Vegetable peeler", query: "vegetable peeler" },
+      { label: "Garlic press", query: "garlic press" },
+      { label: "Silicone spatula set", query: "silicone spatula set" },
+      { label: "Digital kitchen scale", query: "digital kitchen scale" },
+      { label: "Vegetable chopper", query: "vegetable chopper" },
+      { label: "Measuring spoons", query: "measuring spoons set" },
+      { label: "Jar opener", query: "jar opener" },
+      { label: "Herb scissors", query: "herb scissors" },
+      { label: "Silicone baking mat", query: "silicone baking mat" },
+      { label: "Handheld milk frother", query: "milk frother handheld" },
+    ],
+  },
+  {
+    slug: "car-accessories",
+    mode: "generic",
+    label: "Car accessories",
+    seoTitle: "Car accessories: prices in Israel compared",
+    description:
+      "Phone holders, chargers, FM transmitters and organizers for the car, compared across stores by the full price delivered to Israel.",
+    intro:
+      "Phone holders, chargers, FM transmitters, organizers and covers for the car. Many sellers list the same unbranded item; we match look-alikes by product photo and specs and show which one lands in Israel for the least.",
+    searchQuery: "car accessories",
+    products: [
+      { label: "Magnetic car phone holder", query: "magnetic car phone holder" },
+      { label: "Bluetooth FM transmitter", query: "car fm transmitter bluetooth" },
+      { label: "Dual USB car charger", query: "dual usb car charger" },
+      { label: "Car seat gap filler", query: "car seat gap filler" },
+      { label: "Digital tire pressure gauge", query: "digital tire pressure gauge" },
+      { label: "Car trash can", query: "car trash can" },
+      { label: "Windshield sun shade", query: "windshield sun shade" },
+      { label: "Interior LED lights", query: "car interior led lights" },
+      { label: "Handheld car vacuum", query: "handheld car vacuum" },
+      { label: "Steering wheel cover", query: "steering wheel cover" },
+    ],
+  },
+  {
+    slug: "desk-gadgets",
+    mode: "generic",
+    label: "Desk gadgets",
+    seoTitle: "Desk gadgets: prices in Israel compared",
+    description:
+      "Cable clips, laptop stands, desk lamps and organizers for a tidy desk, compared across stores by the full price delivered to Israel.",
+    intro:
+      "Cable clips, laptop stands, monitor risers, lamps and organizers for the home office. We group listings that look identical by product photo and specs, so you see the best landed price to Israel among sellers of the same item.",
+    searchQuery: "desk accessories",
+    products: [
+      { label: "Cable organizer clips", query: "cable organizer clips" },
+      { label: "Adjustable laptop stand", query: "adjustable laptop stand" },
+      { label: "Monitor riser", query: "monitor riser" },
+      { label: "Cable management box", query: "cable management box" },
+      { label: "Large mouse pad", query: "large mouse pad" },
+      { label: "LED desk lamp", query: "led desk lamp" },
+      { label: "Desk phone stand", query: "desk phone stand" },
+      { label: "Desk organizer", query: "desk organizer" },
+      { label: "USB desk fan", query: "usb desk fan" },
+      { label: "Keyboard wrist rest", query: "keyboard wrist rest" },
+    ],
+  },
 ];
 
 /**
@@ -151,6 +227,7 @@ export const CATEGORIES: readonly Category[] = [
 export const DEMO_CATEGORIES: readonly Category[] = [
   {
     slug: "headphones",
+    mode: "branded",
     label: "Headphones",
     seoTitle: "Headphones and earbuds: prices in Israel compared",
     description: "Demo headphones compared by the full price delivered to Israel.",
@@ -165,6 +242,7 @@ export const DEMO_CATEGORIES: readonly Category[] = [
   },
   {
     slug: "pillows",
+    mode: "generic",
     label: "Pillows",
     seoTitle: "Pillows: prices in Israel compared",
     description: "Demo pillows compared by the full price delivered to Israel.",

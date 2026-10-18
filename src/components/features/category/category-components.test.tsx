@@ -20,6 +20,8 @@ const PRODUCT: CategoryProduct = {
   ],
   unshippedStores: ["amazon"],
   matchedBy: "model_number",
+  lookAlike: false,
+  unitPrice: null,
   pricesAsOf: "2026-10-18T04:30:00.000Z",
   bestListing: {
     id: "ebay:1",
@@ -42,6 +44,21 @@ const PRODUCT: CategoryProduct = {
 };
 
 describe("CategoryProductCard", () => {
+  it("badges a photo-matched product and prices a multi-pack per piece", () => {
+    const clips: CategoryProduct = {
+      ...PRODUCT,
+      label: "Magnetic cable clips",
+      query: "magnetic cable clips",
+      matchedBy: "visual_match",
+      lookAlike: true,
+      unitPrice: { pack: 10, perUnit: ils(3.2) },
+    };
+    render(<CategoryProductCard product={clips} goHref="/go/x" />);
+    const card = screen.getByRole("article", { name: "Magnetic cable clips" });
+    expect(within(card).getByText("Looks identical · Best value")).toBeInTheDocument();
+    expect(card).toHaveTextContent("₪3.20 per piece");
+  });
+
   it("shows the landed price, its breakdown, every store, and both links", () => {
     render(<CategoryProductCard product={PRODUCT} goHref="/go/ebay%3A1?d=x&s=y" />);
     const card = screen.getByRole("article", { name: "JBL Charge 5" });

@@ -1,4 +1,5 @@
 import type { TrendingQuery } from "@/domain/deals/trending-query";
+import type { MatchMode } from "@/domain/search/search-intent";
 
 /**
  * A product category: a homepage row and an indexable page (`/c/{slug}`),
@@ -7,6 +8,11 @@ import type { TrendingQuery } from "@/domain/deals/trending-query";
 export interface Category {
   /** URL segment and stable id, e.g. "headphones". English, lower-case, hyphenated. */
   readonly slug: string;
+  /**
+   * `branded`: specific products (brand + model), matched by model number. `generic`:
+   * unbranded commodities ("vegetable peeler"), whose look-alikes match by photo.
+   */
+  readonly mode: MatchMode;
   readonly label: string;
   /** The page's <title> (the layout appends "· OneCart"). */
   readonly seoTitle: string;
@@ -20,8 +26,9 @@ export interface Category {
   /** "See all" runs this search (a live, user-initiated search). */
   readonly searchQuery: string;
   /**
-   * Specific products (brand + model), so each card is the product itself, not
-   * a category's mix. Never a trending query: those have their own grid.
+   * Branded: specific products (brand + model), so each card is the product itself,
+   * not a category's mix. Generic: one commodity item per query. Never a trending
+   * query: those have their own grid.
    */
   readonly products: readonly TrendingQuery[];
 }

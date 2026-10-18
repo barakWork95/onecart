@@ -135,6 +135,41 @@ describe("ResultsView", () => {
     expect(screen.getByText("Similar item · 2 stores")).toBeInTheDocument();
   });
 
+  it("badges a photo match 'Looks identical · Best value', prices packs per piece, and names its sellers", async () => {
+    const user = userEvent.setup();
+    const ebay = makeProduct({
+      provider: "ebay",
+      sku: "c1",
+      title: "10 Pcs Magnetic Cable Holder Clip Organizer",
+      total: 60_00,
+      sellerName: "tidyhome",
+    });
+    const ali = makeProduct({
+      provider: "aliexpress",
+      sku: "c2",
+      title: "10 Pcs Magnetic Cable Organizer Clip",
+      total: 32_00,
+      sellerName: "Clip Factory Store",
+    });
+    const clips = groupProducts([ebay, ali], {
+      imageHashes: new Map([
+        [ebay.imageUrl!, "e0b2b6969e9c9c9c"],
+        [ali.imageUrl!, "e0b2b6969fb80ed5"],
+      ]),
+    });
+    renderView({ response: response({ groups: clips }) });
+    const card = screen.getByRole("article", { name: /Magnetic Cable/ });
+    expect(within(card).getByText("Looks identical · Best value")).toBeInTheDocument();
+    expect(within(card).getByText("Looks identical · 2 stores")).toBeInTheDocument();
+    expect(within(card).getByText("₪3.20 per piece")).toBeInTheDocument();
+
+    await user.click(within(card).getByRole("button", { name: /^Compare 2 stores for/ }));
+    const sheet = await screen.findByRole("dialog");
+    expect(sheet).toHaveTextContent(
+      "Matched by product photo and specs, sold by different sellers (Clip Factory Store, tidyhome).",
+    );
+  });
+
   it("offers a focused search at the other stores on a single-store card", () => {
     renderView();
     const find = screen.getByRole("link", { name: /^Find on other stores: search for Sony WH-CH720N/ });

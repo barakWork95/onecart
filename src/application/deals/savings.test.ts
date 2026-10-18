@@ -22,6 +22,8 @@ function card(
     stores,
     unshippedStores: [],
     matchedBy,
+    lookAlike: matchedBy === "visual_match",
+    unitPrice: null,
     pricesAsOf: "2026-10-14T07:30:00.000Z",
   };
 }
@@ -46,6 +48,11 @@ describe("selectSavings", () => {
         card("similar", { ebay: 100, amazon: 300 }, "title_similarity"),
       ]),
     ).toEqual([]);
+  });
+
+  it("counts photo matches of unbranded items too", () => {
+    const [saving] = selectSavings([card("cable clips", { aliexpress: 30, ebay: 419 }, "visual_match")]);
+    expect(saving).toMatchObject({ cheapest: "aliexpress", against: "ebay", savedMinor: 389_00 });
   });
 
   it("needs at least ₪20 and 10% off the next store, inclusive", () => {

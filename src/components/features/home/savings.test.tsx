@@ -16,6 +16,8 @@ const SAVING: SavingsCard = {
     ],
     unshippedStores: [],
     matchedBy: "model_number",
+    lookAlike: false,
+    unitPrice: null,
     pricesAsOf: "2026-10-14T07:30:00.000Z",
   },
   cheapest: "ebay",
@@ -33,6 +35,23 @@ describe("Savings", () => {
     expect(card).toHaveTextContent("Save ₪170 vs Amazon");
     // The same card can sit in the trending grid or a category row: ids must not collide.
     expect(card).toHaveAttribute("aria-labelledby", "savings-jbl-charge-5");
+  });
+
+  it("words a photo match as looking identical, never as the same item", () => {
+    const lookAlike: SavingsCard = {
+      ...SAVING,
+      card: {
+        ...SAVING.card,
+        label: "Magnetic cable clips",
+        query: "cable clips",
+        matchedBy: "visual_match",
+        lookAlike: true,
+      },
+    };
+    render(<Savings savings={[lookAlike]} />);
+    expect(screen.getByRole("article", { name: "Magnetic cable clips" })).toHaveTextContent(
+      "Looks identical, ₪170 less on eBay",
+    );
   });
 
   it("renders nothing without savings", () => {

@@ -5,9 +5,11 @@ import { ProductImage } from "@/components/features/search/product-image";
 import {
   comparisonScope,
   discountPercent,
+  LOOK_ALIKE_BADGE,
   matchLabel,
   outboundHref,
   storeComparison,
+  unitPriceLabel,
   type FindMatchesLink,
 } from "@/components/features/search/group-view";
 import { STORE_META } from "@/components/features/store-meta";
@@ -87,6 +89,7 @@ export function ProductGroupCard({
   const discount = discountPercent(best);
   const storeName = STORE_META[best.provider].name;
   const label = matchLabel(group.matchedBy);
+  const perPiece = unitPriceLabel(best);
 
   return (
     <article
@@ -103,6 +106,11 @@ export function ProductGroupCard({
         {discount !== null && (
           <span className="absolute start-2.5 top-2.5 rounded-full bg-success px-2 py-0.5 text-xs font-bold text-success-foreground">
             -{discount}%
+          </span>
+        )}
+        {group.lookAlike && (
+          <span className="absolute start-2.5 bottom-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
+            {LOOK_ALIKE_BADGE}
           </span>
         )}
         {user && (
@@ -161,6 +169,7 @@ export function ProductGroupCard({
               {best.price.shippingKnown ? "total landed" : "+ shipping"}
             </span>
           </p>
+          {perPiece && <p className="text-xs font-medium text-muted-foreground">{perPiece}</p>}
           <DeliveryNote group={group} />
           <StoreComparisonNote group={group} />
         </div>

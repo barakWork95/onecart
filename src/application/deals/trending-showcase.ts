@@ -12,6 +12,7 @@ import { searchIntent } from "@/domain/search/search-intent";
 import { rotationFor, rotationTtlSeconds } from "@/domain/deals/warm-rotation";
 import { isFeaturableListing, isTypicalPrice, medianAmount } from "@/domain/deals/featured-listing";
 import { tokenizeTitle } from "@/domain/matching/title-tokens";
+import { unitPrice, type UnitPrice } from "@/domain/matching/unit-price";
 import { normalizeQueryText, searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import type { Money } from "@/domain/shared/money";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
@@ -39,6 +40,10 @@ export interface TrendingCard {
   /** Stores that list the product but won't ship it to Israel. */
   readonly unshippedStores: readonly ProviderId[];
   readonly matchedBy: "single" | MatchBasis;
+  /** Unbranded look-alikes grouped by photo: "Looks identical · Best value". */
+  readonly lookAlike: boolean;
+  /** The best offer's price per piece when it's a stated multi-pack. */
+  readonly unitPrice: UnitPrice | null;
   /** When the oldest price on the card was fetched: the card is a snapshot. */
   readonly pricesAsOf: IsoDateTime;
 }
@@ -133,6 +138,8 @@ export function toTrendingCard(label: string, { query, group, pricesAsOf }: Feat
     })),
     unshippedStores: group.unavailable.map((u) => u.provider),
     matchedBy: group.matchedBy,
+    lookAlike: group.lookAlike,
+    unitPrice: unitPrice(best.title, best.price.total),
     pricesAsOf,
   };
 }

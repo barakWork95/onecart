@@ -58,9 +58,11 @@ test.describe("category pages", () => {
 
   test("the index lists every category, and the footer links them from any page", async ({ page }) => {
     await page.goto("/c");
-    const list = page.getByRole("list", { name: "Categories" });
-    await expect(list.getByRole("link", { name: /^Headphones/ })).toHaveAttribute("href", "/c/headphones");
-    await expect(list.getByRole("link", { name: /^Pillows/ })).toHaveAttribute("href", "/c/pillows");
+    // Branded categories and everyday (photo-matched) gadgets have sections of their own.
+    const branded = page.getByRole("list", { name: "Brands and models" });
+    const generic = page.getByRole("list", { name: "Everyday gadgets" });
+    await expect(branded.getByRole("link", { name: /^Headphones/ })).toHaveAttribute("href", "/c/headphones");
+    await expect(generic.getByRole("link", { name: /^Pillows/ })).toHaveAttribute("href", "/c/pillows");
 
     await page.goto("/privacy");
     await expect(

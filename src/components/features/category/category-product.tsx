@@ -2,6 +2,7 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { CategoryProduct } from "@/application/deals/category-page";
 import { trendingCardId, trendingHref } from "@/components/features/home/trending-card";
+import { LOOK_ALIKE_BADGE } from "@/components/features/search/group-view";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
@@ -42,6 +43,11 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
       {/* Wide and short on phones (ten of these per page), square beside the details from sm. */}
       <div className="relative aspect-[16/9] w-full shrink-0 bg-white sm:aspect-square sm:w-48">
         <ProductImage src={product.imageUrl} sizes="(min-width: 640px) 192px, 100vw" className="p-5" />
+        {product.lookAlike && (
+          <span className="absolute start-2.5 bottom-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
+            {LOOK_ALIKE_BADGE}
+          </span>
+        )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 sm:p-5">
         <div>
@@ -58,6 +64,11 @@ export function CategoryProductCard({ product, goHref }: { product: CategoryProd
           <span className="text-sm text-muted-foreground">
             {price.shippingKnown ? "landed" : "+ shipping"} on {store}
           </span>
+          {product.unitPrice && (
+            <span className="text-sm text-muted-foreground">
+              · {formatMoney(product.unitPrice.perUnit, { precise: true })} per piece
+            </span>
+          )}
         </p>
 
         <dl

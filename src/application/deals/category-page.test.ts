@@ -10,6 +10,7 @@ const key = (provider: ProviderId, query: string) =>
 
 const CATEGORY: Category = {
   slug: "speakers",
+  mode: "branded",
   label: "Speakers",
   seoTitle: "Bluetooth speakers: prices in Israel compared",
   description: "Speakers compared.",

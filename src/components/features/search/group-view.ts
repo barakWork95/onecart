@@ -1,5 +1,6 @@
 import { STORE_META } from "@/components/features/store-meta";
 import { matchSearchText } from "@/domain/matching/match-query";
+import { unitPrice } from "@/domain/matching/unit-price";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import { normalizeQueryText } from "@/domain/search/search-query";
@@ -157,11 +158,35 @@ export function matchLabel(matchedBy: ProductGroup["matchedBy"]): string {
   return matchedBy === "title_similarity" ? "Similar item" : "Same item";
 }
 
-/** The compare sheet's caveat for weaker matches; null when there is none. */
-export function matchCaveat(matchedBy: ProductGroup["matchedBy"]): string | null {
-  if (matchedBy === "visual_match")
-    return " Matched by product photo and specs, sold by different sellers. Check the listing details before you buy.";
-  return matchedBy === "title_similarity"
+/**
+ * The badge on a photo-matched card: the listings look like one item, and the
+ * price shown is the cheapest of them.
+ */
+export const LOOK_ALIKE_BADGE = "Looks identical · Best value";
+
+/** Sellers named in a caveat before "and N more". */
+const CAVEAT_SELLER_LIMIT = 3;
+
+/**
+ * The compare sheet's caveat for weaker matches; null when there is none. A
+ * photo match names its sellers: they're different businesses selling what
+ * looks like the same item.
+ */
+export function matchCaveat(group: ProductGroup): string | null {
+  if (group.lookAlike) {
+    const sellers = [...new Set(group.listings.flatMap((l) => (l.sellerName ? [l.sellerName] : [])))];
+    const named = sellers.slice(0, CAVEAT_SELLER_LIMIT).join(", ");
+    const more = sellers.length - CAVEAT_SELLER_LIMIT;
+    const by = sellers.length > 1 ? ` (${named}${more > 0 ? ` and ${more} more` : ""})` : "";
+    return ` Matched by product photo and specs, sold by different sellers${by}. Check the listing details before you buy.`;
+  }
+  return group.matchedBy === "title_similarity"
     ? " Matched by similar titles — check the listing before buying."
     : null;
+}
+
+/** "₪3.20 per piece" for a stated multi-pack; null otherwise. */
+export function unitPriceLabel(offer: Pick<UnifiedProduct, "title" | "price">): string | null {
+  const unit = unitPrice(offer.title, offer.price.total);
+  return unit ? `${formatMoney(unit.perUnit, { precise: true })} per piece` : null;
 }

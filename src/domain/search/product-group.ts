@@ -49,6 +49,11 @@ export interface ProductGroup {
    */
   readonly matchedBy: "single" | MatchBasis;
   /**
+   * Unbranded listings grouped by product photo, across stores or within one: the UI says
+   * "Looks identical", never "Same item", and the best offer is the best value among them.
+   */
+  readonly lookAlike: boolean;
+  /**
    * The same product at stores that list it but won't ship it to Israel, at
    * most one per store and never a store already in `offers`.
    */
@@ -284,6 +289,7 @@ function toGroup(
     priceRange: { min: first.price.total, max: last.price.total },
     rating: aggregateRating(listings),
     matchedBy: offers.length > 1 ? (cluster.weakestBasis ?? "single") : "single",
+    lookAlike: cluster.weakestBasis === "visual_match",
     unavailable,
     onIntent: listings.some((o) => classes?.get(o.id)?.onIntent ?? true),
     isAccessory: cluster.members.every((m) => m.tokens.isAccessory),

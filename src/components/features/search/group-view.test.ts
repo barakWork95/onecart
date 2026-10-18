@@ -7,6 +7,7 @@ import {
   matchCaveat,
   matchLabel,
   outboundHref,
+  unitPriceLabel,
   premiumOverBest,
   storeComparison,
 } from "@/components/features/search/group-view";
@@ -216,8 +217,37 @@ describe("matchLabel and matchCaveat", () => {
   });
 
   it("caveat only the weaker matches", () => {
-    expect(matchCaveat("model_number")).toBeNull();
-    expect(matchCaveat("title_similarity")).toMatch(/similar titles/);
-    expect(matchCaveat("visual_match")).toMatch(/product photo and specs, sold by different sellers/);
+    const base = group({ provider: "amazon", sku: "1" });
+    expect(matchCaveat(base)).toBeNull();
+    expect(matchCaveat({ ...base, matchedBy: "title_similarity" })).toMatch(/similar titles/);
+  });
+
+  it("name a photo match's sellers, up to three", () => {
+    const listing = (sku: string, sellerName: string | null) =>
+      makeProduct({ provider: "ebay", sku, title: "Cable Clip", sellerName });
+    const base = group({ provider: "ebay", sku: "1" });
+    const lookAlike = (...listings: ReturnType<typeof listing>[]) =>
+      matchCaveat({ ...base, lookAlike: true, listings: [listings[0]!, ...listings.slice(1)] });
+    expect(lookAlike(listing("1", "clipco"), listing("2", "tidyhome"), listing("3", null))).toBe(
+      " Matched by product photo and specs, sold by different sellers (clipco, tidyhome). Check the listing details before you buy.",
+    );
+    expect(
+      lookAlike(
+        listing("1", "a"),
+        listing("2", "b"),
+        listing("3", "c"),
+        listing("4", "d"),
+        listing("5", "e"),
+      ),
+    ).toContain("(a, b, c and 2 more)");
+    expect(lookAlike(listing("1", "a"), listing("2", "a"))).toBe(
+      " Matched by product photo and specs, sold by different sellers. Check the listing details before you buy.",
+    );
+  });
+
+  it("price a stated multi-pack per piece", () => {
+    const pack = makeProduct({ sku: "p", title: "10 Pcs Cable Clips", total: 32_00 });
+    expect(unitPriceLabel(pack)).toBe("₪3.20 per piece");
+    expect(unitPriceLabel(makeProduct({ sku: "q", title: "Cable Clip" }))).toBeNull();
   });
 });
