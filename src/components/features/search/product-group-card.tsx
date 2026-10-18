@@ -5,7 +5,6 @@ import { ProductImage } from "@/components/features/search/product-image";
 import {
   comparisonScope,
   discountPercent,
-  LOOK_ALIKE_BADGE,
   matchLabel,
   outboundHref,
   storeComparison,
@@ -18,21 +17,24 @@ import { TrackPriceButton } from "@/components/features/user-lists/track-price-b
 import { buttonVariants } from "@/components/ui/button";
 import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import type { ProviderId } from "@/domain/shared/provider";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 import { formatCount, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
-function DeliveryNote({ group }: { group: ProductGroup }) {
+function DeliveryNote({ group, locale }: { group: ProductGroup; locale: Locale }) {
+  const t = dict(locale).group;
   const best = bestOffer(group);
   if (!best.price.shippingKnown) {
-    return <p className="text-xs text-muted-foreground">Shipping not quoted</p>;
+    return <p className="text-xs text-muted-foreground">{t.shippingNotQuoted}</p>;
   }
   if (!best.delivery.isFreeShipping) return null;
   const days = best.delivery.maxDays ?? best.delivery.minDays;
   return (
     <p className="inline-flex items-center gap-1 text-xs font-medium text-success">
       <Truck className="size-3.5 shrink-0" aria-hidden />
-      Free{days !== null ? ` ${days}-day` : ""} delivery
+      {t.freeDelivery(days)}
     </p>
   );
 }
@@ -45,8 +47,8 @@ export interface CardUserState {
 }
 
 /** "Available on 2 stores: Amazon ₪244 vs eBay ₪276 — best deal on Amazon", over three lines. */
-function StoreComparisonNote({ group }: { group: ProductGroup }) {
-  const comparison = storeComparison(group);
+function StoreComparisonNote({ group, locale }: { group: ProductGroup; locale: Locale }) {
+  const comparison = storeComparison(group, locale);
   if (!comparison) return null;
   return (
     <p className="text-xs leading-relaxed">
@@ -75,8 +77,10 @@ export function ProductGroupCard({
   user = null,
   findMatches = null,
   checkStore = null,
+  locale = "en",
 }: {
   group: ProductGroup;
+  locale?: Locale;
   links: Readonly<Record<string, string>>;
   user?: CardUserState | null;
   /** Single-store cards: a focused search that may find the item at another store. */
@@ -88,8 +92,9 @@ export function ProductGroupCard({
   const storeCount = group.offers.length;
   const discount = discountPercent(best);
   const storeName = STORE_META[best.provider].name;
-  const label = matchLabel(group.matchedBy);
-  const perPiece = unitPriceLabel(best);
+  const t = dict(locale);
+  const label = matchLabel(group.matchedBy, locale);
+  const perPiece = unitPriceLabel(best, locale);
 
   return (
     <article
@@ -110,7 +115,7 @@ export function ProductGroupCard({
         )}
         {group.lookAlike && (
           <span className="absolute start-2.5 bottom-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
-            {LOOK_ALIKE_BADGE}
+            {t.group.lookAlikeBadge}
           </span>
         )}
         {user && (
@@ -120,6 +125,7 @@ export function ProductGroupCard({
               searchText={user.searchText}
               title={group.title}
               initialSaved={user.saved}
+              locale={locale}
               overlay
             />
             <TrackPriceButton
@@ -128,6 +134,7 @@ export function ProductGroupCard({
               title={group.title}
               currentAgorot={best.price.total.amountMinor}
               initialTracking={user.tracking}
+              locale={locale}
               overlay
             />
           </div>
@@ -138,15 +145,16 @@ export function ProductGroupCard({
         <p className="truncate text-xs text-muted-foreground">
           <span className="font-medium text-foreground/80">
             {storeCount > 1
-              ? `${label} · ${storeCount} stores`
+              ? `${label} · ${t.group.stores(storeCount)}`
               : group.listings.length > 1
-                ? `${storeName} · ${group.listings.length} listings`
+                ? `${storeName} · ${t.group.listings(group.listings.length)}`
                 : storeName}
           </span>
         </p>
         <h2
           id={`${group.id}-title`}
-          className="line-clamp-2 text-sm leading-snug font-semibold text-foreground sm:text-base"
+          dir="auto"
+          className="line-clamp-2 text-sm leading-snug font-semibold text-foreground sm:text-base rtl:text-right"
           title={group.title}
         >
           {group.title}
@@ -155,28 +163,28 @@ export function ProductGroupCard({
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             <Star className="size-3.5 fill-amber-400 text-amber-500" aria-hidden />
             <span className="font-semibold text-foreground">{group.rating.average.toFixed(1)}</span>
-            <span>({formatCount(group.rating.count)})</span>
-            <span className="sr-only">average rating</span>
+            <span>({formatCount(group.rating.count, locale)})</span>
+            <span className="sr-only">{t.group.averageRating}</span>
           </p>
         )}
 
         <div className="mt-auto flex flex-col gap-1 pt-2">
           <p className="flex flex-wrap items-baseline gap-x-1.5">
             <span className="text-2xl font-extrabold tracking-tight text-foreground sm:text-[1.7rem]">
-              {formatMoney(best.price.total)}
+              {formatMoney(best.price.total, { locale })}
             </span>
             <span className="text-xs text-muted-foreground">
-              {best.price.shippingKnown ? "total landed" : "+ shipping"}
+              {best.price.shippingKnown ? t.group.totalLanded : t.group.plusShipping}
             </span>
           </p>
           {perPiece && <p className="text-xs font-medium text-muted-foreground">{perPiece}</p>}
-          <DeliveryNote group={group} />
-          <StoreComparisonNote group={group} />
+          <DeliveryNote group={group} locale={locale} />
+          <StoreComparisonNote group={group} locale={locale} />
         </div>
 
         <div className="pt-2 [&>*]:w-full">
           {comparisonScope(group).hasSheet ? (
-            <CompareSheet group={group} links={links} />
+            <CompareSheet group={group} links={links} locale={locale} />
           ) : (
             <a
               href={outboundHref(links, best)}
@@ -186,7 +194,7 @@ export function ProductGroupCard({
                 "h-11 rounded-xl px-3 font-semibold",
               )}
             >
-              View deal {formatMoney(best.price.total)}
+              {t.group.viewDeal(formatMoney(best.price.total, { locale }))}
               <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
             </a>
           )}
@@ -195,11 +203,11 @@ export function ProductGroupCard({
             <a
               href={checkStore.href}
               {...OUTBOUND_LINK}
-              aria-label={`Check ${STORE_META[checkStore.provider].name} for ${group.title}`}
+              aria-label={t.group.checkLabel(STORE_META[checkStore.provider].name, group.title)}
               className="mt-1.5 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
             >
               <ExternalLink className="size-3.5" aria-hidden />
-              Check {STORE_META[checkStore.provider].name}
+              {t.group.check(STORE_META[checkStore.provider].name)}
             </a>
           )}
           {storeCount === 1 && findMatches && (
@@ -207,7 +215,7 @@ export function ProductGroupCard({
             <Link
               href={findMatches.href}
               prefetch={false}
-              aria-label={`${findMatches.label}: search for ${group.title}`}
+              aria-label={t.group.findLabel(findMatches.label, group.title)}
               className="mt-1.5 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-secondary"
             >
               <Search className="size-3.5" aria-hidden />

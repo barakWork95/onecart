@@ -3,16 +3,18 @@ import { ArrowRightLeft, Bookmark, Compass, TrendingDown, type LucideIcon } from
 
 /** The app's four sections — shown as the mobile tab bar and the desktop header nav. */
 export interface NavItem {
-  readonly label: string;
+  /** The section's name in the dictionary (`nav.*`). */
+  readonly key: "discover" | "compare" | "saved" | "alerts";
   readonly icon: LucideIcon;
+  /** The English path; `localizedPath` gives the link in the page's language. */
   readonly href: string;
 }
 
 export const NAV_ITEMS: readonly NavItem[] = [
-  { label: "Discover", icon: Compass, href: "/" },
-  { label: "Compare", icon: ArrowRightLeft, href: "/search" },
-  { label: "Saved", icon: Bookmark, href: "/saved" },
-  { label: "Alerts", icon: TrendingDown, href: "/alerts" },
+  { key: "discover", icon: Compass, href: "/" },
+  { key: "compare", icon: ArrowRightLeft, href: "/search" },
+  { key: "saved", icon: Bookmark, href: "/saved" },
+  { key: "alerts", icon: TrendingDown, href: "/alerts" },
 ];
 
 /** "/" matches only the home page; other sections match their sub-paths too. */

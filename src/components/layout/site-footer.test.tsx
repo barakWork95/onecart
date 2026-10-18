@@ -26,4 +26,20 @@ describe("SiteFooter", () => {
     expect(within(legal).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy");
     expect(within(legal).getByRole("link", { name: "Terms of Use" })).toHaveAttribute("href", "/terms");
   });
+
+  it("in Hebrew: Hebrew disclosure, Amazon's sentence word for word, and the English legal pages", () => {
+    render(<SiteFooter locale="he" categories={[{ slug: "headphones", label: "Headphones" }]} />);
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toHaveTextContent("OneCart משתתפת בתוכניות שותפים");
+    expect(screen.getByText(AMAZON_ASSOCIATES_DISCLOSURE)).toHaveAttribute("lang", "en");
+    const legal = screen.getByRole("navigation", { name: "מידע משפטי" });
+    const privacy = within(legal).getByRole("link", { name: "מדיניות פרטיות" });
+    expect(privacy).toHaveAttribute("href", "/privacy");
+    expect(privacy).toHaveAttribute("hreflang", "en");
+    const categories = screen.getByRole("navigation", { name: "קטגוריות" });
+    expect(within(categories).getByRole("link", { name: "Headphones" })).toHaveAttribute(
+      "href",
+      "/he/c/headphones",
+    );
+  });
 });

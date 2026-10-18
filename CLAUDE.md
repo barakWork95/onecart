@@ -184,7 +184,16 @@ SearchBar (client) → /search?q=… (Server Component)
   on env changes). E2E runs with it on (`e2e/i18n.spec.ts`).
 - **Text** lives in typed dictionaries (`src/i18n/dictionaries/`): `en.ts` defines the shape,
   every other language must match it (a missing key is a type error), and a test fails on
-  untranslated strings. Store titles are never translated.
+  untranslated strings. Counts are functions (Hebrew says "חנות אחת", "3 חנויות"). Pages read
+  `currentLocale()` and pass `locale` down; components take a `locale` prop (default `en`) and
+  use `dict(locale)`, `joinList()`, and `formatMoney(m, { locale })` / `formatSnapshotTime(iso,
+locale)` (`he-IL`: "89 ₪"). Every internal link goes through `localizedPath(locale, path)`.
+  Store titles are never translated; they get `dir="auto"` (`rtl:text-right`) so English reads
+  left to right inside Hebrew pages. Amazon's Associates sentence stays in English everywhere;
+  the legal pages are English only (Hebrew pages link to them with `hrefLang="en"`).
+- **Hebrew suggestion.** English pages show a dismissible "OneCart זמין גם בעברית" note when
+  the browser's first language is Hebrew (`LanguageSuggestion`, decided after mount); never a
+  redirect.
 - **SEO.** Indexable pages set `alternates: await pageAlternates(path)` (canonical, plus en/he/
   x-default hreflang when Hebrew is live); the sitemap lists each language with its alternates.
 - **Fonts.** `--font-ui` is Plus Jakarta Sans, or Heebo on `:lang(he)` (Jakarta has no Hebrew).

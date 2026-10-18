@@ -6,6 +6,8 @@ import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
 import { normalizeQueryText } from "@/domain/search/search-query";
 import { money, type Money } from "@/domain/shared/money";
 import type { ProviderId } from "@/domain/shared/provider";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
 import { formatMoney } from "@/lib/format";
 
 /** Whole-percent discount vs. the store's strike-through price, or null. */
@@ -64,11 +66,11 @@ export function listingsPerStore(group: ProductGroup): ReadonlyMap<ProviderId, n
 }
 
 /** "eBay ₪1,012" for one listing, "eBay from ₪1,012 (17 listings)" for several. */
-function storePrice(offer: UnifiedProduct, listings: number): string {
+function storePrice(offer: UnifiedProduct, listings: number, locale: Locale): string {
+  const t = dict(locale).group.comparison;
   const name = STORE_META[offer.provider].name;
-  return listings > 1
-    ? `${name} from ${formatMoney(offer.price.total)} (${listings} listings)`
-    : `${name} ${formatMoney(offer.price.total)}`;
+  const price = formatMoney(offer.price.total, { locale });
+  return listings > 1 ? t.storeFrom(name, price, listings) : t.storePrice(name, price);
 }
 
 /**
@@ -76,7 +78,8 @@ function storePrice(offer: UnifiedProduct, listings: number): string {
  * store was found listing. A store that lists the product but won't ship it
  * to Israel is part of the comparison: that's worth knowing.
  */
-export function storeComparison(group: ProductGroup): StoreComparison | null {
+export function storeComparison(group: ProductGroup, locale: Locale = "en"): StoreComparison | null {
+  const t = dict(locale).group.comparison;
   const priced = group.offers.length;
   const counts = listingsPerStore(group);
   const best = bestOffer(group);
@@ -87,24 +90,24 @@ export function storeComparison(group: ProductGroup): StoreComparison | null {
     if (listings < 2) return null;
     const dearest = group.listings[listings - 1] ?? best;
     return {
-      headline: `${listings} listings on ${bestStore}`,
-      prices: `from ${formatMoney(best.price.total)} to ${formatMoney(dearest.price.total)}`,
+      headline: t.listingsOn(listings, bestStore),
+      prices: t.fromTo(
+        formatMoney(best.price.total, { locale }),
+        formatMoney(dearest.price.total, { locale }),
+      ),
       bestDeal: null,
     };
   }
 
   const shown = group.offers
     .slice(0, CARD_OFFER_LIMIT)
-    .map((o) => storePrice(o, counts.get(o.provider) ?? 1));
+    .map((o) => storePrice(o, counts.get(o.provider) ?? 1, locale));
   const hidden = priced - CARD_OFFER_LIMIT;
-  const unshipped = group.unavailable.map((u) => `${STORE_META[u.provider].name}: no offer to Israel`);
+  const unshipped = group.unavailable.map((u) => t.noOffer(STORE_META[u.provider].name));
   return {
-    headline:
-      priced >= 2
-        ? `Available on ${priced} stores`
-        : `Compared on ${priced + group.unavailable.length} stores`,
-    prices: [shown.join(" vs ") + (hidden > 0 ? ` +${hidden} more` : ""), ...unshipped].join(" vs "),
-    bestDeal: priced >= 2 ? `Best deal on ${bestStore}` : `Only ${bestStore} ships it to Israel`,
+    headline: priced >= 2 ? t.availableOn(priced) : t.comparedOn(priced + group.unavailable.length),
+    prices: [shown.join(t.versus) + (hidden > 0 ? t.more(hidden) : ""), ...unshipped].join(t.versus),
+    bestDeal: priced >= 2 ? t.bestDeal(bestStore) : t.onlyShips(bestStore),
   };
 }
 
@@ -135,7 +138,9 @@ export function findMatchesLink(
   group: ProductGroup,
   connectedStores: readonly ProviderId[],
   currentQuery: string,
+  locale: Locale = "en",
 ): FindMatchesLink | null {
+  const t = dict(locale).group;
   const known = new Set([...group.offers, ...group.unavailable].map((o) => o.provider));
   const others = connectedStores.filter((store) => !known.has(store));
   const text = matchSearchText(group.title);
@@ -143,8 +148,8 @@ export function findMatchesLink(
     return null;
   const [only] = others;
   return {
-    href: `/search?${new URLSearchParams({ q: text }).toString()}`,
-    label: only && others.length === 1 ? `Find on ${STORE_META[only].name}` : "Find on other stores",
+    href: localizedPath(locale, `/search?${new URLSearchParams({ q: text }).toString()}`),
+    label: only && others.length === 1 ? t.findOn(STORE_META[only].name) : t.findOnOthers,
   };
 }
 
@@ -153,16 +158,17 @@ export function findMatchesLink(
  * evidence: a model number is the same item; a photo match (generic items)
  * only looks identical; title similarity alone is a similar item.
  */
-export function matchLabel(matchedBy: ProductGroup["matchedBy"]): string {
-  if (matchedBy === "visual_match") return "Looks identical";
-  return matchedBy === "title_similarity" ? "Similar item" : "Same item";
+export function matchLabel(matchedBy: ProductGroup["matchedBy"], locale: Locale = "en"): string {
+  const t = dict(locale).group;
+  if (matchedBy === "visual_match") return t.looksIdentical;
+  return matchedBy === "title_similarity" ? t.similarItem : t.sameItem;
 }
 
 /**
  * The badge on a photo-matched card: the listings look like one item, and the
  * price shown is the cheapest of them.
  */
-export const LOOK_ALIKE_BADGE = "Looks identical · Best value";
+export const LOOK_ALIKE_BADGE = dict("en").group.lookAlikeBadge;
 
 /** Sellers named in a caveat before "and N more". */
 const CAVEAT_SELLER_LIMIT = 3;
@@ -172,21 +178,23 @@ const CAVEAT_SELLER_LIMIT = 3;
  * photo match names its sellers: they're different businesses selling what
  * looks like the same item.
  */
-export function matchCaveat(group: ProductGroup): string | null {
+export function matchCaveat(group: ProductGroup, locale: Locale = "en"): string | null {
+  const t = dict(locale).group.caveat;
   if (group.lookAlike) {
     const sellers = [...new Set(group.listings.flatMap((l) => (l.sellerName ? [l.sellerName] : [])))];
     const named = sellers.slice(0, CAVEAT_SELLER_LIMIT).join(", ");
     const more = sellers.length - CAVEAT_SELLER_LIMIT;
-    const by = sellers.length > 1 ? ` (${named}${more > 0 ? ` and ${more} more` : ""})` : "";
-    return ` Matched by product photo and specs, sold by different sellers${by}. Check the listing details before you buy.`;
+    const by = sellers.length > 1 ? (more > 0 ? t.moreSellers(named, more) : named) : "";
+    return t.photo(by);
   }
-  return group.matchedBy === "title_similarity"
-    ? " Matched by similar titles — check the listing before buying."
-    : null;
+  return group.matchedBy === "title_similarity" ? t.title : null;
 }
 
 /** "₪3.20 per piece" for a stated multi-pack; null otherwise. */
-export function unitPriceLabel(offer: Pick<UnifiedProduct, "title" | "price">): string | null {
+export function unitPriceLabel(
+  offer: Pick<UnifiedProduct, "title" | "price">,
+  locale: Locale = "en",
+): string | null {
   const unit = unitPrice(offer.title, offer.price.total);
-  return unit ? `${formatMoney(unit.perUnit, { precise: true })} per piece` : null;
+  return unit ? dict(locale).group.perPiece(formatMoney(unit.perUnit, { precise: true, locale })) : null;
 }

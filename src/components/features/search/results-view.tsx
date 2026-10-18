@@ -15,6 +15,8 @@ import { ProductGroupCard } from "@/components/features/search/product-group-car
 import { SortChips } from "@/components/features/search/sort-chips";
 import { STORE_META } from "@/components/features/store-meta";
 import { buttonVariants } from "@/components/ui/button";
+import { dict, joinList } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
 import { formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { ProviderId } from "@/domain/shared/provider";
@@ -25,25 +27,27 @@ import {
 } from "@/domain/search/search-response";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
-const STATUS_TEXT: Partial<Record<ProviderOutcome["status"], string>> = {
-  timeout: "timed out",
-  error: "unavailable",
-  circuit_open: "temporarily paused",
-};
+/** How a failed store's status reads in the "some stores are unavailable" notice. */
+function statusText(status: ProviderOutcome["status"], locale: Locale): string {
+  const t = dict(locale).search.results.status;
+  return status === "timeout" || status === "circuit_open" ? t[status] : t.error;
+}
 
 function TranslationNotice({
   query,
   translation,
+  locale,
 }: {
   query: SearchResponse["query"];
   translation: QueryTranslationInfo;
+  locale: Locale;
 }) {
+  const t = dict(locale).search.results;
   if (translation.source === null) {
     return (
       <p className="flex items-start gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
         <Languages className="mt-0.5 size-4 shrink-0" aria-hidden />
-        We couldn&apos;t translate your Hebrew search, so stores were searched with the original text. Try
-        English for better results.
+        {t.translationFailed}
       </p>
     );
   }
@@ -51,10 +55,12 @@ function TranslationNotice({
     <p className="flex items-center gap-2 text-sm text-muted-foreground">
       <Languages className="size-4 shrink-0 text-primary" aria-hidden />
       <span>
-        Showing results for{" "}
-        <strong className="font-semibold text-foreground">“{query.normalizedText}”</strong>
-        <span className="sr-only">, translated from Hebrew</span>
-        {translation.partial && <span> (some words couldn&apos;t be translated)</span>}
+        {t.showingFor}{" "}
+        <strong className="font-semibold text-foreground" lang="en" dir="ltr">
+          “{query.normalizedText}”
+        </strong>
+        <span className="sr-only">{t.translatedFromHebrew}</span>
+        {translation.partial && <span>{t.someWordsUntranslated}</span>}
       </span>
     </p>
   );
@@ -63,15 +69,22 @@ function TranslationNotice({
 function PartialNotice({
   failed,
   checkStores,
+  locale,
 }: {
   failed: readonly ProviderOutcome[];
   /** Stores the cards offer "Check <store>" links for. */
   checkStores: readonly ProviderId[];
+  locale: Locale;
 }) {
+  const t = dict(locale).search.results;
   const list = failed
-    .map((o) => `${STORE_META[o.provider].name} (${STATUS_TEXT[o.status] ?? "unavailable"})`)
+    .map((o) => `${STORE_META[o.provider].name} (${statusText(o.status, locale)})`)
     .join(", ");
-  const checks = checkStores.map((p) => `“Check ${STORE_META[p].name}”`).join(" or ");
+  const checks = joinList(
+    checkStores.map((p) => t.checkQuoted(STORE_META[p].name)),
+    locale,
+    "or",
+  );
   return (
     <p
       role="status"
@@ -79,8 +92,8 @@ function PartialNotice({
     >
       <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
       <span>
-        Some stores are unavailable right now: {list}. Showing results from the rest
-        {checks ? `; ${checks} on a card searches that store for the item.` : "."}
+        {t.partial(list)}
+        {checks ? t.partialChecks(checks) : "."}
       </span>
     </p>
   );
@@ -107,7 +120,8 @@ export function datedStores(
     .sort((a, b) => a.cachedAt.localeCompare(b.cachedAt));
 }
 
-function SnapshotNotice({ stores }: { stores: ReturnType<typeof datedStores> }) {
+function SnapshotNotice({ stores, locale }: { stores: ReturnType<typeof datedStores>; locale: Locale }) {
+  const t = dict(locale).search.results;
   return (
     <p className="flex items-start gap-2 text-sm text-muted-foreground">
       <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -115,24 +129,28 @@ function SnapshotNotice({ stores }: { stores: ReturnType<typeof datedStores> }) 
         {stores.map(({ provider, cachedAt }, i) => (
           <span key={provider}>
             {i > 0 && " · "}
-            {STORE_META[provider].name} prices as of{" "}
-            <time dateTime={cachedAt}>{formatSnapshotTime(cachedAt)}</time>
+            {t.pricesAsOf(STORE_META[provider].name)}{" "}
+            <time dateTime={cachedAt}>{formatSnapshotTime(cachedAt, locale)}</time>
           </span>
         ))}
-        . Prices may have changed since; the store shows the current one.
+        {t.pricesMayHaveChanged}
       </span>
     </p>
   );
 }
 
 /** The current URL's search, one results page further; filters and sort are kept. */
-export function nextPageHref(query: SearchResponse["query"], nextPage: number): string {
+export function nextPageHref(
+  query: SearchResponse["query"],
+  nextPage: number,
+  locale: Locale = "en",
+): string {
   const params = new URLSearchParams({ q: query.rawText });
   if (query.sort !== "relevance") params.set("sort", query.sort);
   if (query.filters.maxTotal) params.set("max", String(Math.round(query.filters.maxTotal.amountMinor / 100)));
   if (query.filters.freeShippingOnly) params.set("free", "1");
   params.set("page", String(nextPage));
-  return `/search?${params.toString()}`;
+  return localizedPath(locale, `/search?${params.toString()}`);
 }
 
 function EmptyState({ title, body, children }: { title: string; body: string; children?: ReactNode }) {
@@ -160,6 +178,7 @@ export interface ResultsViewProps {
   readonly storeSearches?: readonly { readonly provider: ProviderId; readonly href: string }[];
   /** Products this visitor saved / tracks; null when wishlists aren't available. */
   readonly userLists?: { readonly savedIds: readonly string[]; readonly alertIds: readonly string[] } | null;
+  readonly locale?: Locale;
 }
 
 export function ResultsView({
@@ -171,7 +190,9 @@ export function ResultsView({
   sampleStores = [],
   storeSearches = [],
   userLists = null,
+  locale = "en",
 }: ResultsViewProps) {
+  const t = dict(locale).search.results;
   const { query, groups, providers, totalOffers, isPartial, pagination } = response;
   const searched = providers.filter((p) => p.status !== "skipped");
   // A store that's down can't be searched again; its cards get "Check <store>" instead.
@@ -184,70 +205,62 @@ export function ResultsView({
   const dated = datedStores(searched, response.generatedAt);
 
   return (
-    <section aria-label="Search results" className="flex flex-col gap-4">
-      {translation && <TranslationNotice query={query} translation={translation} />}
+    <section aria-label={t.label} className="flex flex-col gap-4">
+      {translation && <TranslationNotice query={query} translation={translation} locale={locale} />}
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <p className="text-muted-foreground">
-          <span className="font-semibold text-foreground">{totalOffers}</span>{" "}
-          {totalOffers === 1 ? "offer" : "offers"} •{" "}
-          <span className="font-semibold text-primary">
-            {searched.length} {searched.length === 1 ? "store" : "stores"}
-          </span>
-          {query.sort === "relevance" && <span> • Best match</span>}
+          <span className="font-semibold text-foreground">{t.offers(totalOffers)}</span> •{" "}
+          <span className="font-semibold text-primary">{t.stores(searched.length)}</span>
+          {query.sort === "relevance" && <span> • {t.bestMatch}</span>}
         </p>
         <div className="flex gap-2">
           {demoMode && (
             <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800 dark:bg-violet-950 dark:text-violet-200">
               <FlaskConical className="size-3.5" aria-hidden />
-              Demo data
+              {t.demo}
             </span>
           )}
           {anyTaxEstimated && (
             <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
               <BadgeCheck className="size-3.5" aria-hidden />
-              Import VAT included
+              {t.vatIncluded}
             </span>
           )}
         </div>
       </div>
 
-      <SortChips text={query.rawText} active={query.sort} />
+      <SortChips text={query.rawText} active={query.sort} locale={locale} />
 
-      {dated.length > 0 && groups.length > 0 && <SnapshotNotice stores={dated} />}
+      {dated.length > 0 && groups.length > 0 && <SnapshotNotice stores={dated} locale={locale} />}
 
       {isPartial && !allFailed && (
         <PartialNotice
           failed={failed}
           checkStores={[...new Set(Object.values(storeChecks).map((c) => c.provider))]}
+          locale={locale}
         />
       )}
       {sampleStores.length > 0 && (
         <p className="flex items-start gap-2 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-900 dark:bg-violet-950 dark:text-violet-100">
           <FlaskConical className="mt-0.5 size-4 shrink-0" aria-hidden />
           <span>
-            {sampleStores.map((p) => STORE_META[p].name).join(" and ")} results here are recorded samples, not
-            live prices.
+            {t.samples(
+              joinList(
+                sampleStores.map((p) => STORE_META[p].name),
+                locale,
+              ),
+            )}
           </span>
         </p>
       )}
 
       {searched.length === 0 ? (
-        <EmptyState
-          title="No stores are connected yet"
-          body="Store API keys aren't configured on this server, so there's nothing to search."
-        />
+        <EmptyState title={t.noStoresTitle} body={t.noStoresBody} />
       ) : allFailed ? (
-        <EmptyState
-          title="Stores aren't responding"
-          body={
-            storeSearches.length > 0
-              ? "We couldn't reach any store just now. You can search them directly, or try again in a minute."
-              : "We couldn't reach any store just now. Please try again in a minute."
-          }
-        >
+        <EmptyState title={t.downTitle} body={storeSearches.length > 0 ? t.downBodyWithLinks : t.downBody}>
           {storeSearches.length > 0 && (
-            <ul className="flex flex-wrap justify-center gap-2" aria-label="Search the stores directly">
+            <ul className="flex flex-wrap justify-center gap-2" aria-label={t.searchDirectly}>
               {storeSearches.map(({ provider, href }) => (
                 <li key={provider}>
                   <a
@@ -258,7 +271,7 @@ export function ResultsView({
                       "h-11 rounded-xl px-4 font-semibold",
                     )}
                   >
-                    Search {STORE_META[provider].name}
+                    {t.searchStore(STORE_META[provider].name)}
                     <ExternalLink className="size-4" aria-hidden />
                   </a>
                 </li>
@@ -267,19 +280,17 @@ export function ResultsView({
           )}
         </EmptyState>
       ) : groups.length === 0 ? (
-        <EmptyState
-          title="No matches"
-          body={`No store had results for “${query.rawText}”. Try fewer or more general words.`}
-        />
+        <EmptyState title={t.noMatchesTitle} body={t.noMatchesBody(query.rawText)} />
       ) : (
         <>
-          <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Products">
+          <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label={t.products}>
             {groups.map((group) => (
               <li key={group.id} className="min-w-0">
                 <ProductGroupCard
                   group={group}
                   links={outboundLinks}
-                  findMatches={findMatchesLink(group, connectedStores, query.normalizedText)}
+                  findMatches={findMatchesLink(group, connectedStores, query.normalizedText, locale)}
+                  locale={locale}
                   checkStore={storeChecks[group.id] ?? null}
                   user={
                     userLists && {
@@ -294,10 +305,12 @@ export function ResultsView({
           </ol>
           <div className="flex flex-col items-center gap-3 pt-2">
             <p className="text-sm text-muted-foreground">
-              Showing {groups.length} {groups.length === 1 ? "product" : "products"}
-              {!pagination.hasNextPage && groups.length > 0 && " — that's everything the stores returned"}
+              {t.showing(groups.length)}
+              {!pagination.hasNextPage && groups.length > 0 && t.everything}
             </p>
-            {pagination.hasNextPage && <LoadMore href={nextPageHref(query, pagination.page + 1)} />}
+            {pagination.hasNextPage && (
+              <LoadMore href={nextPageHref(query, pagination.page + 1, locale)} locale={locale} />
+            )}
           </div>
         </>
       )}

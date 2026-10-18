@@ -9,93 +9,85 @@ import { CategoryRows, CategoryRowsSkeleton } from "@/components/features/home/c
 import { TrendingShowcase, TrendingShowcaseSkeleton } from "@/components/features/home/trending-showcase";
 import { PopularSearches } from "@/components/features/search/popular-searches";
 import { SearchBox } from "@/components/features/search/search-box";
-import { pageAlternates } from "@/i18n/server";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
+import { currentLocale, pageAlternates } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: await pageAlternates("/") };
 }
 
 const VALUE_PROPS = [
-  {
-    icon: Globe2,
-    title: "Every store, one search",
-    body: "Amazon, eBay and AliExpress side by side, sellers grouped per product.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "The real price to Israel",
-    body: "Shipping, import VAT and duty added before we compare.",
-  },
-  { icon: ShieldCheck, title: "Buy where you trust", body: "We send you to the store's own checkout." },
-];
+  { icon: Globe2, key: "stores" },
+  { icon: BadgeCheck, key: "landed" },
+  { icon: ShieldCheck, key: "trust" },
+] as const;
 
 /** Cached comparisons only: the homepage never calls a store's API (see `trendingCards`). */
-async function Trending() {
+async function Trending({ locale }: { locale: Locale }) {
   // Cached prices and their timestamps are request-time data, never prerendered.
   await connection();
-  return <TrendingShowcase cards={await trendingCards()} />;
+  return <TrendingShowcase cards={await trendingCards()} locale={locale} />;
 }
 
 /** Same item clearly cheaper on one store: from the cached cards below. */
-async function CrossStoreSavings() {
+async function CrossStoreSavings({ locale }: { locale: Locale }) {
   await connection();
-  return <Savings savings={await savingsCards()} />;
+  return <Savings savings={await savingsCards()} locale={locale} />;
 }
 
 /** Real drops against our own daily price history, left in the cache by the cron. */
-async function Drops() {
+async function Drops({ locale }: { locale: Locale }) {
   await connection();
-  return <PriceDrops drops={await priceDropCards()} />;
+  return <PriceDrops drops={await priceDropCards()} locale={locale} />;
 }
 
 /** Category rows: cached results only, like the trending grid. */
-async function Categories() {
+async function Categories({ locale }: { locale: Locale }) {
   await connection();
-  return <CategoryRows rows={await categoryRows()} />;
+  return <CategoryRows rows={await categoryRows()} locale={locale} />;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const locale = await currentLocale();
+  const t = dict(locale).home;
   return (
     <main className="flex w-full flex-1 flex-col">
       <section className="border-b border-border/60 bg-gradient-to-b from-primary/10 via-primary/5 to-background">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pt-10 pb-8 sm:pt-14">
           <div className="flex flex-col gap-2 text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-brand-navy sm:text-5xl">
-              Find the best price.
-            </h1>
-            <p className="text-base text-muted-foreground">
-              Compare Amazon, eBay and AliExpress by the price you&apos;ll actually pay in Israel.
-            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-brand-navy sm:text-5xl">{t.title}</h1>
+            <p className="text-base text-muted-foreground">{t.subtitle}</p>
           </div>
-          <SearchBox />
-          <PopularSearches heading="Trending searches" />
+          <SearchBox locale={locale} />
+          <PopularSearches heading={t.trendingSearches} locale={locale} />
         </div>
       </section>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 pb-10">
         {/* Hidden until they have something true to show: no skeletons. */}
         <Suspense fallback={null}>
-          <CrossStoreSavings />
+          <CrossStoreSavings locale={locale} />
         </Suspense>
 
         <Suspense fallback={<TrendingShowcaseSkeleton />}>
-          <Trending />
+          <Trending locale={locale} />
         </Suspense>
 
         <Suspense fallback={null}>
-          <Drops />
+          <Drops locale={locale} />
         </Suspense>
 
         <Suspense fallback={<CategoryRowsSkeleton />}>
-          <Categories />
+          <Categories locale={locale} />
         </Suspense>
 
         <ul className="grid gap-3 sm:grid-cols-3">
-          {VALUE_PROPS.map(({ icon: Icon, title, body }) => (
-            <li key={title} className="rounded-3xl border border-border/60 bg-card p-4">
+          {VALUE_PROPS.map(({ icon: Icon, key }) => (
+            <li key={key} className="rounded-3xl border border-border/60 bg-card p-4">
               <Icon className="size-6 text-primary" aria-hidden />
-              <h2 className="mt-2 font-bold text-foreground">{title}</h2>
-              <p className="text-sm text-muted-foreground">{body}</p>
+              <h2 className="mt-2 font-bold text-foreground">{t.valueProps[key].title}</h2>
+              <p className="text-sm text-muted-foreground">{t.valueProps[key].body}</p>
             </li>
           ))}
         </ul>

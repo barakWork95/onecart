@@ -1,15 +1,17 @@
 import Link from "next/link";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
 
 /** Required by the Amazon Associates Operating Agreement; keep the wording exact. */
 export const AMAZON_ASSOCIATES_DISCLOSURE = "As an Amazon Associate I earn from qualifying purchases.";
 
 /** Our affiliate relationships, stated plainly on every page (eBay Partner Network, Amazon Associates). */
-export const AFFILIATE_DISCLOSURE =
-  "OneCart is a participant in affiliate programs including the eBay Partner Network, Amazon Associates and the AliExpress Affiliate Program. We may earn a commission on qualifying purchases at no additional cost to you.";
+export const AFFILIATE_DISCLOSURE = dict("en").footer.affiliate;
 
+/** The legal pages exist in English only: every language links to them. */
 export const LEGAL_LINKS = [
-  { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms of Use" },
+  { href: "/privacy", key: "privacy" },
+  { href: "/terms", key: "terms" },
 ] as const;
 
 /**
@@ -19,20 +21,23 @@ export const LEGAL_LINKS = [
  */
 export function SiteFooter({
   categories = [],
+  locale = "en",
 }: {
   /** Category pages to link (`/c/{slug}`): crawlable paths into them from every page. */
   categories?: readonly { readonly slug: string; readonly label: string }[];
+  locale?: Locale;
 }) {
+  const t = dict(locale).footer;
   return (
     <footer className="border-t border-border/60 pb-[calc(4rem+env(safe-area-inset-bottom)+1.25rem)] md:pb-6">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 pt-5 text-center text-xs text-muted-foreground sm:text-start">
         {categories.length > 0 && (
-          <nav aria-label="Categories">
+          <nav aria-label={t.categories}>
             <ul className="flex flex-wrap justify-center gap-x-4 sm:justify-start">
               {categories.map(({ slug, label }) => (
                 <li key={slug}>
                   <Link
-                    href={`/c/${slug}`}
+                    href={localizedPath(locale, `/c/${slug}`)}
                     className="inline-flex min-h-11 items-center font-medium text-foreground/80 underline-offset-4 hover:underline"
                   >
                     {label}
@@ -43,19 +48,21 @@ export function SiteFooter({
           </nav>
         )}
         <p className="max-w-3xl leading-relaxed">
-          {AFFILIATE_DISCLOSURE} {AMAZON_ASSOCIATES_DISCLOSURE}
+          {t.affiliate} {/* Amazon's required sentence, word for word in every language. */}
+          <span lang="en">{AMAZON_ASSOCIATES_DISCLOSURE}</span>
         </p>
         <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
           <p>© OneCart</p>
-          <nav aria-label="Legal">
+          <nav aria-label={t.legal}>
             <ul className="flex gap-4">
-              {LEGAL_LINKS.map(({ href, label }) => (
+              {LEGAL_LINKS.map(({ href, key }) => (
                 <li key={href}>
                   <Link
                     href={href}
+                    hrefLang={locale === "en" ? undefined : "en"}
                     className="inline-flex min-h-11 items-center font-medium text-foreground/80 underline-offset-4 hover:underline"
                   >
-                    {label}
+                    {t[key]}
                   </Link>
                 </li>
               ))}

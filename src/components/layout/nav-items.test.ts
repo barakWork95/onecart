@@ -2,11 +2,11 @@ import { isActive, NAV_ITEMS } from "@/components/layout/nav-items";
 
 describe("NAV_ITEMS", () => {
   it("lists the four sections in tab-bar order", () => {
-    expect(NAV_ITEMS.map((i) => [i.label, i.href])).toEqual([
-      ["Discover", "/"],
-      ["Compare", "/search"],
-      ["Saved", "/saved"],
-      ["Alerts", "/alerts"],
+    expect(NAV_ITEMS.map((i) => [i.key, i.href])).toEqual([
+      ["discover", "/"],
+      ["compare", "/search"],
+      ["saved", "/saved"],
+      ["alerts", "/alerts"],
     ]);
   });
 });

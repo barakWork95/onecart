@@ -95,7 +95,7 @@ describe("ResultsView", () => {
   it("shows the translated query, counts, and one card per product group", () => {
     renderView();
     expect(screen.getByText("“wireless earbuds”")).toBeInTheDocument();
-    expect(screen.getByText(/offers/)).toHaveTextContent("4 offers • 4 stores");
+    expect(screen.getByText(/offers/).closest("p")).toHaveTextContent("4 offers • 4 stores");
     const cards = within(screen.getByRole("list", { name: "Products" })).getAllByRole("article");
     expect(cards).toHaveLength(2);
     expect(within(cards[0]!).getByRole("heading", { level: 2 })).toHaveTextContent(
@@ -672,5 +672,45 @@ describe("ResultsView — dated prices", () => {
   it("shows no date for live or fresh results", () => {
     renderView();
     expect(screen.queryByText(/Prices may have changed/)).not.toBeInTheDocument();
+  });
+});
+
+describe("ResultsView in Hebrew", () => {
+  // Intl marks Hebrew prices right-to-left (U+200F); compare the visible text.
+  const plain = (s: string | null) => (s ?? "").replace(/[‏]/g, "").replace(/ /g, " ");
+
+  it("reads in Hebrew, prices number-first, and links within /he", async () => {
+    const user = userEvent.setup();
+    renderView({
+      locale: "he",
+      response: response({ pagination: { page: 1, pageSize: 20, totalResults: 2, hasNextPage: true } }),
+    });
+    expect(screen.getByRole("region", { name: "תוצאות החיפוש" })).toBeInTheDocument();
+    expect(screen.getByText(/הצעות/).closest("p")).toHaveTextContent("4 הצעות • 4 חנויות");
+    // The search ran in English: that query stays left to right inside the Hebrew line.
+    expect(screen.getByText("“wireless earbuds”")).toHaveAttribute("dir", "ltr");
+
+    const sort = screen.getByRole("navigation", { name: "מיון התוצאות" });
+    expect(within(sort).getByRole("link", { name: /המחיר הנמוך/ })).toHaveAttribute(
+      "href",
+      `/he/search?q=${encodeURIComponent("אוזניות אלחוטיות").replace(/%20/g, "+")}`,
+    );
+    expect(screen.getByRole("link", { name: "עוד תוצאות" }).getAttribute("href")).toMatch(/^\/he\/search\?/);
+
+    const grouped = screen.getAllByRole("article")[0]!;
+    expect(within(grouped).getByText(/^אותו מוצר · 3 חנויות$/)).toBeInTheDocument();
+    expect(
+      plain(
+        within(grouped)
+          .getByText(/^זמין ב-3 חנויות/)
+          .closest("p")?.textContent ?? "",
+      ),
+    ).toContain("AliExpress 89 ₪ מול Temu 98 ₪ מול Amazon 142 ₪");
+
+    await user.click(within(grouped).getByRole("button", { name: /^השוואה בין 3 חנויות עבור/ }));
+    const sheet = await screen.findByRole("dialog");
+    expect(within(sheet).getByRole("heading", { name: /^השוואה בין 3 חנויות:/ })).toBeInTheDocument();
+    expect(within(sheet).getByText("המחיר הטוב")).toBeInTheDocument();
+    expect(within(sheet).getByRole("button", { name: "סגירת ההשוואה" })).toBeInTheDocument();
   });
 });

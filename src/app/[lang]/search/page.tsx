@@ -8,13 +8,18 @@ import { ResultsSkeleton } from "@/components/features/search/results-skeleton";
 import { ResultsView } from "@/components/features/search/results-view";
 import { SearchBox } from "@/components/features/search/search-box";
 import { Skeleton } from "@/components/ui/skeleton";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
+import { currentLocale, getDictionary } from "@/i18n/server";
 
 // Results are live store queries (see robots.ts); they're never worth indexing.
-export const metadata: Metadata = { title: "Compare prices", robots: { index: false, follow: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getDictionary()).meta.searchTitle, robots: { index: false, follow: false } };
+}
 
 type SearchParams = PageProps<"/[lang]/search">["searchParams"];
 
-async function Results({ searchParams }: { searchParams: SearchParams }) {
+async function Results({ searchParams, locale }: { searchParams: SearchParams; locale: Locale }) {
   // Live prices, clocks and caches: always render at request time, never prerender.
   await connection();
   const [result, access] = await Promise.all([searchFromParams(await searchParams), readUserLists()]);
@@ -34,18 +39,20 @@ async function Results({ searchParams }: { searchParams: SearchParams }) {
       storeSearches={result.storeSearches}
       sampleStores={result.sampleStores}
       userLists={userLists}
+      locale={locale}
     />
   );
 }
 
-async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
+async function SearchContent({ searchParams, locale }: { searchParams: SearchParams; locale: Locale }) {
+  const t = dict(locale).search;
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim() : "";
 
   return (
     <>
       {/* Keyed so a new query remounts the box with the new text. */}
-      <SearchBox key={q} defaultValue={q} autoFocus={!q} />
+      <SearchBox key={q} defaultValue={q} autoFocus={!q} locale={locale} />
       {q ? (
         // Keyed by the query string so every new search shows the skeleton. `page` is left out:
         // "Load more" keeps the cards on screen while the longer list renders.
@@ -55,23 +62,24 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
               typeof v === "string" && k !== "page" ? [[k, v]] : [],
             ),
           ).toString()}
-          fallback={<ResultsSkeleton />}
+          fallback={<ResultsSkeleton label={t.results.loading} />}
         >
-          <Results searchParams={searchParams} />
+          <Results searchParams={searchParams} locale={locale} />
         </Suspense>
       ) : (
-        <PopularSearches heading="Try searching for" />
+        <PopularSearches heading={t.trySearching} locale={locale} />
       )}
     </>
   );
 }
 
-export default function SearchPage({ searchParams }: PageProps<"/[lang]/search">) {
+export default async function SearchPage({ searchParams }: PageProps<"/[lang]/search">) {
+  const locale = await currentLocale();
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 pt-4 pb-8">
-      <h1 className="sr-only">Compare prices across stores</h1>
+      <h1 className="sr-only">{dict(locale).search.heading}</h1>
       <Suspense fallback={<Skeleton className="h-14 w-full rounded-2xl" />}>
-        <SearchContent searchParams={searchParams} />
+        <SearchContent searchParams={searchParams} locale={locale} />
       </Suspense>
     </main>
   );

@@ -3,9 +3,11 @@
 import { ChevronDown, Loader2 } from "lucide-react";
 import Link, { useLinkStatus } from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
 
-function Label() {
+function Label({ idle, loading }: { idle: string; loading: string }) {
   const { pending } = useLinkStatus();
   return (
     <>
@@ -15,7 +17,7 @@ function Label() {
       ) : (
         <ChevronDown className="size-4" aria-hidden />
       )}
-      <span aria-live="polite">{pending ? "Loading more…" : "Load more"}</span>
+      <span aria-live="polite">{pending ? loading : idle}</span>
     </>
   );
 }
@@ -26,7 +28,8 @@ function Label() {
  * prefetched, because a deeper page can cost a store API call (SerpApi bills
  * per page); the server serves already-loaded results first.
  */
-export function LoadMore({ href }: { href: string }) {
+export function LoadMore({ href, locale = "en" }: { href: string; locale?: Locale }) {
+  const t = dict(locale).search.loadMore;
   return (
     <Link
       href={href}
@@ -37,7 +40,7 @@ export function LoadMore({ href }: { href: string }) {
         "h-11 w-full rounded-xl px-6 font-semibold sm:w-auto",
       )}
     >
-      <Label />
+      <Label idle={t.idle} loading={t.loading} />
     </Link>
   );
 }

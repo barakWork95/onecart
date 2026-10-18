@@ -22,6 +22,18 @@ describe.each([
     expect(within(nav).getByRole("link", { name: "Discover" })).not.toHaveAttribute("aria-current");
   });
 
+  it("names and links every section in Hebrew under /he", () => {
+    pathname = "/he/saved";
+    render(<Nav locale="he" />);
+    const nav = screen.getByRole("navigation", { name: "ראשי" });
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((l) => l.getAttribute("href")),
+    ).toEqual(["/he", "/he/search", "/he/saved", "/he/alerts"]);
+    expect(within(nav).getByRole("link", { name: "שמורים" })).toHaveAttribute("aria-current", "page");
+  });
+
   it("only shows at its own breakpoint", () => {
     render(<Nav />);
     expect(screen.getByRole("navigation", { name: "Main" })).toHaveClass(breakpointClass);

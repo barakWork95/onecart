@@ -1,9 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { LOOK_ALIKE_BADGE } from "@/components/features/search/group-view";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -18,8 +19,8 @@ export function trendingCardId(query: string, prefix = "trending"): string {
     .replace(/^-|-$/g, "")}`;
 }
 
-export function trendingHref(query: string): string {
-  return `/search?${new URLSearchParams({ q: query }).toString()}`;
+export function trendingHref(query: string, locale: Locale = "en"): string {
+  return localizedPath(locale, `/search?${new URLSearchParams({ q: query }).toString()}`);
 }
 
 /**
@@ -31,13 +32,16 @@ export function TrendingCardView({
   card,
   idPrefix,
   highlight,
+  locale = "en",
 }: {
   card: TrendingCard;
+  locale?: Locale;
   /** Ids must be unique on the page: a card shown in two sections needs another prefix. */
   idPrefix?: string;
   /** A one-line claim under the price, e.g. "Save ₪200 vs Amazon". */
   highlight?: string;
 }) {
+  const t = dict(locale).card;
   const bestStore = STORE_META[card.best.provider].name;
   const headingId = trendingCardId(card.query, idPrefix);
   // Stores with a price; "won't ship to Israel" is shown in the store chips, not counted here.
@@ -55,32 +59,35 @@ export function TrendingCardView({
         />
         {storeCount > 1 && (
           <span className="absolute start-2.5 top-2.5 rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
-            {storeCount} stores
+            {t.stores(storeCount)}
           </span>
         )}
         {card.lookAlike && (
           <span className="absolute start-2.5 bottom-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-full bg-brand-navy px-2 py-0.5 text-[11px] font-semibold text-background">
-            {LOOK_ALIKE_BADGE}
+            {dict(locale).group.lookAlikeBadge}
           </span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <h3 id={headingId} className="text-sm leading-snug font-bold text-foreground sm:text-base">
           {/* The heading's link covers the whole card: one tab stop, one click target. */}
-          <Link href={trendingHref(card.query)} className="after:absolute after:inset-0 focus:outline-none">
+          <Link
+            href={trendingHref(card.query, locale)}
+            className="after:absolute after:inset-0 focus:outline-none"
+          >
             {card.label}
           </Link>
         </h3>
         <p className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="text-xs text-muted-foreground">From</span>
+          <span className="text-xs text-muted-foreground">{t.from}</span>
           <span className="text-2xl font-extrabold tracking-tight text-foreground">
-            {formatMoney(card.best.total)}
+            {formatMoney(card.best.total, { locale })}
           </span>
-          <span className="text-xs text-muted-foreground">on {bestStore}</span>
+          <span className="text-xs text-muted-foreground">{t.onStore(bestStore)}</span>
         </p>
         {card.unitPrice && (
           <p className="-mt-1.5 text-xs text-muted-foreground">
-            {formatMoney(card.unitPrice.perUnit, { precise: true })} per piece
+            {t.perPiece(formatMoney(card.unitPrice.perUnit, { precise: true, locale }))}
           </p>
         )}
         {highlight && (
@@ -88,7 +95,7 @@ export function TrendingCardView({
             {highlight}
           </p>
         )}
-        <ul className="flex flex-wrap gap-1.5" aria-label="Stores">
+        <ul className="flex flex-wrap gap-1.5" aria-label={t.storesList}>
           {card.stores.map((store) => (
             <li
               key={store.provider}
@@ -97,9 +104,9 @@ export function TrendingCardView({
                 STORE_META[store.provider].chip,
               )}
             >
-              {STORE_META[store.provider].name} {formatMoney(store.total)}
+              {STORE_META[store.provider].name} {formatMoney(store.total, { locale })}
               {store.listings > 1 && (
-                <span className="font-medium opacity-80">· {store.listings} listings</span>
+                <span className="font-medium opacity-80">· {t.listings(store.listings)}</span>
               )}
             </li>
           ))}
@@ -108,13 +115,14 @@ export function TrendingCardView({
               key={provider}
               className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
             >
-              {STORE_META[provider].name}: no offer to Israel
+              {t.noOffer(STORE_META[provider].name)}
             </li>
           ))}
         </ul>
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <p className="text-[11px] text-muted-foreground">
-            Prices as of <time dateTime={card.pricesAsOf}>{formatSnapshotTime(card.pricesAsOf)}</time>
+            {t.pricesAsOf}{" "}
+            <time dateTime={card.pricesAsOf}>{formatSnapshotTime(card.pricesAsOf, locale)}</time>
           </p>
           <ArrowRight
             className="size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5 rtl:rotate-180"

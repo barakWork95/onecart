@@ -9,7 +9,7 @@ import { applyTheme, storedTheme, storeTheme } from "@/components/layout/theme";
  * swap with CSS (`dark:`), not React state, so server and client render the
  * same markup — no hydration mismatch, correct icon from the first paint.
  */
-export function ThemeToggle() {
+export function ThemeToggle({ label = "Toggle dark mode" }: { label?: string } = {}) {
   // Until the user picks a theme, keep following the OS setting live.
   useEffect(() => {
     const media = matchMedia("(prefers-color-scheme: dark)");
@@ -30,8 +30,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label="Toggle dark mode"
-      title="Toggle dark mode"
+      aria-label={label}
+      title={label}
       className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
       <Sun className="size-4 dark:hidden" aria-hidden />

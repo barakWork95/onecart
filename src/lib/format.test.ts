@@ -1,5 +1,5 @@
 import { money } from "@/domain/shared/money";
-import { formatCount, formatDeliveryDays, formatMoney } from "@/lib/format";
+import { formatCount, formatDeliveryDays, formatMoney, formatSnapshotTime } from "@/lib/format";
 
 describe("formatMoney", () => {
   it("rounds headline prices to whole shekels with the symbol first", () => {
@@ -38,5 +38,29 @@ describe("formatDeliveryDays", () => {
 describe("formatCount", () => {
   it("adds thousands separators", () => {
     expect(formatCount(1420)).toBe("1,420");
+  });
+});
+
+describe("Hebrew formatting", () => {
+  // Intl marks the number and symbol right-to-left (U+200F); strip them to compare the text.
+  const plain = (s: string) => s.replace(/‏/g, "").replace(/ /g, " ");
+
+  it("puts the shekel sign after the number", () => {
+    expect(plain(formatMoney(money(89_00, "ILS"), { locale: "he" }))).toBe("89 ₪");
+    expect(plain(formatMoney(money(1234_50, "ILS"), { locale: "he", precise: true }))).toBe("1,234.50 ₪");
+  });
+
+  it("says business days in Hebrew, one day included", () => {
+    expect(
+      formatDeliveryDays({ minDays: 10, maxDays: 12, isFreeShipping: null, methodLabel: null }, "he"),
+    ).toBe("10–12 ימי עסקים");
+    expect(
+      formatDeliveryDays({ minDays: 1, maxDays: 1, isFreeShipping: null, methodLabel: null }, "he"),
+    ).toBe("יום עסקים אחד");
+  });
+
+  it("dates a snapshot in Hebrew, Israel time", () => {
+    expect(formatSnapshotTime("2026-10-13T07:30:00.000Z", "he")).toBe("13 באוק׳, 10:30");
+    expect(formatCount(12345, "he")).toBe("12,345");
   });
 });

@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { TrendingCard } from "@/application/deals/trending-showcase";
 import { TrendingCardView } from "@/components/features/home/trending-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { dict } from "@/i18n/dictionaries";
+import { localizedPath, type Locale } from "@/i18n/locales";
 
 export interface CategoryRowView {
   readonly category: { readonly slug: string; readonly label: string; readonly searchQuery: string };
@@ -18,8 +20,9 @@ const ITEM = "w-[46%] min-w-0 shrink-0 snap-start sm:w-[31%] lg:w-auto";
  * Homepage category rows: one comparison card per product, from cached
  * results only. Rows without a card are left out by the caller.
  */
-export function CategoryRows({ rows }: { rows: readonly CategoryRowView[] }) {
+export function CategoryRows({ rows, locale = "en" }: { rows: readonly CategoryRowView[]; locale?: Locale }) {
   if (rows.length === 0) return null;
+  const t = dict(locale).home.rows;
   return (
     <div className="flex flex-col gap-8">
       {rows.map(({ category, cards }) => {
@@ -32,17 +35,21 @@ export function CategoryRows({ rows }: { rows: readonly CategoryRowView[] }) {
               </h2>
               {/* The category's own page: cached, indexable, and free (no store calls). */}
               <Link
-                href={`/c/${category.slug}`}
+                href={localizedPath(locale, `/c/${category.slug}`)}
                 className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline"
               >
-                See all<span className="sr-only"> {category.label.toLowerCase()}</span>
+                {t.seeAll}
+                <span className="sr-only">
+                  {" "}
+                  {locale === "en" ? category.label.toLowerCase() : category.label}
+                </span>
                 <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
               </Link>
             </div>
-            <ol className={ROW} aria-label={`${category.label} products`}>
+            <ol className={ROW} aria-label={t.products(category.label)}>
               {cards.map((card) => (
                 <li key={card.query} className={ITEM}>
-                  <TrendingCardView card={card} idPrefix="category" />
+                  <TrendingCardView card={card} idPrefix="category" locale={locale} />
                 </li>
               ))}
             </ol>

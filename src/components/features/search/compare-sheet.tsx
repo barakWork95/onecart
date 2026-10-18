@@ -24,32 +24,36 @@ import {
 import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 import { formatDeliveryDays, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
-function shippingLabel(offer: UnifiedProduct): string {
-  if (!offer.price.shippingKnown) return "Shipping not quoted";
+function shippingLabel(offer: UnifiedProduct, locale: Locale): string {
+  const t = dict(locale).compare;
+  if (!offer.price.shippingKnown) return t.shippingNotQuoted;
   return offer.price.shipping.amountMinor === 0
-    ? "Free shipping"
-    : `${formatMoney(offer.price.shipping)} shipping`;
+    ? t.freeShipping
+    : t.shipping(formatMoney(offer.price.shipping, { locale }));
 }
 
 /** Plain-language "where does the total come from" line. */
-function breakdown(offer: UnifiedProduct): string {
+function breakdown(offer: UnifiedProduct, locale: Locale): string {
+  const t = dict(locale).compare.breakdown;
+  const precise = (m: UnifiedProduct["price"]["item"]) => formatMoney(m, { precise: true, locale });
   const { item, importVat, customsDuty, fees, taxesCollectedAtCheckout, shippingKnown } = offer.price;
-  const parts = [`Item ${formatMoney(item, { precise: true })}`];
+  const parts = [t.item(precise(item))];
   if (shippingKnown && offer.price.shipping.amountMinor > 0)
-    parts.push(`shipping ${formatMoney(offer.price.shipping, { precise: true })}`);
+    parts.push(t.shipping(precise(offer.price.shipping)));
   const taxes = importVat.amountMinor + customsDuty.amountMinor;
   if (taxes > 0) {
-    parts.push(
-      `${taxesCollectedAtCheckout ? "import fees" : "est. VAT & duty"} ${formatMoney({ amountMinor: taxes, currency: "ILS" }, { precise: true })}`,
-    );
+    const amount = precise({ amountMinor: taxes, currency: "ILS" });
+    parts.push(taxesCollectedAtCheckout ? t.importFees(amount) : t.vatAndDuty(amount));
   } else {
-    parts.push("no import tax");
+    parts.push(t.noImportTax);
   }
-  if (fees.amountMinor > 0) parts.push(`clearance ${formatMoney(fees, { precise: true })}`);
+  if (fees.amountMinor > 0) parts.push(t.clearance(precise(fees)));
   return parts.join(" · ");
 }
 
@@ -59,20 +63,23 @@ function OfferRow({
   index,
   fastestId,
   href,
+  locale,
 }: {
   group: ProductGroup;
   offer: UnifiedProduct;
   index: number;
   fastestId: string | null;
   href: string;
+  locale: Locale;
 }) {
+  const t = dict(locale).compare;
   const isBest = index === 0;
   const meta = STORE_META[offer.provider];
-  const delivery = formatDeliveryDays(offer.delivery);
+  const delivery = formatDeliveryDays(offer.delivery, locale);
   const premium = premiumOverBest(group, offer);
 
   return (
-    <li className="py-4" aria-label={`${meta.name} offer`}>
+    <li className="py-4" aria-label={t.offer(meta.name)}>
       <div className="flex items-center gap-3">
         <StoreChip provider={offer.provider} />
         <div className="min-w-0 flex-1">
@@ -80,71 +87,78 @@ function OfferRow({
             <span className="font-semibold text-foreground">{meta.name}</span>
             {isBest && (
               <span className="rounded bg-success px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-success-foreground uppercase">
-                Best price
+                {t.bestPrice}
               </span>
             )}
             {offer.id === fastestId && (
               <span className="rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase">
-                Fastest
+                {t.fastest}
               </span>
             )}
           </p>
           <p className="text-xs leading-snug text-muted-foreground">
-            {[delivery ?? "Delivery time not quoted", shippingLabel(offer)].join(" • ")}
+            {[delivery ?? t.deliveryUnknown, shippingLabel(offer, locale)].join(" • ")}
           </p>
         </div>
         <div className="text-end">
-          <p className="text-lg font-bold text-foreground">{formatMoney(offer.price.total)}</p>
+          <p className="text-lg font-bold text-foreground">{formatMoney(offer.price.total, { locale })}</p>
           <p className="text-[11px] whitespace-nowrap text-muted-foreground">
             {isBest
               ? offer.price.shippingKnown
-                ? "Total landed"
-                : "+ shipping"
-              : `+${formatMoney(premium)} vs best`}
+                ? t.totalLanded
+                : t.plusShipping
+              : t.vsBest(formatMoney(premium, { locale }))}
           </p>
         </div>
         <a
           href={href}
           {...OUTBOUND_LINK}
-          aria-label={`Go to ${meta.name} — ${formatMoney(offer.price.total)}`}
+          aria-label={t.goTo(meta.name, formatMoney(offer.price.total, { locale }))}
           className={cn(
             buttonVariants({ variant: isBest ? "default" : "secondary", size: "lg" }),
             "h-11 min-w-11 rounded-xl px-4 font-semibold",
           )}
         >
-          Go
+          {t.go}
         </a>
       </div>
       <p className="mt-1.5 ps-14 text-[11px] leading-snug text-muted-foreground/80">
-        {[breakdown(offer), unitPriceLabel(offer)].filter(Boolean).join(" · ")}
+        {[breakdown(offer, locale), unitPriceLabel(offer, locale)].filter(Boolean).join(" · ")}
       </p>
     </li>
   );
 }
 
 /** A store that lists the product but has no offer that ships it to Israel. */
-function UnavailableRow({ listing, href }: { listing: UnavailableListing; href: string }) {
+function UnavailableRow({
+  listing,
+  href,
+  locale,
+}: {
+  listing: UnavailableListing;
+  href: string;
+  locale: Locale;
+}) {
+  const t = dict(locale).compare;
   const meta = STORE_META[listing.provider];
   return (
-    <li className="py-4" aria-label={`${meta.name}: no offer to Israel`}>
+    <li className="py-4" aria-label={t.unavailableLabel(meta.name)}>
       <div className="flex items-center gap-3">
         <StoreChip provider={listing.provider} />
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-foreground">{meta.name}</p>
-          <p className="text-xs leading-snug text-muted-foreground">
-            Listed, but no offer ships it to Israel
-          </p>
+          <p className="text-xs leading-snug text-muted-foreground">{t.unavailableBody}</p>
         </div>
         <a
           href={href}
           {...OUTBOUND_LINK}
-          aria-label={`View on ${meta.name} (no offer to Israel)`}
+          aria-label={t.viewLabel(meta.name)}
           className={cn(
             buttonVariants({ variant: "outline", size: "lg" }),
             "h-11 min-w-11 rounded-xl px-4 font-semibold",
           )}
         >
-          View
+          {t.view}
         </a>
       </div>
     </li>
@@ -160,48 +174,54 @@ function ListingsTray({
   provider,
   listings,
   links,
+  locale,
 }: {
   provider: UnifiedProduct["provider"];
   listings: readonly UnifiedProduct[];
   links: Readonly<Record<string, string>>;
+  locale: Locale;
 }) {
+  const t = dict(locale).compare;
   const name = STORE_META[provider].name;
   return (
     <li className="pb-3">
       <details className="group/tray rounded-2xl bg-secondary/60 open:bg-secondary">
         <summary className="flex h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-2xl px-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
-          <span>
-            All {listings.length} {name} listings
-          </span>
+          <span>{t.trayAll(listings.length, name)}</span>
           <ChevronDown className="size-4 transition-transform group-open/tray:rotate-180" aria-hidden />
         </summary>
-        <ul className="divide-y divide-border/70 px-3 pb-2" aria-label={`${name} listings`}>
+        <ul className="divide-y divide-border/70 px-3 pb-2" aria-label={t.trayList(name)}>
           {listings.map((listing) => (
             <li key={listing.id} className="flex items-center gap-3 py-2.5">
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-xs leading-snug text-foreground">{listing.title}</p>
+                {/* Store titles keep their own direction (English inside a Hebrew page). */}
+                <p dir="auto" className="line-clamp-2 text-xs leading-snug text-foreground rtl:text-right">
+                  {listing.title}
+                </p>
                 <p className="text-[11px] text-muted-foreground">
                   {[
-                    listing.sellerName && `Sold by ${listing.sellerName}`,
-                    formatDeliveryDays(listing.delivery),
-                    shippingLabel(listing),
-                    unitPriceLabel(listing),
+                    listing.sellerName && t.soldBy(listing.sellerName),
+                    formatDeliveryDays(listing.delivery, locale),
+                    shippingLabel(listing, locale),
+                    unitPriceLabel(listing, locale),
                   ]
                     .filter(Boolean)
                     .join(" • ")}
                 </p>
               </div>
-              <p className="shrink-0 text-sm font-bold text-foreground">{formatMoney(listing.price.total)}</p>
+              <p className="shrink-0 text-sm font-bold text-foreground">
+                {formatMoney(listing.price.total, { locale })}
+              </p>
               <a
                 href={outboundHref(links, listing)}
                 {...OUTBOUND_LINK}
-                aria-label={`Go to ${name} — ${formatMoney(listing.price.total)}: ${listing.title}`}
+                aria-label={t.goToListing(name, formatMoney(listing.price.total, { locale }), listing.title)}
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
                   "h-11 min-w-11 shrink-0 rounded-lg px-3",
                 )}
               >
-                Go
+                {t.go}
               </a>
             </li>
           ))}
@@ -215,10 +235,13 @@ function ListingsTray({
 export function CompareSheet({
   group,
   links,
+  locale = "en",
 }: {
   group: ProductGroup;
   links: Readonly<Record<string, string>>;
+  locale?: Locale;
 }) {
+  const t = dict(locale).compare;
   const fastestId = fastestOfferId(group);
   const { stores: storeCount, listings: listingCount } = comparisonScope(group);
   const singleStore = storeCount === 1;
@@ -230,12 +253,12 @@ export function CompareSheet({
         className={cn(buttonVariants({ size: "lg" }), "h-11 rounded-xl px-4 font-semibold")}
         aria-label={
           singleStore
-            ? `See ${listingCount} ${storeName} listings for ${group.title}`
-            : `Compare ${storeCount} stores for ${group.title}`
+            ? t.triggerListingsLabel(listingCount, storeName, group.title)
+            : t.triggerCompareLabel(storeCount, group.title)
         }
       >
         <ArrowRightLeft className="size-4" aria-hidden />
-        {singleStore ? `${listingCount} listings` : `Compare (${storeCount})`}
+        {singleStore ? t.triggerListings(listingCount) : t.triggerCompare(storeCount)}
       </DrawerTrigger>
       <DrawerContent className="mx-auto max-w-2xl rounded-t-3xl">
         <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted" aria-hidden />
@@ -243,9 +266,9 @@ export function CompareSheet({
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[11px] font-bold tracking-widest text-primary uppercase">
-                Landed breakdown{" "}
+                {t.heading}{" "}
                 <span className="ms-2 font-medium tracking-normal text-muted-foreground normal-case">
-                  Delivery to Israel
+                  {t.deliveryToIsrael}
                 </span>
               </p>
               {/* Seller titles run long; two lines on phones keep the offers above the fold. */}
@@ -254,16 +277,16 @@ export function CompareSheet({
                 title={group.title}
               >
                 {singleStore
-                  ? `${listingCount} ${storeName} listings: ${group.title}`
-                  : `Compare ${storeCount} stores: ${group.title}`}
+                  ? t.titleListings(listingCount, storeName, group.title)
+                  : t.titleCompare(storeCount, group.title)}
               </DrawerTitle>
               <DrawerDescription className="mt-1 text-sm text-muted-foreground">
-                Shipping, estimated import VAT and duty included where stores quote them.
-                {matchCaveat(group)}
+                {t.description}
+                {matchCaveat(group, locale)}
               </DrawerDescription>
             </div>
             <DrawerClose
-              aria-label="Close comparison"
+              aria-label={t.close}
               className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
             >
               <X className="size-4" aria-hidden />
@@ -280,15 +303,26 @@ export function CompareSheet({
                     index={index}
                     fastestId={fastestId}
                     href={outboundHref(links, offer)}
+                    locale={locale}
                   />
                   {listings.length > 1 && (
-                    <ListingsTray provider={offer.provider} listings={listings} links={links} />
+                    <ListingsTray
+                      provider={offer.provider}
+                      listings={listings}
+                      links={links}
+                      locale={locale}
+                    />
                   )}
                 </Fragment>
               );
             })}
             {group.unavailable.map((listing) => (
-              <UnavailableRow key={listing.id} listing={listing} href={outboundHref(links, listing)} />
+              <UnavailableRow
+                key={listing.id}
+                listing={listing}
+                href={outboundHref(links, listing)}
+                locale={locale}
+              />
             ))}
           </ul>
         </div>

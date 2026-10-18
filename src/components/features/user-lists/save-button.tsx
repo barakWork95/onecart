@@ -3,6 +3,8 @@
 import { Bookmark } from "lucide-react";
 import { useState, useTransition } from "react";
 import { setSavedAction } from "@/app/[lang]/saved/actions";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
 
 export function SaveButton({
@@ -11,7 +13,9 @@ export function SaveButton({
   title,
   initialSaved,
   overlay = false,
+  locale = "en",
 }: {
+  locale?: Locale;
   productId: string;
   searchText: string;
   title: string;
@@ -19,6 +23,7 @@ export function SaveButton({
   /** Styled to sit on top of a product image. */
   overlay?: boolean;
 }) {
+  const t = dict(locale).lists;
   const [saved, setSaved] = useState(initialSaved);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -43,7 +48,7 @@ export function SaveButton({
         onClick={toggle}
         disabled={pending}
         aria-pressed={saved}
-        aria-label={saved ? `Remove ${title} from Saved` : `Save ${title}`}
+        aria-label={saved ? t.unsave(title) : t.save(title)}
         className={cn(
           "flex size-9 items-center justify-center rounded-full border transition-colors disabled:opacity-60",
           saved

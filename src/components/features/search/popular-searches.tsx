@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localizedPath, type Locale } from "@/i18n/locales";
 
 /** Starting points: the trending products, plus a Hebrew search to show translation works. */
 export const POPULAR_SEARCHES: readonly { label: string; q: string; lang?: "he" }[] = [
@@ -10,7 +11,7 @@ export const POPULAR_SEARCHES: readonly { label: string; q: string; lang?: "he" 
   { label: "אוזניות אלחוטיות", q: "אוזניות אלחוטיות", lang: "he" },
 ];
 
-export function PopularSearches({ heading }: { heading: string }) {
+export function PopularSearches({ heading, locale = "en" }: { heading: string; locale?: Locale }) {
   return (
     <section aria-labelledby="popular-searches" className="flex flex-col gap-3">
       <h2 id="popular-searches" className="text-sm font-semibold text-muted-foreground">
@@ -20,7 +21,7 @@ export function PopularSearches({ heading }: { heading: string }) {
         {POPULAR_SEARCHES.map(({ label, q, lang }) => (
           <li key={q}>
             <Link
-              href={`/search?${new URLSearchParams({ q }).toString()}`}
+              href={localizedPath(locale, `/search?${new URLSearchParams({ q }).toString()}`)}
               lang={lang}
               dir={lang === "he" ? "rtl" : undefined}
               className="inline-flex h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary"

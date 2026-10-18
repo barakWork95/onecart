@@ -15,6 +15,8 @@ import {
 import { suggestTarget } from "@/domain/user-lists/price-alert";
 import { money } from "@/domain/shared/money";
 import { formatMoney } from "@/lib/format";
+import { dict } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
 
 export function TrackPriceButton({
@@ -24,7 +26,9 @@ export function TrackPriceButton({
   currentAgorot,
   initialTracking,
   overlay = false,
+  locale = "en",
 }: {
+  locale?: Locale;
   productId: string;
   searchText: string;
   title: string;
@@ -33,6 +37,7 @@ export function TrackPriceButton({
   /** Styled to sit on top of a product image. */
   overlay?: boolean;
 }) {
+  const t = dict(locale).lists;
   const current = money(currentAgorot, "ILS");
   const [open, setOpen] = useState(false);
   const [tracking, setTracking] = useState(initialTracking);
@@ -59,8 +64,8 @@ export function TrackPriceButton({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger
-        aria-label={tracking ? `Change price alert for ${title}` : `Track price of ${title}`}
-        title={confirmed ? `Alert set below ${confirmed}` : undefined}
+        aria-label={tracking ? t.changeAlert(title) : t.track(title)}
+        title={confirmed ? t.alertSetBelow(confirmed) : undefined}
         className={cn(
           "flex size-9 items-center justify-center rounded-full border transition-colors",
           tracking
@@ -80,22 +85,21 @@ export function TrackPriceButton({
         >
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-[11px] font-bold tracking-widest text-primary uppercase">Price alert</p>
+              <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{t.alertHeading}</p>
               <DrawerTitle className="mt-1 text-xl font-bold text-foreground">{title}</DrawerTitle>
               <DrawerDescription className="mt-1 text-sm text-muted-foreground">
-                Today&apos;s best landed price is {formatMoney(current, { precise: true })}. We check prices
-                daily and show a drop on your Alerts tab.
+                {t.alertDescription(formatMoney(current, { precise: true, locale }))}
               </DrawerDescription>
             </div>
             <DrawerClose
-              aria-label="Close price alert"
+              aria-label={t.closeAlert}
               className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground"
             >
               <X className="size-4" aria-hidden />
             </DrawerClose>
           </div>
           <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
-            Alert me when the price drops to
+            {t.alertWhen}
             <span className="relative">
               <span className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                 ₪
@@ -122,7 +126,7 @@ export function TrackPriceButton({
             disabled={pending}
             className={cn(buttonVariants({ size: "lg" }), "h-12 rounded-xl text-base font-semibold")}
           >
-            {pending ? "Saving…" : tracking ? "Update alert" : "Create alert"}
+            {pending ? t.saving : tracking ? t.updateAlert : t.createAlert}
           </button>
         </form>
       </DrawerContent>
