@@ -294,21 +294,30 @@ test.describe("outbound redirect (/go)", () => {
   });
 
   test("clicking Go opens the store in a new tab", async ({ page, context }) => {
+    // Playwright routes only the first URL of a redirect chain, so routing amazon.com can't
+    // catch the store page /go redirects to: the popup would load the real Amazon. Answer
+    // /go here instead, keeping its 302's destination, so the test never leaves localhost.
+    let destination: string | undefined;
+    await context.route("**/go/**", async (route) => {
+      const response = await route.fetch({ maxRedirects: 0 });
+      expect(response.status()).toBe(302);
+      destination = response.headers()["location"];
+      await route.fulfill({ status: 200, contentType: "text/plain", body: "store" });
+    });
     await page.goto("/search?q=wireless+earbuds");
     await page.getByRole("button", { name: /Compare 4 stores/ }).click();
-    // Intercept the external store so the test never leaves localhost.
-    await context.route("https://www.amazon.com/**", (route) =>
-      route.fulfill({ status: 200, body: "store" }),
-    );
+    const sheet = page.getByRole("dialog");
+    await expect(sheet.getByRole("heading", { name: /Compare 4 stores:/ })).toBeVisible();
     const [popup] = await Promise.all([
       context.waitForEvent("page"),
-      page
-        .getByRole("dialog")
-        .getByRole("link", { name: /Go to Amazon/ })
-        .click(),
+      sheet.getByRole("link", { name: /Go to Amazon/ }).click(),
     ]);
-    await popup.waitForLoadState();
-    expect(new URL(popup.url()).searchParams.get("tag")).toBe("onecart-e2e-20");
+    await expect(popup.getByText("store")).toBeVisible();
+    expect(new URL(popup.url()).pathname).toMatch(/^\/go\/amazon/);
+    expect(destination).toBeDefined();
+    const store = new URL(destination ?? "");
+    expect(store.host).toBe("www.amazon.com");
+    expect(store.searchParams.get("tag")).toBe("onecart-e2e-20");
   });
 });
 
