@@ -5,6 +5,11 @@ import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { createCategoryPage, type CategoryPage } from "@/application/deals/category-page";
 import { createCheckOpsAlerts, type OpsAlertRun } from "@/application/ops/ops-alerts";
+import { photoUrlsToHash } from "@/application/deals/photo-warmup";
+import type { ImageHashIndex } from "@/domain/matching/image-hash";
+import { dHash } from "@/infrastructure/images/dhash";
+import { fetchImage } from "@/infrastructure/images/image-fetcher";
+import { createRedisImageHashIndex } from "@/infrastructure/images/redis-image-hash-index";
 import { createRecordCronRun } from "@/application/ops/record-cron-run";
 import { createStatusReport } from "@/application/ops/status-report";
 import { webPushConfig } from "@/config/env";
@@ -130,6 +135,8 @@ interface Services {
   readonly opsStore: OpsStore;
   readonly recordCronRun: ReturnType<typeof createRecordCronRun>;
   readonly opsAlertState: OpsAlertState;
+  /** Product-photo hashes for generic matching: cache reads anywhere, downloads in the warm-up only. */
+  readonly imageHashes: ImageHashIndex;
   readonly statusReport: ReturnType<typeof createStatusReport>;
   readonly checkOpsAlerts: ReturnType<typeof createCheckOpsAlerts>;
   readonly demoMode: boolean;
@@ -323,6 +330,13 @@ function buildServices(): Services {
     opsStore,
     recordCronRun: createRecordCronRun({ store: opsStore, logger }),
     opsAlertState,
+    imageHashes: createRedisImageHashIndex({
+      redis,
+      hashImage: async (url) => {
+        const bytes = await fetchImage(url);
+        return bytes ? dHash(bytes).catch(() => null) : null;
+      },
+    }),
     statusReport: createStatusReport({
       ops: opsStore,
       quotas: opsQuotas,
@@ -554,6 +568,22 @@ export async function categoryRows(): Promise<CategoryRow[]> {
   return filled;
 }
 
+/** Photos hashed per warm run at most: bounds the cron's time as the catalogue grows. */
+const MAX_PHOTOS_PER_RUN = 1_500;
+
+/** Generic searches' photo hashes after a warm run; a failure never fails the warm-up. */
+async function hashPhotos(urls: readonly string[]): Promise<number | "error"> {
+  if (urls.length === 0) return 0;
+  try {
+    return await getServices().imageHashes.ensure([...new Set(urls)].slice(0, MAX_PHOTOS_PER_RUN));
+  } catch (error) {
+    consoleLogger.warn("photos: hashing failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "error";
+  }
+}
+
 /** Price history after a warm run; its failure never fails the warm-up itself. */
 async function recordPrices(
   observed: readonly Observed[],
@@ -615,8 +645,11 @@ export async function warmTrending() {
   const atMs = Date.now();
   const today = israelDay(new Date(atMs));
   const observed: Observed[] = [];
-  const onWarmed = (query: string, response: SearchResponse) =>
+  const photos: string[] = [];
+  const onWarmed = (query: string, response: SearchResponse) => {
     observed.push(...observationsFrom(query, response, today));
+    photos.push(...photoUrlsToHash(response));
+  };
   const trending = await warmTrendingSearches(
     warmSearchProducts,
     trendingQueries,
@@ -636,7 +669,12 @@ export async function warmTrending() {
   delete holder[DROPS_KEY];
   // The category pages are cached HTML: rebuilt on their next visit (not served stale).
   for (const { slug } of categories) revalidateTag(categoryTag(slug), { expire: 0 });
-  return { trending, categories: categoriesWarmed, priceHistory: await recordPrices(observed, today) };
+  return {
+    trending,
+    categories: categoriesWarmed,
+    priceHistory: await recordPrices(observed, today),
+    photosHashed: await hashPhotos(photos),
+  };
 }
 
 /** Runs a cron's work and records how it went (see `createRecordCronRun`). */
