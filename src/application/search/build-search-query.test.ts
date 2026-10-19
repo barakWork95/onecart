@@ -3,6 +3,14 @@ import type { QueryTranslator } from "@/domain/search/ports";
 import { money } from "@/domain/shared/money";
 
 describe("parseSearchParams", () => {
+  it("sanitizes the query before anything uses it, and refuses one with nothing left", () => {
+    const parsed = parseSearchParams({ q: "<b>jbl</b>\u0000 flip 6" });
+    expect(parsed.ok && parsed.value.text).toBe("jbl flip 6");
+    expect(parseSearchParams({ q: "<script></script>" })).toEqual({ ok: false, error: "missing_query" });
+    const long = parseSearchParams({ q: "a".repeat(500) });
+    expect(long.ok && long.value.text).toHaveLength(100);
+  });
+
   it("parses a full, valid URL", () => {
     expect(
       parseSearchParams({ q: "  earbuds ", sort: "delivery_fastest", page: "3", max: "250", free: "1" }),
@@ -43,7 +51,7 @@ describe("parseSearchParams", () => {
     expect(result.ok && result.value.text).toBe("first");
   });
 
-  it.each([{}, { q: "" }, { q: "   " }, { q: "x".repeat(201) }])(
+  it.each([{}, { q: "" }, { q: "   " }, { q: "<br/>\u200b" }])(
     "rejects a missing or invalid query %#",
     (params) => {
       expect(parseSearchParams(params)).toEqual({ ok: false, error: "missing_query" });

@@ -37,3 +37,24 @@ export const DEFAULT_DAILY_CALL_BUDGETS = { ebay: 4_500, amazon: 3, aliexpress: 
  * never spend their searches. 0 turns Amazon warming off.
  */
 export const DEFAULT_AMAZON_WARM_PER_DAY = 2;
+
+/**
+ * /go clicks one IP may make. Each one writes a click row and can call
+ * AliExpress's link API; a shopper opens a handful of stores per search.
+ */
+export const GO_RATE_LIMITS: readonly RateLimitWindow[] = [
+  { name: "minute", limit: 60, windowSeconds: 60 },
+  { name: "day", limit: 1_000, windowSeconds: 24 * 60 * 60 },
+];
+
+/**
+ * Server Action POSTs (Save, Alerts, push subscribe) one IP may send. They
+ * write to Supabase and read the search cache; a shopper sends a few per visit.
+ */
+export const ACTION_RATE_LIMITS: readonly RateLimitWindow[] = [
+  { name: "minute", limit: 30, windowSeconds: 60 },
+  { name: "day", limit: 500, windowSeconds: 24 * 60 * 60 },
+];
+
+/** Wrong /internal passwords per IP before it's locked out for the rest of the window. */
+export const ADMIN_LOCKOUT = { limit: 10, windowSeconds: 15 * 60 } as const;

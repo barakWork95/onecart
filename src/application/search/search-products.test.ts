@@ -320,6 +320,21 @@ describe("searchProducts — caching", () => {
     expect(second.pagination).toMatchObject({ page: 2, totalResults: 2 });
   });
 
+  it("calls no store at all in cache-only mode: cached stores answer, the rest are skipped", async () => {
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));
+    const warm = setup([ali.provider]);
+    await warm.search(QUERY);
+    ali.search.mockClear();
+    const { search } = setup([ali.provider, amazon.provider], { cache: warm.cache });
+    const response = await search(QUERY, { cachedOnly: true });
+
+    expect(ali.search).not.toHaveBeenCalled();
+    expect(amazon.search).not.toHaveBeenCalled();
+    expect(outcome(response, "aliexpress")).toMatchObject({ status: "ok", fromCache: true, resultCount: 1 });
+    expect(outcome(response, "amazon")).toMatchObject({ status: "skipped" });
+  });
+
   it("shares cache entries across differently-cased query text", async () => {
     const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const { search } = setup([ali.provider]);

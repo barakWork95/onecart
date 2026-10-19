@@ -1,4 +1,9 @@
-import { normalizeQueryText, searchCacheKey } from "@/domain/search/search-query";
+import {
+  MAX_QUERY_LENGTH,
+  normalizeQueryText,
+  sanitizeSearchText,
+  searchCacheKey,
+} from "@/domain/search/search-query";
 import { isProviderId } from "@/domain/shared/provider";
 
 describe("searchCacheKey", () => {
@@ -46,5 +51,34 @@ describe("isProviderId", () => {
   it("narrows known providers only", () => {
     expect(isProviderId("aliexpress")).toBe(true);
     expect(isProviderId("shein")).toBe(false);
+  });
+});
+
+describe("sanitizeSearchText", () => {
+  it("strips HTML tags and angle brackets, keeping the words", () => {
+    expect(sanitizeSearchText("<script>alert(1)</script> jbl flip 6")).toBe("alert(1) jbl flip 6");
+    expect(sanitizeSearchText('<img src=x onerror="alert(1)">headphones')).toBe("headphones");
+    expect(sanitizeSearchText("a < b > c")).toBe("a b c");
+  });
+
+  it("removes control characters, invisible and direction-override characters", () => {
+    expect(sanitizeSearchText("jbl\u0000 flip\u0007\t6\n")).toBe("jbl flip 6");
+    // Zero-width and bidi overrides can disguise text ("Trojan Source").
+    expect(sanitizeSearchText("air\u200Bpods \u202Eorp\u202C")).toBe("airpods orp");
+  });
+
+  it("keeps Hebrew, product punctuation and normalizes width and spacing", () => {
+    expect(sanitizeSearchText("  אוזניות   סוני  wh-1000xm5 ")).toBe("אוזניות סוני wh-1000xm5");
+    expect(sanitizeSearchText("ｊｂｌ　ｆｌｉｐ")).toBe("jbl flip");
+    expect(sanitizeSearchText("usb-c 65w & 2/pack, 3.5mm")).toBe("usb-c 65w & 2/pack, 3.5mm");
+  });
+
+  it(`cuts at ${MAX_QUERY_LENGTH} characters, at a word boundary when there is one`, () => {
+    expect(MAX_QUERY_LENGTH).toBe(100);
+    const long = `${"word ".repeat(30)}end`;
+    const cut = sanitizeSearchText(long);
+    expect(cut.length).toBeLessThanOrEqual(MAX_QUERY_LENGTH);
+    expect(cut.endsWith("word")).toBe(true);
+    expect(sanitizeSearchText("x".repeat(150))).toHaveLength(100);
   });
 });

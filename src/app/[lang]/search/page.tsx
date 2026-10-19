@@ -8,6 +8,7 @@ import { ResultsSkeleton } from "@/components/features/search/results-skeleton";
 import { ResultsView } from "@/components/features/search/results-view";
 import { SearchBox } from "@/components/features/search/search-box";
 import { Skeleton } from "@/components/ui/skeleton";
+import { sanitizeSearchText } from "@/domain/search/search-query";
 import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { currentLocale, getDictionary } from "@/i18n/server";
@@ -47,7 +48,8 @@ async function Results({ searchParams, locale }: { searchParams: SearchParams; l
 async function SearchContent({ searchParams, locale }: { searchParams: SearchParams; locale: Locale }) {
   const t = dict(locale).search;
   const params = await searchParams;
-  const q = typeof params.q === "string" ? params.q.trim() : "";
+  // The same text the search runs on: tags, control characters and overlong input never show.
+  const q = typeof params.q === "string" ? sanitizeSearchText(params.q) : "";
 
   return (
     <>

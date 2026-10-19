@@ -13,6 +13,9 @@ function fakeCounter(): CounterStore & { readonly ttls: Map<string, number> } {
       ttls.set(key, ttlSeconds);
       return next;
     },
+    async count(key) {
+      return counts.get(key) ?? 0;
+    },
   };
 }
 
@@ -65,7 +68,7 @@ describe("createRateLimiter", () => {
     const limit = createRateLimiter({
       prefix: "rl:search",
       windows,
-      counter: { increment: () => Promise.reject(new Error("redis down")) },
+      counter: { increment: () => Promise.reject(new Error("redis down")), count: async () => 0 },
       logger,
     });
     expect(await limit("ip")).toEqual({ allowed: true, retryAfterSeconds: 0 });

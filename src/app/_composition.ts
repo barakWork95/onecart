@@ -127,6 +127,8 @@ interface Services {
   /** The search path for cache warming: same stores and cache, its own Amazon budget. */
   readonly warmSearchProducts: SearchProducts;
   readonly translator: QueryTranslator;
+  /** Cache and glossary only, never DeepL: for Server Actions, which any client can POST. */
+  readonly cachedTranslator: QueryTranslator;
   readonly linkCodec: OutboundLinkCodec;
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
   /** Null without Supabase's service key: clicks are only logged then. */
@@ -248,6 +250,7 @@ function buildServices(): Services {
     deepl: config.DEEPL_API_KEY ? createDeepLTranslator({ apiKey: config.DEEPL_API_KEY }) : null,
     logger,
   });
+  const cachedTranslator = createQueryTranslator({ cache: redis, deepl: null, logger });
 
   const linkCodec = createHmacOutboundLinkCodec(
     outboundLinkSecret(config.OUTBOUND_LINK_SECRET, config.NODE_ENV, demoMode),
@@ -424,6 +427,7 @@ function buildServices(): Services {
         : {}),
     }),
     translator,
+    cachedTranslator,
     demoMode,
     sampleStores,
   };
@@ -857,19 +861,31 @@ export async function clickReport(days: number): Promise<ClickReport | "not_conf
 const ALL_RESULTS_PAGE_SIZE = 500;
 
 /**
- * All offers for a user's original search text (Hebrew or English), using the
- * same translation and (cached) search path as the results page. Null when
- * every store failed, so callers don't mistake an outage for "not found".
+ * All offers for a user's original search text (Hebrew or English).
+ * - `cached` (default): as the results page cached them. Server Actions pass
+ *   client-supplied text, so they never spend a store call or a DeepL
+ *   translation: a search nobody ran finds nothing.
+ * - `live`: the results page's own path, calling stores on a cache miss (the
+ *   price-alert cron, behind its secret).
+ * Null when every store failed, so callers don't mistake an outage for "not found".
  */
-export async function offersFor(searchText: string): Promise<UnifiedProduct[] | null> {
+export async function offersFor(
+  searchText: string,
+  mode: "cached" | "live" = "cached",
+): Promise<UnifiedProduct[] | null> {
   const request = parseSearchParams({ q: searchText });
   if (!request.ok) return [];
-  const { searchProducts, translator } = getServices();
-  const { query } = await buildSearchQuery(request.value, translator, consoleLogger);
+  const { searchProducts, translator, cachedTranslator } = getServices();
+  const live = mode === "live";
+  const { query } = await buildSearchQuery(
+    request.value,
+    live ? translator : cachedTranslator,
+    consoleLogger,
+  );
   // Include deeper store pages a shopper already loaded, without paying for new ones.
   const response = await searchProducts(
     { ...query, page: 1, pageSize: ALL_RESULTS_PAGE_SIZE },
-    { deeperStorePages: "cached" },
+    { deeperStorePages: "cached", cachedOnly: !live },
   );
   const searched = response.providers.filter((p) => p.status !== "skipped");
   if (searched.length > 0 && searched.every((p) => ["timeout", "error", "circuit_open"].includes(p.status)))

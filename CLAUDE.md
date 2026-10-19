@@ -582,10 +582,20 @@ Every `/search` can call the stores' APIs, whose limits are shared by all shoppe
 in a day and used up SerpApi's month, taking both stores down for everyone.
 
 - `robots.txt` disallows `/search`, `/go/`, `/api/`; search pages are `noindex`.
-- **Per-IP throttle** in `src/proxy.ts` (`_search-throttle.ts`): GET `/search?q=…` only, 20 a
-  minute and 300 a day per IP by default (`SEARCH_RATE_LIMIT_PER_MINUTE` / `_PER_DAY`); over it →
-  429 with `Retry-After`. Router prefetches are excluded by the proxy **matcher** (`missing`
-  headers): Next strips `next-router-prefetch` from `request.headers`, so code can't see it.
+- **Per-IP throttles** in `src/proxy.ts` (`_throttles.ts`, `throttleBucket`), each over it →
+  plain 429 with `Retry-After`:
+  - `search`: GET `/search?q=…` only, 20 a minute and 300 a day by default
+    (`SEARCH_RATE_LIMIT_PER_MINUTE` / `_PER_DAY`). Router prefetches are excluded by the proxy
+    **matcher** (`missing` headers): Next strips `next-router-prefetch` from `request.headers`.
+  - `go`: `/go/*`, 60 a minute / 1,000 a day (`GO_RATE_LIMITS`); the proxy skips session work there.
+  - `action`: any POST with a `next-action` header (Server Actions post to whichever page shows
+    them; matched by `{ source: "/:path*", has: next-action }`), 30 a minute / 500 a day.
+  - `/internal` password guessing: 10 wrong passwords per IP per 15 min (`ADMIN_LOCKOUT`,
+    `createFailureLockout`) → 429 **before** the password is checked, so a locked IP can't
+    confirm a right guess. The bare prompt (no credentials) isn't a failure.
+- **Server Actions never spend quota**: `offersFor(text)` defaults to `cached` mode — cache-only
+  search (`cachedOnly`: a miss is `skipped`) and `cachedTranslator` (cache + glossary, no DeepL).
+  Only the price-alert cron passes `"live"`.
 - **Per-store daily budget** (`StoreCallBudget`, checked in the orchestrator after cache and
   circuit): eBay 4,500, Amazon 3 and AliExpress 2,000 live calls a day by default
   (`ALIEXPRESS_DAILY_CALL_BUDGET`) (`EBAY_DAILY_CALL_BUDGET`,
@@ -593,13 +603,34 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   untouched, and the UI offers "Check <store>" links. This stops floods from rotating IPs.
 - Local runs may share production Redis (`.env.local` holds the `KV_*` vars). Non-live data is
   always cache-scoped (`amazon@recorded`, `<store>@demo`), E2E blanks every Redis variable, and
-  requests without a client IP (local runs) aren't throttled.
+  requests without a client IP — or with a loopback one, which `next start` forwards — aren't
+  throttled (local runs, E2E).
 - Counters are fixed windows in Upstash (`createUpstashCounterStore`), per-instance in memory
   without it. Production's database is Vercel Storage `onecart-redis`, which injects
   `KV_REST_API_URL` / `KV_REST_API_TOKEN`; `parseServerEnv()` maps them onto
   `UPSTASH_REDIS_REST_*` when that pair is unset, so every Redis user finds it. A counter outage allows the request: the limiter must never take the site down.
 - Check eBay's usage: `GET https://api.ebay.com/developer/analytics/v1_beta/rate_limit/?api_context=buy&api_name=browse`
   (client-credentials token); it reports count, remaining and the reset time.
+
+## Security hardening
+
+- **Search text** is sanitized once, at the URL boundary (`parseSearchParams` →
+  `sanitizeSearchText`): NFKC, HTML tags and `<`/`>` removed, control / zero-width / bidi
+  override characters dropped, spaces collapsed, cut to `MAX_QUERY_LENGTH` (100) at a word
+  boundary. Translator, stores, cache keys, the search box and Server Actions all see that text.
+  Nothing left → `missing_query`. React escapes everything rendered; the only
+  `dangerouslySetInnerHTML` are JSON-LD (`<` escaped) and the constant theme script.
+- **Headers** (`src/app/_security-headers.ts`, applied by `next.config.ts` `headers()`; later
+  rules win per key): CSP, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy:
+strict-origin-when-cross-origin` (`no-referrer` on `/go/*`), `Permissions-Policy` off for
+  camera/mic/geolocation, HSTS 2 years. `/sw.js` keeps its stricter CSP.
+- **CSP**: `default-src 'self'`; scripts `'self' 'unsafe-inline'` (+ `'unsafe-eval'` in dev only)
+  — a nonce would force every page dynamic, so no remote script host is allowed instead; Vercel
+  Analytics loads same-origin. `img-src` lists only the store CDNs (product photos are
+  `unoptimized`): **a new provider's image host goes in `IMAGE_HOSTS` and `remotePatterns`.**
+  `e2e/security.spec.ts` fails on any CSP violation.
+- **Timeouts**: every Supabase client uses `fetchWithTimeout(5 s)`; the proxy's session refresh
+  fails soft. Actions and pages return generic localized messages; raw errors only reach logs.
 
 ## Analytics
 
@@ -803,7 +834,8 @@ Example: adding `shein`.
    it under its own key.
 7. **Config.** Add the API key and affiliate tag to `serverEnvSchema` in `src/config/env.ts` and to
    `.env.example`. A missing key disables the provider (status `skipped`) and does not crash the app.
-8. **Images.** Add the provider's image CDN host to `images.remotePatterns` in `next.config.ts`.
+8. **Images.** Add the provider's image CDN host to `images.remotePatterns` in `next.config.ts`
+   and to `IMAGE_HOSTS` in `src/app/_security-headers.ts` (the CSP blocks it otherwise).
 9. **Wire it up.** Register the adapter in the composition root.
 10. **UI.** Add the store's label and logo chip used on the compare sheet.
 11. **Verify.** Run `npm run check` and confirm the coverage for the new folder is at least 90%.

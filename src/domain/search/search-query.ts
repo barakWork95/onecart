@@ -1,8 +1,8 @@
 import type { Money } from "@/domain/shared/money";
 import type { ProviderId } from "@/domain/shared/provider";
 
-/** Longest query we accept from the user. */
-export const MAX_QUERY_LENGTH = 200;
+/** Longest search text accepted: longer input is cut (`sanitizeSearchText`). */
+export const MAX_QUERY_LENGTH = 100;
 
 /**
  * `relevance` (the default) keeps each store's own best-match order, merged
@@ -48,6 +48,30 @@ export interface SearchQuery {
 }
 
 /** Lower-case, trim, collapse whitespace — so "Wireless  Earbuds " and "wireless earbuds" share a cache entry. */
+/** C0/C1 controls, zero-width characters and bidi overrides/isolates ("Trojan Source"). */
+const INVISIBLE = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g;
+
+/**
+ * Search text as typed, made safe to send to translators and store APIs and to show
+ * again: width-normalized (NFKC), HTML tags and stray angle brackets removed, control,
+ * invisible and direction-override characters dropped, spaces collapsed, and cut to
+ * `MAX_QUERY_LENGTH` (at a word boundary when one is near). Case is kept.
+ */
+export function sanitizeSearchText(raw: string): string {
+  const text = raw
+    .normalize("NFKC")
+    .replace(/<\/?[a-z!][^>]*>/gi, " ")
+    .replace(/[<>]/g, " ")
+    .replace(/[\t\n\r]/g, " ")
+    .replace(INVISIBLE, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= MAX_QUERY_LENGTH) return text;
+  const cut = text.slice(0, MAX_QUERY_LENGTH);
+  const space = cut.lastIndexOf(" ");
+  return (space > MAX_QUERY_LENGTH * 0.6 ? cut.slice(0, space) : cut).trim();
+}
+
 export function normalizeQueryText(text: string): string {
   return text.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim();
 }

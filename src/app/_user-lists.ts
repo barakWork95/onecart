@@ -86,7 +86,13 @@ export function priceAlertChecker() {
       : backend.kind === "supabase" && backend.secretKey
         ? createSupabaseAlertCheckRepository(createSupabaseServiceClient(backend.url, backend.secretKey))
         : null;
-  return alerts ? createCheckPriceAlerts({ alerts, fetchOffers: offersFor, logger: consoleLogger }) : null;
+  return alerts
+    ? createCheckPriceAlerts({
+        alerts,
+        fetchOffers: (text) => offersFor(text, "live"),
+        logger: consoleLogger,
+      })
+    : null;
 }
 
 /**

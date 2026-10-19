@@ -4,6 +4,7 @@ import type { CounterStore } from "@/domain/security/ports";
 export interface RedisCounterClient {
   incr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<unknown>;
+  get(key: string): Promise<unknown>;
 }
 
 /**
@@ -17,6 +18,10 @@ export function createRedisCounterStore(redis: RedisCounterClient): CounterStore
       // First hit in the window starts its clock.
       if (count === 1) await redis.expire(key, ttlSeconds);
       return count;
+    },
+    async count(key) {
+      const value = Number(await redis.get(key));
+      return Number.isFinite(value) ? value : 0;
     },
   };
 }
@@ -36,6 +41,10 @@ export function createInMemoryCounterStore(now: () => number = Date.now): Counte
       }
       entry.count += 1;
       return entry.count;
+    },
+    async count(key) {
+      const entry = counts.get(key);
+      return entry && entry.expiresAtMs > now() ? entry.count : 0;
     },
   };
 }

@@ -4,6 +4,7 @@ import { detectQueryLanguage } from "@/domain/search/query-language";
 import {
   DEFAULT_SORT,
   MAX_QUERY_LENGTH,
+  sanitizeSearchText,
   normalizeQueryText,
   SEARCH_SORTS,
   type SearchQuery,
@@ -24,7 +25,11 @@ const first = (v: unknown) => (Array.isArray(v) ? v[0] : v);
  * (`.catch`) instead of erroring: a hand-edited URL should still search.
  */
 const searchParamsSchema = z.object({
-  q: z.preprocess(first, z.string().trim().min(1).max(MAX_QUERY_LENGTH)),
+  // Sanitized before anything (translator, stores, cache, page) sees it; empty after that = no query.
+  q: z.preprocess((v) => {
+    const value = first(v);
+    return typeof value === "string" ? sanitizeSearchText(value) : value;
+  }, z.string().min(1).max(MAX_QUERY_LENGTH)),
   sort: z.preprocess(first, z.enum(SEARCH_SORTS)).catch(DEFAULT_SORT),
   page: z.preprocess(first, z.coerce.number().int().min(1).max(50)).catch(1),
   /** Max landed total in whole shekels. */

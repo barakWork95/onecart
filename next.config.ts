@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+import { securityHeaderRules } from "./src/app/_security-headers";
+
 /**
  * English pages keep their unprefixed URLs: "/c/x" is served by app/[lang] as "/en/c/x".
  * Listed explicitly so /api, /go, /internal, assets and metadata files never match.
@@ -41,17 +43,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    return [
-      {
-        // Browsers must always see the newest service worker, and it may only load our own scripts.
-        source: "/sw.js",
-        headers: [
-          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
-          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
-          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
-        ],
-      },
-    ];
+    return securityHeaderRules({ dev: process.env.NODE_ENV !== "production" });
   },
   partialPrefetching: true,
   turbopack: {

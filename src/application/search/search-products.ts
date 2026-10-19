@@ -74,6 +74,8 @@ export interface SearchProductsOptions {
   readonly includeEarlierPages?: boolean;
   /** Skip the cache read and call the stores (cache warming); results are still cached. */
   readonly refresh?: boolean;
+  /** Read the cache only and never call a store: a miss is "skipped" (Server Actions). */
+  readonly cachedOnly?: boolean;
   /** Ask stores for their cheapest page 1 (see `ProviderSearchOptions.lean`). */
   readonly lean?: boolean;
   /** Cache lifetime per store for what this search fetches, instead of the default. */
@@ -84,6 +86,7 @@ export interface SearchProductsOptions {
 interface RunOptions {
   readonly signal: AbortSignal | undefined;
   readonly refresh: boolean;
+  readonly cachedOnly: boolean;
   readonly lean: boolean;
   readonly ttlSeconds: Partial<Record<ProviderId, number>>;
 }
@@ -225,6 +228,9 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const cacheKey = searchCacheKey(query, id, storePage, scopeOf(id));
     const cached = run.refresh ? null : await readCache(id, query, storePage);
     if (cached) return cached;
+    if (run.cachedOnly) {
+      return { outcome: { ...base, status: "skipped" }, products: [], hasMore: false, unavailable: [] };
+    }
 
     const state: CircuitState | null = await safely(
       "circuit read",
@@ -392,6 +398,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const run: RunOptions = {
       signal: options.signal,
       refresh: options.refresh === true,
+      cachedOnly: options.cachedOnly === true,
       lean: options.lean === true,
       ttlSeconds: options.cacheTtlSeconds ?? {},
     };
