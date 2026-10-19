@@ -7,6 +7,7 @@ import { MAX_QUERY_LENGTH } from "@/domain/search/search-query";
 import { dict } from "@/i18n/dictionaries";
 import { localizedPath, type Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
+import { analyticsTitle, trackEvent } from "@/lib/analytics";
 
 /**
  * The full hint is wider than a phone's input (276px vs 190–245px at
@@ -45,7 +46,13 @@ export function SearchBox({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Form action={localizedPath(locale, "/search")} role="search" className={cn("relative", className)}>
+    <Form
+      action={localizedPath(locale, "/search")}
+      role="search"
+      className={cn("relative", className)}
+      // Reported as the form submits; the navigation itself isn't touched.
+      onSubmit={() => trackEvent("search_query", { query: analyticsTitle(value), locale, source: "input" })}
+    >
       <Search
         className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-primary"
         aria-hidden

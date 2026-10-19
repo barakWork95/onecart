@@ -7,6 +7,8 @@ import { getServices } from "@/app/_composition";
 import { readUserLists } from "@/app/_user-lists";
 import { removeSavedAction } from "@/app/[lang]/saved/actions";
 import { STORE_META } from "@/components/features/store-meta";
+import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link";
+import { priceIls } from "@/lib/analytics";
 import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-lists/list-page";
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +16,6 @@ import { dict } from "@/i18n/dictionaries";
 import { localizedPath, type Locale } from "@/i18n/locales";
 import { currentLocale, getDictionary } from "@/i18n/server";
 import { formatMoney } from "@/lib/format";
-import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getDictionary()).meta.savedTitle };
@@ -46,14 +47,20 @@ async function SavedList({ locale }: { locale: Locale }) {
               {t.whenSaved(formatMoney(item.price, { locale }), STORE_META[item.provider].name)}
             </p>
             <div className="mt-1 flex gap-3 text-sm font-semibold">
-              <a
+              <TrackedOutboundLink
                 href={linkCodec.encode({ id: item.productId, provider: item.provider, url: item.productUrl })}
-                {...OUTBOUND_LINK}
+                click={{
+                  store: item.provider,
+                  product_title: item.title,
+                  price_ils: priceIls(item.price),
+                  is_best_deal: false,
+                  locale,
+                }}
                 className="text-primary"
                 aria-label={t.goToStoreLabel(STORE_META[item.provider].name, item.title)}
               >
                 {t.goToStore}
-              </a>
+              </TrackedOutboundLink>
               <Link
                 href={localizedPath(
                   locale,

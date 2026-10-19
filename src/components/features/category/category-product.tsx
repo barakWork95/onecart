@@ -2,9 +2,10 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { CategoryProduct } from "@/application/deals/category-page";
 import { trendingCardId, trendingHref } from "@/components/features/home/trending-card";
-import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
+import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link";
+import { priceIls } from "@/lib/analytics";
 import { dict, beforeValue } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
@@ -128,14 +129,20 @@ export function CategoryProductCard({
             {t.compareEvery}
             <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
           </Link>
-          <a
+          <TrackedOutboundLink
             href={goHref}
-            {...OUTBOUND_LINK}
+            click={{
+              store: provider,
+              product_title: product.bestListing.title,
+              price_ils: priceIls(price.total),
+              is_best_deal: true,
+              locale,
+            }}
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold whitespace-nowrap text-primary-foreground"
           >
             {t.viewOn(store)}
             <ExternalLink className="size-4" aria-hidden />
-          </a>
+          </TrackedOutboundLink>
           <p className="text-[11px] text-muted-foreground sm:ms-auto">
             {beforeValue(t.pricesAsOf)}
             <time dateTime={product.pricesAsOf}>{formatSnapshotTime(product.pricesAsOf, locale)}</time>

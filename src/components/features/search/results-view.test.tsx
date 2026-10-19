@@ -6,8 +6,10 @@ import type { SearchQuery } from "@/domain/search/search-query";
 import type { ProviderOutcome, SearchResponse } from "@/domain/search/search-response";
 import type { ProviderId } from "@/domain/shared/provider";
 import { makeProduct } from "@/test/product-factory";
+import { track } from "@vercel/analytics";
 
 // Server Actions run on the server; cards only need callable stand-ins here.
+jest.mock("@vercel/analytics", () => ({ track: jest.fn() }));
 jest.mock("@/app/[lang]/saved/actions", () => ({ setSavedAction: jest.fn() }));
 jest.mock("@/app/[lang]/alerts/actions", () => ({ createAlertAction: jest.fn() }));
 
@@ -712,5 +714,48 @@ describe("ResultsView in Hebrew", () => {
     expect(within(sheet).getByRole("heading", { name: /^השוואה בין 3 חנויות:/ })).toBeInTheDocument();
     expect(within(sheet).getByText("המחיר הטוב")).toBeInTheDocument();
     expect(within(sheet).getByRole("button", { name: "סגירת ההשוואה" })).toBeInTheDocument();
+  });
+});
+
+describe("ResultsView analytics", () => {
+  const tracked = track as jest.MockedFunction<typeof track>;
+  beforeEach(() => tracked.mockReset());
+
+  it("reports opening a comparison and each store click, best deal marked, in the page's language", async () => {
+    const user = userEvent.setup();
+    renderView({ locale: "he" });
+    const grouped = screen.getAllByRole("article")[0]!;
+    await user.click(within(grouped).getByRole("button", { name: /^השוואה בין 3 חנויות עבור/ }));
+    // The card's own title (its most-reviewed listing's).
+    expect(tracked).toHaveBeenCalledWith("view_comparison", {
+      product_title: "Soundcore Life P3 Earbuds",
+      store_count: 3,
+      locale: "he",
+    });
+
+    const sheet = await screen.findByRole("dialog");
+    await user.click(within(sheet).getByRole("link", { name: /^מעבר ל-AliExpress/ }));
+    expect(tracked).toHaveBeenLastCalledWith("outbound_click", {
+      store: "aliexpress",
+      product_title: "Soundcore Life P3 Earbuds",
+      price_ils: 89,
+      is_best_deal: true,
+      locale: "he",
+    });
+    await user.click(within(sheet).getByRole("link", { name: /^מעבר ל-Temu/ }));
+    expect(tracked).toHaveBeenLastCalledWith(
+      "outbound_click",
+      expect.objectContaining({ store: "temu", price_ils: 98.01, is_best_deal: false }),
+    );
+  });
+
+  it("reports a single-store card's deal click", async () => {
+    const user = userEvent.setup();
+    renderView();
+    await user.click(screen.getByRole("link", { name: /^View deal/ }));
+    expect(tracked).toHaveBeenCalledWith(
+      "outbound_click",
+      expect.objectContaining({ store: "ebay", price_ils: 310, is_best_deal: true, locale: "en" }),
+    );
   });
 });

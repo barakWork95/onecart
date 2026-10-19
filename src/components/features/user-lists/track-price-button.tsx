@@ -18,6 +18,7 @@ import { formatMoney } from "@/lib/format";
 import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
+import { analyticsTitle, trackEvent } from "@/lib/analytics";
 
 export function TrackPriceButton({
   productId,
@@ -52,6 +53,11 @@ export function TrackPriceButton({
     startTransition(async () => {
       const result = await createAlertAction({ productId, searchText, targetShekels: target, locale });
       if (result.ok) {
+        trackEvent("set_price_alert", {
+          product_title: analyticsTitle(title),
+          target_price: Number(target),
+          locale,
+        });
         setTracking(true);
         setConfirmed(result.value.target);
         setOpen(false);

@@ -2,9 +2,10 @@ import { ExternalLink, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import type { PriceDropCard } from "@/domain/deals/ports";
 import { trendingCardId, trendingHref } from "@/components/features/home/trending-card";
-import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 import { ProductImage } from "@/components/features/search/product-image";
 import { STORE_META } from "@/components/features/store-meta";
+import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link";
+import { priceIls } from "@/lib/analytics";
 import { formatMoney, formatSnapshotTime } from "@/lib/format";
 import { dict, beforeValue } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
@@ -76,14 +77,20 @@ export function PriceDrops({ drops, locale = "en" }: { drops: readonly PriceDrop
                     {t.typically(formatMoney(drop.typical, { locale }), drop.historyDays)}
                   </p>
                   <div className="mt-auto flex flex-col gap-1.5 pt-1">
-                    <a
+                    <TrackedOutboundLink
                       href={href}
-                      {...OUTBOUND_LINK}
+                      click={{
+                        store: drop.provider,
+                        product_title: drop.title,
+                        price_ils: priceIls(drop.current),
+                        is_best_deal: false,
+                        locale,
+                      }}
                       className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground"
                     >
                       {t.view(store.name)}
                       <ExternalLink className="size-4" aria-hidden />
-                    </a>
+                    </TrackedOutboundLink>
                     <p className="text-[11px] text-muted-foreground">
                       {beforeValue(t.priceAsOf)}
                       <time dateTime={drop.observedAt}>{formatSnapshotTime(drop.observedAt, locale)}</time>

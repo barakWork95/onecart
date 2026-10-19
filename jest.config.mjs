@@ -6,6 +6,8 @@ const moduleNameMapper = {
   "^@/(.*)$": "<rootDir>/src/$1",
   // `server-only` throws outside a React Server environment; it's a no-op in tests.
   "^server-only$": "<rootDir>/src/test/server-only-stub.ts",
+  // Analytics ships untransformed ESM and must never run in tests: a mock `track` instead.
+  "^@vercel/analytics(/next)?$": "<rootDir>/src/test/vercel-analytics-stub.ts",
 };
 
 /**

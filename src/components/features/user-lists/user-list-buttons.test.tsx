@@ -1,9 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { track } from "@vercel/analytics";
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
 
+jest.mock("@vercel/analytics", () => ({ track: jest.fn() }));
+const tracked = track as jest.MockedFunction<typeof track>;
 const setSavedAction = jest.fn();
 const createAlertAction = jest.fn();
 jest.mock("@/app/[lang]/saved/actions", () => ({
@@ -14,6 +17,7 @@ jest.mock("@/app/[lang]/alerts/actions", () => ({
 }));
 
 beforeEach(() => {
+  tracked.mockReset();
   setSavedAction.mockReset();
   createAlertAction.mockReset();
 });
@@ -23,7 +27,7 @@ const REF = { productId: "aliexpress:1", searchText: "אוזניות אלחוט�
 describe("SaveButton", () => {
   it("saves optimistically, sending only the product id and search", async () => {
     setSavedAction.mockResolvedValue({ ok: true, value: { saved: true } });
-    render(<SaveButton {...REF} initialSaved={false} />);
+    render(<SaveButton {...REF} initialSaved={false} priceIls={89} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Save Life P3" }));
     expect(screen.getByRole("button", { name: "Remove Life P3 from Saved" })).toHaveAttribute(
@@ -43,7 +47,7 @@ describe("SaveButton", () => {
       ok: false,
       message: "This price changed — refresh the search and try again.",
     });
-    render(<SaveButton {...REF} initialSaved={true} />);
+    render(<SaveButton {...REF} initialSaved={true} priceIls={89} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Remove Life P3 from Saved" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("This price changed");
@@ -98,7 +102,7 @@ describe("in Hebrew", () => {
     createAlertAction.mockResolvedValue({ ok: true, value: { target: "80.00 ₪" } });
     render(
       <>
-        <SaveButton {...REF} initialSaved={false} locale="he" />
+        <SaveButton {...REF} initialSaved={false} priceIls={89} locale="he" />
         <TrackPriceButton {...REF} currentAgorot={89_00} initialTracking={false} locale="he" />
       </>,
     );
@@ -119,5 +123,42 @@ describe("RemoveButton", () => {
     await userEvent.click(screen.getByRole("button", { name: "הסרה" }));
     expect(action).toHaveBeenCalledWith({ productId: "ebay:1", locale: "he" });
     expect(await screen.findByRole("alert")).toHaveTextContent("השמירה לא זמינה כרגע.");
+  });
+});
+
+describe("retention analytics", () => {
+  it("reports a save and an alert only once the server confirmed them", async () => {
+    setSavedAction.mockResolvedValueOnce({ ok: false, message: "no" });
+    render(<SaveButton {...REF} initialSaved={false} priceIls={89} locale="he" />);
+    await userEvent.click(screen.getByRole("button", { name: "שמירת Life P3" }));
+    await screen.findByRole("alert");
+    expect(tracked).not.toHaveBeenCalled();
+
+    setSavedAction.mockResolvedValueOnce({ ok: true, value: { saved: true } });
+    await userEvent.click(screen.getByRole("button", { name: "שמירת Life P3" }));
+    await waitFor(() =>
+      expect(tracked).toHaveBeenCalledWith("save_item", {
+        product_title: "Life P3",
+        price_ils: 89,
+        locale: "he",
+      }),
+    );
+  });
+
+  it("reports the alert's target price", async () => {
+    createAlertAction.mockResolvedValue({ ok: true, value: { target: "₪75.50" } });
+    render(<TrackPriceButton {...REF} currentAgorot={89_00} initialTracking={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "Track price of Life P3" }));
+    const input = await screen.findByRole("spinbutton");
+    await userEvent.clear(input);
+    await userEvent.type(input, "75.5");
+    await userEvent.click(screen.getByRole("button", { name: "Create alert" }));
+    await waitFor(() =>
+      expect(tracked).toHaveBeenCalledWith("set_price_alert", {
+        product_title: "Life P3",
+        target_price: 75.5,
+        locale: "en",
+      }),
+    );
   });
 });

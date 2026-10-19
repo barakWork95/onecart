@@ -11,6 +11,7 @@ import {
   unitPriceLabel,
 } from "@/components/features/search/group-view";
 import { StoreChip } from "@/components/features/search/store-chip";
+import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link";
 import { STORE_META } from "@/components/features/store-meta";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -28,6 +29,7 @@ import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { formatDeliveryDays, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { analyticsTitle, priceIls, trackEvent } from "@/lib/analytics";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 function shippingLabel(offer: UnifiedProduct, locale: Locale): string {
@@ -110,9 +112,15 @@ function OfferRow({
               : t.vsBest(formatMoney(premium, { locale }))}
           </p>
         </div>
-        <a
+        <TrackedOutboundLink
           href={href}
-          {...OUTBOUND_LINK}
+          click={{
+            store: offer.provider,
+            product_title: offer.title,
+            price_ils: priceIls(offer.price.total),
+            is_best_deal: isBest,
+            locale,
+          }}
           aria-label={t.goTo(meta.name, formatMoney(offer.price.total, { locale }))}
           className={cn(
             buttonVariants({ variant: isBest ? "default" : "secondary", size: "lg" }),
@@ -120,7 +128,7 @@ function OfferRow({
           )}
         >
           {t.go}
-        </a>
+        </TrackedOutboundLink>
       </div>
       <p className="mt-1.5 ps-14 text-[11px] leading-snug text-muted-foreground">
         {[breakdown(offer, locale), unitPriceLabel(offer, locale)].filter(Boolean).join(" · ")}
@@ -175,11 +183,14 @@ function ListingsTray({
   listings,
   links,
   locale,
+  bestId,
 }: {
   provider: UnifiedProduct["provider"];
   listings: readonly UnifiedProduct[];
   links: Readonly<Record<string, string>>;
   locale: Locale;
+  /** The group's cheapest listing: the one a click counts as the best deal. */
+  bestId: string;
 }) {
   const t = dict(locale).compare;
   const name = STORE_META[provider].name;
@@ -212,9 +223,15 @@ function ListingsTray({
               <p className="shrink-0 text-sm font-bold text-foreground">
                 {formatMoney(listing.price.total, { locale })}
               </p>
-              <a
+              <TrackedOutboundLink
                 href={outboundHref(links, listing)}
-                {...OUTBOUND_LINK}
+                click={{
+                  store: listing.provider,
+                  product_title: listing.title,
+                  price_ils: priceIls(listing.price.total),
+                  is_best_deal: listing.id === bestId,
+                  locale,
+                }}
                 aria-label={t.goToListing(name, formatMoney(listing.price.total, { locale }), listing.title)}
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
@@ -222,7 +239,7 @@ function ListingsTray({
                 )}
               >
                 {t.go}
-              </a>
+              </TrackedOutboundLink>
             </li>
           ))}
         </ul>
@@ -248,7 +265,16 @@ export function CompareSheet({
   const storeName = STORE_META[bestOffer(group).provider].name;
 
   return (
-    <Drawer>
+    <Drawer
+      onOpenChange={(open) => {
+        if (open)
+          trackEvent("view_comparison", {
+            product_title: analyticsTitle(group.title),
+            store_count: group.offers.length,
+            locale,
+          });
+      }}
+    >
       <DrawerTrigger
         className={cn(buttonVariants({ size: "lg" }), "h-11 rounded-xl px-4 font-semibold")}
         aria-label={
@@ -311,6 +337,7 @@ export function CompareSheet({
                       listings={listings}
                       links={links}
                       locale={locale}
+                      bestId={bestOffer(group).id}
                     />
                   )}
                 </Fragment>

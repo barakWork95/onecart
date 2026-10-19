@@ -56,7 +56,10 @@ export default function PrivacyPage() {
             <strong>Page views.</strong> We count visits with Vercel Web Analytics: the page address, the
             referring site, and your country, browser and device type. It uses no cookies and stores no IP
             address; a visitor is recognized only within one day, by an anonymous code that resets daily, so
-            visits can&apos;t be linked over time or across sites.
+            visits can&apos;t be linked over time or across sites. The same way, we count a few actions: a
+            search (with its text), opening a comparison, following a link to a store, saving a product and
+            setting a price alert, with the product&apos;s name, store and price, and the site&apos;s
+            language. These are never linked to your saved items, alerts or anonymous account.
           </li>
           <li>
             <strong>Preferences.</strong> Your light or dark theme choice is kept in your browser&apos;s local

@@ -11,6 +11,8 @@ import {
 } from "@/app/[lang]/alerts/actions";
 import { NotifyMe } from "@/components/features/user-lists/notify-me";
 import { STORE_META } from "@/components/features/store-meta";
+import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link";
+import { priceIls } from "@/lib/analytics";
 import { EmptyList, ListPage, ProductThumb } from "@/components/features/user-lists/list-page";
 import { RemoveButton } from "@/components/features/user-lists/remove-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,7 +21,6 @@ import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { currentLocale, getDictionary } from "@/i18n/server";
 import { formatMoney } from "@/lib/format";
-import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getDictionary()).meta.alertsTitle };
@@ -76,17 +77,23 @@ async function AlertList({ locale }: { locale: Locale }) {
               {t.was} {money(alert.baseline)}
             </p>
             {alert.status === "triggered" && (
-              <a
+              <TrackedOutboundLink
                 href={linkCodec.encode({
                   id: alert.productId,
                   provider: alert.provider,
                   url: alert.productUrl,
                 })}
-                {...OUTBOUND_LINK}
+                click={{
+                  store: alert.provider,
+                  product_title: alert.title,
+                  price_ils: priceIls(alert.lastSeen ?? alert.target),
+                  is_best_deal: false,
+                  locale,
+                }}
                 className="text-sm font-semibold text-primary"
               >
                 {t.buyNow}
-              </a>
+              </TrackedOutboundLink>
             )}
           </div>
           <RemoveButton

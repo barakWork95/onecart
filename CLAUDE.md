@@ -603,8 +603,18 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
 
 ## Analytics
 
-- Vercel Web Analytics (`<Analytics />` from `@vercel/analytics/next`, in `HtmlShell`): cookieless
-  page-view counts, no IP stored. It's described on `/privacy`; any other tracking needs the same.
+- Vercel Web Analytics (`<Analytics />` from `@vercel/analytics/next`, in `HtmlShell`, rendered
+  only when `VERCEL_ENV` is production or preview): cookieless page-view counts, no IP stored.
+- **Custom events** go through `trackEvent(name, props)` (`src/lib/analytics.ts`, typed by
+  `AnalyticsEvents`): `outbound_click`, `search_query`, `view_comparison`, `save_item`,
+  `set_price_alert`. Call it from client event handlers only; it's fire-and-forget, never throws,
+  and a no-op without the script (local, E2E). Titles and queries go through `analyticsTitle`
+  (one line, ≤ 80 chars), prices through `priceIls`. Priced store links use
+  `TrackedOutboundLink` (spreads `OUTBOUND_LINK`; click and middle-click report, nothing is
+  awaited). Never send anything that identifies a person (no account ids, endpoints, emails).
+- Tests: Jest maps `@vercel/analytics` to `src/test/vercel-analytics-stub.ts` (`track` is a mock).
+  E2E installs a `window.va` recorder (`e2e/analytics.spec.ts`) to assert exact payloads.
+- Everything tracked is described on `/privacy`; new tracking needs the same.
 
 ## Share previews and sitemap
 

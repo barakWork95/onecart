@@ -1,6 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { track } from "@vercel/analytics";
 import { SearchBox } from "@/components/features/search/search-box";
 
+jest.mock("@vercel/analytics", () => ({ track: jest.fn() }));
 jest.mock("next/form", () => ({
   __esModule: true,
   default: ({ children, ...props }: React.ComponentProps<"form">) => <form {...props}>{children}</form>,
@@ -32,5 +34,18 @@ describe("SearchBox placeholder", () => {
       "placeholder",
       "Search products…",
     );
+  });
+});
+
+describe("SearchBox analytics", () => {
+  it("reports a submitted search, typed in the box, with the page's language", () => {
+    stubScreen(false);
+    render(<SearchBox defaultValue="  אוזניות   סוני " locale="he" />);
+    fireEvent.submit(screen.getByRole("search"));
+    expect(track).toHaveBeenCalledWith("search_query", {
+      query: "אוזניות סוני",
+      locale: "he",
+      source: "input",
+    });
   });
 });

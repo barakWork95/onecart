@@ -6,16 +6,20 @@ import { setSavedAction } from "@/app/[lang]/saved/actions";
 import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
+import { analyticsTitle, trackEvent } from "@/lib/analytics";
 
 export function SaveButton({
   productId,
   searchText,
   title,
   initialSaved,
+  priceIls,
   overlay = false,
   locale = "en",
 }: {
   locale?: Locale;
+  /** The landed price shown with it, in shekels (reported with the save). */
+  priceIls: number;
   productId: string;
   searchText: string;
   title: string;
@@ -37,6 +41,8 @@ export function SaveButton({
       if (!result.ok) {
         setSaved(!next);
         setError(result.message);
+      } else if (next) {
+        trackEvent("save_item", { product_title: analyticsTitle(title), price_ils: priceIls, locale });
       }
     });
   }

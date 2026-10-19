@@ -12,6 +12,7 @@ import {
   type FindMatchesLink,
 } from "@/components/features/search/group-view";
 import { STORE_META } from "@/components/features/store-meta";
+import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link";
 import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
 import { buttonVariants } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { formatCount, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { priceIls } from "@/lib/analytics";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
 
 function DeliveryNote({ group, locale }: { group: ProductGroup; locale: Locale }) {
@@ -125,6 +127,7 @@ export function ProductGroupCard({
               searchText={user.searchText}
               title={group.title}
               initialSaved={user.saved}
+              priceIls={priceIls(best.price.total)}
               locale={locale}
               overlay
             />
@@ -186,9 +189,15 @@ export function ProductGroupCard({
           {comparisonScope(group).hasSheet ? (
             <CompareSheet group={group} links={links} locale={locale} />
           ) : (
-            <a
+            <TrackedOutboundLink
               href={outboundHref(links, best)}
-              {...OUTBOUND_LINK}
+              click={{
+                store: best.provider,
+                product_title: best.title,
+                price_ils: priceIls(best.price.total),
+                is_best_deal: true,
+                locale,
+              }}
               className={cn(
                 buttonVariants({ variant: "secondary", size: "lg" }),
                 "h-11 rounded-xl px-3 font-semibold",
@@ -196,7 +205,7 @@ export function ProductGroupCard({
             >
               {t.group.viewDeal(formatMoney(best.price.total, { locale }))}
               <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
-            </a>
+            </TrackedOutboundLink>
           )}
           {storeCount === 1 && checkStore && (
             // The store's API is down: send the shopper to its own search, via our affiliate redirect.
