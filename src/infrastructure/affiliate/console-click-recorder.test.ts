@@ -8,6 +8,10 @@ describe("consoleClickRecorder", () => {
       provider: "amazon",
       affiliated: true,
       at: "2026-10-11T09:00:00.000Z",
+      title: null,
+      priceAgorot: null,
+      bestDeal: false,
+      locale: "en",
     });
     expect(JSON.parse(String(warn.mock.calls[0]?.[0]))).toEqual({
       level: "info",
@@ -16,6 +20,10 @@ describe("consoleClickRecorder", () => {
       provider: "amazon",
       affiliated: true,
       at: "2026-10-11T09:00:00.000Z",
+      title: null,
+      priceAgorot: null,
+      bestDeal: false,
+      locale: "en",
     });
     warn.mockRestore();
   });

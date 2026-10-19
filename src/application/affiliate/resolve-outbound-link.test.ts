@@ -54,7 +54,28 @@ describe("resolveOutboundLink", () => {
       provider: "amazon",
       affiliated: true,
       at: "2026-10-11T09:00:00.000Z",
+      title: null,
+      priceAgorot: null,
+      bestDeal: false,
+      locale: "en",
     });
+  });
+
+  it("records what the shopper saw (signed with the link) and the page's language", async () => {
+    const context = { title: "Kindle Paperwhite", priceAgorot: 612_12, bestDeal: true };
+    const { resolve, clicks } = setup({ codec: codecFor({ ...TARGET, context }) });
+    await resolve(TARGET.id, { s: "valid", l: "he" });
+    expect(clicks.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Kindle Paperwhite",
+        priceAgorot: 612_12,
+        bestDeal: true,
+        locale: "he",
+      }),
+    );
+    // An unknown language reads as English: `l` isn't signed, so it's only ever trusted as en/he.
+    await resolve(TARGET.id, { s: "valid", l: "<script>" });
+    expect(clicks.record).toHaveBeenLastCalledWith(expect.objectContaining({ locale: "en" }));
   });
 
   it("rejects links the codec didn't sign, without recording a click", async () => {

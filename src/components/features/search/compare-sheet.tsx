@@ -224,7 +224,7 @@ function ListingsTray({
                 {formatMoney(listing.price.total, { locale })}
               </p>
               <TrackedOutboundLink
-                href={outboundHref(links, listing)}
+                href={outboundHref(links, listing, locale)}
                 click={{
                   store: listing.provider,
                   product_title: listing.title,
@@ -328,7 +328,7 @@ export function CompareSheet({
                     offer={offer}
                     index={index}
                     fastestId={fastestId}
-                    href={outboundHref(links, offer)}
+                    href={outboundHref(links, offer, locale)}
                     locale={locale}
                   />
                   {listings.length > 1 && (
@@ -347,7 +347,7 @@ export function CompareSheet({
               <UnavailableRow
                 key={listing.id}
                 listing={listing}
-                href={outboundHref(links, listing)}
+                href={outboundHref(links, listing, locale)}
                 locale={locale}
               />
             ))}

@@ -168,3 +168,29 @@ test.describe("Hebrew category pages and their SEO", () => {
     expect(sitemap).not.toContain("/c/pillows");
   });
 });
+
+test.describe("click context in store links", () => {
+  test("a Hebrew page's store link signs what the card shows and adds the page's language", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/he/search?q=wireless+earbuds");
+    // Every card here compares stores: the store links are in its sheet.
+    await page
+      .getByRole("button", { name: /^השוואה בין \d+ חנויות עבור/ })
+      .first()
+      .click();
+    const href = await page.getByRole("dialog").locator('a[href^="/go/"]').first().getAttribute("href");
+    const url = new URL(href ?? "", "http://localhost");
+    expect(url.searchParams.get("l")).toBe("he");
+    const payload = JSON.parse(Buffer.from(url.searchParams.get("d") ?? "", "base64url").toString("utf8"));
+    expect(payload).toMatchObject({
+      t: expect.any(String),
+      a: expect.any(Number),
+      b: true,
+    });
+    // The unsigned language never invalidates the signed link.
+    const response = await request.get(href ?? "", { maxRedirects: 0 });
+    expect(response.status()).toBe(302);
+  });
+});

@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import type { OutboundLinkCodec, OutboundTarget } from "@/domain/affiliate/ports";
+import type { ClickContext, OutboundLinkCodec, OutboundTarget } from "@/domain/affiliate/ports";
 import { isProviderId } from "@/domain/shared/provider";
 
 /** Minimum secret length (bytes of entropy matter more, but this catches "changeme"). */
@@ -9,6 +9,20 @@ interface Payload {
   readonly v: 1;
   readonly p: string;
   readonly u: string;
+  /** Click context (optional): title, price in agorot (or null), best deal. */
+  readonly t?: string;
+  readonly a?: number | null;
+  readonly b?: boolean;
+}
+
+/** Longest title a link carries: enough to recognize the product, short enough for a URL. */
+const MAX_TITLE = 80;
+
+function contextOf({ t, a, b }: Partial<Payload>): ClickContext | null | undefined {
+  if (t === undefined && a === undefined && b === undefined) return undefined;
+  const priceOk = a === null || (typeof a === "number" && Number.isInteger(a) && a > 0);
+  if (typeof t !== "string" || t.length > MAX_TITLE || !priceOk || typeof b !== "boolean") return null;
+  return { title: t, priceAgorot: a, bestDeal: b };
 }
 
 const b64url = (buf: Buffer) => buf.toString("base64url");
@@ -26,7 +40,19 @@ export function createHmacOutboundLinkCodec(secret: string): OutboundLinkCodec {
 
   return {
     encode(target: OutboundTarget) {
-      const payload: Payload = { v: 1, p: target.provider, u: target.url };
+      const { context } = target;
+      const payload: Payload = {
+        v: 1,
+        p: target.provider,
+        u: target.url,
+        ...(context
+          ? {
+              t: context.title.replace(/\s+/g, " ").trim().slice(0, MAX_TITLE),
+              a: context.priceAgorot,
+              b: context.bestDeal,
+            }
+          : {}),
+      };
       const data = b64url(Buffer.from(JSON.stringify(payload), "utf8"));
       const query = new URLSearchParams({ d: data, s: b64url(mac(target.id, data)) });
       return `/go/${encodeURIComponent(target.id)}?${query.toString()}`;
@@ -47,11 +73,14 @@ export function createHmacOutboundLinkCodec(secret: string): OutboundLinkCodec {
         return null;
       }
       if (typeof payload !== "object" || payload === null) return null;
-      const { v, p, u } = payload as Partial<Payload>;
+      const fields = payload as Partial<Payload>;
+      const { v, p, u } = fields;
       if (v !== 1 || typeof p !== "string" || typeof u !== "string" || !isProviderId(p)) return null;
       // The id names its store ("amazon:…"); it must agree with the signed provider.
       if (!id.startsWith(`${p}:`)) return null;
-      return { id, provider: p, url: u };
+      const context = contextOf(fields);
+      if (context === null) return null;
+      return context ? { id, provider: p, url: u, context } : { id, provider: p, url: u };
     },
   };
 }

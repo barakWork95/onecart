@@ -190,7 +190,7 @@ export function ProductGroupCard({
             <CompareSheet group={group} links={links} locale={locale} />
           ) : (
             <TrackedOutboundLink
-              href={outboundHref(links, best)}
+              href={outboundHref(links, best, locale)}
               click={{
                 store: best.provider,
                 product_title: best.title,

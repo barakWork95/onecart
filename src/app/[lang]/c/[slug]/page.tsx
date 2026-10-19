@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { categoryList, categoryPageData } from "@/app/_composition";
 import { JsonLd } from "@/app/_json-ld";
+import { withLocale } from "@/components/features/outbound-link";
 import { OG_IMAGES } from "@/app/_share-card";
 import { Breadcrumbs } from "@/components/features/category/breadcrumbs";
 import { CategoryProductCard } from "@/components/features/category/category-product";
@@ -118,7 +119,7 @@ export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c
             <li key={product.query}>
               <CategoryProductCard
                 product={product}
-                goHref={goLinks[product.bestListing.id] ?? "/"}
+                goHref={withLocale(goLinks[product.bestListing.id] ?? "/", locale)}
                 locale={locale}
               />
             </li>

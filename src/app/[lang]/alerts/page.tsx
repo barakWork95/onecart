@@ -1,3 +1,4 @@
+import { withLocale } from "@/components/features/outbound-link";
 import { BellRing, TrendingDown } from "lucide-react";
 import type { Metadata } from "next";
 import { connection } from "next/server";
@@ -78,11 +79,19 @@ async function AlertList({ locale }: { locale: Locale }) {
             </p>
             {alert.status === "triggered" && (
               <TrackedOutboundLink
-                href={linkCodec.encode({
-                  id: alert.productId,
-                  provider: alert.provider,
-                  url: alert.productUrl,
-                })}
+                href={withLocale(
+                  linkCodec.encode({
+                    id: alert.productId,
+                    provider: alert.provider,
+                    url: alert.productUrl,
+                    context: {
+                      title: alert.title,
+                      priceAgorot: (alert.lastSeen ?? alert.target).amountMinor,
+                      bestDeal: false,
+                    },
+                  }),
+                  locale,
+                )}
                 click={{
                   store: alert.provider,
                   product_title: alert.title,

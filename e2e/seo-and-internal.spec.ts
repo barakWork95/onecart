@@ -62,6 +62,22 @@ test.describe("internal click report", () => {
   });
 });
 
+test.describe("internal click analytics", () => {
+  test("asks for the password, then opens (no click storage in E2E)", async ({ request, browser }) => {
+    const anonymous = await request.get("/internal/analytics");
+    expect(anonymous.status()).toBe(401);
+    expect(anonymous.headers()["www-authenticate"]).toContain("Basic");
+
+    const context = await browser.newContext({ httpCredentials: ADMIN });
+    const page = await context.newPage();
+    const response = await page.goto("/internal/analytics");
+    expect(response?.headers()["x-robots-tag"]).toBe("noindex, nofollow");
+    await expect(page.getByRole("heading", { level: 1, name: "Click analytics" })).toBeVisible();
+    await expect(page.getByText(/Click storage isn.t configured/)).toBeVisible();
+    await context.close();
+  });
+});
+
 test.describe("internal status", () => {
   const CRON = { Authorization: "Bearer e2e-only-cron-secret-0123456789" };
 

@@ -193,6 +193,10 @@ export function StatusView({ report, alertsPanel }: { report: StatusReport; aler
                 clicks, {n(c.affiliated)} affiliate-tagged.{" "}
                 <Link href="/internal/clicks" className="font-medium text-primary underline">
                   Click report
+                </Link>{" "}
+                ·{" "}
+                <Link href="/internal/analytics" className="font-medium text-primary underline">
+                  Click analytics
                 </Link>
               </span>
             </p>

@@ -5,6 +5,7 @@ import type {
   OutboundClick,
   OutboundLinkCodec,
 } from "@/domain/affiliate/ports";
+import { DEFAULT_LOCALE, isLocale } from "@/domain/shared/locale";
 import { noopLogger, type Logger } from "@/domain/shared/logger";
 import type { ProviderId } from "@/domain/shared/provider";
 import { err, ok, type Result } from "@/domain/shared/result";
@@ -75,11 +76,16 @@ export function createResolveOutboundLink(deps: ResolveOutboundLinkDeps) {
       return err("disallowed_destination");
     }
 
+    const lang = params.l;
     const click: OutboundClick = {
       productId: id,
       provider: target.provider,
       affiliated: tagged.affiliated,
       at: now().toISOString(),
+      title: target.context?.title ?? null,
+      priceAgorot: target.context?.priceAgorot ?? null,
+      bestDeal: target.context?.bestDeal ?? false,
+      locale: lang && isLocale(lang) ? lang : DEFAULT_LOCALE,
     };
     if (deps.defer) deps.defer(() => record(click));
     else await record(click);

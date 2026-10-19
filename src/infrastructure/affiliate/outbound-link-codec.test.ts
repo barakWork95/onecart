@@ -25,6 +25,33 @@ describe("createHmacOutboundLinkCodec", () => {
     expect(codec.decode(id, params)).toEqual(TARGET);
   });
 
+  it("signs a click's context with the link, and reads it back", () => {
+    const withContext = {
+      ...TARGET,
+      context: { title: "Kindle Paperwhite 16GB", priceAgorot: 612_12, bestDeal: true },
+    };
+    const { id, params } = paramsOf(codec.encode(withContext));
+    expect(codec.decode(id, params)).toEqual(withContext);
+  });
+
+  it("reads links made before click context (no context), and rejects an edited one", () => {
+    const { id, params } = paramsOf(codec.encode(TARGET));
+    expect(codec.decode(id, params)?.context).toBeUndefined();
+
+    const signed = paramsOf(
+      codec.encode({ ...TARGET, context: { title: "A", priceAgorot: 100, bestDeal: false } }),
+    );
+    const payload = JSON.parse(Buffer.from(signed.params.d!, "base64url").toString("utf8"));
+    const edited = Buffer.from(JSON.stringify({ ...payload, t: "Injected" })).toString("base64url");
+    expect(codec.decode(signed.id, { ...signed.params, d: edited })).toBeNull();
+  });
+
+  it("keeps a long title short in the link", () => {
+    const long = { ...TARGET, context: { title: "x".repeat(300), priceAgorot: null, bestDeal: false } };
+    const { id, params } = paramsOf(codec.encode(long));
+    expect(codec.decode(id, params)?.context?.title).toHaveLength(80);
+  });
+
   it("rejects links signed with a different secret", () => {
     const other = createHmacOutboundLinkCodec("another-secret-that-is-32-chars-long!!");
     const { id, params } = paramsOf(other.encode(TARGET));

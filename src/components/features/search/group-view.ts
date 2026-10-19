@@ -1,4 +1,5 @@
 import { STORE_META } from "@/components/features/store-meta";
+import { withLocale } from "@/components/features/outbound-link";
 import { matchSearchText } from "@/domain/matching/match-query";
 import { unitPrice } from "@/domain/matching/unit-price";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
@@ -42,8 +43,10 @@ export function premiumOverBest(group: ProductGroup, offer: UnifiedProduct): Mon
 export function outboundHref(
   links: Readonly<Record<string, string>>,
   offer: Pick<UnifiedProduct, "id" | "productUrl">,
+  locale: Locale = "en",
 ): string {
-  return links[offer.id] ?? offer.productUrl;
+  const signed = links[offer.id];
+  return signed ? withLocale(signed, locale) : offer.productUrl;
 }
 
 /** Offers listed by name on a card before "+N more"; the compare sheet has them all. */

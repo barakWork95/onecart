@@ -706,6 +706,14 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
     logs (`consoleClickRecorder`).
   - The table has RLS and no policies: only the service role writes or reads it. The
     `outbound_clicks_daily` view counts per **Israeli** day and store.
+  - **Click context.** Priced links sign what the shopper saw into the payload (`context`:
+    title ≤ 80 chars, landed price in agorot, best deal = the group's cheapest listing); the
+    page's language rides unsigned as `l` (`withLocale`, Hebrew pages only; read as en/he only).
+    The row stores `product_title`, `price_ils`, `is_best_deal`, `locale`
+    (`20261019130000_outbound_click_context.sql`). Store-search links carry no context.
+  - `/internal/analytics` (same admin password): today / 7 / 30-day KPIs and the store breakdown
+    (from the daily view), top 10 products (`outbound_click_top_products`, last 30 days), and the
+    latest 50 clicks; refreshes every 30 s while open (`AutoRefresh`).
   - `/internal/clicks` shows the last 30 days per store and per day, with the affiliate-tagged
     share. HTTP Basic: any user name, password `ADMIN_DASHBOARD_PASSWORD` (checked in
     `src/proxy.ts` and again in the page). Unset → 404. `robots.txt` disallows `/internal`.

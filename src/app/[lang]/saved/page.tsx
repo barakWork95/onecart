@@ -1,3 +1,4 @@
+import { withLocale } from "@/components/features/outbound-link";
 import { Bookmark, RefreshCw } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -48,7 +49,15 @@ async function SavedList({ locale }: { locale: Locale }) {
             </p>
             <div className="mt-1 flex gap-3 text-sm font-semibold">
               <TrackedOutboundLink
-                href={linkCodec.encode({ id: item.productId, provider: item.provider, url: item.productUrl })}
+                href={withLocale(
+                  linkCodec.encode({
+                    id: item.productId,
+                    provider: item.provider,
+                    url: item.productUrl,
+                    context: { title: item.title, priceAgorot: item.price.amountMinor, bestDeal: false },
+                  }),
+                  locale,
+                )}
                 click={{
                   store: item.provider,
                   product_title: item.title,

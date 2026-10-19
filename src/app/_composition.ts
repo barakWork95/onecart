@@ -42,6 +42,7 @@ import {
   type PriceHistoryRun,
 } from "@/application/deals/price-history";
 import { selectSavings, type SavingsCard } from "@/application/deals/savings";
+import { createClickAnalytics, type ClickDashboard } from "@/application/affiliate/click-analytics";
 import type { PriceDropBoard, PriceDropCard } from "@/domain/deals/ports";
 import { createRedisPriceDropBoard } from "@/infrastructure/cache/redis-price-drop-board";
 import { createSupabasePriceHistory } from "@/infrastructure/db/supabase-price-history";
@@ -87,6 +88,7 @@ import { createInMemoryUserLists } from "@/infrastructure/db/in-memory-user-list
 import { createInMemoryPushSubscriptions } from "@/infrastructure/db/in-memory-push-subscriptions";
 import { createSupabaseServiceClient } from "@/infrastructure/db/supabase-clients";
 import {
+  createSupabaseClickAnalytics,
   createSupabaseClickRecorder,
   createSupabaseClickStats,
 } from "@/infrastructure/db/supabase-outbound-clicks";
@@ -129,6 +131,7 @@ interface Services {
   readonly resolveOutboundLink: ReturnType<typeof createResolveOutboundLink>;
   /** Null without Supabase's service key: clicks are only logged then. */
   readonly clickReport: ReturnType<typeof createClickReport> | null;
+  readonly clickAnalytics: ReturnType<typeof createClickAnalytics> | null;
   /** Null without Supabase's service key: no price history, so no drops. */
   readonly recordPriceHistory: ReturnType<typeof createRecordPriceHistory> | null;
   readonly priceDropBoard: PriceDropBoard;
@@ -335,6 +338,12 @@ function buildServices(): Services {
     userListsBackend,
     linkCodec,
     clickReport: serviceDb ? createClickReport({ stats: createSupabaseClickStats(serviceDb) }) : null,
+    clickAnalytics: serviceDb
+      ? createClickAnalytics({
+          stats: createSupabaseClickStats(serviceDb),
+          analytics: createSupabaseClickAnalytics(serviceDb),
+        })
+      : null,
     priceDropBoard,
     opsStore,
     recordCronRun: createRecordCronRun({ store: opsStore, logger }),
@@ -503,13 +512,29 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
   const response = await searchProducts(query, { includeEarlierPages: true });
 
   const outboundLinks: Record<string, string> = {};
-  // "Won't ship to Israel" listings get signed links too: the shopper may still want to look.
-  for (const offer of response.groups.flatMap((g) => [...g.listings, ...g.unavailable])) {
-    outboundLinks[offer.id] = linkCodec.encode({
-      id: offer.id,
-      provider: offer.provider,
-      url: offer.productUrl,
-    });
+  for (const group of response.groups) {
+    // Each link signs what its card shows, for the click log: title, landed price, best deal.
+    for (const listing of group.listings) {
+      outboundLinks[listing.id] = linkCodec.encode({
+        id: listing.id,
+        provider: listing.provider,
+        url: listing.productUrl,
+        context: {
+          title: listing.title,
+          priceAgorot: listing.price.total.amountMinor,
+          bestDeal: listing.id === group.listings[0].id,
+        },
+      });
+    }
+    // "Won't ship to Israel" listings get signed links too: the shopper may still want to look.
+    for (const listing of group.unavailable) {
+      outboundLinks[listing.id] = linkCodec.encode({
+        id: listing.id,
+        provider: listing.provider,
+        url: listing.productUrl,
+        context: { title: listing.title, priceAgorot: null, bestDeal: false },
+      });
+    }
   }
   const checks: Record<string, { provider: ProviderId; href: string }> = {};
   for (const [groupId, target] of Object.entries(storeChecks(response))) {
@@ -625,7 +650,12 @@ export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; 
   }
   const cards = drops.map((drop) => ({
     drop,
-    href: linkCodec.encode({ id: drop.productId, provider: drop.provider, url: drop.productUrl }),
+    href: linkCodec.encode({
+      id: drop.productId,
+      provider: drop.provider,
+      url: drop.productUrl,
+      context: { title: drop.title, priceAgorot: drop.current.amountMinor, bestDeal: false },
+    }),
   }));
   holder[DROPS_KEY] = { value: cards, atMs: Date.now() };
   return cards;
@@ -782,6 +812,7 @@ export async function categoryPageData(slug: string): Promise<CategoryPageData |
       id: bestListing.id,
       provider: bestListing.provider,
       url: bestListing.productUrl,
+      context: { title: bestListing.title, priceAgorot: bestListing.price.total.amountMinor, bestDeal: true },
     });
   return { page, goLinks };
 }
@@ -795,6 +826,20 @@ export function resolveOutboundLink(
 }
 
 /** Outbound clicks for the last `days` days; failures are logged here, the page just says so. */
+/** The /internal/analytics dashboard's data, or why there is none. */
+export async function clickAnalyticsData(): Promise<ClickDashboard | "not_configured" | "error"> {
+  const analytics = getServices().clickAnalytics;
+  if (!analytics) return "not_configured";
+  try {
+    return await analytics();
+  } catch (error) {
+    consoleLogger.warn("internal/analytics: load failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return "error";
+  }
+}
+
 export async function clickReport(days: number): Promise<ClickReport | "not_configured" | "error"> {
   const report = getServices().clickReport;
   if (!report) return "not_configured";

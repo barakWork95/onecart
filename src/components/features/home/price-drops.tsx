@@ -1,3 +1,4 @@
+import { withLocale } from "@/components/features/outbound-link";
 import { ExternalLink, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import type { PriceDropCard } from "@/domain/deals/ports";
@@ -78,7 +79,7 @@ export function PriceDrops({ drops, locale = "en" }: { drops: readonly PriceDrop
                   </p>
                   <div className="mt-auto flex flex-col gap-1.5 pt-1">
                     <TrackedOutboundLink
-                      href={href}
+                      href={withLocale(href, locale)}
                       click={{
                         store: drop.provider,
                         product_title: drop.title,
