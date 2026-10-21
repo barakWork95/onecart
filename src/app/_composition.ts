@@ -95,6 +95,7 @@ import {
 import { createRedisCircuitBreakerStore } from "@/infrastructure/cache/redis-circuit-breaker-store";
 import { createRedisSearchCache } from "@/infrastructure/cache/redis-search-cache";
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
+import { createFailoverCounterStore, createFailoverRedis } from "@/infrastructure/cache/failover-redis";
 import { createUpstashCounterStore, createUpstashRedis } from "@/infrastructure/cache/upstash";
 import { createCachedFxRates } from "@/infrastructure/fx/cached-fx-rates";
 import { createFrankfurterFxSource } from "@/infrastructure/fx/frankfurter-fx-source";
@@ -177,7 +178,9 @@ type ServicesHolder = { [SERVICES_KEY]?: Services };
 function buildServices(): Services {
   const config = env();
   const logger = consoleLogger;
-  const redis = createUpstashRedis(config) ?? createInMemoryRedis();
+  // Upstash, or memory while it's out of quota or unreachable: pages never fail on Redis.
+  const upstash = createUpstashRedis(config);
+  const redis = upstash ? createFailoverRedis({ primary: upstash, logger }) : createInMemoryRedis();
   const demoMode = config.ONECART_DEMO_PROVIDERS;
 
   const providers: ProductSearchProvider[] = [];
@@ -445,7 +448,11 @@ function createCallBudget(
   prefix: string,
   limits: Partial<Record<ProviderId, number>>,
 ): StoreCallBudget {
-  const counter = createUpstashCounterStore(config) ?? createInMemoryCounterStore();
+  // Budgets keep counting in memory while Upstash is out: they must never fail open to a flood.
+  const upstashCounter = createUpstashCounterStore(config);
+  const counter = upstashCounter
+    ? createFailoverCounterStore({ primary: upstashCounter, logger: consoleLogger })
+    : createInMemoryCounterStore();
   const limiters = new Map<ProviderId, RateLimiter>();
   for (const provider of providers) {
     const limit = limits[provider.id];
@@ -557,51 +564,43 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
 }
 
 /** Showcase cards are cache reads; reuse them briefly so homepage traffic doesn't multiply Redis calls. */
-const SHOWCASE_MEMO_MS = 5 * 60 * 1000;
-const SHOWCASE_KEY = Symbol.for("onecart.showcaseMemo");
-const CATEGORIES_KEY = Symbol.for("onecart.categoryRowsMemo");
-const DROPS_KEY = Symbol.for("onecart.priceDropsMemo");
+/**
+ * The homepage's cached-results sections. They're cached as remote entries
+ * shared by every server instance ("use cache: remote"), not per instance:
+ * each rebuild reads ~100 cached searches and their photo hashes from Redis,
+ * and serverless instances come and go all day. Refreshed when the warm-up
+ * revalidates HOME_TAG, or hourly. Empty results are kept only a few minutes,
+ * so cards appear soon after the cache is first warmed.
+ */
+export const HOME_TAG = "home";
 
 export interface CategoryRow {
   readonly category: Category;
   readonly cards: readonly TrendingCard[];
 }
 
-type Memo<T> = { readonly value: T; readonly atMs: number };
-type MemoHolder = {
-  [SHOWCASE_KEY]?: Memo<TrendingCard[]>;
-  [CATEGORIES_KEY]?: Memo<CategoryRow[]>;
-  [DROPS_KEY]?: Memo<{ readonly drop: PriceDropCard; readonly href: string }[]>;
-};
-
-const fresh = (memo: Memo<unknown> | undefined) => !!memo && Date.now() - memo.atMs < SHOWCASE_MEMO_MS;
-
-/**
- * The homepage "Trending" cards, from cached search results only (never a
- * store API call). An empty result isn't memoized, so cards appear as soon
- * as the cache is warmed.
- */
+/** The homepage "Trending" cards, from cached search results only (never a store API call). */
 export async function trendingCards(): Promise<TrendingCard[]> {
-  const holder = globalThis as MemoHolder;
-  const memo = holder[SHOWCASE_KEY];
-  if (memo && fresh(memo)) return memo.value;
+  "use cache: remote";
+  cacheTag(HOME_TAG);
   const { trendingShowcase, trendingQueries } = getServices();
   const cards = await trendingShowcase(trendingQueries);
-  if (cards.length > 0) holder[SHOWCASE_KEY] = { value: cards, atMs: Date.now() };
+  if (cards.length > 0) cacheLife("hours");
+  else cacheLife("minutes");
   return cards;
 }
 
 /** The homepage category rows, cached results only; a category with no cards is left out. */
 export async function categoryRows(): Promise<CategoryRow[]> {
-  const holder = globalThis as MemoHolder;
-  const memo = holder[CATEGORIES_KEY];
-  if (memo && fresh(memo)) return memo.value;
+  "use cache: remote";
+  cacheTag(HOME_TAG);
   const { trendingShowcase, categories } = getServices();
   const rows = await Promise.all(
     categories.map(async (category) => ({ category, cards: await trendingShowcase(category.products) })),
   );
   const filled = rows.filter((row) => row.cards.length > 0);
-  if (filled.length > 0) holder[CATEGORIES_KEY] = { value: filled, atMs: Date.now() };
+  if (filled.length > 0) cacheLife("hours");
+  else cacheLife("minutes");
   return filled;
 }
 
@@ -640,9 +639,8 @@ async function recordPrices(
 
 /** Today's price drops (cache only), each with a signed /go link to the listing. */
 export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; readonly href: string }[]> {
-  const holder = globalThis as MemoHolder;
-  const memo = holder[DROPS_KEY];
-  if (memo && fresh(memo)) return memo.value;
+  "use cache: remote";
+  cacheTag(HOME_TAG);
   const { priceDropBoard, linkCodec } = getServices();
   let drops: readonly PriceDropCard[] = [];
   try {
@@ -661,7 +659,8 @@ export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; 
       context: { title: drop.title, priceAgorot: drop.current.amountMinor, bestDeal: false },
     }),
   }));
-  holder[DROPS_KEY] = { value: cards, atMs: Date.now() };
+  if (cards.length > 0) cacheLife("hours");
+  else cacheLife("minutes");
   return cards;
 }
 
@@ -681,9 +680,6 @@ const CATEGORY_WARM_CONCURRENCY = 3;
 export async function warmTrending() {
   const { warmSearchProducts, trendingQueries, categories, trendingWarmStores, amazonWarmPerDay } =
     getServices();
-  const holder = globalThis as MemoHolder;
-  delete holder[SHOWCASE_KEY];
-  delete holder[CATEGORIES_KEY];
   const atMs = Date.now();
   const today = israelDay(new Date(atMs));
   const observed: Observed[] = [];
@@ -708,15 +704,13 @@ export async function warmTrending() {
     { daily: trendingWarmStores, rotating: [], atMs },
     { concurrency: CATEGORY_WARM_CONCURRENCY, onWarmed },
   );
-  delete holder[DROPS_KEY];
-  // The category pages are cached HTML: rebuilt on their next visit (not served stale).
+  const priceHistory = await recordPrices(observed, today);
+  const photosHashed = await hashPhotos(photos);
+  // Category pages and the homepage sections are cached: rebuilt on their next visit (not
+  // served stale), after the price drops and photo hashes they read are written.
   for (const { slug } of categories) revalidateTag(categoryTag(slug), { expire: 0 });
-  return {
-    trending,
-    categories: categoriesWarmed,
-    priceHistory: await recordPrices(observed, today),
-    photosHashed: await hashPhotos(photos),
-  };
+  revalidateTag(HOME_TAG, { expire: 0 });
+  return { trending, categories: categoriesWarmed, priceHistory, photosHashed };
 }
 
 /** Runs a cron's work and records how it went (see `createRecordCronRun`). */

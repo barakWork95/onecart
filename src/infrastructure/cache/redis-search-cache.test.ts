@@ -7,6 +7,7 @@ function fakeRedis(initial: Record<string, unknown> = {}) {
   const store = new Map<string, unknown>(Object.entries(initial));
   const redis: RedisLike & { set: jest.Mock } = {
     get: async <T>(key: string) => (store.get(key) ?? null) as T | null,
+    mget: async <T>(keys: readonly string[]) => keys.map((key) => (store.get(key) ?? null) as T | null),
     set: jest.fn(async (key: string, value: unknown) => {
       // Mirror Upstash: values round-trip through JSON.
       store.set(key, JSON.parse(JSON.stringify(value)));
@@ -51,9 +52,20 @@ describe("createRedisSearchCache", () => {
     expect(await createRedisSearchCache(fakeRedis({ k: value })).get("k")).toBeNull();
   });
 
+  it("reads many entries in one MGET, each validated like a single read", async () => {
+    const good = { products: [], cachedAt: "2026-10-21T00:00:00.000Z" };
+    const redis = fakeRedis({ a: good, bad: { products: "nope" } });
+    const spied = { ...redis, get: jest.spyOn(redis, "get"), mget: jest.spyOn(redis, "mget") };
+    const client: RedisLike = redis;
+    expect(await createRedisSearchCache(client).getMany(["a", "bad", "missing"])).toEqual([good, null, null]);
+    expect(spied.mget).toHaveBeenCalledTimes(1);
+    expect(spied.get).not.toHaveBeenCalled();
+  });
+
   it("propagates Redis errors so the use case can log and fall back", async () => {
     const redis: RedisLike = {
       get: () => Promise.reject(new Error("ECONNRESET")),
+      mget: () => Promise.reject(new Error("ECONNRESET")),
       set: () => Promise.reject(new Error("ECONNRESET")),
     };
     await expect(createRedisSearchCache(redis).get("k")).rejects.toThrow("ECONNRESET");

@@ -510,17 +510,26 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
 - Bump the `v3` segment in the key whenever the cached entry or `UnifiedProduct` shape changes.
   Deeper store pages add a `:pN` suffix.
 - Never cache an error or an empty result from a failed call. Do cache a legitimate "0 results".
-- If Redis is unavailable, log it and continue uncached. A cache outage must not break search.
-  Without Upstash env vars, the composition root uses `createInMemoryRedis()`, which is
-  per-instance only.
+- **Redis failover** (`createFailoverRedis` / `createFailoverCounterStore`): if Upstash errors, it's
+  skipped for 30 s, or **15 min on an exhausted quota**, and that instance uses memory instead. The
+  failing call itself is answered from memory, so pages never see the outage. Counters (rate
+  limits, store budgets) keep counting in memory: a Redis outage must never make budgets fail open
+  to a flood. Without Upstash env vars, the composition root uses `createInMemoryRedis()`
+  (per-instance only). The status page's quota reader stays on raw Upstash, so it shows the error.
+- **Upstash bills every command (free plan: 500K a month)**. Read many keys with **one `mget`**
+  (`RedisLike.mget`, chunked by 100; `SearchResultCache.getMany`), never a `get` per key in a
+  loop: photo hashes, and a showcase product's stores, are one MGET each. On 2026-10-21 per-key
+  GETs of ~900 keys per homepage rebuild × every fresh serverless instance burned ~940K commands.
 - The homepage deal feed reads Supabase and the Redis cache only. It must **never** trigger a live
   provider API call.
 - **Homepage "Trending comparisons"** (`application/deals/trending-showcase.ts`): one card per
   product in `config/trending.ts`, built from **cached** results with the same
   `assembleResults()` the search page uses (so a card matches the comparison it links to); the
   card is the search's top non-accessory result. Nothing cached → no card. Each card shows when
-  its prices were fetched ("Prices as of …", the oldest snapshot). Cards are memoized per
-  instance for 5 minutes.
+  its prices were fetched ("Prices as of …", the oldest snapshot). The homepage sections
+  (`trendingCards`, `categoryRows`, `priceDropCards`) are `"use cache: remote"`: shared by every
+  instance, tag `HOME_TAG`, an hour (minutes when empty), revalidated at the end of the warm-up.
+  Plain `"use cache"` / globalThis memos are per instance, which on serverless means "per cold start".
   - `/api/cron/warm-trending` (daily 07:30 UTC, after eBay's quota reset) re-runs those searches
     through the normal search path with `refresh` (skip the cache read, call, re-cache).
     Demo mode warms the demo catalog's `DEMO_TRENDING_QUERIES`.

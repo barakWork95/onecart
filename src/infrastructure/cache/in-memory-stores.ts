@@ -8,15 +8,21 @@ import type { ProviderId } from "@/domain/shared/provider";
  */
 export function createInMemorySearchCache(now: () => number = Date.now): SearchResultCache {
   const entries = new Map<string, { value: CachedProviderResult; expiresAtMs: number }>();
+  const get = (key: string) => {
+    const entry = entries.get(key);
+    if (!entry) return null;
+    if (entry.expiresAtMs <= now()) {
+      entries.delete(key);
+      return null;
+    }
+    return entry.value;
+  };
   return {
     async get(key) {
-      const entry = entries.get(key);
-      if (!entry) return null;
-      if (entry.expiresAtMs <= now()) {
-        entries.delete(key);
-        return null;
-      }
-      return entry.value;
+      return get(key);
+    },
+    async getMany(keys) {
+      return keys.map(get);
     },
     async set(key, value, ttlSeconds) {
       entries.set(key, { value, expiresAtMs: now() + ttlSeconds * 1000 });

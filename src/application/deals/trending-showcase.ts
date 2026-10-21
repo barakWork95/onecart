@@ -81,20 +81,25 @@ export function createFeaturedLookup(deps: TrendingShowcaseDeps) {
 
   return async function featured(query: string): Promise<Featured | null> {
     const text = normalizeQueryText(query);
-    const entries = await Promise.all(
-      deps.stores.map(async (store) => {
-        try {
-          return await deps.cache.get(
-            searchCacheKey({ normalizedText: text, destination: DESTINATION }, store.id, 1, store.cacheScope),
-          );
-        } catch (error) {
-          logger.warn("showcase: cache read failed", {
-            provider: store.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          return null;
-        }
-      }),
+    const keys = deps.stores.map((store) =>
+      searchCacheKey({ normalizedText: text, destination: DESTINATION }, store.id, 1, store.cacheScope),
+    );
+    // One batched read for every store (a homepage render reads ~100 products).
+    const entries = await deps.cache.getMany(keys).catch(() =>
+      // …and store by store if that fails, so one bad store doesn't hide the others.
+      Promise.all(
+        deps.stores.map(async (store, i) => {
+          try {
+            return await deps.cache.get(keys[i]!);
+          } catch (error) {
+            logger.warn("showcase: cache read failed", {
+              provider: store.id,
+              error: error instanceof Error ? error.message : String(error),
+            });
+            return null;
+          }
+        }),
+      ),
     );
     const cached = entries.flatMap((e) => (e ? [e] : []));
     if (!cached.some((e) => e.products.length > 0)) return null;

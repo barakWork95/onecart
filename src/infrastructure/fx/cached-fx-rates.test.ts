@@ -82,6 +82,7 @@ describe("createCachedFxRates", () => {
   it("keeps working when the store is down", async () => {
     const broken: RedisLike = {
       get: () => Promise.reject(new Error("x")),
+      mget: () => Promise.reject(new Error("x")),
       set: () => Promise.reject(new Error("x")),
     };
     const { getFxRates, logger } = setup(async () => rates(3.7), broken);

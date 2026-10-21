@@ -12,6 +12,16 @@ describe("createInMemoryRedis", () => {
     expect(await redis.get("k")).toBeNull();
   });
 
+  it("reads many keys at once, in order, null for missing or expired ones", async () => {
+    const clock = { ms: 0 };
+    const redis = createInMemoryRedis(() => clock.ms);
+    await redis.set("a", 1, { ex: 10 });
+    await redis.set("b", { x: 2 }, { ex: 1 });
+    clock.ms = 5_000;
+    expect(await redis.mget(["a", "missing", "b"])).toEqual([1, null, null]);
+    expect(await redis.mget([])).toEqual([]);
+  });
+
   it("uses the real clock by default", async () => {
     const redis = createInMemoryRedis();
     await redis.set("k", "v", { ex: 60 });

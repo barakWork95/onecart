@@ -140,7 +140,11 @@ describe("createBudgetQuota", () => {
   });
 
   it("reports a counter it can't read", async () => {
-    const redis = { get: () => Promise.reject(new Error("redis down")), set: async () => undefined };
+    const redis = {
+      get: () => Promise.reject(new Error("redis down")),
+      mget: () => Promise.reject(new Error("redis down")),
+      set: async () => undefined,
+    };
     const [reading] = await createBudgetQuota({
       redis,
       budgets: [{ name: "Our eBay budget today", prefix: "budget", subject: "ebay", limit: 4500 }],

@@ -26,7 +26,8 @@ export function createRedisImageHashIndex(deps: ImageHashIndexDeps): ImageHashIn
 
   async function lookup(urls: readonly string[]) {
     const unique = [...new Set(urls)];
-    const values = await Promise.all(unique.map((u) => deps.redis.get<unknown>(imageHashKey(u))));
+    // One MGET, not a GET per photo: a generic search or showcase looks up dozens at once.
+    const values = await deps.redis.mget<unknown>(unique.map(imageHashKey));
     return unique.map((url, i) => ({ url, value: values[i] }));
   }
 

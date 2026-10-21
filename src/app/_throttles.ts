@@ -7,6 +7,7 @@ import { ACTION_RATE_LIMITS, ADMIN_LOCKOUT, GO_RATE_LIMITS, searchRateLimits } f
 import type { CounterStore } from "@/domain/security/ports";
 import type { RateLimitWindow } from "@/domain/security/rate-limit";
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
+import { createFailoverCounterStore } from "@/infrastructure/cache/failover-redis";
 import { createUpstashCounterStore } from "@/infrastructure/cache/upstash";
 import { consoleLogger } from "@/infrastructure/logging/console-logger";
 import { splitLocale } from "@/i18n/locales";
@@ -24,8 +25,15 @@ type Holder = { [HOLDER_KEY]?: Map<string, unknown> };
 function once<T>(name: string, make: (counter: CounterStore) => T): T {
   const holder = globalThis as Holder;
   const made = (holder[HOLDER_KEY] ??= new Map());
-  if (!made.has("counter"))
-    made.set("counter", createUpstashCounterStore(env()) ?? createInMemoryCounterStore());
+  if (!made.has("counter")) {
+    const upstash = createUpstashCounterStore(env());
+    made.set(
+      "counter",
+      upstash
+        ? createFailoverCounterStore({ primary: upstash, logger: consoleLogger })
+        : createInMemoryCounterStore(),
+    );
+  }
   if (!made.has(name)) made.set(name, make(made.get("counter") as CounterStore));
   return made.get(name) as T;
 }

@@ -12,10 +12,16 @@ import type { SavedItem } from "@/domain/user-lists/product-snapshot";
  */
 export function fakeSearchCache(now: () => number): SearchResultCache {
   const entries = new Map<string, { value: CachedProviderResult; expiresAtMs: number }>();
+  const get = (key: string) => {
+    const entry = entries.get(key);
+    return entry && entry.expiresAtMs > now() ? entry.value : null;
+  };
   return {
     async get(key) {
-      const entry = entries.get(key);
-      return entry && entry.expiresAtMs > now() ? entry.value : null;
+      return get(key);
+    },
+    async getMany(keys) {
+      return keys.map(get);
     },
     async set(key, value, ttlSeconds) {
       entries.set(key, { value, expiresAtMs: now() + ttlSeconds * 1000 });

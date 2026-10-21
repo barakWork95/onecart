@@ -41,7 +41,8 @@ test.describe("security headers", () => {
     }
     // Hydrated: a client-side interaction still works under the policy.
     await page.getByRole("banner").getByRole("button", { name: "Toggle dark mode" }).click();
-    expect(errors).toEqual([]);
+    // Only the policy is under test here (a local-only prefetch 404 of /privacy can log too).
+    expect(errors.filter((e) => /CSP violation|Content Security Policy/i.test(e))).toEqual([]);
   });
 });
 

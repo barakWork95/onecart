@@ -17,6 +17,8 @@ export interface CachedProviderResult {
  */
 export interface SearchResultCache {
   get(key: string): Promise<CachedProviderResult | null>;
+  /** Many entries in one round trip, in key order (null for a miss). */
+  getMany(keys: readonly string[]): Promise<(CachedProviderResult | null)[]>;
   set(key: string, value: CachedProviderResult, ttlSeconds: number): Promise<void>;
 }
 

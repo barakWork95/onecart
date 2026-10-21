@@ -1,3 +1,4 @@
+import type { RedisLike } from "@/infrastructure/cache/redis-client";
 import { createInMemoryRedis } from "@/infrastructure/cache/in-memory-redis";
 import { fetchImage, isAllowedImageUrl, MAX_IMAGE_BYTES } from "@/infrastructure/images/image-fetcher";
 import { createRedisImageHashIndex, imageHashKey } from "@/infrastructure/images/redis-image-hash-index";
@@ -45,6 +46,21 @@ describe("fetchImage", () => {
 });
 
 describe("createRedisImageHashIndex", () => {
+  it("reads every photo's hash in one batched read, never one GET per photo", async () => {
+    const redis = createInMemoryRedis();
+    const spied = { ...redis, get: jest.spyOn(redis, "get"), mget: jest.spyOn(redis, "mget") };
+    const client: RedisLike = redis;
+    const index = createRedisImageHashIndex({ redis: client, hashImage: async () => "00ff00ff00ff00ff" });
+    const urls = Array.from({ length: 60 }, (_, i) => `https://i.ebayimg.com/${i}.jpg`);
+    await index.ensure(urls.slice(0, 10));
+    spied.mget.mockClear();
+
+    const found = await index.cached(urls);
+    expect(found.size).toBe(10);
+    expect(spied.mget).toHaveBeenCalledTimes(1);
+    expect(spied.get).not.toHaveBeenCalled();
+  });
+
   it("hashes only what's missing, caches results, and never downloads on a cache read", async () => {
     const redis = createInMemoryRedis();
     const hashImage = jest.fn(async (url: string) => (url.endsWith("bad.jpg") ? null : "00ff00ff00ff00ff"));

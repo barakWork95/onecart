@@ -25,6 +25,10 @@ export function createRedisSearchCache(redis: RedisLike): SearchResultCache {
       const value = await redis.get<unknown>(key);
       return isCachedProviderResult(value) ? value : null;
     },
+    async getMany(keys) {
+      const values = await redis.mget<unknown>(keys);
+      return values.map((value) => (isCachedProviderResult(value) ? value : null));
+    },
     async set(key, value, ttlSeconds) {
       await redis.set(key, value, { ex: ttlSeconds });
     },

@@ -126,6 +126,7 @@ describe("createAliExpressLinkGenerator", () => {
   it("keeps working when the cache is down", async () => {
     const broken: RedisLike = {
       get: () => Promise.reject(new Error("x")),
+      mget: () => Promise.reject(new Error("x")),
       set: () => Promise.reject(new Error("x")),
     };
     const { generator, logger } = setup(async () => json(linkGenerateOk), { cache: broken });

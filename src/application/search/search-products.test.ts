@@ -388,6 +388,7 @@ describe("searchProducts — caching", () => {
   it("keeps searching when the cache is down", async () => {
     const brokenCache: SearchResultCache = {
       get: () => Promise.reject(new Error("redis down")),
+      getMany: () => Promise.reject(new Error("redis down")),
       set: () => Promise.reject(new Error("redis down")),
     };
     const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
@@ -406,7 +407,11 @@ describe("searchProducts — caching", () => {
   });
 
   it("logs non-Error cache failures too", async () => {
-    const brokenCache: SearchResultCache = { get: () => Promise.reject("nope"), set: async () => undefined };
+    const brokenCache: SearchResultCache = {
+      get: () => Promise.reject("nope"),
+      getMany: () => Promise.reject("nope"),
+      set: async () => undefined,
+    };
     const ali = fakeProvider("aliexpress", () => okPage([]));
     const { search, logger } = setup([ali.provider], { cache: brokenCache });
     await search(QUERY);

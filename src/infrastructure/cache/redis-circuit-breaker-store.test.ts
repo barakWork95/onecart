@@ -8,6 +8,7 @@ function fakeRedis(initial: Record<string, unknown> = {}) {
   const store = new Map<string, unknown>(Object.entries(initial));
   const redis: RedisLike & { set: jest.Mock } = {
     get: async <T>(key: string) => (store.get(key) ?? null) as T | null,
+    mget: async <T>(keys: readonly string[]) => keys.map((key) => (store.get(key) ?? null) as T | null),
     set: jest.fn(async (key: string, value: unknown) => {
       store.set(key, value);
       return "OK";

@@ -158,11 +158,26 @@ describe("trending showcase", () => {
     expect(cards.map((c) => c.label)).toEqual(["Sony WH-1000XM5"]);
   });
 
+  it("reads all of a product's stores in one batched cache read", async () => {
+    const cache = await seeded();
+    const spied = { ...cache, get: jest.fn(cache.get), getMany: jest.fn(cache.getMany) };
+    const showcase = createTrendingShowcase({
+      cache: spied,
+      stores: [{ id: "ebay" }, { id: "amazon", cacheScope: "recorded" }, { id: "aliexpress" }],
+    });
+    const cards = await showcase([{ label: "Sony WH-1000XM5", query: "sony wh-1000xm5" }]);
+    expect(cards).toHaveLength(1);
+    expect(spied.getMany).toHaveBeenCalledTimes(1);
+    expect(spied.get).not.toHaveBeenCalled();
+  });
+
   it("only reads the cache, and skips a store whose cache read fails", async () => {
     const logger = { warn: jest.fn() };
     const cache = await seeded();
+    // The batched read fails, so the showcase reads store by store and skips the one that fails.
     const flaky = {
       ...cache,
+      getMany: jest.fn(() => Promise.reject(new Error("down"))),
       get: jest.fn((k: string) => (k.includes("amazon") ? Promise.reject(new Error("down")) : cache.get(k))),
     };
     const showcase = createTrendingShowcase({

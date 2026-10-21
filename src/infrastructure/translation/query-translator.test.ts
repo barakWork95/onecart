@@ -5,6 +5,7 @@ import { createQueryTranslator, translationKey } from "@/infrastructure/translat
 
 const brokenRedis: RedisLike = {
   get: () => Promise.reject(new Error("redis down")),
+  mget: () => Promise.reject(new Error("redis down")),
   set: () => Promise.reject(new Error("redis down")),
 };
 
