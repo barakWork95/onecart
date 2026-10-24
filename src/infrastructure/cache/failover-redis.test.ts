@@ -43,6 +43,16 @@ describe("createFailoverRedis", () => {
     return { clock, primary, logger, redis };
   };
 
+  it("says when it's degraded (serving from memory), so callers can avoid caching what it returns", async () => {
+    const { clock, primary, redis } = setup();
+    expect(redis.degraded()).toBe(false);
+    primary.failWith = QUOTA;
+    await redis.get("k");
+    expect(redis.degraded()).toBe(true);
+    clock.ms += 15 * 60_000;
+    expect(redis.degraded()).toBe(false);
+  });
+
   it("uses the primary while it works", async () => {
     const { primary, redis } = setup();
     await redis.set("k", 1, { ex: 60 });
@@ -89,6 +99,10 @@ describe("createFailoverCounterStore", () => {
         if (fail) throw QUOTA;
         return 1;
       },
+      incrementMany: async (slots) => {
+        if (fail) throw QUOTA;
+        return slots.map(() => 1);
+      },
       count: async () => 0,
     };
     const store = createFailoverCounterStore({ primary, now: () => clock.ms, logger: { warn: jest.fn() } });
@@ -97,5 +111,11 @@ describe("createFailoverCounterStore", () => {
     expect(await store.increment("k", 60)).toBe(1);
     expect(await store.increment("k", 60)).toBe(2);
     expect(await store.count("k")).toBe(2);
+    expect(
+      await store.incrementMany([
+        { key: "k", ttlSeconds: 60 },
+        { key: "j", ttlSeconds: 60 },
+      ]),
+    ).toEqual([3, 1]);
   });
 });

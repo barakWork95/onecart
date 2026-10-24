@@ -10,6 +10,7 @@ import {
   type CircuitState,
 } from "@/domain/search/circuit-breaker";
 import { assembleResults } from "@/application/search/assemble-results";
+import { batchCacheReads } from "@/application/search/batched-cache-reads";
 import { photoHashesFor, type PhotoHashReader } from "@/application/search/photo-hashes";
 import type {
   ProductSearchProvider,
@@ -17,7 +18,12 @@ import type {
   ProviderPage,
 } from "@/domain/search/product-search-provider";
 import { searchIntent, type SearchIntent } from "@/domain/search/search-intent";
-import type { CircuitBreakerStore, SearchResultCache, StoreCallBudget } from "@/domain/search/ports";
+import type {
+  CachedProviderResult,
+  CircuitBreakerStore,
+  SearchResultCache,
+  StoreCallBudget,
+} from "@/domain/search/ports";
 import { paginate } from "@/domain/search/result-ordering";
 import { searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import {
@@ -89,6 +95,8 @@ interface RunOptions {
   readonly cachedOnly: boolean;
   readonly lean: boolean;
   readonly ttlSeconds: Partial<Record<ProviderId, number>>;
+  /** This search's cache reads, batched per tick (`batchCacheReads`). */
+  readonly read: (key: string) => Promise<CachedProviderResult | null>;
 }
 
 export type SearchProducts = (query: SearchQuery, options?: SearchProductsOptions) => Promise<SearchResponse>;
@@ -186,11 +194,12 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     id: ProductSearchProvider["id"],
     query: SearchQuery,
     storePage: number,
+    run: RunOptions,
   ): Promise<ProviderRun | null> {
     const cached = await safely(
       "cache read",
       null,
-      () => deps.cache.get(searchCacheKey(query, id, storePage, scopeOf(id))),
+      () => run.read(searchCacheKey(query, id, storePage, scopeOf(id))),
       id,
     );
     if (!cached) return null;
@@ -226,7 +235,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     }
 
     const cacheKey = searchCacheKey(query, id, storePage, scopeOf(id));
-    const cached = run.refresh ? null : await readCache(id, query, storePage);
+    const cached = run.refresh ? null : await readCache(id, query, storePage, run);
     if (cached) return cached;
     if (run.cachedOnly) {
       return { outcome: { ...base, status: "skipped" }, products: [], hasMore: false, unavailable: [] };
@@ -356,7 +365,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     const run =
       mode === "fetch"
         ? await runProvider(progress.provider, query, storePage, options)
-        : await readCache(progress.provider.id, query, storePage);
+        : await readCache(progress.provider.id, query, storePage, options);
     // A failed deeper page keeps what we have: the store answered page 1 fine.
     if (!run || FAILED_PROVIDER_STATUSES.includes(run.outcome.status)) progress.stopped = true;
     else progress.runs.push(run);
@@ -401,6 +410,7 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
       cachedOnly: options.cachedOnly === true,
       lean: options.lean === true,
       ttlSeconds: options.cacheTtlSeconds ?? {},
+      read: batchCacheReads(deps.cache),
     };
     const mode = options.deeperStorePages ?? (query.page > 1 ? "fetch" : "none");
     const pageSize = Math.max(1, Math.floor(query.pageSize));

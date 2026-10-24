@@ -74,9 +74,18 @@ test.describe("category pages", () => {
   });
 
   test("the sitemap lists indexable category pages only", async ({ request }) => {
-    const sitemap = await (await request.get("/sitemap.xml")).text();
+    // Cached like the pages: the fetch right after the warm-up may still get the old copy.
+    let sitemap = "";
+    await expect
+      .poll(
+        async () => {
+          sitemap = await (await request.get("/sitemap.xml")).text();
+          return sitemap;
+        },
+        { timeout: 15_000 },
+      )
+      .toContain("<loc>https://www.onecartapp.com/c/headphones</loc>");
     expect(sitemap).toContain("<loc>https://www.onecartapp.com/c</loc>");
-    expect(sitemap).toContain("<loc>https://www.onecartapp.com/c/headphones</loc>");
     expect(sitemap).not.toContain("/c/pillows");
   });
 });

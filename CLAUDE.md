@@ -520,6 +520,25 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   (`RedisLike.mget`, chunked by 100; `SearchResultCache.getMany`), never a `get` per key in a
   loop: photo hashes, and a showcase product's stores, are one MGET each. On 2026-10-21 per-key
   GETs of ~900 keys per homepage rebuild × every fresh serverless instance burned ~940K commands.
+  - A search's cache reads go through `batchCacheReads`: every read issued in the same tick (each
+    store's page, each "Load more" round) is one `getMany`.
+  - Rate limits are **one command per hit**: `CounterStore.incrementMany` runs `INCR_WITH_EXPIRY`
+    (INCR, and EXPIRE on the first hit, in one atomic script) for every window at once. A key can't
+    be left without an expiry.
+- **Per-instance memory cache** (`withMemoryCache`, 60 s, 200 entries, LRU): only keys starting
+  with `MEMORY_CACHED_PREFIXES` (`search:`, `translate:`, `img:dhash:`, `aff:aliexpress:`;
+  written once, read many times). Misses are never remembered, writes go through, every read
+  returns a fresh copy. **Counters, circuit breakers and ops state are never memory-cached**: they
+  use the plain failover client, and the wrapper refuses their keys anyway. Homepage and category
+  views read Redis itself (`sharedSearchCache`), so they see the warm-up's writes at once.
+- **Stale-while-error** (`src/app/_last-good.ts`) for views cached from Redis (homepage sections,
+  category pages): a good result is kept with `LAST_GOOD_LIFE` (refresh hourly, servable for a
+  week); a rebuild while Redis is degraded (`redisDegraded()`) **throws** instead of caching an
+  empty or partial view, and Next keeps serving the last good copy. With no copy at all
+  (`orUncached`), the view is built uncached for that request. During `next build` it never
+  throws (cached a few minutes instead), so an outage can't fail a deploy. The warm-up marks
+  views stale with `revalidateTag(tag, "max")`, and only when it ran on Upstash. Next logs each
+  failed rebuild as `⨯ RedisDegradedError … keeping the last good copy`: expected during an outage.
 - The homepage deal feed reads Supabase and the Redis cache only. It must **never** trigger a live
   provider API call.
 - **Homepage "Trending comparisons"** (`application/deals/trending-showcase.ts`): one card per
@@ -528,7 +547,8 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   card is the search's top non-accessory result. Nothing cached → no card. Each card shows when
   its prices were fetched ("Prices as of …", the oldest snapshot). The homepage sections
   (`trendingCards`, `categoryRows`, `priceDropCards`) are `"use cache: remote"`: shared by every
-  instance, tag `HOME_TAG`, an hour (minutes when empty), revalidated at the end of the warm-up.
+  instance, tag `HOME_TAG`, an hour (minutes when empty; last good copy kept while Redis is
+  degraded), marked stale at the end of the warm-up.
   Plain `"use cache"` / globalThis memos are per instance, which on serverless means "per cold start".
   - `/api/cron/warm-trending` (daily 07:30 UTC, after eBay's quota reset) re-runs those searches
     through the normal search path with `refresh` (skip the cache read, call, re-cache).
@@ -550,11 +570,11 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   queries, 3 at a time, on `TRENDING_WARM_STORES` (default `ebay,aliexpress`; ~95 calls a day
   each), and hashes the generic queries' photos (≤ 1,500 a run, cached 30 days). Amazon's rotation stays on the trending queries.
 - **Category pages** (`/c`, `/c/[slug]`, for search engines): built only from cached results via
-  `categoryPageData()` (`"use cache"`, `cacheLife("hours")`, tag `category:{slug}`), so a crawl never
+  `categoryPageData()` (`"use cache"`, `LAST_GOOD_LIFE`, tag `category:{slug}`), so a crawl never
   reaches Redis, let alone a store. Products are picked by `createFeaturedLookup`, the same as
   homepage cards, and `CategoryProductCard` shows the full landed-price breakdown.
-  - The warm-up revalidates each tag; the first visit after it may still get the previous copy
-    while it rebuilds (E2E polls for the fresh one).
+  - The warm-up revalidates each tag (`"max"`); the first visit after it may still get the
+    previous copy while it rebuilds, and so may `sitemap.xml` (E2E polls for the fresh ones).
   - Fewer than `MIN_INDEXABLE_PRODUCTS` (3) priced products → `noindex, follow` and left out of
     the sitemap. Unknown slugs get a real 404 from `src/proxy.ts` (the page's own `notFound()`
     would come after a streamed 200).
@@ -601,7 +621,9 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
     them; matched by `{ source: "/:path*", has: next-action }`), 30 a minute / 500 a day.
   - `/internal` password guessing: 10 wrong passwords per IP per 15 min (`ADMIN_LOCKOUT`,
     `createFailureLockout`) → 429 **before** the password is checked, so a locked IP can't
-    confirm a right guess. The bare prompt (no credentials) isn't a failure.
+    confirm a right guess. The bare prompt (no credentials) isn't a failure. Each instance
+    remembers an IP's count for 60 s (a failure's INCR updates it at once), so an open dashboard
+    doesn't cost a read per refresh.
 - **Server Actions never spend quota**: `offersFor(text)` defaults to `cached` mode — cache-only
   search (`cachedOnly`: a miss is `skipped`) and `cachedTranslator` (cache + glossary, no DeepL).
   Only the price-alert cron passes `"live"`.
@@ -753,7 +775,7 @@ strict-origin-when-cross-origin` (`no-referrer` on `/go/*`), `Permissions-Policy
     (`20261019130000_outbound_click_context.sql`). Store-search links carry no context.
   - `/internal/analytics` (same admin password): today / 7 / 30-day KPIs and the store breakdown
     (from the daily view), top 10 products (`outbound_click_top_products`, last 30 days), and the
-    latest 50 clicks; refreshes every 30 s while open (`AutoRefresh`).
+    latest 50 clicks; refreshes every 60 s while open (`AutoRefresh`).
   - `/internal/clicks` shows the last 30 days per store and per day, with the affiliate-tagged
     share. HTTP Basic: any user name, password `ADMIN_DASHBOARD_PASSWORD` (checked in
     `src/proxy.ts` and again in the page). Unset → 404. `robots.txt` disallows `/internal`.

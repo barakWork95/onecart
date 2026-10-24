@@ -320,6 +320,34 @@ describe("searchProducts — caching", () => {
     expect(second.pagination).toMatchObject({ page: 2, totalResults: 2 });
   });
 
+  it("reads every store's cached page in one batched read, not a read per store", async () => {
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));
+    const temu = fakeProvider("temu", () => okPage([EARBUDS.temu]));
+    const warm = setup([ali.provider, amazon.provider, temu.provider]);
+    await warm.search(QUERY);
+    const get = jest.spyOn(warm.cache, "get");
+    const getMany = jest.spyOn(warm.cache, "getMany");
+
+    const response = await warm.search(QUERY);
+    expect(getMany).toHaveBeenCalledTimes(1);
+    expect(getMany.mock.calls[0]?.[0]).toHaveLength(3);
+    expect(get).not.toHaveBeenCalled();
+    expect(response.providers.every((p) => p.fromCache)).toBe(true);
+  });
+
+  it("treats a failed batched read as a miss for each store, and still searches", async () => {
+    const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
+    const { search, cache, logger } = setup([ali.provider]);
+    jest.spyOn(cache, "getMany").mockRejectedValue(new Error("redis down"));
+    const response = await search(QUERY);
+    expect(outcome(response, "aliexpress")).toMatchObject({ status: "ok", fromCache: false });
+    expect(logger.warn).toHaveBeenCalledWith(
+      "search: cache read failed, continuing without it",
+      expect.objectContaining({ provider: "aliexpress", error: "redis down" }),
+    );
+  });
+
   it("calls no store at all in cache-only mode: cached stores answer, the rest are skipped", async () => {
     const ali = fakeProvider("aliexpress", () => okPage([EARBUDS.aliexpress]));
     const amazon = fakeProvider("amazon", () => okPage([EARBUDS.amazon]));

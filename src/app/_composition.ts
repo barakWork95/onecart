@@ -2,6 +2,7 @@ import "server-only";
 
 import { randomBytes } from "node:crypto";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { cacheLifeFor, LAST_GOOD_LIFE, orUncached } from "@/app/_last-good";
 import { after } from "next/server";
 import { createCategoryPage, type CategoryPage } from "@/application/deals/category-page";
 import { createCheckOpsAlerts, type OpsAlertRun } from "@/application/ops/ops-alerts";
@@ -96,6 +97,7 @@ import { createRedisCircuitBreakerStore } from "@/infrastructure/cache/redis-cir
 import { createRedisSearchCache } from "@/infrastructure/cache/redis-search-cache";
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
 import { createFailoverCounterStore, createFailoverRedis } from "@/infrastructure/cache/failover-redis";
+import { withMemoryCache } from "@/infrastructure/cache/memory-cache";
 import { createUpstashCounterStore, createUpstashRedis } from "@/infrastructure/cache/upstash";
 import { createCachedFxRates } from "@/infrastructure/fx/cached-fx-rates";
 import { createFrankfurterFxSource } from "@/infrastructure/fx/frankfurter-fx-source";
@@ -128,6 +130,8 @@ interface Services {
   /** The search path for cache warming: same stores and cache, its own Amazon budget. */
   readonly warmSearchProducts: SearchProducts;
   readonly translator: QueryTranslator;
+  /** True while this instance answers from memory instead of Upstash (see `_last-good.ts`). */
+  readonly redisDegraded: () => boolean;
   /** Cache and glossary only, never DeepL: for Server Actions, which any client can POST. */
   readonly cachedTranslator: QueryTranslator;
   readonly linkCodec: OutboundLinkCodec;
@@ -180,7 +184,15 @@ function buildServices(): Services {
   const logger = consoleLogger;
   // Upstash, or memory while it's out of quota or unreachable: pages never fail on Redis.
   const upstash = createUpstashRedis(config);
-  const redis = upstash ? createFailoverRedis({ primary: upstash, logger }) : createInMemoryRedis();
+  const failover = upstash ? createFailoverRedis({ primary: upstash, logger }) : null;
+  const redis = failover ?? createInMemoryRedis();
+  /**
+   * Read-only keys (search results, translations, photo hashes, affiliate links)
+   * also go through a per-instance memory cache: repeat reads within a minute cost
+   * no command. Shared state (counters, circuit breakers, ops state) gets `redis`
+   * itself, and `withMemoryCache` refuses those keys whatever it's given.
+   */
+  const cachedReads = withMemoryCache(redis);
   const demoMode = config.ONECART_DEMO_PROVIDERS;
 
   const providers: ProductSearchProvider[] = [];
@@ -246,14 +258,16 @@ function buildServices(): Services {
     }
   }
 
-  const searchCache = createRedisSearchCache(redis);
+  const searchCache = createRedisSearchCache(cachedReads);
+  /** Homepage and category views read Redis itself: they must see the warm-up's writes at once. */
+  const sharedSearchCache = createRedisSearchCache(redis);
 
   const translator = createQueryTranslator({
-    cache: redis,
+    cache: cachedReads,
     deepl: config.DEEPL_API_KEY ? createDeepLTranslator({ apiKey: config.DEEPL_API_KEY }) : null,
     logger,
   });
-  const cachedTranslator = createQueryTranslator({ cache: redis, deepl: null, logger });
+  const cachedTranslator = createQueryTranslator({ cache: cachedReads, deepl: null, logger });
 
   const linkCodec = createHmacOutboundLinkCodec(
     outboundLinkSecret(config.OUTBOUND_LINK_SECRET, config.NODE_ENV, demoMode),
@@ -279,7 +293,7 @@ function buildServices(): Services {
   }));
 
   const imageHashes = createRedisImageHashIndex({
-    redis,
+    redis: cachedReads,
     hashImage: async (url) => {
       const bytes = await fetchImage(url);
       return bytes ? dHash(bytes).catch(() => null) : null;
@@ -390,7 +404,7 @@ function buildServices(): Services {
                 appKey: config.ALIEXPRESS_APP_KEY,
                 appSecret: config.ALIEXPRESS_APP_SECRET,
                 trackingId: config.AFFILIATE_ALIEXPRESS_TRACKING_ID,
-                cache: redis,
+                cache: cachedReads,
                 logger,
               }),
             }
@@ -402,12 +416,18 @@ function buildServices(): Services {
       logger,
     }),
     trendingShowcase: createTrendingShowcase({
-      cache: searchCache,
+      cache: sharedSearchCache,
       stores: showcaseStores,
       imageHashes,
       logger,
     }),
-    categoryPage: createCategoryPage({ cache: searchCache, stores: showcaseStores, imageHashes, logger }),
+    categoryPage: createCategoryPage({
+      cache: sharedSearchCache,
+      stores: showcaseStores,
+      imageHashes,
+      logger,
+    }),
+    redisDegraded: () => failover?.degraded() ?? false,
     trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
     categories: demoMode ? DEMO_CATEGORIES : CATEGORIES,
     // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.
@@ -563,14 +583,14 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
   };
 }
 
-/** Showcase cards are cache reads; reuse them briefly so homepage traffic doesn't multiply Redis calls. */
 /**
  * The homepage's cached-results sections. They're cached as remote entries
  * shared by every server instance ("use cache: remote"), not per instance:
  * each rebuild reads ~100 cached searches and their photo hashes from Redis,
  * and serverless instances come and go all day. Refreshed when the warm-up
  * revalidates HOME_TAG, or hourly. Empty results are kept only a few minutes,
- * so cards appear soon after the cache is first warmed.
+ * so cards appear soon after the cache is first warmed. While Redis is
+ * degraded, rebuilds keep the last good copy (`_last-good.ts`).
  */
 export const HOME_TAG = "home";
 
@@ -579,29 +599,50 @@ export interface CategoryRow {
   readonly cards: readonly TrendingCard[];
 }
 
-/** The homepage "Trending" cards, from cached search results only (never a store API call). */
-export async function trendingCards(): Promise<TrendingCard[]> {
+/** Sets a freshly built view's cache life, or throws to keep the last good copy (`cacheLifeFor`). */
+function settleCacheLife(what: string, empty: boolean) {
+  if (cacheLifeFor(what, { empty, degraded: getServices().redisDegraded() }) === "last-good")
+    cacheLife(LAST_GOOD_LIFE);
+  else cacheLife("minutes");
+}
+
+async function buildTrendingCards(): Promise<TrendingCard[]> {
+  const { trendingShowcase, trendingQueries } = getServices();
+  return trendingShowcase(trendingQueries);
+}
+
+async function cachedTrendingCards(): Promise<TrendingCard[]> {
   "use cache: remote";
   cacheTag(HOME_TAG);
-  const { trendingShowcase, trendingQueries } = getServices();
-  const cards = await trendingShowcase(trendingQueries);
-  if (cards.length > 0) cacheLife("hours");
-  else cacheLife("minutes");
+  const cards = await buildTrendingCards();
+  settleCacheLife("home: trending", cards.length === 0);
   return cards;
 }
 
-/** The homepage category rows, cached results only; a category with no cards is left out. */
-export async function categoryRows(): Promise<CategoryRow[]> {
-  "use cache: remote";
-  cacheTag(HOME_TAG);
+/** The homepage "Trending" cards, from cached search results only (never a store API call). */
+export function trendingCards(): Promise<TrendingCard[]> {
+  return orUncached("home: trending", cachedTrendingCards, buildTrendingCards, consoleLogger);
+}
+
+async function buildCategoryRows(): Promise<CategoryRow[]> {
   const { trendingShowcase, categories } = getServices();
   const rows = await Promise.all(
     categories.map(async (category) => ({ category, cards: await trendingShowcase(category.products) })),
   );
-  const filled = rows.filter((row) => row.cards.length > 0);
-  if (filled.length > 0) cacheLife("hours");
-  else cacheLife("minutes");
-  return filled;
+  return rows.filter((row) => row.cards.length > 0);
+}
+
+async function cachedCategoryRows(): Promise<CategoryRow[]> {
+  "use cache: remote";
+  cacheTag(HOME_TAG);
+  const rows = await buildCategoryRows();
+  settleCacheLife("home: categories", rows.length === 0);
+  return rows;
+}
+
+/** The homepage category rows, cached results only; a category with no cards is left out. */
+export function categoryRows(): Promise<CategoryRow[]> {
+  return orUncached("home: categories", cachedCategoryRows, buildCategoryRows, consoleLogger);
 }
 
 /** Photos hashed per warm run at most: bounds the cron's time as the catalogue grows. */
@@ -638,9 +679,21 @@ async function recordPrices(
 }
 
 /** Today's price drops (cache only), each with a signed /go link to the listing. */
-export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; readonly href: string }[]> {
+type PriceDropLink = { readonly drop: PriceDropCard; readonly href: string };
+
+export function priceDropCards(): Promise<PriceDropLink[]> {
+  return orUncached("home: price drops", cachedPriceDropCards, buildPriceDropCards, consoleLogger);
+}
+
+async function cachedPriceDropCards(): Promise<PriceDropLink[]> {
   "use cache: remote";
   cacheTag(HOME_TAG);
+  const cards = await buildPriceDropCards();
+  settleCacheLife("home: price drops", cards.length === 0);
+  return cards;
+}
+
+async function buildPriceDropCards(): Promise<PriceDropLink[]> {
   const { priceDropBoard, linkCodec } = getServices();
   let drops: readonly PriceDropCard[] = [];
   try {
@@ -650,7 +703,7 @@ export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; 
       error: error instanceof Error ? error.message : String(error),
     });
   }
-  const cards = drops.map((drop) => ({
+  return drops.map((drop) => ({
     drop,
     href: linkCodec.encode({
       id: drop.productId,
@@ -659,9 +712,6 @@ export async function priceDropCards(): Promise<{ readonly drop: PriceDropCard; 
       context: { title: drop.title, priceAgorot: drop.current.amountMinor, bestDeal: false },
     }),
   }));
-  if (cards.length > 0) cacheLife("hours");
-  else cacheLife("minutes");
-  return cards;
 }
 
 /** Cross-store savings among the homepage's own cards (trending and categories). */
@@ -706,10 +756,14 @@ export async function warmTrending() {
   );
   const priceHistory = await recordPrices(observed, today);
   const photosHashed = await hashPhotos(photos);
-  // Category pages and the homepage sections are cached: rebuilt on their next visit (not
-  // served stale), after the price drops and photo hashes they read are written.
-  for (const { slug } of categories) revalidateTag(categoryTag(slug), { expire: 0 });
-  revalidateTag(HOME_TAG, { expire: 0 });
+  // Category pages and the homepage sections are cached: marked stale once the price drops
+  // and photo hashes they read are written, so the next visit rebuilds them in the
+  // background (stale-while-revalidate: a failed rebuild keeps the previous copy). A run
+  // that fell back to memory leaves them alone: it wrote nothing other instances can read.
+  if (!getServices().redisDegraded()) {
+    for (const { slug } of categories) revalidateTag(categoryTag(slug), "max");
+    revalidateTag(HOME_TAG, "max");
+  }
   return { trending, categories: categoriesWarmed, priceHistory, photosHashed };
 }
 
@@ -793,13 +847,27 @@ export interface CategoryPageData {
 /**
  * A category page's data, from cached search results only, cached as the
  * page itself: crawlers never reach Redis, let alone a store. Refreshed when
- * the warm-up revalidates its tag, or hourly if a run is missed. Null for an
- * unknown slug.
+ * the warm-up revalidates its tag, or hourly if a run is missed; while Redis is
+ * degraded the last good copy stays (`_last-good.ts`). Null for an unknown slug.
  */
-export async function categoryPageData(slug: string): Promise<CategoryPageData | null> {
+export function categoryPageData(slug: string): Promise<CategoryPageData | null> {
+  return orUncached(
+    `category:${slug}`,
+    () => cachedCategoryPageData(slug),
+    () => buildCategoryPageData(slug),
+    consoleLogger,
+  );
+}
+
+async function cachedCategoryPageData(slug: string): Promise<CategoryPageData | null> {
   "use cache";
-  cacheLife("hours");
   cacheTag(categoryTag(slug));
+  const data = await buildCategoryPageData(slug);
+  settleCacheLife(`category:${slug}`, !data || data.page.products.length === 0);
+  return data;
+}
+
+async function buildCategoryPageData(slug: string): Promise<CategoryPageData | null> {
   const { categories, categoryPage, linkCodec } = getServices();
   const category = categoryBySlug(categories, slug);
   if (!category) return null;

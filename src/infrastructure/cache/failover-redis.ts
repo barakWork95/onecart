@@ -27,7 +27,8 @@ function failover<T>(name: string, deps: FailoverDeps<T> & { readonly fallback: 
   const now = deps.now ?? Date.now;
   const logger = deps.logger ?? noopLogger;
   let downUntil = 0;
-  return async function run<R>(call: (store: T) => Promise<R>): Promise<R> {
+  const degraded = () => now() < downUntil;
+  const run = async function run<R>(call: (store: T) => Promise<R>): Promise<R> {
     if (now() < downUntil) return call(deps.fallback);
     try {
       return await call(deps.primary);
@@ -43,12 +44,23 @@ function failover<T>(name: string, deps: FailoverDeps<T> & { readonly fallback: 
       return call(deps.fallback);
     }
   };
+  return { run, degraded };
+}
+
+/** Redis that can tell whether it's currently answering from memory instead of Upstash. */
+export interface FailoverRedis extends RedisLike {
+  /** True while Upstash is skipped: what it returns may be partial, so don't cache it for long. */
+  degraded(): boolean;
 }
 
 /** Upstash with an in-memory stand-in while it's out (see `failover`). */
-export function createFailoverRedis(deps: FailoverDeps<RedisLike>): RedisLike {
-  const run = failover("redis", { ...deps, fallback: deps.fallback ?? createInMemoryRedis(deps.now) });
+export function createFailoverRedis(deps: FailoverDeps<RedisLike>): FailoverRedis {
+  const { run, degraded } = failover("redis", {
+    ...deps,
+    fallback: deps.fallback ?? createInMemoryRedis(deps.now),
+  });
   return {
+    degraded,
     get: (key) => run((r) => r.get(key)),
     mget: (keys) => run((r) => r.mget(keys)),
     set: (key, value, options) => run((r) => r.set(key, value, options)),
@@ -57,12 +69,13 @@ export function createFailoverRedis(deps: FailoverDeps<RedisLike>): RedisLike {
 
 /** Rate-limit and budget counters that keep counting in memory while Upstash is out. */
 export function createFailoverCounterStore(deps: FailoverDeps<CounterStore>): CounterStore {
-  const run = failover("counters", {
+  const { run } = failover("counters", {
     ...deps,
     fallback: deps.fallback ?? createInMemoryCounterStore(deps.now),
   });
   return {
     increment: (key, ttl) => run((c) => c.increment(key, ttl)),
+    incrementMany: (slots) => run((c) => c.incrementMany(slots)),
     count: (key) => run((c) => c.count(key)),
   };
 }

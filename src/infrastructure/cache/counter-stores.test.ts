@@ -1,31 +1,81 @@
 import { createInMemoryCounterStore, createRedisCounterStore } from "@/infrastructure/cache/counter-stores";
 
+/** Runs the counter script's logic the way Redis would, so tests see real counts and TTLs. */
+function fakeRedis(initial: Record<string, number> = {}) {
+  const values = new Map<string, number>(Object.entries(initial));
+  const ttls = new Map<string, number>();
+  return {
+    values,
+    ttls,
+    get: jest.fn(async (key: string) => values.get(key) ?? null),
+    eval: jest.fn(async (_script: string, keys: string[], args: string[]) =>
+      keys.map((key, i) => {
+        const next = (values.get(key) ?? 0) + 1;
+        values.set(key, next);
+        if (next === 1) ttls.set(key, Number(args[i]));
+        return next;
+      }),
+    ),
+  };
+}
+
 describe("createRedisCounterStore", () => {
-  it("increments and starts the expiry on the first hit only", async () => {
-    let value = 0;
-    const redis = { incr: jest.fn(async () => ++value), expire: jest.fn(async () => 1), get: jest.fn() };
+  it("counts every window of a hit in ONE atomic command, setting each key's expiry with its first hit", async () => {
+    const redis = fakeRedis();
     const store = createRedisCounterStore(redis);
-    expect(await store.increment("k", 120)).toBe(1);
-    expect(await store.increment("k", 120)).toBe(2);
-    expect(redis.expire).toHaveBeenCalledTimes(1);
-    expect(redis.expire).toHaveBeenCalledWith("k", 120);
+    expect(
+      await store.incrementMany([
+        { key: "rl:minute", ttlSeconds: 120 },
+        { key: "rl:day", ttlSeconds: 86_460 },
+      ]),
+    ).toEqual([1, 1]);
+    expect(await store.incrementMany([{ key: "rl:minute", ttlSeconds: 120 }])).toEqual([2]);
+    expect(redis.eval).toHaveBeenCalledTimes(2);
+    // The expiry is set inside the same script as the INCR: a key can never be left without one.
+    expect(redis.eval.mock.calls[0]?.[0]).toMatch(/INCR[\s\S]*EXPIRE/);
+    expect(Object.fromEntries(redis.ttls)).toEqual({ "rl:minute": 120, "rl:day": 86_460 });
+  });
+
+  it("increments one key through the same script", async () => {
+    const redis = fakeRedis({ k: 4 });
+    expect(await createRedisCounterStore(redis).increment("k", 60)).toBe(5);
+    expect(redis.eval).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends nothing for no keys", async () => {
+    const redis = fakeRedis();
+    expect(await createRedisCounterStore(redis).incrementMany([])).toEqual([]);
+    expect(redis.eval).not.toHaveBeenCalled();
   });
 
   it("reads a count without adding to it: 0 for a missing key", async () => {
-    const values = new Map<string, unknown>([["k", 3]]);
-    const redis = {
-      incr: jest.fn(),
-      expire: jest.fn(),
-      get: jest.fn(async (key: string) => values.get(key) ?? null),
-    };
+    const redis = fakeRedis({ k: 3 });
     const store = createRedisCounterStore(redis);
     expect(await store.count("k")).toBe(3);
     expect(await store.count("missing")).toBe(0);
-    expect(redis.incr).not.toHaveBeenCalled();
+    expect(redis.eval).not.toHaveBeenCalled();
   });
 });
 
 describe("createInMemoryCounterStore", () => {
+  it("counts several keys at once, each with its own expiry", async () => {
+    const clock = { ms: 0 };
+    const store = createInMemoryCounterStore(() => clock.ms);
+    expect(
+      await store.incrementMany([
+        { key: "a", ttlSeconds: 60 },
+        { key: "b", ttlSeconds: 600 },
+      ]),
+    ).toEqual([1, 1]);
+    clock.ms += 60_000;
+    expect(
+      await store.incrementMany([
+        { key: "a", ttlSeconds: 60 },
+        { key: "b", ttlSeconds: 600 },
+      ]),
+    ).toEqual([1, 2]);
+  });
+
   it("counts per key and restarts after the key expires", async () => {
     const clock = { ms: 0 };
     const store = createInMemoryCounterStore(() => clock.ms);

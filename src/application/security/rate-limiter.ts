@@ -28,15 +28,22 @@ export function createRateLimiter(deps: RateLimiterDeps): RateLimiter {
   return async (subject) => {
     const at = now();
     try {
-      const counts = await Promise.all(
-        deps.windows.map(async (window) => {
-          const slot = windowSlot(deps.prefix, subject, window, at);
-          // A little past the window, so a key never expires mid-window on clock skew.
-          const count = await deps.counter.increment(slot.key, window.windowSeconds + 60);
-          return { window, count, resetsInSeconds: slot.resetsInSeconds };
-        }),
+      const slots = deps.windows.map((window) => ({
+        window,
+        ...windowSlot(deps.prefix, subject, window, at),
+      }));
+      // Every window in one counter call (one command on Upstash). A little past the
+      // window, so a key never expires mid-window on clock skew.
+      const values = await deps.counter.incrementMany(
+        slots.map((s) => ({ key: s.key, ttlSeconds: s.window.windowSeconds + 60 })),
       );
-      return decideRateLimit(counts);
+      return decideRateLimit(
+        slots.map((s, i) => ({
+          window: s.window,
+          count: values[i] ?? 0,
+          resetsInSeconds: s.resetsInSeconds,
+        })),
+      );
     } catch (error) {
       logger.warn("rate-limit: counter unavailable, allowing", {
         prefix: deps.prefix,

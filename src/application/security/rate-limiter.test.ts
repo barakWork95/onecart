@@ -13,6 +13,9 @@ function fakeCounter(): CounterStore & { readonly ttls: Map<string, number> } {
       ttls.set(key, ttlSeconds);
       return next;
     },
+    async incrementMany(slots) {
+      return Promise.all(slots.map((s) => this.increment(s.key, s.ttlSeconds)));
+    },
     async count(key) {
       return counts.get(key) ?? 0;
     },
@@ -20,6 +23,23 @@ function fakeCounter(): CounterStore & { readonly ttls: Map<string, number> } {
 }
 
 describe("createRateLimiter", () => {
+  it("counts a hit in every window with ONE counter call", async () => {
+    const counter = fakeCounter();
+    const many = jest.spyOn(counter, "incrementMany");
+    const limit = createRateLimiter({
+      prefix: "rl:search",
+      windows: [
+        { name: "minute", limit: 2, windowSeconds: 60 },
+        { name: "day", limit: 3, windowSeconds: 86_400 },
+      ],
+      counter,
+      now: () => Date.UTC(2026, 9, 13, 6, 0, 0),
+    });
+    await limit("1.1.1.1");
+    expect(many).toHaveBeenCalledTimes(1);
+    expect(many.mock.calls[0]?.[0]).toHaveLength(2);
+  });
+
   const clock = { ms: Date.UTC(2026, 9, 13, 6, 0, 0) };
   const windows = [
     { name: "minute", limit: 2, windowSeconds: 60 },
@@ -68,7 +88,11 @@ describe("createRateLimiter", () => {
     const limit = createRateLimiter({
       prefix: "rl:search",
       windows,
-      counter: { increment: () => Promise.reject(new Error("redis down")), count: async () => 0 },
+      counter: {
+        increment: () => Promise.reject(new Error("redis down")),
+        incrementMany: () => Promise.reject(new Error("redis down")),
+        count: async () => 0,
+      },
       logger,
     });
     expect(await limit("ip")).toEqual({ allowed: true, retryAfterSeconds: 0 });

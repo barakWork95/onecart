@@ -13,7 +13,7 @@ export type ClickAnalyticsState =
   | { readonly kind: "error" };
 
 /** How often the page re-reads the click log while open. */
-const REFRESH_SECONDS = 30;
+const REFRESH_SECONDS = 60;
 
 const count = new Intl.NumberFormat("en-IL");
 const percent = new Intl.NumberFormat("en-IL", { style: "percent", maximumFractionDigits: 0 });
