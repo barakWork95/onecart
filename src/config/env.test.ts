@@ -28,6 +28,14 @@ describe("parseServerEnv", () => {
     });
   });
 
+  it("reads an empty on/off flag (KEY= from the template) as off, but rejects anything else", () => {
+    expect(parseServerEnv({ ONECART_DEMO_PROVIDERS: "", HEBREW_UI: "" })).toMatchObject({
+      ONECART_DEMO_PROVIDERS: false,
+      HEBREW_UI: false,
+    });
+    expect(() => parseServerEnv({ ONECART_DEMO_PROVIDERS: "yes" })).toThrow();
+  });
+
   it("still rejects malformed values that are present", () => {
     expect(() => parseServerEnv({ UPSTASH_REDIS_REST_URL: "not a url" })).toThrow();
     expect(() => parseServerEnv({ ONECART_DEMO_PROVIDERS: "yes" })).toThrow();

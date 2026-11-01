@@ -14,6 +14,16 @@ import { PROVIDER_IDS } from "@/domain/shared/provider";
 const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess((v) => (v === "" ? undefined : v), schema.optional());
 
+/** An on/off switch: "true" or "false"; unset or empty (`KEY=`) is off. */
+const flag = () =>
+  z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
+  );
+
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
@@ -21,18 +31,12 @@ const serverEnvSchema = z.object({
    * Serve the hand-written demo catalog instead of live stores (local dev, E2E).
    * The UI labels results as demo data whenever this is on.
    */
-  ONECART_DEMO_PROVIDERS: z
-    .enum(["true", "false"])
-    .default("false")
-    .transform((v) => v === "true"),
+  ONECART_DEMO_PROVIDERS: flag(),
   /**
    * Serve the Hebrew interface under /he, with hreflang links and sitemap entries.
    * Off: /he answers 404 and nothing links to it (until its text is translated).
    */
-  HEBREW_UI: z
-    .enum(["true", "false"])
-    .default("false")
-    .transform((v) => v === "true"),
+  HEBREW_UI: flag(),
 
   // Search data providers
   ALIEXPRESS_APP_KEY: optional(z.string().min(1)),
