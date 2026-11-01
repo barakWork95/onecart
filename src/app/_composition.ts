@@ -67,12 +67,17 @@ import {
   type TrendingCard,
   type TrendingShowcase,
 } from "@/application/deals/trending-showcase";
+import { createSearchPhotoHashing, type SearchPhotoHashRun } from "@/application/search/photo-hashes";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
 import { createRateLimiter, type RateLimiter } from "@/application/security/rate-limiter";
 import { storeChecks, storeSearches } from "@/application/search/store-fallback";
 import { FALLBACK_FX_RATES } from "@/config/fallback-fx-rates";
 import { ISRAEL_IMPORT_POLICY } from "@/config/israel-import-policy";
-import { DEFAULT_AMAZON_WARM_PER_DAY, DEFAULT_DAILY_CALL_BUDGETS } from "@/config/rate-limits";
+import {
+  DEFAULT_AMAZON_WARM_PER_DAY,
+  DEFAULT_DAILY_CALL_BUDGETS,
+  DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY,
+} from "@/config/rate-limits";
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
 import { CATEGORIES, DEMO_CATEGORIES, type Category } from "@/config/categories";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
@@ -155,8 +160,10 @@ interface Services {
   readonly opsStore: OpsStore;
   readonly recordCronRun: ReturnType<typeof createRecordCronRun>;
   readonly opsAlertState: OpsAlertState;
-  /** Product-photo hashes for generic matching: cache reads anywhere, downloads in the warm-up only. */
+  /** Product-photo hashes for generic matching: cache reads anywhere, downloads off the request path. */
   readonly imageHashes: ImageHashIndex;
+  /** Hashes a generic search's photos after its response (null: demo mode, or turned off). */
+  readonly hashSearchPhotos: ((response: SearchResponse) => Promise<SearchPhotoHashRun>) | null;
   readonly statusReport: ReturnType<typeof createStatusReport>;
   readonly checkOpsAlerts: ReturnType<typeof createCheckOpsAlerts>;
   readonly demoMode: boolean;
@@ -383,6 +390,7 @@ function buildServices(): Services {
     recordCronRun: createRecordCronRun({ store: opsStore, logger }),
     opsAlertState,
     imageHashes,
+    hashSearchPhotos: createHashSearchPhotos(config, demoMode, imageHashes, logger),
     statusReport: createStatusReport({
       ops: opsStore,
       quotas: opsQuotas,
@@ -475,6 +483,39 @@ function buildServices(): Services {
 }
 
 /**
+ * The daily cap on hashing shoppers' search photos (`createSearchPhotoHashing`):
+ * one count per search with photos to hash, shared by every instance.
+ */
+function createHashSearchPhotos(
+  config: ReturnType<typeof env>,
+  demoMode: boolean,
+  index: ImageHashIndex,
+  logger: typeof consoleLogger,
+): Services["hashSearchPhotos"] {
+  const perDay = config.PHOTO_HASH_SEARCHES_PER_DAY ?? DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY;
+  if (demoMode || perDay === 0) return null;
+  const limiter = createRateLimiter({
+    prefix: "photo-hash",
+    windows: [{ name: "day", limit: perDay, windowSeconds: 24 * 60 * 60 }],
+    counter: budgetCounter(config),
+    logger,
+  });
+  return createSearchPhotoHashing({
+    index,
+    allow: async () => (await limiter("search")).allowed,
+    logger,
+  });
+}
+
+/** Budgets keep counting in memory while Upstash is out: they must never fail open to a flood. */
+function budgetCounter(config: ReturnType<typeof env>) {
+  const upstashCounter = createUpstashCounterStore(config);
+  return upstashCounter
+    ? createFailoverCounterStore({ primary: upstashCounter, logger: consoleLogger })
+    : createInMemoryCounterStore();
+}
+
+/**
  * Daily live-call caps for the stores we call for real (not recorded or demo
  * data), counted in Upstash so every instance shares them.
  */
@@ -486,11 +527,7 @@ function createCallBudget(
   prefix: string,
   limits: Partial<Record<ProviderId, number>>,
 ): StoreCallBudget {
-  // Budgets keep counting in memory while Upstash is out: they must never fail open to a flood.
-  const upstashCounter = createUpstashCounterStore(config);
-  const counter = upstashCounter
-    ? createFailoverCounterStore({ primary: upstashCounter, logger: consoleLogger })
-    : createInMemoryCounterStore();
+  const counter = budgetCounter(config);
   const limiters = new Map<ProviderId, RateLimiter>();
   for (const provider of providers) {
     const limit = limits[provider.id];
@@ -559,6 +596,9 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
   const { query, translation } = await buildSearchQuery(request.value, translator, consoleLogger);
   // Cumulative: "Load more" re-renders every card through the requested page.
   const response = await searchProducts(query, { includeEarlierPages: true });
+  // Sent first; then the photos the grouping lacked are hashed, so the next visit compares them.
+  const { hashSearchPhotos } = getServices();
+  if (hashSearchPhotos) after(() => hashSearchPhotos(response).then(() => undefined));
 
   const outboundLinks: Record<string, string> = {};
   for (const group of response.groups) {

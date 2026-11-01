@@ -31,6 +31,13 @@ export function createRedisImageHashIndex(deps: ImageHashIndexDeps): ImageHashIn
     return unique.map((url, i) => ({ url, value: values[i] }));
   }
 
+  /** Neither a hash nor the failure marker: never tried, or expired. */
+  async function missing(urls: readonly string[]) {
+    return (await lookup(urls))
+      .filter(({ value }) => value === null || value === undefined)
+      .map((r) => r.url);
+  }
+
   return {
     async cached(urls) {
       const found = new Map<string, ImageHash>();
@@ -38,21 +45,21 @@ export function createRedisImageHashIndex(deps: ImageHashIndexDeps): ImageHashIn
       return found;
     },
 
+    missing,
+
     async ensure(urls) {
-      const missing = (await lookup(urls))
-        .filter(({ value }) => value === null || value === undefined)
-        .map((r) => r.url);
+      const todo = await missing(urls);
       let added = 0;
       let next = 0;
       const worker = async () => {
-        while (next < missing.length) {
-          const url = missing[next++]!;
+        while (next < todo.length) {
+          const url = todo[next++]!;
           const hash = await deps.hashImage(url);
           await deps.redis.set(imageHashKey(url), hash ?? FAILED, { ex: hash ? HASH_TTL : FAILED_TTL });
           if (hash) added++;
         }
       };
-      await Promise.all(Array.from({ length: Math.min(concurrency, missing.length) }, worker));
+      await Promise.all(Array.from({ length: Math.min(concurrency, todo.length) }, worker));
       return added;
     },
   };

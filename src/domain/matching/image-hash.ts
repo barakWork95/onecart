@@ -21,10 +21,15 @@ export function hammingDistance(a: ImageHash, b: ImageHash): number {
   return distance;
 }
 
-/** Hashes for image URLs: read the cache during searches, compute only in the warm-up. */
+/**
+ * Hashes for image URLs: searches read the cache; downloads happen only off the
+ * request path (the warm-up, or after a search's response is sent).
+ */
 export interface ImageHashIndex {
   /** Cached hashes only, never a download (safe on a shopper's search). */
   cached(urls: readonly string[]): Promise<ReadonlyMap<string, ImageHash>>;
-  /** Downloads and hashes what isn't cached yet (warm-up only); how many were added. */
+  /** URLs never tried: neither hashed nor a recent failure. Never a download. */
+  missing(urls: readonly string[]): Promise<string[]>;
+  /** Downloads and hashes what isn't cached yet (never on the request path); how many were added. */
   ensure(urls: readonly string[]): Promise<number>;
 }

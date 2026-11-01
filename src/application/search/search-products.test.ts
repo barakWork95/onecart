@@ -1,3 +1,4 @@
+import { createSearchPhotoHashing } from "@/application/search/photo-hashes";
 import { createSearchProducts, type SearchProductsDeps } from "@/application/search/search-products";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type {
@@ -11,7 +12,7 @@ import { searchCacheKey, type SearchQuery } from "@/domain/search/search-query";
 import { money } from "@/domain/shared/money";
 import type { ProviderId } from "@/domain/shared/provider";
 import { err, ok, type Result } from "@/domain/shared/result";
-import { fakeCircuitBreakerStore, fakeSearchCache } from "@/test/fakes";
+import { fakeCircuitBreakerStore, fakeImageHashIndex, fakeSearchCache } from "@/test/fakes";
 import { makeProduct } from "@/test/product-factory";
 
 type CallResult = Result<ProviderPage, ProviderError>;
@@ -928,6 +929,24 @@ describe("searchProducts — photo matching for generic searches", () => {
     expect(response.groups).toHaveLength(1);
     expect(response.groups[0]).toMatchObject({ matchedBy: "visual_match" });
     expect(cached).toHaveBeenCalledWith(expect.arrayContaining(Object.keys(photos)));
+  });
+
+  it("groups them on the next search once the first one's photos are hashed in the background", async () => {
+    const { index, downloaded } = fakeImageHashIndex((url) => photos[url] ?? null);
+    const { search } = setup(providers(), { imageHashes: index });
+    const hashAfterwards = createSearchPhotoHashing({ index, allow: async () => true });
+
+    // The first search finds no hashes yet: two single-store cards, nothing downloaded.
+    const first = await search(CLIPS);
+    expect(first.groups).toHaveLength(2);
+    expect(downloaded).toEqual([]);
+
+    expect(await hashAfterwards(first)).toBe(2);
+    const next = await search(CLIPS);
+    expect(next.groups).toHaveLength(1);
+    expect(next.groups[0]).toMatchObject({ matchedBy: "visual_match", lookAlike: true });
+    // One card, both stores' offers: the comparison, with no Amazon involved.
+    expect(next.groups[0]!.offers.map((o) => o.provider).sort()).toEqual(["aliexpress", "ebay"]);
   });
 
   it("keeps them apart without hashes, and when the lookup fails", async () => {

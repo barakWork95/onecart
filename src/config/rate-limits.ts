@@ -39,6 +39,15 @@ export const DEFAULT_DAILY_CALL_BUDGETS = { ebay: 4_500, amazon: 3, aliexpress: 
 export const DEFAULT_AMAZON_WARM_PER_DAY = 2;
 
 /**
+ * Generic searches per day, across all shoppers, whose photos are hashed after
+ * the response (PHOTO_HASH_SEARCHES_PER_DAY; `createSearchPhotoHashing`). Each
+ * downloads and writes at most 40 photo hashes (20 per store), only those never
+ * tried: about 2,500 Redis commands a day, about 75,000 a month at the cap, against
+ * Upstash's 500,000. Searches whose photos are all hashed spend none. 0 turns it off.
+ */
+export const DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY = 60;
+
+/**
  * /go clicks one IP may make. Each one writes a click row and can call
  * AliExpress's link API; a shopper opens a handful of stores per search.
  */

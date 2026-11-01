@@ -1,3 +1,4 @@
+import type { ImageHash, ImageHashIndex } from "@/domain/matching/image-hash";
 import type { CircuitState } from "@/domain/search/circuit-breaker";
 import type { CachedProviderResult, CircuitBreakerStore, SearchResultCache } from "@/domain/search/ports";
 import type { ProviderId } from "@/domain/shared/provider";
@@ -39,6 +40,38 @@ export function fakeCircuitBreakerStore(): CircuitBreakerStore {
       states.set(provider, state);
     },
   };
+}
+
+/**
+ * An image hash index whose "downloads" are `hashOf` (null = unhashable, remembered
+ * like the real one). `downloaded` lists every URL hashed, in order.
+ */
+export function fakeImageHashIndex(hashOf: (url: string) => ImageHash | null) {
+  const stored = new Map<string, ImageHash | null>();
+  const downloaded: string[] = [];
+  const missing = async (urls: readonly string[]) => [...new Set(urls)].filter((u) => !stored.has(u));
+  const index: ImageHashIndex = {
+    async cached(urls) {
+      const found = new Map<string, ImageHash>();
+      for (const url of urls) {
+        const hash = stored.get(url);
+        if (hash) found.set(url, hash);
+      }
+      return found;
+    },
+    missing,
+    async ensure(urls) {
+      let added = 0;
+      for (const url of await missing(urls)) {
+        downloaded.push(url);
+        const hash = hashOf(url);
+        stored.set(url, hash);
+        if (hash) added++;
+      }
+      return added;
+    },
+  };
+  return { index, downloaded };
 }
 
 /**

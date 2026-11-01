@@ -389,9 +389,17 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   - **Photo hashes (Phase 2).** The warm-up hashes generic searches' photos (`photoUrlsToHash`,
     25 per store, ≤1,500 a run): dHash with `sharp` (borders trimmed, 9×8 greyscale), cached in
     Redis 30 days (`img:dhash:v1:{sha256(url)}`; failures 1 day). Photos come only from the
-    allowlisted store CDNs (`image-fetcher.ts`: https, no redirects, 5 s, 2 MB). **Searches never
-    compute a hash**: `photoHashesFor` reads cached ones, for generic intents only, and a failed
-    read means "no photos".
+    allowlisted store CDNs (`image-fetcher.ts`: https, no redirects, 5 s, 2 MB). **A search never
+    computes a hash while rendering**: `photoHashesFor` reads cached ones, for generic intents only,
+    and a failed read means "no photos".
+  - **Shoppers' searches hash after the response** (`createSearchPhotoHashing`, scheduled with
+    `after()` in `searchFromParams`): a generic search with listings from 2+ stores hashes the
+    photos never tried (`ImageHashIndex.missing`) of each store's top `SEARCH_PHOTOS_PER_STORE`
+    (20), so the next visit groups look-alikes. One daily allowance per search with photos to
+    hash (`PHOTO_HASH_SEARCHES_PER_DAY`, default 60, counter prefix `photo-hash`; 0 = off; off in
+    demo mode): at most ~2,500 Redis commands a day. Searches whose photos are all tried spend
+    nothing. Never throws. The thresholds below are unchanged: hashing more photos finds more
+    pairs; it never loosens what counts as one.
   - **Generic matcher (Phase 3, `generic-matcher.ts`).** A generic pair matches **only** through
     `matchGeneric`, never the branded rules: unbranded titles carry format codes ("MP3",
     "QC3.0") that read as model numbers. Gates: (A) no `attributeConflict`; (B) photos within

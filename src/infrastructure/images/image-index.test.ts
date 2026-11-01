@@ -86,4 +86,25 @@ describe("createRedisImageHashIndex", () => {
     expect(hashImage).toHaveBeenCalledTimes(3);
     expect(await redis.get(imageHashKey("https://i.ebayimg.com/bad.jpg"))).toBe("unhashable");
   });
+
+  it("lists the photos never tried, in one batched read, without downloading", async () => {
+    const redis = createInMemoryRedis();
+    const hashImage = jest.fn(async (url: string) => (url.endsWith("bad.jpg") ? null : "00ff00ff00ff00ff"));
+    const index = createRedisImageHashIndex({ redis, hashImage });
+    await index.ensure(["https://i.ebayimg.com/a.jpg", "https://i.ebayimg.com/bad.jpg"]);
+    hashImage.mockClear();
+    const mget = jest.spyOn(redis, "mget");
+
+    // A remembered failure isn't missing: it's tried again only once its marker expires.
+    expect(
+      await index.missing([
+        "https://i.ebayimg.com/a.jpg",
+        "https://i.ebayimg.com/bad.jpg",
+        "https://i.ebayimg.com/new.jpg",
+        "https://i.ebayimg.com/new.jpg",
+      ]),
+    ).toEqual(["https://i.ebayimg.com/new.jpg"]);
+    expect(mget).toHaveBeenCalledTimes(1);
+    expect(hashImage).not.toHaveBeenCalled();
+  });
 });
