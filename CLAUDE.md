@@ -428,6 +428,11 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
       the groups formed are unchanged. Edited copies within 10 bits, v1 → v2: resized 89 → 100%,
       lossy 94 → 99%, padded 92 → 93%. Changing any step changes the hashes: bump the key's
       version and re-record `generic-recorded.json` from its photos.
+    - **Measured live with v2 (db7bda7, function in `iad1`):** seven warm fresh checks took
+      1.40–2.21 s (median 1.67 s; a cold start 3.48 s): `photos` 0.39–0.97 s (median ~0.5 s),
+      `process` summing 1.4–2.6 s, `search` 0.30–0.40 s, `check` ~0.2 s, `regroup` ~0.11 s. About
+      0.5 s is outside the function (Israel → `fra1` → `iad1`). Redis round trips look like ~0.1 s
+      each; `preferredRegion` next to Upstash is the next saving.
     - **Hash the 500px photos, never store thumbnails.** Measured on 2026-11-01 (with v1) over the
       449 recorded generic listings: eBay `s-l140` hashed a median ~5 bits (up to 21) from the 500px photo,
       AliExpress `_200x200` within 2 bits for only 81% (up to 20), so thumbnail hashes can't be
