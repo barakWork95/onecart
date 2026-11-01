@@ -1,7 +1,12 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { isImageHash, type ImageHash, type ImageHashIndex } from "@/domain/matching/image-hash";
+import {
+  isImageHash,
+  type ImageHash,
+  type ImageHashIndex,
+  type PhotoStepTimer,
+} from "@/domain/matching/image-hash";
 import type { RedisLike } from "@/infrastructure/cache/redis-client";
 
 /** Image URLs are long; the key holds a digest. Bump v1 if the hash algorithm changes. */
@@ -18,7 +23,10 @@ export interface ImageHashIndexDeps {
    * Downloads and hashes one image: null when it can't be hashed (remembered for a
    * day), "retry" when it should be tried again on the next run (a timeout).
    */
-  readonly hashImage: (url: string) => Promise<ImageHash | "retry" | null>;
+  readonly hashImage: (
+    url: string,
+    mark?: (step: "download" | "process", ms: number) => void,
+  ) => Promise<ImageHash | "retry" | null>;
   /** Downloads at once in `ensure`. */
   readonly concurrency?: number;
 }
@@ -41,6 +49,24 @@ export function createRedisImageHashIndex(deps: ImageHashIndexDeps): ImageHashIn
       .map((r) => r.url);
   }
 
+  async function hash(urls: readonly string[], mark?: PhotoStepTimer) {
+    const hashes = new Map<string, ImageHash>();
+    let next = 0;
+    const worker = async () => {
+      while (next < urls.length) {
+        const url = urls[next++]!;
+        const result = await deps.hashImage(url, mark);
+        if (result === "retry") continue;
+        const writing = performance.now();
+        await deps.redis.set(imageHashKey(url), result ?? FAILED, { ex: result ? HASH_TTL : FAILED_TTL });
+        mark?.("write", performance.now() - writing);
+        if (result) hashes.set(url, result);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(concurrency, urls.length) }, worker));
+    return hashes;
+  }
+
   return {
     async cached(urls) {
       const found = new Map<string, ImageHash>();
@@ -51,20 +77,9 @@ export function createRedisImageHashIndex(deps: ImageHashIndexDeps): ImageHashIn
     missing,
 
     async ensure(urls) {
-      const todo = await missing(urls);
-      let added = 0;
-      let next = 0;
-      const worker = async () => {
-        while (next < todo.length) {
-          const url = todo[next++]!;
-          const hash = await deps.hashImage(url);
-          if (hash === "retry") continue;
-          await deps.redis.set(imageHashKey(url), hash ?? FAILED, { ex: hash ? HASH_TTL : FAILED_TTL });
-          if (hash) added++;
-        }
-      };
-      await Promise.all(Array.from({ length: Math.min(concurrency, todo.length) }, worker));
-      return added;
+      return (await hash(await missing(urls))).size;
     },
+
+    hash,
   };
 }

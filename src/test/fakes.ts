@@ -61,12 +61,18 @@ export function fakeImageHashIndex(hashOf: (url: string) => ImageHash | null) {
     },
     missing,
     async ensure(urls) {
-      let added = 0;
-      for (const url of await missing(urls)) {
+      return (await index.hash(await missing(urls))).size;
+    },
+    async hash(urls, mark) {
+      const added = new Map<string, ImageHash>();
+      for (const url of urls) {
         downloaded.push(url);
         const hash = hashOf(url);
         stored.set(url, hash);
-        if (hash) added++;
+        if (hash) added.set(url, hash);
+        mark?.("download", 10);
+        mark?.("process", 2);
+        mark?.("write", 5);
       }
       return added;
     },

@@ -93,7 +93,9 @@ describe("createSearchPhotoHashing", () => {
     const { photos, downloaded, allow } = setup();
     const results = response("monitor stand riser", twoStores);
     expect(await photos.pending(results)).toBe(true);
-    expect(await photos.hash(results)).toBe(3);
+    const run = await photos.hash(results);
+    expect(run.kind).toBe("hashed");
+    expect(run.kind === "hashed" && run.hashes.size).toBe(3);
     expect(allow).toHaveBeenCalledTimes(1);
     // eBay's top two and AliExpress's one; eBay's third is past `perStore`.
     expect(downloaded.sort()).toEqual([
@@ -103,6 +105,15 @@ describe("createSearchPhotoHashing", () => {
     ]);
     // Nothing left to check: the page stops asking.
     expect(await photos.pending(results)).toBe(false);
+  });
+
+  it("reads the cache once, then reports the slowest download and write and the total processing", async () => {
+    const { index } = fakeImageHashIndex(() => "00ff00ff00ff00ff");
+    const missing = jest.spyOn(index, "missing");
+    const photos = createSearchPhotoHashing({ index, allow: async () => true, perStore: 2 });
+    const run = await photos.hash(response("monitor stand riser", twoStores));
+    expect(missing).toHaveBeenCalledTimes(1);
+    expect(run.timings).toMatchObject({ download: 10, write: 5, process: 6 });
   });
 
   it("checks the top six per store by default", async () => {
@@ -119,22 +130,22 @@ describe("createSearchPhotoHashing", () => {
     const { photos, index, allow, downloaded } = setup();
     // A branded search never uses photos.
     expect(await photos.pending(response("anker 737", twoStores))).toBe(false);
-    expect(await photos.hash(response("anker 737", twoStores))).toBe("not_needed");
+    expect((await photos.hash(response("anker 737", twoStores))).kind).toBe("not_needed");
     // One store alone has no cross-store look-alike to find.
     const oneStore = response("monitor stand riser", [listing("ebay", 1), listing("ebay", 2)]);
     expect(await photos.pending(oneStore)).toBe(false);
-    expect(await photos.hash(oneStore)).toBe("not_needed");
+    expect((await photos.hash(oneStore)).kind).toBe("not_needed");
     // Every photo already tried (hashed or remembered as unhashable).
     await index.ensure(twoStores.map((p) => p.imageUrl!));
     downloaded.length = 0;
-    expect(await photos.hash(response("monitor stand riser", twoStores))).toBe("not_needed");
+    expect((await photos.hash(response("monitor stand riser", twoStores))).kind).toBe("not_needed");
     expect(allow).not.toHaveBeenCalled();
     expect(downloaded).toEqual([]);
   });
 
   it("downloads nothing once the day's allowance is spent", async () => {
     const { photos, downloaded, logger } = setup(false);
-    expect(await photos.hash(response("monitor stand riser", twoStores))).toBe("over_budget");
+    expect((await photos.hash(response("monitor stand riser", twoStores))).kind).toBe("over_budget");
     expect(downloaded).toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith("search photos: over the daily allowance, not hashing", {
       query: "monitor stand riser",
@@ -143,12 +154,12 @@ describe("createSearchPhotoHashing", () => {
 
   it("never throws: a failure is logged and reported", async () => {
     const logger = { warn: jest.fn() };
-    const index = { missing: () => Promise.reject(new Error("redis down")), ensure: jest.fn() };
+    const index = { missing: () => Promise.reject(new Error("redis down")), hash: jest.fn() };
     const photos = createSearchPhotoHashing({ index, allow: async () => true, logger });
     const results = response("monitor stand riser", twoStores);
-    expect(await photos.hash(results)).toBe("error");
+    expect((await photos.hash(results)).kind).toBe("error");
     expect(await photos.pending(results)).toBe(false);
-    expect(index.ensure).not.toHaveBeenCalled();
+    expect(index.hash).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith("search photos: hashing failed", { error: "redis down" });
     expect(logger.warn).toHaveBeenCalledWith("search photos: check failed", { error: "redis down" });
   });

@@ -86,6 +86,8 @@ export interface SearchProductsOptions {
   readonly lean?: boolean;
   /** Cache lifetime per store for what this search fetches, instead of the default. */
   readonly cacheTtlSeconds?: Partial<Record<ProviderId, number>>;
+  /** Where this search reads photo hashes, instead of the shared cache (a caller that holds them). */
+  readonly photoHashes?: PhotoHashReader;
 }
 
 /** Per-call knobs `runProvider` needs from the search options. */
@@ -377,13 +379,18 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
   }
 
   /** Every store page loaded so far, assembled into the cards a shopper sees. */
-  async function merge(progress: readonly ProviderProgress[], query: SearchQuery, intent: SearchIntent) {
+  async function merge(
+    progress: readonly ProviderProgress[],
+    query: SearchQuery,
+    intent: SearchIntent,
+    photoHashes: PhotoHashReader | undefined,
+  ) {
     const stores = progress.map(({ runs }) => ({
       products: runs.flatMap((r) => r.products),
       unavailable: runs.flatMap((r) => r.unavailable),
     }));
     const products = stores.flatMap((s) => s.products);
-    const hashes = await photoHashesFor(deps.imageHashes, products, intent, logger);
+    const hashes = await photoHashesFor(photoHashes, products, intent, logger);
     return assembleResults(stores, query, intent, hashes);
   }
 
@@ -427,12 +434,13 @@ export function createSearchProducts(deps: SearchProductsDeps): SearchProducts {
     // Already-loaded results fill pages first; a store is asked for its next page only
     // when they run out. One extra group tells us whether a next results page exists.
     const intent = searchIntent(query.normalizedText);
-    let merged = await merge(progress, query, intent);
+    const photoHashes = options.photoHashes ?? deps.imageHashes;
+    let merged = await merge(progress, query, intent, photoHashes);
     while (mode !== "none" && merged.groups.length <= page * pageSize) {
       const deeper = progress.filter(canGoDeeper);
       if (deeper.length === 0) break;
       await Promise.all(deeper.map((p) => loadNextPage(p, query, mode, run)));
-      merged = await merge(progress, query, intent);
+      merged = await merge(progress, query, intent, photoHashes);
     }
 
     const { items, pagination } = paginate(merged.groups, page, pageSize);

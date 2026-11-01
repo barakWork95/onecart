@@ -72,6 +72,7 @@ import {
   lookAlikePairs,
   SEARCH_PHOTOS_PER_STORE,
   type LookAlikePair,
+  type PhotoHashTimings,
   type SearchPhotoHashing,
 } from "@/application/search/photo-hashes";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
@@ -315,11 +316,19 @@ function buildServices(): Services {
   }));
 
   /** One photo's hash; a timeout is tried again on a later run, not remembered as a failure. */
-  const hashImage = (timeoutMs?: number) => async (url: string) => {
-    const bytes = await fetchImage(url, fetch, timeoutMs);
-    if (bytes === "timeout") return "retry" as const;
-    return bytes ? dHash(bytes).catch(() => null) : null;
-  };
+  const hashImage =
+    (timeoutMs?: number) =>
+    async (url: string, mark?: (step: "download" | "process", ms: number) => void) => {
+      const downloading = performance.now();
+      const bytes = await fetchImage(url, fetch, timeoutMs);
+      mark?.("download", performance.now() - downloading);
+      if (bytes === "timeout") return "retry" as const;
+      if (!bytes) return null;
+      const processing = performance.now();
+      const hash = await dHash(bytes).catch(() => null);
+      mark?.("process", performance.now() - processing);
+      return hash;
+    };
   const imageHashes = createRedisImageHashIndex({ redis: cachedReads, hashImage: hashImage() });
   // A shopper is waiting on the photo check: every photo at once, none allowed to hold it up.
   const searchImageHashes = createRedisImageHashIndex({
@@ -677,7 +686,7 @@ export type FingerprintTopResult =
       readonly regrouped: boolean;
       readonly pairs: readonly LookAlikePair[];
       /** Milliseconds per phase, for the Server-Timing header. */
-      readonly timings: { readonly search: number; readonly hash: number; readonly regroup: number };
+      readonly timings: PhotoHashTimings & { readonly search: number; readonly regroup: number };
     };
 
 /**
@@ -688,23 +697,44 @@ export type FingerprintTopResult =
 export async function fingerprintTop(params: PhotoCheckParams): Promise<FingerprintTopResult> {
   const request = parseSearchParams({ ...params, page: "1" });
   if (!request.ok) return { kind: "invalid" };
-  const { searchProducts, cachedTranslator, searchPhotos } = getServices();
+  const { searchProducts, cachedTranslator, searchPhotos, imageHashes } = getServices();
   const started = performance.now();
-  const since = (at: number) => Math.round(performance.now() - at);
   const { query } = await buildSearchQuery(request.value, cachedTranslator, consoleLogger);
-  const before = await searchProducts(query, { cachedOnly: true });
+  // Kept for the regroup, which then needs no Redis read for photos nothing else has written.
+  const known = new Map<string, string>();
+  const before = await searchProducts(query, {
+    cachedOnly: true,
+    photoHashes: {
+      cached: async (urls) => {
+        const found = await imageHashes.cached(urls);
+        for (const [url, hash] of found) known.set(url, hash);
+        return found;
+      },
+    },
+  });
   const pairsBefore = lookAlikePairs(before.groups);
-  const hashStarted = performance.now();
-  const hashed = searchPhotos ? await searchPhotos.hash(before) : "not_needed";
-  const timings = { search: Math.round(hashStarted - started), hash: since(hashStarted), regroup: 0 };
-  if (typeof hashed !== "number" || hashed === 0)
-    return { kind: "checked", regrouped: false, pairs: pairsBefore, timings };
+  const search = Math.round(performance.now() - started);
+  const idle = { check: 0, photos: 0, download: 0, write: 0, process: 0 };
+  const run = searchPhotos ? await searchPhotos.hash(before) : { kind: "not_needed" as const, timings: idle };
+  if (run.kind !== "hashed" || run.hashes.size === 0)
+    return {
+      kind: "checked",
+      regrouped: false,
+      pairs: pairsBefore,
+      timings: { search, regroup: 0, ...run.timings },
+    };
+  for (const [url, hash] of run.hashes) known.set(url, hash);
   const regroupStarted = performance.now();
-  const pairs = lookAlikePairs((await searchProducts(query, { cachedOnly: true })).groups);
+  const after = await searchProducts(query, {
+    cachedOnly: true,
+    photoHashes: { cached: async () => known },
+  });
+  const pairs = lookAlikePairs(after.groups);
   // A listing newly in a look-alike card, whether a new card or one that grew.
   const groupedBefore = new Set(pairsBefore.flatMap((p) => p.listingIds));
   const regrouped = pairs.some((p) => p.listingIds.some((id) => !groupedBefore.has(id)));
-  return { kind: "checked", regrouped, pairs, timings: { ...timings, regroup: since(regroupStarted) } };
+  const regroup = Math.round(performance.now() - regroupStarted);
+  return { kind: "checked", regrouped, pairs, timings: { search, regroup, ...run.timings } };
 }
 
 /**

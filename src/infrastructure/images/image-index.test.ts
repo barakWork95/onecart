@@ -99,6 +99,34 @@ describe("createRedisImageHashIndex", () => {
     expect(await redis.get(imageHashKey("https://i.ebayimg.com/bad.jpg"))).toBe("unhashable");
   });
 
+  it("hashes exactly the photos it's given, without a cache read, timing each step", async () => {
+    const redis = createInMemoryRedis();
+    const mget = jest.spyOn(redis, "mget");
+    const hashImage = jest.fn(
+      async (url: string, mark?: (phase: "download" | "process", ms: number) => void) => {
+        mark?.("download", 30);
+        mark?.("process", 4);
+        return url.endsWith("bad.jpg") ? null : "00ff00ff00ff00ff";
+      },
+    );
+    const index = createRedisImageHashIndex({ redis, hashImage });
+    const marks: [string, number][] = [];
+    const hashes = await index.hash(
+      ["https://i.ebayimg.com/a.jpg", "https://i.ebayimg.com/bad.jpg"],
+      (phase, ms) => marks.push([phase, ms]),
+    );
+    expect(hashes).toEqual(new Map([["https://i.ebayimg.com/a.jpg", "00ff00ff00ff00ff"]]));
+    expect(mget).not.toHaveBeenCalled();
+    expect(marks.filter(([p]) => p === "download")).toEqual([
+      ["download", 30],
+      ["download", 30],
+    ]);
+    expect(marks.filter(([p]) => p === "process")).toHaveLength(2);
+    // Both results are written (the failure as its marker), each timed.
+    expect(marks.filter(([p]) => p === "write")).toHaveLength(2);
+    expect(await index.missing(["https://i.ebayimg.com/a.jpg", "https://i.ebayimg.com/bad.jpg"])).toEqual([]);
+  });
+
   it("records nothing for a photo it should try again (a timeout): it stays missing", async () => {
     const redis = createInMemoryRedis();
     const hashImage = jest.fn(async (url: string) =>

@@ -41,8 +41,27 @@ export async function photoHashesFor(
  */
 export const SEARCH_PHOTOS_PER_STORE = 6;
 
-/** How many photos were hashed, or why none were. */
-export type SearchPhotoHashRun = number | "not_needed" | "over_budget" | "error";
+/** Where a photo check's time went, in milliseconds. */
+export interface PhotoHashTimings {
+  /** Finding the missing photos and spending the allowance. */
+  readonly check: number;
+  /** The whole parallel photo step, by the clock. */
+  readonly photos: number;
+  /** The slowest single download and Redis write. */
+  readonly download: number;
+  readonly write: number;
+  /** Image processing summed over the photos: CPU they compete for. */
+  readonly process: number;
+}
+
+/** The new hashes and where the time went, or why nothing was hashed. */
+export type SearchPhotoHashRun =
+  | {
+      readonly kind: "hashed";
+      readonly hashes: ReadonlyMap<string, ImageHash>;
+      readonly timings: PhotoHashTimings;
+    }
+  | { readonly kind: "not_needed" | "over_budget" | "error"; readonly timings: PhotoHashTimings };
 
 /** A photo-matched card spanning stores: what a progressive check reports back. */
 export interface LookAlikePair {
@@ -70,7 +89,7 @@ export function lookAlikePairs(groups: readonly ProductGroup[]): LookAlikePair[]
  * downloads and Redis writes). Neither ever throws.
  */
 export function createSearchPhotoHashing(deps: {
-  readonly index: Pick<ImageHashIndex, "missing" | "ensure">;
+  readonly index: Pick<ImageHashIndex, "missing" | "hash">;
   readonly allow: () => Promise<boolean>;
   readonly perStore?: number;
   readonly logger?: Logger;
@@ -100,21 +119,41 @@ export function createSearchPhotoHashing(deps: {
     },
 
     async hash(response: SearchResponse): Promise<SearchPhotoHashRun> {
+      const started = performance.now();
+      const since = (at: number) => Math.round(performance.now() - at);
+      const idle = { check: 0, photos: 0, download: 0, write: 0, process: 0 };
       const urls = candidates(response);
-      if (urls.length === 0) return "not_needed";
+      if (urls.length === 0) return { kind: "not_needed", timings: idle };
       try {
+        // The allowance comes after the read, so a search with nothing to hash can't spend it.
         const missing = await deps.index.missing(urls);
-        if (missing.length === 0) return "not_needed";
+        if (missing.length === 0) return { kind: "not_needed", timings: { ...idle, check: since(started) } };
         if (!(await deps.allow())) {
           logger.warn("search photos: over the daily allowance, not hashing", {
             query: response.query.normalizedText,
           });
-          return "over_budget";
+          return { kind: "over_budget", timings: { ...idle, check: since(started) } };
         }
-        return await deps.index.ensure(missing);
+        const check = since(started);
+        const photosStarted = performance.now();
+        const steps = { download: 0, write: 0, process: 0 };
+        const hashes = await deps.index.hash(missing, (step, ms) => {
+          steps[step] = step === "process" ? steps[step] + ms : Math.max(steps[step], ms);
+        });
+        return {
+          kind: "hashed",
+          hashes,
+          timings: {
+            check,
+            photos: since(photosStarted),
+            download: Math.round(steps.download),
+            write: Math.round(steps.write),
+            process: Math.round(steps.process),
+          },
+        };
       } catch (error) {
         warn("search photos: hashing failed", error);
-        return "error";
+        return { kind: "error", timings: { ...idle, check: since(started) } };
       }
     },
   };

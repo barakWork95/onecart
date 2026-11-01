@@ -412,7 +412,13 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
     - Latency: the check's own index (`searchImageHashes`) downloads all 12 photos at once, each
       capped at `SEARCH_PHOTO_TIMEOUT_MS` (1.5 s; the warm-up allows 5 s). A timeout is
       `"retry"`: nothing is recorded, so a later visit tries it again (a real failure is
-      remembered for a day). The endpoint sends `Server-Timing: search, hash, regroup`.
+      remembered for a day). The endpoint sends `Server-Timing`: `search`, `check` (missing read
+      and allowance), `photos` (the whole parallel step), `download` and `write` (the slowest of
+      each), `process` (summed: CPU the photos compete for), `regroup`.
+    - Redis round trips: `missing` once, then the allowance, then `ImageHashIndex.hash` on that
+      list with no second read; the regroup reads photos from the hashes the check already holds
+      (`SearchProductsOptions.photoHashes`). The allowance stays after the read, not in parallel:
+      otherwise repeating a check on a hashed search would drain the shared daily cap.
     - **Hash the 500px photos, never thumbnails.** Measured on 2026-11-01 over the 449 recorded
       generic listings: eBay `s-l140` hashed a median ~5 bits (up to 21) from the 500px photo,
       AliExpress `_200x200` within 2 bits for only 81% (up to 20), so thumbnail hashes can't be

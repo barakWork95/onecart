@@ -942,12 +942,21 @@ describe("searchProducts — photo matching for generic searches", () => {
     expect(downloaded).toEqual([]);
 
     expect(await fingerprints.pending(first)).toBe(true);
-    expect(await fingerprints.hash(first)).toBe(2);
+    expect((await fingerprints.hash(first)).kind).toBe("hashed");
     const next = await search(CLIPS);
     expect(next.groups).toHaveLength(1);
     expect(next.groups[0]).toMatchObject({ matchedBy: "visual_match", lookAlike: true });
     // One card, both stores' offers: the comparison, with no Amazon involved.
     expect(next.groups[0]!.offers.map((o) => o.provider).sort()).toEqual(["aliexpress", "ebay"]);
+  });
+
+  it("reads one search's photo hashes from the reader it's given instead", async () => {
+    const shared = { cached: jest.fn(() => Promise.resolve(new Map<string, string>())) };
+    const known = { cached: jest.fn(() => Promise.resolve(new Map(Object.entries(photos)))) };
+    const { search } = setup(providers(), { imageHashes: shared });
+    const response = await search(CLIPS, { photoHashes: known });
+    expect(response.groups).toHaveLength(1);
+    expect(shared.cached).not.toHaveBeenCalled();
   });
 
   it("keeps them apart without hashes, and when the lookup fails", async () => {

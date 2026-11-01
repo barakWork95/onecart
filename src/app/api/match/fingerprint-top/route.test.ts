@@ -23,12 +23,14 @@ describe("POST /api/match/fingerprint-top", () => {
       kind: "checked",
       regrouped: true,
       pairs,
-      timings: { search: 40, hash: 820, regroup: 35 },
+      timings: { search: 40, check: 12, photos: 820, download: 700, write: 20, process: 90, regroup: 3 },
     });
     const response = await post({ q: "monitor stand riser", sort: "landed_price_asc" });
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(response.headers.get("server-timing")).toBe("search;dur=40, hash;dur=820, regroup;dur=35");
+    expect(response.headers.get("server-timing")).toBe(
+      "search;dur=40, check;dur=12, photos;dur=820, download;dur=700, write;dur=20, process;dur=90, regroup;dur=3",
+    );
     expect(await response.json()).toEqual({ regrouped: true, pairs });
     expect(run).toHaveBeenCalledWith({ q: "monitor stand riser", sort: "landed_price_asc" });
   });

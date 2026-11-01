@@ -32,4 +32,12 @@ export interface ImageHashIndex {
   missing(urls: readonly string[]): Promise<string[]>;
   /** Downloads and hashes what isn't cached yet (never on the request path); how many were added. */
   ensure(urls: readonly string[]): Promise<number>;
+  /**
+   * Downloads and hashes exactly these URLs, with no cache read (pass `missing`'s
+   * result, never on the request path); the new hashes. `mark` times each step.
+   */
+  hash(urls: readonly string[], mark?: PhotoStepTimer): Promise<ReadonlyMap<string, ImageHash>>;
 }
+
+/** Reports how long one step took for one photo, in milliseconds. */
+export type PhotoStepTimer = (step: "download" | "process" | "write", ms: number) => void;
