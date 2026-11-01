@@ -26,6 +26,7 @@ import {
   type SearchResponse,
 } from "@/domain/search/search-response";
 import { OUTBOUND_LINK } from "@/components/features/outbound-link";
+import { PhotoMatchCheck } from "@/components/features/search/photo-match-check";
 
 /** How a failed store's status reads in the "some stores are unavailable" notice. */
 function statusText(status: ProviderOutcome["status"], locale: Locale): string {
@@ -178,6 +179,8 @@ export interface ResultsViewProps {
   readonly storeSearches?: readonly { readonly provider: ProviderId; readonly href: string }[];
   /** Products this visitor saved / tracks; null when wishlists aren't available. */
   readonly userLists?: { readonly savedIds: readonly string[]; readonly alertIds: readonly string[] } | null;
+  /** Params for the client's photo check when look-alikes may still group (`PhotoMatchCheck`). */
+  readonly photoCheck?: Readonly<Record<string, string>> | null;
   readonly locale?: Locale;
 }
 
@@ -190,6 +193,7 @@ export function ResultsView({
   sampleStores = [],
   storeSearches = [],
   userLists = null,
+  photoCheck = null,
   locale = "en",
 }: ResultsViewProps) {
   const t = dict(locale).search.results;
@@ -206,6 +210,7 @@ export function ResultsView({
 
   return (
     <section aria-label={t.label} className="flex flex-col gap-4">
+      {photoCheck && <PhotoMatchCheck params={photoCheck} />}
       {translation && <TranslationNotice query={query} translation={translation} locale={locale} />}
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">

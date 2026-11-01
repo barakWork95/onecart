@@ -1,5 +1,10 @@
 import { assembleResults } from "@/application/search/assemble-results";
-import { createSearchPhotoHashing, photoHashesFor } from "@/application/search/photo-hashes";
+import {
+  createSearchPhotoHashing,
+  lookAlikePairs,
+  photoHashesFor,
+  SEARCH_PHOTOS_PER_STORE,
+} from "@/application/search/photo-hashes";
 import { searchIntent } from "@/domain/search/search-intent";
 import type { SearchResponse } from "@/domain/search/search-response";
 import { fakeImageHashIndex } from "@/test/fakes";
@@ -80,13 +85,15 @@ describe("createSearchPhotoHashing", () => {
     const { index, downloaded } = fakeImageHashIndex(() => "00ff00ff00ff00ff");
     const allow = jest.fn(async () => allowed);
     const logger = { warn: jest.fn() };
-    const hash = createSearchPhotoHashing({ index, allow, perStore: 2, logger });
-    return { hash, index, downloaded, allow, logger };
+    const photos = createSearchPhotoHashing({ index, allow, perStore: 2, logger });
+    return { photos, index, downloaded, allow, logger };
   }
 
   it("hashes each store's top photos for a generic search across stores, spending one allowance", async () => {
-    const { hash, downloaded, allow } = setup();
-    expect(await hash(response("monitor stand riser", twoStores))).toBe(3);
+    const { photos, downloaded, allow } = setup();
+    const results = response("monitor stand riser", twoStores);
+    expect(await photos.pending(results)).toBe(true);
+    expect(await photos.hash(results)).toBe(3);
     expect(allow).toHaveBeenCalledTimes(1);
     // eBay's top two and AliExpress's one; eBay's third is past `perStore`.
     expect(downloaded.sort()).toEqual([
@@ -94,27 +101,40 @@ describe("createSearchPhotoHashing", () => {
       "https://img.example/ebay-1.jpg",
       "https://img.example/ebay-2.jpg",
     ]);
+    // Nothing left to check: the page stops asking.
+    expect(await photos.pending(results)).toBe(false);
+  });
+
+  it("checks the top six per store by default", async () => {
+    const { index, downloaded } = fakeImageHashIndex(() => "00ff00ff00ff00ff");
+    const many = [...Array.from({ length: 9 }, (_, i) => listing("ebay", i)), listing("aliexpress", 1)];
+    await createSearchPhotoHashing({ index, allow: async () => true }).hash(
+      response("monitor stand riser", many),
+    );
+    expect(downloaded.filter((u) => u.includes("ebay"))).toHaveLength(SEARCH_PHOTOS_PER_STORE);
+    expect(SEARCH_PHOTOS_PER_STORE).toBe(6);
   });
 
   it("spends nothing when there's nothing to hash", async () => {
-    const { hash, index, allow, downloaded } = setup();
+    const { photos, index, allow, downloaded } = setup();
     // A branded search never uses photos.
-    expect(await hash(response("anker 737", twoStores))).toBe("not_needed");
+    expect(await photos.pending(response("anker 737", twoStores))).toBe(false);
+    expect(await photos.hash(response("anker 737", twoStores))).toBe("not_needed");
     // One store alone has no cross-store look-alike to find.
-    expect(await hash(response("monitor stand riser", [listing("ebay", 1), listing("ebay", 2)]))).toBe(
-      "not_needed",
-    );
+    const oneStore = response("monitor stand riser", [listing("ebay", 1), listing("ebay", 2)]);
+    expect(await photos.pending(oneStore)).toBe(false);
+    expect(await photos.hash(oneStore)).toBe("not_needed");
     // Every photo already tried (hashed or remembered as unhashable).
     await index.ensure(twoStores.map((p) => p.imageUrl!));
     downloaded.length = 0;
-    expect(await hash(response("monitor stand riser", twoStores))).toBe("not_needed");
+    expect(await photos.hash(response("monitor stand riser", twoStores))).toBe("not_needed");
     expect(allow).not.toHaveBeenCalled();
     expect(downloaded).toEqual([]);
   });
 
   it("downloads nothing once the day's allowance is spent", async () => {
-    const { hash, downloaded, logger } = setup(false);
-    expect(await hash(response("monitor stand riser", twoStores))).toBe("over_budget");
+    const { photos, downloaded, logger } = setup(false);
+    expect(await photos.hash(response("monitor stand riser", twoStores))).toBe("over_budget");
     expect(downloaded).toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith("search photos: over the daily allowance, not hashing", {
       query: "monitor stand riser",
@@ -124,9 +144,48 @@ describe("createSearchPhotoHashing", () => {
   it("never throws: a failure is logged and reported", async () => {
     const logger = { warn: jest.fn() };
     const index = { missing: () => Promise.reject(new Error("redis down")), ensure: jest.fn() };
-    const hash = createSearchPhotoHashing({ index, allow: async () => true, logger });
-    expect(await hash(response("monitor stand riser", twoStores))).toBe("error");
+    const photos = createSearchPhotoHashing({ index, allow: async () => true, logger });
+    const results = response("monitor stand riser", twoStores);
+    expect(await photos.hash(results)).toBe("error");
+    expect(await photos.pending(results)).toBe(false);
     expect(index.ensure).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith("search photos: hashing failed", { error: "redis down" });
+    expect(logger.warn).toHaveBeenCalledWith("search photos: check failed", { error: "redis down" });
+  });
+});
+
+describe("lookAlikePairs", () => {
+  it("lists the photo-matched groups that span stores, with their listings and stores", () => {
+    const ebay = makeProduct({
+      provider: "ebay",
+      sku: "e1",
+      title: "Magnetic Cable Holder Clip Organizer",
+      total: 12_40,
+    });
+    const ali = makeProduct({
+      provider: "aliexpress",
+      sku: "a1",
+      title: "Magnetic Cable Organizer Clip",
+      total: 2_99,
+    });
+    const lone = makeProduct({
+      provider: "ebay",
+      sku: "e2",
+      title: "Desk Lamp",
+      imageUrl: "https://img.example/lamp.jpg",
+    });
+    const { groups } = assembleResults(
+      [{ products: [ebay, ali, lone], unavailable: [] }],
+      { filters: {}, sort: "relevance" },
+      searchIntent("cable clips"),
+      new Map([
+        [ebay.imageUrl!, "e0b2b6969e9c9c9c"],
+        [ali.imageUrl!, "e0b2b6969fb80ed5"],
+      ]),
+    );
+    expect(lookAlikePairs(groups)).toEqual([
+      { listingIds: expect.arrayContaining([ebay.id, ali.id]), stores: ["aliexpress", "ebay"] },
+    ]);
+    expect(lookAlikePairs(groups.filter((g) => g.listings.length === 1))).toEqual([]);
   });
 });

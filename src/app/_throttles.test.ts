@@ -46,6 +46,8 @@ describe("throttleBucket", () => {
     expect(throttleBucket("POST", url("/search?q=jbl"), action)).toBe("action");
     expect(throttleBucket("POST", url("/he/alerts"), action)).toBe("action");
     expect(throttleBucket("POST", url("/"), action)).toBe("action");
+    // The progressive photo check after a search's results show.
+    expect(throttleBucket("POST", url("/api/match/fingerprint-top"), new Headers())).toBe("match");
   });
 
   it("leaves plain page views alone", () => {
@@ -53,5 +55,7 @@ describe("throttleBucket", () => {
     expect(throttleBucket("GET", url("/c/headphones"), new Headers())).toBeNull();
     expect(throttleBucket("GET", url("/google"), new Headers())).toBeNull();
     expect(throttleBucket("POST", url("/saved"), new Headers())).toBeNull();
+    // Only a POST runs the photo check; a GET is a 405, never work.
+    expect(throttleBucket("GET", url("/api/match/fingerprint-top"), new Headers())).toBeNull();
   });
 });

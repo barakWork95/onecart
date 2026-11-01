@@ -931,17 +931,18 @@ describe("searchProducts — photo matching for generic searches", () => {
     expect(cached).toHaveBeenCalledWith(expect.arrayContaining(Object.keys(photos)));
   });
 
-  it("groups them on the next search once the first one's photos are hashed in the background", async () => {
+  it("groups them on the next search once the first one's top photos are hashed", async () => {
     const { index, downloaded } = fakeImageHashIndex((url) => photos[url] ?? null);
     const { search } = setup(providers(), { imageHashes: index });
-    const hashAfterwards = createSearchPhotoHashing({ index, allow: async () => true });
+    const fingerprints = createSearchPhotoHashing({ index, allow: async () => true });
 
     // The first search finds no hashes yet: two single-store cards, nothing downloaded.
     const first = await search(CLIPS);
     expect(first.groups).toHaveLength(2);
     expect(downloaded).toEqual([]);
 
-    expect(await hashAfterwards(first)).toBe(2);
+    expect(await fingerprints.pending(first)).toBe(true);
+    expect(await fingerprints.hash(first)).toBe(2);
     const next = await search(CLIPS);
     expect(next.groups).toHaveLength(1);
     expect(next.groups[0]).toMatchObject({ matchedBy: "visual_match", lookAlike: true });

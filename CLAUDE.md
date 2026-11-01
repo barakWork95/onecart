@@ -392,14 +392,25 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
     allowlisted store CDNs (`image-fetcher.ts`: https, no redirects, 5 s, 2 MB). **A search never
     computes a hash while rendering**: `photoHashesFor` reads cached ones, for generic intents only,
     and a failed read means "no photos".
-  - **Shoppers' searches hash after the response** (`createSearchPhotoHashing`, scheduled with
-    `after()` in `searchFromParams`): a generic search with listings from 2+ stores hashes the
-    photos never tried (`ImageHashIndex.missing`) of each store's top `SEARCH_PHOTOS_PER_STORE`
-    (20), so the next visit groups look-alikes. One daily allowance per search with photos to
-    hash (`PHOTO_HASH_SEARCHES_PER_DAY`, default 60, counter prefix `photo-hash`; 0 = off; off in
-    demo mode): at most ~2,500 Redis commands a day. Searches whose photos are all tried spend
-    nothing. Never throws. The thresholds below are unchanged: hashing more photos finds more
-    pairs; it never loosens what counts as one.
+  - **Progressive grouping for fresh generic searches** (`createSearchPhotoHashing`). Cached
+    hashes group on the first render. `searchFromParams` sets `photoCheck` (the page's `q`,
+    `sort`, `max`, `free`) when a generic search with listings from 2+ stores has photos never
+    tried (`ImageHashIndex.missing`) among each store's top `SEARCH_PHOTOS_PER_STORE` (6).
+    `PhotoMatchCheck` (client) then POSTs them to `/api/match/fingerprint-top` once: cached
+    results only (`fingerprintTop`: `cachedOnly`, `cachedTranslator`, page 1; never a store or
+    DeepL call), it hashes the missing top photos, regroups, and returns the look-alike cards
+    (`lookAlikePairs`) with `regrouped`. On `regrouped` the client calls `router.refresh()` in a
+    transition: the server rebuilds the page from cache and the cards merge in place, no
+    skeleton, no reload; the refreshed page has nothing left to check, so it never loops. One
+    grouping implementation (the server's); the client never merges cards itself.
+    - The endpoint takes the page's search params, never photo URLs; Origin must be this site
+      (403 otherwise); strict body schema (400); per-IP throttle `match` in the proxy
+      (`MATCH_RATE_LIMITS`, 20 a minute / 300 a day, no session work).
+    - One daily allowance per search with photos to hash (`PHOTO_HASH_SEARCHES_PER_DAY`, default
+      150, counter prefix `photo-hash`; 0 = off; off in demo mode, so E2E never runs it): at most
+      ~2,100 Redis commands a day. Searches whose photos are all tried spend nothing. Never throws.
+    - The thresholds below are unchanged: hashing more photos finds more pairs; it never loosens
+      what counts as one.
   - **Generic matcher (Phase 3, `generic-matcher.ts`).** A generic pair matches **only** through
     `matchGeneric`, never the branded rules: unbranded titles carry format codes ("MP3",
     "QC3.0") that read as model numbers. Gates: (A) no `attributeConflict`; (B) photos within
@@ -633,6 +644,7 @@ in a day and used up SerpApi's month, taking both stores down for everyone.
   - `go`: `/go/*`, 60 a minute / 1,000 a day (`GO_RATE_LIMITS`); the proxy skips session work there.
   - `action`: any POST with a `next-action` header (Server Actions post to whichever page shows
     them; matched by `{ source: "/:path*", has: next-action }`), 30 a minute / 500 a day.
+  - `match`: POST `/api/match/*` (the results page's photo check), 20 a minute / 300 a day.
   - `/internal` password guessing: 10 wrong passwords per IP per 15 min (`ADMIN_LOCKOUT`,
     `createFailureLockout`) → 429 **before** the password is checked, so a locked IP can't
     confirm a right guess. The bare prompt (no credentials) isn't a failure. Each instance

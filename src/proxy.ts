@@ -11,6 +11,7 @@ const TOO_MANY: Record<ThrottleBucket | "admin", string> = {
   search: "Too many searches in a short time. Please wait a moment and try again.",
   go: "Too many store visits in a short time. Please wait a moment and try again.",
   action: "Too many requests in a short time. Please wait a moment and try again.",
+  match: "Too many requests in a short time. Please wait a moment and try again.",
   admin: "Too many failed sign-in attempts. Try again later.",
 };
 
@@ -90,7 +91,7 @@ async function guardInternal(request: NextRequest, ip: string | null): Promise<N
  * 0. 404s the Hebrew interface while it's off, and unknown category slugs (/c/{slug},
  *    /he/c/{slug}); password-protects /internal.
  * 1. Throttles per IP what costs us per request: searches (store APIs), /go
- *    clicks and Server Action POSTs (see `_throttles.ts`); locks out IPs that
+ *    clicks, Server Action POSTs and photo checks (see `_throttles.ts`); locks out IPs that
  *    keep guessing the /internal password.
  * 2. Keeps the Supabase session cookie fresh. Server Components can read but
  *    not write cookies, so without this an expired access token would make a
@@ -116,7 +117,9 @@ export async function proxy(request: NextRequest) {
     if (!decision.allowed) return tooMany(bucket, decision.retryAfterSeconds);
   }
   // /go reads no session: it only redirects (and logs the click with the service key).
-  if (request.nextUrl.pathname.startsWith("/go/")) return NextResponse.next();
+  // The photo check doesn't either.
+  if (request.nextUrl.pathname.startsWith("/go/") || request.nextUrl.pathname.startsWith("/api/match/"))
+    return NextResponse.next();
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -159,6 +162,8 @@ export const config = {
     "/alerts",
     // Outbound clicks: throttled, no session work.
     "/go/:path*",
+    // The results page's photo check: throttled, no session work.
+    "/api/match/:path*",
     // Server Actions POST to whichever page shows them (home and category pages too).
     { source: "/:path*", has: [{ type: "header", key: "next-action" }] },
     "/internal/:path*",

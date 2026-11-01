@@ -39,13 +39,14 @@ export const DEFAULT_DAILY_CALL_BUDGETS = { ebay: 4_500, amazon: 3, aliexpress: 
 export const DEFAULT_AMAZON_WARM_PER_DAY = 2;
 
 /**
- * Generic searches per day, across all shoppers, whose photos are hashed after
- * the response (PHOTO_HASH_SEARCHES_PER_DAY; `createSearchPhotoHashing`). Each
- * downloads and writes at most 40 photo hashes (20 per store), only those never
- * tried: about 2,500 Redis commands a day, about 75,000 a month at the cap, against
- * Upstash's 500,000. Searches whose photos are all hashed spend none. 0 turns it off.
+ * Generic searches per day, across all shoppers, whose top photos the results
+ * page's photo check fingerprints (PHOTO_HASH_SEARCHES_PER_DAY;
+ * `createSearchPhotoHashing`). Each downloads and writes at most 12 photo hashes
+ * (6 per store), only those never tried: about 2,100 Redis commands a day, about
+ * 63,000 a month at the cap, against Upstash's 500,000. Searches whose photos are
+ * all tried spend none. 0 turns it off.
  */
-export const DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY = 60;
+export const DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY = 150;
 
 /**
  * /go clicks one IP may make. Each one writes a click row and can call
@@ -63,6 +64,15 @@ export const GO_RATE_LIMITS: readonly RateLimitWindow[] = [
 export const ACTION_RATE_LIMITS: readonly RateLimitWindow[] = [
   { name: "minute", limit: 30, windowSeconds: 60 },
   { name: "day", limit: 500, windowSeconds: 24 * 60 * 60 },
+];
+
+/**
+ * Photo checks (`POST /api/match/fingerprint-top`) per IP: the results page makes
+ * one per search, so these sit at the search limits.
+ */
+export const MATCH_RATE_LIMITS: readonly RateLimitWindow[] = [
+  { name: "minute", limit: 20, windowSeconds: 60 },
+  { name: "day", limit: 300, windowSeconds: 24 * 60 * 60 },
 ];
 
 /** Wrong /internal passwords per IP before it's locked out for the rest of the window. */

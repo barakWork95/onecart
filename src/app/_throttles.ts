@@ -3,7 +3,13 @@ import "server-only";
 import { createFailureLockout, type FailureLockout } from "@/application/security/failure-lockout";
 import { createRateLimiter, type RateLimiter } from "@/application/security/rate-limiter";
 import { env } from "@/config/env";
-import { ACTION_RATE_LIMITS, ADMIN_LOCKOUT, GO_RATE_LIMITS, searchRateLimits } from "@/config/rate-limits";
+import {
+  ACTION_RATE_LIMITS,
+  ADMIN_LOCKOUT,
+  GO_RATE_LIMITS,
+  MATCH_RATE_LIMITS,
+  searchRateLimits,
+} from "@/config/rate-limits";
 import type { CounterStore } from "@/domain/security/ports";
 import type { RateLimitWindow } from "@/domain/security/rate-limit";
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
@@ -15,7 +21,8 @@ import { splitLocale } from "@/i18n/locales";
 /**
  * Per-IP limits applied in the proxy, before anything costly runs: searches
  * (store calls), /go clicks (a click row, AliExpress link calls), Server Actions
- * (Supabase writes), and wrong /internal passwords. Shared through Upstash;
+ * (Supabase writes), photo checks (downloads, Redis writes), and wrong /internal
+ * passwords. Shared through Upstash;
  * per-instance without it.
  */
 const HOLDER_KEY = Symbol.for("onecart.throttles");
@@ -54,7 +61,7 @@ export function searchThrottle(): RateLimiter {
   );
 }
 
-export type ThrottleBucket = "search" | "go" | "action";
+export type ThrottleBucket = "search" | "go" | "action" | "match";
 
 export function throttleFor(bucket: ThrottleBucket): RateLimiter {
   switch (bucket) {
@@ -64,6 +71,8 @@ export function throttleFor(bucket: ThrottleBucket): RateLimiter {
       return limiter("rl:go", GO_RATE_LIMITS);
     case "action":
       return limiter("rl:action", ACTION_RATE_LIMITS);
+    case "match":
+      return limiter("rl:match", MATCH_RATE_LIMITS);
   }
 }
 
@@ -104,5 +113,6 @@ export function throttleBucket(method: string, url: URL, headers: Headers): Thro
   if (isSearchRequest(method, url)) return "search";
   if (url.pathname.startsWith("/go/")) return "go";
   if (method === "POST" && headers.has("next-action")) return "action";
+  if (method === "POST" && url.pathname.startsWith("/api/match/")) return "match";
   return null;
 }

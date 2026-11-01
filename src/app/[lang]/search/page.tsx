@@ -40,6 +40,7 @@ async function Results({ searchParams, locale }: { searchParams: SearchParams; l
       storeSearches={result.storeSearches}
       sampleStores={result.sampleStores}
       userLists={userLists}
+      photoCheck={result.photoCheck}
       locale={locale}
     />
   );

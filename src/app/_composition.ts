@@ -67,7 +67,12 @@ import {
   type TrendingCard,
   type TrendingShowcase,
 } from "@/application/deals/trending-showcase";
-import { createSearchPhotoHashing, type SearchPhotoHashRun } from "@/application/search/photo-hashes";
+import {
+  createSearchPhotoHashing,
+  lookAlikePairs,
+  type LookAlikePair,
+  type SearchPhotoHashing,
+} from "@/application/search/photo-hashes";
 import { createSearchProducts, type SearchProducts } from "@/application/search/search-products";
 import { createRateLimiter, type RateLimiter } from "@/application/security/rate-limiter";
 import { storeChecks, storeSearches } from "@/application/search/store-fallback";
@@ -162,8 +167,8 @@ interface Services {
   readonly opsAlertState: OpsAlertState;
   /** Product-photo hashes for generic matching: cache reads anywhere, downloads off the request path. */
   readonly imageHashes: ImageHashIndex;
-  /** Hashes a generic search's photos after its response (null: demo mode, or turned off). */
-  readonly hashSearchPhotos: ((response: SearchResponse) => Promise<SearchPhotoHashRun>) | null;
+  /** Progressive photo grouping for fresh generic searches (null: demo mode, or turned off). */
+  readonly searchPhotos: SearchPhotoHashing | null;
   readonly statusReport: ReturnType<typeof createStatusReport>;
   readonly checkOpsAlerts: ReturnType<typeof createCheckOpsAlerts>;
   readonly demoMode: boolean;
@@ -390,7 +395,7 @@ function buildServices(): Services {
     recordCronRun: createRecordCronRun({ store: opsStore, logger }),
     opsAlertState,
     imageHashes,
-    hashSearchPhotos: createHashSearchPhotos(config, demoMode, imageHashes, logger),
+    searchPhotos: createSearchPhotos(config, demoMode, imageHashes, logger),
     statusReport: createStatusReport({
       ops: opsStore,
       quotas: opsQuotas,
@@ -483,15 +488,15 @@ function buildServices(): Services {
 }
 
 /**
- * The daily cap on hashing shoppers' search photos (`createSearchPhotoHashing`):
- * one count per search with photos to hash, shared by every instance.
+ * Progressive photo grouping (`createSearchPhotoHashing`) and its daily cap: one
+ * count per search with photos to hash, shared by every instance.
  */
-function createHashSearchPhotos(
+function createSearchPhotos(
   config: ReturnType<typeof env>,
   demoMode: boolean,
   index: ImageHashIndex,
   logger: typeof consoleLogger,
-): Services["hashSearchPhotos"] {
+): Services["searchPhotos"] {
   const perDay = config.PHOTO_HASH_SEARCHES_PER_DAY ?? DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY;
   if (demoMode || perDay === 0) return null;
   const limiter = createRateLimiter({
@@ -585,7 +590,22 @@ export type SearchPageResult =
       /** Unavailable stores, each with a signed link to search its own site for the query. */
       readonly storeSearches: readonly { readonly provider: ProviderId; readonly href: string }[];
       readonly sampleStores: readonly ProviderId[];
+      /**
+       * The params for the client's photo check (`POST /api/match/fingerprint-top`) when the
+       * top photos of a generic search across stores include some never fingerprinted; else null.
+       */
+      readonly photoCheck: PhotoCheckParams | null;
     };
+
+/** What the photo check needs to rebuild the results the page shows (always page 1). */
+export type PhotoCheckParams = Readonly<Partial<Record<(typeof PHOTO_CHECK_PARAMS)[number], string>>>;
+const PHOTO_CHECK_PARAMS = ["q", "sort", "max", "free"] as const;
+
+function photoCheckParams(params: RawSearchParams): PhotoCheckParams {
+  return Object.fromEntries(
+    PHOTO_CHECK_PARAMS.flatMap((key) => (typeof params[key] === "string" ? [[key, params[key]]] : [])),
+  );
+}
 
 /** Everything the /search page needs, from raw URL params. */
 export async function searchFromParams(params: RawSearchParams): Promise<SearchPageResult> {
@@ -596,9 +616,9 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
   const { query, translation } = await buildSearchQuery(request.value, translator, consoleLogger);
   // Cumulative: "Load more" re-renders every card through the requested page.
   const response = await searchProducts(query, { includeEarlierPages: true });
-  // Sent first; then the photos the grouping lacked are hashed, so the next visit compares them.
-  const { hashSearchPhotos } = getServices();
-  if (hashSearchPhotos) after(() => hashSearchPhotos(response).then(() => undefined));
+  // Cached photo hashes already grouped these; the client asks for the missing ones next.
+  const { searchPhotos } = getServices();
+  const photoCheck = searchPhotos && (await searchPhotos.pending(response)) ? photoCheckParams(params) : null;
 
   const outboundLinks: Record<string, string> = {};
   for (const group of response.groups) {
@@ -638,7 +658,39 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
     storeChecks: checks,
     storeSearches: storeSearches(response).map((t) => ({ provider: t.provider, href: linkCodec.encode(t) })),
     sampleStores,
+    photoCheck,
   };
+}
+
+export type FingerprintTopResult =
+  | { readonly kind: "invalid" }
+  | {
+      readonly kind: "checked";
+      /** New look-alike cards formed: the page's results are worth refreshing. */
+      readonly regrouped: boolean;
+      readonly pairs: readonly LookAlikePair[];
+    };
+
+/**
+ * The client's photo check for a fresh generic search (`POST /api/match/fingerprint-top`):
+ * fingerprints the top photos of each store's cached results, then regroups. Cached data
+ * only: it never calls a store or DeepL, so a miss finds nothing.
+ */
+export async function fingerprintTop(params: PhotoCheckParams): Promise<FingerprintTopResult> {
+  const request = parseSearchParams({ ...params, page: "1" });
+  if (!request.ok) return { kind: "invalid" };
+  const { searchProducts, cachedTranslator, searchPhotos } = getServices();
+  const { query } = await buildSearchQuery(request.value, cachedTranslator, consoleLogger);
+  const before = await searchProducts(query, { cachedOnly: true });
+  const pairsBefore = lookAlikePairs(before.groups);
+  const hashed = searchPhotos ? await searchPhotos.hash(before) : "not_needed";
+  if (typeof hashed !== "number" || hashed === 0)
+    return { kind: "checked", regrouped: false, pairs: pairsBefore };
+  const pairs = lookAlikePairs((await searchProducts(query, { cachedOnly: true })).groups);
+  // A listing newly in a look-alike card, whether a new card or one that grew.
+  const groupedBefore = new Set(pairsBefore.flatMap((p) => p.listingIds));
+  const regrouped = pairs.some((p) => p.listingIds.some((id) => !groupedBefore.has(id)));
+  return { kind: "checked", regrouped, pairs };
 }
 
 /**

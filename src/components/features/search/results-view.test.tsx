@@ -12,6 +12,9 @@ import { track } from "@vercel/analytics";
 jest.mock("@vercel/analytics", () => ({ track: jest.fn() }));
 jest.mock("@/app/[lang]/saved/actions", () => ({ setSavedAction: jest.fn() }));
 jest.mock("@/app/[lang]/alerts/actions", () => ({ createAlertAction: jest.fn() }));
+// The photo check refreshes through the router (same object on every render, like Next's).
+const mockRouter = { refresh: jest.fn() };
+jest.mock("next/navigation", () => ({ useRouter: () => mockRouter }));
 
 const QUERY: SearchQuery = {
   rawText: "אוזניות אלחוטיות",
@@ -169,6 +172,23 @@ describe("ResultsView", () => {
     const sheet = await screen.findByRole("dialog");
     expect(sheet).toHaveTextContent(
       "Matched by product photo and specs, sold by different sellers (Clip Factory Store, tidyhome).",
+    );
+  });
+
+  it("runs the photo check only when the server says look-alikes may still group", async () => {
+    const fetchMock = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({ regrouped: false, pairs: [] }),
+    }));
+    global.fetch = fetchMock as unknown as typeof fetch;
+    renderView();
+    expect(fetchMock).not.toHaveBeenCalled();
+    renderView({ photoCheck: { q: "monitor stand riser" } });
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/match/fingerprint-top",
+        expect.objectContaining({ body: JSON.stringify({ q: "monitor stand riser" }) }),
+      ),
     );
   });
 
