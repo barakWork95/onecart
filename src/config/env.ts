@@ -101,6 +101,16 @@ const serverEnvSchema = z.object({
    */
   KV_REST_API_URL: optional(z.url()),
   KV_REST_API_TOKEN: optional(z.string().min(1)),
+  /**
+   * Upstash's Management API (console → Account → Management API), for this month's
+   * command count on the status page and the 80% alert. Unset: only an outage or an
+   * exhausted quota is detected.
+   */
+  UPSTASH_MANAGEMENT_EMAIL: optional(z.email()),
+  UPSTASH_MANAGEMENT_API_KEY: optional(z.string().min(1)),
+  UPSTASH_DATABASE_ID: optional(z.string().min(1)),
+  /** The plan's monthly commands (free plan: 500,000); the alert warns at 80% of it. */
+  UPSTASH_MONTHLY_COMMAND_LIMIT: z.coerce.number().int().positive().default(500_000),
   SEARCH_CACHE_TTL_SECONDS: z.coerce
     .number()
     .int()

@@ -1,5 +1,7 @@
 import { CRON_JOBS, staleJobs, type CronJob, type CronJobHistory } from "@/domain/ops/cron-run";
-import { isExhausted, type QuotaReading } from "@/domain/ops/status";
+import { isExhausted, isNearlyExhausted, type QuotaReading } from "@/domain/ops/status";
+
+const count = (n: number) => n.toLocaleString("en-US");
 
 /** Something ops should hear about. `key` is stable while the issue lasts. */
 export interface OpsIssue {
@@ -7,7 +9,10 @@ export interface OpsIssue {
   readonly message: string;
 }
 
-/** Everything wrong right now: failing last runs, missed runs, quotas at zero. */
+/**
+ * Everything wrong right now: failing last runs, missed runs, quotas at zero,
+ * quotas past their warning share, and quotas whose read failure means an outage.
+ */
 export function currentIssues(
   history: Readonly<Partial<Record<CronJob, CronJobHistory>>>,
   quotas: readonly QuotaReading[],
@@ -24,6 +29,16 @@ export function currentIssues(
     issues.push({ key: `stale:${job}`, message: `${job} hasn't run in over a day` });
   for (const q of quotas.filter(isExhausted))
     issues.push({ key: `quota:${q.name}`, message: `${q.name}: none left` });
+  for (const q of quotas) {
+    if (!isNearlyExhausted(q) || q.used === null || q.limit === null) continue;
+    const share = Math.floor((q.used / q.limit) * 100);
+    issues.push({
+      key: `quota-near:${q.name}`,
+      message: `${q.name}: ${share}% used (${count(q.used)} of ${count(q.limit)})`,
+    });
+  }
+  for (const q of quotas.filter((q) => q.alertOnError && q.error))
+    issues.push({ key: `quota-error:${q.name}`, message: `${q.name}: ${q.error}` });
   return issues;
 }
 

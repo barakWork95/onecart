@@ -576,7 +576,13 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   - The warm-up revalidates each tag (`"max"`); the first visit after it may still get the
     previous copy while it rebuilds, and so may `sitemap.xml` (E2E polls for the fresh ones).
   - Fewer than `MIN_INDEXABLE_PRODUCTS` (3) priced products → `noindex, follow` and left out of
-    the sitemap. Unknown slugs get a real 404 from `src/proxy.ts` (the page's own `notFound()`
+    the sitemap. **Except after an outage:** the warm-up saves each indexable page to Supabase
+    (`category_snapshots`, `createCategorySnapshots`, skipped while Redis is degraded), and a
+    thin build falls back to that copy for up to `SNAPSHOT_MAX_AGE_DAYS` (14), with today's
+    category copy and the snapshot's own "Prices as of" dates. A Redis outage, a deploy or
+    results that expired before the warm-up never flip a page to `noindex`; only two weeks
+    without fresh data does. Needs `SUPABASE_SECRET_KEY`; store failures fall back to the fresh
+    page. Unknown slugs get a real 404 from `src/proxy.ts` (the page's own `notFound()`
     would come after a streamed 200).
   - JSON-LD: `BreadcrumbList` + `ItemList` of names only, no prices (our landed price isn't the
     store's price). Category copy states no tax figures; `HowWePrice` reads them from the policy.
@@ -696,8 +702,17 @@ strict-origin-when-cross-origin` (`no-referrer` on `/go/*`), `Permissions-Policy
   and last ok run, quotas, price rows per day (14 days), push and alert counts, clicks today.
   Quotas cost nothing to read: SerpApi's account endpoint, eBay's rate-limit analytics, and our
   own budget counters (`budget:day:{store}:{day}`, `budget-warm:…`) read directly.
+- **Upstash health** (`createUpstashQuota`, a quota reading like the others): a GET of a missing
+  key through the plain client (never the failover, which would hide an outage; Upstash doesn't
+  bill empty reads), plus this month's commands from Upstash's Management API when
+  `UPSTASH_MANAGEMENT_EMAIL`, `UPSTASH_MANAGEMENT_API_KEY` and `UPSTASH_DATABASE_ID` are set,
+  against `UPSTASH_MONTHLY_COMMAND_LIMIT` (default 500,000). Out of quota → "none left";
+  unreachable → an outage issue (`alertOnError`); ≥ 80% → a warning (`warnAtShare`, opt-in per
+  quota: SerpApi ends every month near 99% by design). `RedisHealthBanner` shows these on every
+  `/internal` page (`redisHealthIssues()`, re-checked every 5 minutes per instance).
 - **Ops alerts** (`createCheckOpsAlerts`, after every cron run): issues = failing last runs, missed
-  runs (a recorded job over 26h old; each cron checks the other), quotas at zero. Only changes
+  runs (a recorded job over 26h old; each cron checks the other), quotas at zero, quotas past
+  their warning share, and quotas whose read error means an outage. Only changes
   push: new issues once, then "recovered". If every push failed, nothing is marked alerted, so
   the next run retries. Targets are admin browsers in Redis (`ops:alerts:targets:v1`), added
   with the status page's switch; turning it off keeps the browser's own subscription.

@@ -51,3 +51,12 @@ export interface PriceDropBoard {
   save(cards: readonly PriceDropCard[]): Promise<void>;
   load(): Promise<readonly PriceDropCard[]>;
 }
+
+/**
+ * The last indexable copy of each category page, kept outside Redis. The page is
+ * opaque here: the use case that writes it checks its shape when reading it back.
+ */
+export interface CategorySnapshotStore {
+  load(slug: string): Promise<{ readonly page: unknown; readonly savedAt: IsoDateTime } | null>;
+  save(slug: string, page: object, savedAt: IsoDateTime): Promise<void>;
+}

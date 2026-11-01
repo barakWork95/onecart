@@ -10,10 +10,23 @@ export interface QuotaReading {
   readonly resetsAt: IsoDateTime | null;
   /** Why it couldn't be read; null when it was. */
   readonly error: string | null;
+  /** Warn once this share is used (e.g. 0.8). Unset: only "none left" alerts. */
+  readonly warnAtShare?: number;
+  /** An error reading this quota means an outage worth alerting (Redis down), not just a blind spot. */
+  readonly alertOnError?: boolean;
 }
 
 /** A quota at zero: searches against it fail until it resets. */
 export const isExhausted = (q: QuotaReading): boolean => q.remaining !== null && q.remaining <= 0;
+
+/** Past its warning share but not yet at zero (only for quotas that set `warnAtShare`). */
+export const isNearlyExhausted = (q: QuotaReading): boolean =>
+  q.warnAtShare !== undefined &&
+  q.used !== null &&
+  q.limit !== null &&
+  q.limit > 0 &&
+  !isExhausted(q) &&
+  q.used / q.limit >= q.warnAtShare;
 
 export interface QuotaSource {
   /** Never throws: an unreadable quota is a reading with `error` set. */

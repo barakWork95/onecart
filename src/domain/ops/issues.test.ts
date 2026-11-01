@@ -52,6 +52,50 @@ describe("currentIssues", () => {
     ]);
   });
 
+  it("warns once a quota that asks for it is nearly used up, before it runs out", () => {
+    const upstash = (used: number): QuotaReading => ({
+      name: "Upstash Redis commands this month",
+      used,
+      limit: 500_000,
+      remaining: 500_000 - used,
+      resetsAt: "2026-12-01T00:00:00.000Z",
+      error: null,
+      warnAtShare: 0.8,
+    });
+    expect(currentIssues({}, [upstash(399_999)], NOW)).toEqual([]);
+    expect(currentIssues({}, [upstash(412_345)], NOW)).toEqual([
+      {
+        key: "quota-near:Upstash Redis commands this month",
+        message: "Upstash Redis commands this month: 82% used (412,345 of 500,000)",
+      },
+    ]);
+    // At zero it's the "none left" issue instead, not both.
+    expect(currentIssues({}, [upstash(500_000)], NOW).map((i) => i.key)).toEqual([
+      "quota:Upstash Redis commands this month",
+    ]);
+    // Quotas that don't ask (SerpApi ends every month near 99% by design) never warn early.
+    expect(currentIssues({}, [{ ...upstash(499_000), warnAtShare: undefined }], NOW)).toEqual([]);
+  });
+
+  it("alerts an unreadable quota only when it says an error means an outage", () => {
+    const down: QuotaReading = {
+      name: "Upstash Redis commands this month",
+      used: null,
+      limit: 500_000,
+      remaining: null,
+      resetsAt: null,
+      error: "Redis unreachable (fetch failed)",
+      alertOnError: true,
+    };
+    expect(currentIssues({}, [down], NOW)).toEqual([
+      {
+        key: "quota-error:Upstash Redis commands this month",
+        message: "Upstash Redis commands this month: Redis unreachable (fetch failed)",
+      },
+    ]);
+    expect(currentIssues({}, [{ ...down, alertOnError: undefined }], NOW)).toEqual([]);
+  });
+
   it("is empty when everything ran fine", () => {
     expect(
       currentIssues(

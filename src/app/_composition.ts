@@ -12,10 +12,12 @@ import { dHash } from "@/infrastructure/images/dhash";
 import { fetchImage } from "@/infrastructure/images/image-fetcher";
 import { createRedisImageHashIndex } from "@/infrastructure/images/redis-image-hash-index";
 import { createRecordCronRun } from "@/application/ops/record-cron-run";
-import { createStatusReport } from "@/application/ops/status-report";
+import { createCategorySnapshots } from "@/application/deals/category-snapshots";
+import { createStatusReport, readQuotas } from "@/application/ops/status-report";
 import { webPushConfig } from "@/config/env";
 import type { PushSubscriptionKeys } from "@/domain/notifications/push";
 import type { OpsAlertState, OpsStore } from "@/domain/ops/ports";
+import { currentIssues, type OpsIssue } from "@/domain/ops/issues";
 import type { QuotaSource } from "@/domain/ops/status";
 import type { ProviderId as StoreId } from "@/domain/shared/provider";
 import { createRedisOpsAlertState } from "@/infrastructure/cache/redis-ops-alert-state";
@@ -24,6 +26,7 @@ import { createSupabaseOpsStats } from "@/infrastructure/db/supabase-ops-stats";
 import { createWebPushSender } from "@/infrastructure/notifications/web-push-sender";
 import { createBudgetQuota, type BudgetCounter } from "@/infrastructure/ops/budget-quota";
 import { createEbayQuota } from "@/infrastructure/ops/ebay-quota";
+import { createUpstashQuota } from "@/infrastructure/ops/upstash-quota";
 import { createSerpApiQuota } from "@/infrastructure/ops/serpapi-quota";
 
 /** Store names for status labels (the UI's STORE_META lives in components). */
@@ -73,7 +76,7 @@ import { DEFAULT_AMAZON_WARM_PER_DAY, DEFAULT_DAILY_CALL_BUDGETS } from "@/confi
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
 import { CATEGORIES, DEMO_CATEGORIES, type Category } from "@/config/categories";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
-import { amazonSource, ebayCredentials, env } from "@/config/env";
+import { amazonSource, ebayCredentials, env, type ServerEnv } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductSearchProvider } from "@/domain/search/product-search-provider";
@@ -87,6 +90,7 @@ import { createHmacOutboundLinkCodec } from "@/infrastructure/affiliate/outbound
 import { createInMemoryRedis } from "@/infrastructure/cache/in-memory-redis";
 import { createInMemoryUserLists } from "@/infrastructure/db/in-memory-user-lists";
 import { createInMemoryPushSubscriptions } from "@/infrastructure/db/in-memory-push-subscriptions";
+import { createSupabaseCategorySnapshots } from "@/infrastructure/db/supabase-category-snapshots";
 import { createSupabaseServiceClient } from "@/infrastructure/db/supabase-clients";
 import {
   createSupabaseClickAnalytics,
@@ -98,6 +102,7 @@ import { createRedisSearchCache } from "@/infrastructure/cache/redis-search-cach
 import { createInMemoryCounterStore } from "@/infrastructure/cache/counter-stores";
 import { createFailoverCounterStore, createFailoverRedis } from "@/infrastructure/cache/failover-redis";
 import { withMemoryCache } from "@/infrastructure/cache/memory-cache";
+import type { RedisLike } from "@/infrastructure/cache/redis-client";
 import { createUpstashCounterStore, createUpstashRedis } from "@/infrastructure/cache/upstash";
 import { createCachedFxRates } from "@/infrastructure/fx/cached-fx-rates";
 import { createFrankfurterFxSource } from "@/infrastructure/fx/frankfurter-fx-source";
@@ -132,6 +137,10 @@ interface Services {
   readonly translator: QueryTranslator;
   /** True while this instance answers from memory instead of Upstash (see `_last-good.ts`). */
   readonly redisDegraded: () => boolean;
+  /** Last indexable copy of each category page (null without Supabase's service key). */
+  readonly categorySnapshots: ReturnType<typeof createCategorySnapshots> | null;
+  /** Upstash's health and monthly commands (null without Upstash, or in demo mode). */
+  readonly redisHealth: QuotaSource | null;
   /** Cache and glossary only, never DeepL: for Server Actions, which any client can POST. */
   readonly cachedTranslator: QueryTranslator;
   readonly linkCodec: OutboundLinkCodec;
@@ -329,6 +338,7 @@ function buildServices(): Services {
   const ebayKeys = ebayCredentials(config);
   if (!demoMode && ebayKeys) opsQuotas.push(createEbayQuota({ tokens: createEbayTokenProvider(ebayKeys) }));
   const counterRedis = createUpstashRedis(config);
+  let redisHealth: QuotaSource | null = null;
   if (!demoMode && counterRedis) {
     const budgets: BudgetCounter[] = liveStores.map((store) => ({
       name: `Our ${STORE_NAMES[store]} budget today`,
@@ -344,6 +354,10 @@ function buildServices(): Services {
         limit: amazonWarmPerDay,
       });
     opsQuotas.push(createBudgetQuota({ redis: counterRedis, budgets: budgets.filter((b) => b.limit > 0) }));
+    // Upstash itself, through the plain client (the failover would hide an outage): a GET of a
+    // missing key, which Upstash doesn't bill, plus the month's count from its Management API.
+    redisHealth = upstashQuota(config, counterRedis);
+    opsQuotas.push(redisHealth);
   }
   const opsAlertState = createRedisOpsAlertState(redis);
   const push = webPushConfig(config);
@@ -428,6 +442,10 @@ function buildServices(): Services {
       logger,
     }),
     redisDegraded: () => failover?.degraded() ?? false,
+    redisHealth,
+    categorySnapshots: serviceDb
+      ? createCategorySnapshots({ store: createSupabaseCategorySnapshots(serviceDb), logger })
+      : null,
     trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
     categories: demoMode ? DEMO_CATEGORIES : CATEGORIES,
     // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.
@@ -645,6 +663,36 @@ export function categoryRows(): Promise<CategoryRow[]> {
   return orUncached("home: categories", cachedCategoryRows, buildCategoryRows, consoleLogger);
 }
 
+function upstashQuota(config: ServerEnv, plainRedis: RedisLike): QuotaSource {
+  const {
+    UPSTASH_MANAGEMENT_EMAIL: email,
+    UPSTASH_MANAGEMENT_API_KEY: apiKey,
+    UPSTASH_DATABASE_ID: databaseId,
+  } = config;
+  return createUpstashQuota({
+    probe: () => plainRedis.get("ops:probe:v1"),
+    management: email && apiKey && databaseId ? { email, apiKey, databaseId } : null,
+    monthlyLimit: config.UPSTASH_MONTHLY_COMMAND_LIMIT,
+  });
+}
+
+/** How often each instance re-checks Upstash for the /internal banner. */
+const REDIS_HEALTH_MEMO_MS = 5 * 60 * 1000;
+const REDIS_HEALTH_KEY = Symbol.for("onecart.redisHealthMemo");
+type RedisHealthHolder = { [REDIS_HEALTH_KEY]?: { readonly issues: OpsIssue[]; readonly atMs: number } };
+
+/** Upstash problems for the /internal banner: failing, out of quota, or past 80% this month. */
+export async function redisHealthIssues(): Promise<OpsIssue[]> {
+  const source = getServices().redisHealth;
+  if (!source) return [];
+  const holder = globalThis as RedisHealthHolder;
+  const memo = holder[REDIS_HEALTH_KEY];
+  if (memo && Date.now() - memo.atMs < REDIS_HEALTH_MEMO_MS) return memo.issues;
+  const issues = currentIssues({}, await readQuotas([source]), Date.now());
+  holder[REDIS_HEALTH_KEY] = { issues, atMs: Date.now() };
+  return issues;
+}
+
 /** Photos hashed per warm run at most: bounds the cron's time as the catalogue grows. */
 const MAX_PHOTOS_PER_RUN = 1_500;
 
@@ -756,6 +804,7 @@ export async function warmTrending() {
   );
   const priceHistory = await recordPrices(observed, today);
   const photosHashed = await hashPhotos(photos);
+  const categorySnapshots = await saveCategorySnapshots();
   // Category pages and the homepage sections are cached: marked stale once the price drops
   // and photo hashes they read are written, so the next visit rebuilds them in the
   // background (stale-while-revalidate: a failed rebuild keeps the previous copy). A run
@@ -764,7 +813,21 @@ export async function warmTrending() {
     for (const { slug } of categories) revalidateTag(categoryTag(slug), "max");
     revalidateTag(HOME_TAG, "max");
   }
-  return { trending, categories: categoriesWarmed, priceHistory, photosHashed };
+  return { trending, categories: categoriesWarmed, priceHistory, photosHashed, categorySnapshots };
+}
+
+/**
+ * Saves each indexable category page as its fallback (`createCategorySnapshots`), built
+ * from the results just warmed. Skipped while Redis is degraded: those pages would be
+ * built from one instance's memory.
+ */
+async function saveCategorySnapshots(): Promise<number | "not_configured" | "skipped"> {
+  const { categorySnapshots, categoryPage, categories, redisDegraded } = getServices();
+  if (!categorySnapshots) return "not_configured";
+  if (redisDegraded()) return "skipped";
+  let saved = 0;
+  for (const category of categories) if (await categorySnapshots.save(await categoryPage(category))) saved++;
+  return saved;
 }
 
 /** Runs a cron's work and records how it went (see `createRecordCronRun`). */
@@ -871,7 +934,11 @@ async function buildCategoryPageData(slug: string): Promise<CategoryPageData | n
   const { categories, categoryPage, linkCodec } = getServices();
   const category = categoryBySlug(categories, slug);
   if (!category) return null;
-  const page = await categoryPage(category);
+  // A thin build (Redis down, results expired before the warm-up) falls back to the last
+  // indexable copy, so a temporary outage never flips the page to noindex.
+  const { categorySnapshots } = getServices();
+  const fresh = await categoryPage(category);
+  const page = categorySnapshots ? await categorySnapshots.withFallback(fresh) : fresh;
   const goLinks: Record<string, string> = {};
   for (const { bestListing } of page.products)
     goLinks[bestListing.id] = linkCodec.encode({

@@ -108,7 +108,7 @@ export function StatusView({ report, alertsPanel }: { report: StatusReport; aler
               <th scope="col" className="py-1 text-end font-medium">
                 Used
               </th>
-              <th scope="col" className="py-1 text-end font-medium">
+              <th scope="col" className="py-1 ps-3 text-end font-medium">
                 Left
               </th>
             </tr>
@@ -128,7 +128,7 @@ export function StatusView({ report, alertsPanel }: { report: StatusReport; aler
                 </td>
                 <td
                   className={cn(
-                    "py-1.5 text-end font-semibold tabular-nums",
+                    "py-1.5 ps-3 text-end font-semibold tabular-nums",
                     isExhausted(q) && "text-destructive",
                   )}
                 >
