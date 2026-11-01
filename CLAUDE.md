@@ -409,6 +409,15 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
     - One daily allowance per search with photos to hash (`PHOTO_HASH_SEARCHES_PER_DAY`, default
       150, counter prefix `photo-hash`; 0 = off; off in demo mode, so E2E never runs it): at most
       ~2,100 Redis commands a day. Searches whose photos are all tried spend nothing. Never throws.
+    - Latency: the check's own index (`searchImageHashes`) downloads all 12 photos at once, each
+      capped at `SEARCH_PHOTO_TIMEOUT_MS` (1.5 s; the warm-up allows 5 s). A timeout is
+      `"retry"`: nothing is recorded, so a later visit tries it again (a real failure is
+      remembered for a day). The endpoint sends `Server-Timing: search, hash, regroup`.
+    - **Hash the 500px photos, never thumbnails.** Measured on 2026-11-01 over the 449 recorded
+      generic listings: eBay `s-l140` hashed a median ~5 bits (up to 21) from the 500px photo,
+      AliExpress `_200x200` within 2 bits for only 81% (up to 20), so thumbnail hashes can't be
+      compared with the stored ones; and they barely download faster (8 KB vs 55 KB, but latency,
+      not bytes, dominates: eBay 241 vs 324 ms median, AliExpress 676 vs 646 ms).
     - The thresholds below are unchanged: hashing more photos finds more pairs; it never loosens
       what counts as one.
   - **Generic matcher (Phase 3, `generic-matcher.ts`).** A generic pair matches **only** through

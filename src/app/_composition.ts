@@ -70,6 +70,7 @@ import {
 import {
   createSearchPhotoHashing,
   lookAlikePairs,
+  SEARCH_PHOTOS_PER_STORE,
   type LookAlikePair,
   type SearchPhotoHashing,
 } from "@/application/search/photo-hashes";
@@ -313,12 +314,18 @@ function buildServices(): Services {
     ...(p.cacheScope ? { cacheScope: p.cacheScope } : {}),
   }));
 
-  const imageHashes = createRedisImageHashIndex({
+  /** One photo's hash; a timeout is tried again on a later run, not remembered as a failure. */
+  const hashImage = (timeoutMs?: number) => async (url: string) => {
+    const bytes = await fetchImage(url, fetch, timeoutMs);
+    if (bytes === "timeout") return "retry" as const;
+    return bytes ? dHash(bytes).catch(() => null) : null;
+  };
+  const imageHashes = createRedisImageHashIndex({ redis: cachedReads, hashImage: hashImage() });
+  // A shopper is waiting on the photo check: every photo at once, none allowed to hold it up.
+  const searchImageHashes = createRedisImageHashIndex({
     redis: cachedReads,
-    hashImage: async (url) => {
-      const bytes = await fetchImage(url);
-      return bytes ? dHash(bytes).catch(() => null) : null;
-    },
+    hashImage: hashImage(SEARCH_PHOTO_TIMEOUT_MS),
+    concurrency: 2 * SEARCH_PHOTOS_PER_STORE,
   });
   const searchDeps = {
     providers,
@@ -395,7 +402,7 @@ function buildServices(): Services {
     recordCronRun: createRecordCronRun({ store: opsStore, logger }),
     opsAlertState,
     imageHashes,
-    searchPhotos: createSearchPhotos(config, demoMode, imageHashes, logger),
+    searchPhotos: createSearchPhotos(config, demoMode, searchImageHashes, logger),
     statusReport: createStatusReport({
       ops: opsStore,
       quotas: opsQuotas,
@@ -669,6 +676,8 @@ export type FingerprintTopResult =
       /** New look-alike cards formed: the page's results are worth refreshing. */
       readonly regrouped: boolean;
       readonly pairs: readonly LookAlikePair[];
+      /** Milliseconds per phase, for the Server-Timing header. */
+      readonly timings: { readonly search: number; readonly hash: number; readonly regroup: number };
     };
 
 /**
@@ -680,17 +689,22 @@ export async function fingerprintTop(params: PhotoCheckParams): Promise<Fingerpr
   const request = parseSearchParams({ ...params, page: "1" });
   if (!request.ok) return { kind: "invalid" };
   const { searchProducts, cachedTranslator, searchPhotos } = getServices();
+  const started = performance.now();
+  const since = (at: number) => Math.round(performance.now() - at);
   const { query } = await buildSearchQuery(request.value, cachedTranslator, consoleLogger);
   const before = await searchProducts(query, { cachedOnly: true });
   const pairsBefore = lookAlikePairs(before.groups);
+  const hashStarted = performance.now();
   const hashed = searchPhotos ? await searchPhotos.hash(before) : "not_needed";
+  const timings = { search: Math.round(hashStarted - started), hash: since(hashStarted), regroup: 0 };
   if (typeof hashed !== "number" || hashed === 0)
-    return { kind: "checked", regrouped: false, pairs: pairsBefore };
+    return { kind: "checked", regrouped: false, pairs: pairsBefore, timings };
+  const regroupStarted = performance.now();
   const pairs = lookAlikePairs((await searchProducts(query, { cachedOnly: true })).groups);
   // A listing newly in a look-alike card, whether a new card or one that grew.
   const groupedBefore = new Set(pairsBefore.flatMap((p) => p.listingIds));
   const regrouped = pairs.some((p) => p.listingIds.some((id) => !groupedBefore.has(id)));
-  return { kind: "checked", regrouped, pairs };
+  return { kind: "checked", regrouped, pairs, timings: { ...timings, regroup: since(regroupStarted) } };
 }
 
 /**
@@ -784,6 +798,13 @@ export async function redisHealthIssues(): Promise<OpsIssue[]> {
   holder[REDIS_HEALTH_KEY] = { issues, atMs: Date.now() };
   return issues;
 }
+
+/**
+ * A photo the shopper's check waits for at most (the warm-up allows 5 s). On 2026-11-01
+ * the stores' 500px photos took a median 0.3 s (eBay) and 0.65 s (AliExpress) to download,
+ * 0.9–1 s at p90; a slower one is tried again on a later visit.
+ */
+const SEARCH_PHOTO_TIMEOUT_MS = 1_500;
 
 /** Photos hashed per warm run at most: bounds the cron's time as the catalogue grows. */
 const MAX_PHOTOS_PER_RUN = 1_500;

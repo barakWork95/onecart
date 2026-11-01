@@ -19,10 +19,16 @@ describe("POST /api/match/fingerprint-top", () => {
 
   it("runs the check for the page's search and returns the look-alike cards, uncached", async () => {
     const pairs = [{ listingIds: ["ebay:1", "aliexpress:2"], stores: ["aliexpress", "ebay"] as const }];
-    run.mockResolvedValue({ kind: "checked", regrouped: true, pairs });
+    run.mockResolvedValue({
+      kind: "checked",
+      regrouped: true,
+      pairs,
+      timings: { search: 40, hash: 820, regroup: 35 },
+    });
     const response = await post({ q: "monitor stand riser", sort: "landed_price_asc" });
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("server-timing")).toBe("search;dur=40, hash;dur=820, regroup;dur=35");
     expect(await response.json()).toEqual({ regrouped: true, pairs });
     expect(run).toHaveBeenCalledWith({ q: "monitor stand riser", sort: "landed_price_asc" });
   });

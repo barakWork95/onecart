@@ -32,5 +32,15 @@ export async function POST(request: Request) {
   if (!parsed.success) return refuse(400, "invalid_body");
   const result = await fingerprintTop(parsed.data);
   if (result.kind === "invalid") return refuse(400, "missing_query");
-  return NextResponse.json({ regrouped: result.regrouped, pairs: result.pairs }, { headers: NO_STORE });
+  const { search, hash, regroup } = result.timings;
+  return NextResponse.json(
+    { regrouped: result.regrouped, pairs: result.pairs },
+    {
+      headers: {
+        ...NO_STORE,
+        // Durations only: what the check spent reading results, hashing photos and regrouping.
+        "Server-Timing": `search;dur=${search}, hash;dur=${hash}, regroup;dur=${regroup}`,
+      },
+    },
+  );
 }

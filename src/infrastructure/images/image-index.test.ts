@@ -43,6 +43,18 @@ describe("fetchImage", () => {
       await fetchImage("https://i.ebayimg.com/x.jpg", () => Promise.reject(new Error("timeout"))),
     ).toBeNull();
   });
+
+  it("reports a timeout apart from a failure, after the deadline it's given", async () => {
+    const hang = jest.fn(
+      (_url: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_, reject) =>
+          init?.signal?.addEventListener("abort", () => reject(init.signal!.reason)),
+        ),
+    );
+    const started = Date.now();
+    expect(await fetchImage("https://i.ebayimg.com/x.jpg", hang, 50)).toBe("timeout");
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
 });
 
 describe("createRedisImageHashIndex", () => {
@@ -85,6 +97,32 @@ describe("createRedisImageHashIndex", () => {
     expect(await index.ensure(urls)).toBe(0);
     expect(hashImage).toHaveBeenCalledTimes(3);
     expect(await redis.get(imageHashKey("https://i.ebayimg.com/bad.jpg"))).toBe("unhashable");
+  });
+
+  it("records nothing for a photo it should try again (a timeout): it stays missing", async () => {
+    const redis = createInMemoryRedis();
+    const hashImage = jest.fn(async (url: string) =>
+      url.endsWith("slow.jpg") ? ("retry" as const) : "00ff00ff00ff00ff",
+    );
+    const index = createRedisImageHashIndex({ redis, hashImage });
+    const urls = ["https://i.ebayimg.com/a.jpg", "https://i.ebayimg.com/slow.jpg"];
+    expect(await index.ensure(urls)).toBe(1);
+    expect(await index.missing(urls)).toEqual(["https://i.ebayimg.com/slow.jpg"]);
+    expect(await redis.get(imageHashKey("https://i.ebayimg.com/slow.jpg"))).toBeNull();
+  });
+
+  it("downloads up to `concurrency` photos at once", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    const hashImage = async () => {
+      peak = Math.max(peak, ++inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight--;
+      return "00ff00ff00ff00ff";
+    };
+    const index = createRedisImageHashIndex({ redis: createInMemoryRedis(), hashImage, concurrency: 12 });
+    await index.ensure(Array.from({ length: 12 }, (_, i) => `https://i.ebayimg.com/${i}.jpg`));
+    expect(peak).toBe(12);
   });
 
   it("lists the photos never tried, in one batched read, without downloading", async () => {

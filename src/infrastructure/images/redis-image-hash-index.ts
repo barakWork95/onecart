@@ -14,8 +14,11 @@ const FAILED = "unhashable";
 
 export interface ImageHashIndexDeps {
   readonly redis: RedisLike;
-  /** Downloads and hashes one image; null when it can't. */
-  readonly hashImage: (url: string) => Promise<ImageHash | null>;
+  /**
+   * Downloads and hashes one image: null when it can't be hashed (remembered for a
+   * day), "retry" when it should be tried again on the next run (a timeout).
+   */
+  readonly hashImage: (url: string) => Promise<ImageHash | "retry" | null>;
   /** Downloads at once in `ensure`. */
   readonly concurrency?: number;
 }
@@ -55,6 +58,7 @@ export function createRedisImageHashIndex(deps: ImageHashIndexDeps): ImageHashIn
         while (next < todo.length) {
           const url = todo[next++]!;
           const hash = await deps.hashImage(url);
+          if (hash === "retry") continue;
           await deps.redis.set(imageHashKey(url), hash ?? FAILED, { ex: hash ? HASH_TTL : FAILED_TTL });
           if (hash) added++;
         }
