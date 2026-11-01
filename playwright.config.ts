@@ -40,6 +40,12 @@ export default defineConfig({
       ALIEXPRESS_APP_KEY: "",
       ALIEXPRESS_APP_SECRET: "",
       AFFILIATE_ALIEXPRESS_TRACKING_ID: "",
+      EBAY_APP_ID: "",
+      EBAY_CERT_ID: "",
+      EBAY_DEV_ID: "",
+      SERPAPI_API_KEY: "",
+      // A `vercel env pull` sets this to "production": E2E isn't a deployment (no Analytics, no live mode).
+      VERCEL_ENV: "",
       OUTBOUND_LINK_SECRET: "e2e-only-outbound-link-secret-0123456789",
       AFFILIATE_AMAZON_TAG: "onecart-e2e-20",
       AFFILIATE_EBAY_CAMPAIGN_ID: "5338000000",
