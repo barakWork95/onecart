@@ -419,6 +419,15 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
       list with no second read; the regroup reads photos from the hashes the check already holds
       (`SearchProductsOptions.photoHashes`). The allowance stays after the read, not in parallel:
       otherwise repeating a check on a hashed search would drain the shared daily cap.
+    - **Measured 2026-11-01 (b7beb22, function in `iad1`, Upstash region not yet matched):** seven
+      fresh checks took 3.65–6.83 s (median 4.32 s): `search` 0.20–0.46 s, `check` ~0.2 s, `photos`
+      2.6–5.4 s, slowest `download` 0.23–0.81 s, slowest `write` 0.10–0.20 s, `regroup` ~0.11 s
+      (was ~0.21 s). **Image processing is the bottleneck**, not Redis or downloads: `process`
+      summed 19–50 s, each photo waiting most of the step on the function's CPU. The cheaper
+      pipelines don't keep hashes: over 150 recorded photos, raw output after trim (16.5 vs
+      38.5 ms/photo locally) matched the stored hash exactly for 7, and shrinking first
+      (5.1 ms/photo) for 8, up to 14 and 21 bits away. Either needs a `v2` hash key and
+      recalibration.
     - **Hash the 500px photos, never thumbnails.** Measured on 2026-11-01 over the 449 recorded
       generic listings: eBay `s-l140` hashed a median ~5 bits (up to 21) from the 500px photo,
       AliExpress `_200x200` within 2 bits for only 81% (up to 20), so thumbnail hashes can't be
