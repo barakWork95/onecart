@@ -14,6 +14,9 @@ jest.mock("@/app/_composition", () => ({
   }),
 }));
 
+const connection = jest.fn(async () => {});
+jest.mock("next/server", () => ({ connection: () => connection() }));
+
 let hebrew = false;
 jest.mock("@/i18n/enabled", () => ({ hebrewEnabled: () => hebrew }));
 
@@ -22,6 +25,12 @@ beforeEach(() => {
 });
 
 describe("sitemap.xml", () => {
+  it("is built per request, so a copy from an outage can't stay frozen", async () => {
+    connection.mockClear();
+    await sitemap();
+    expect(connection).toHaveBeenCalledTimes(1);
+  });
+
   it("lists the static pages and indexable category pages on the canonical host", async () => {
     expect((await sitemap()).map((e) => e.url)).toEqual([
       "https://www.onecartapp.com/",

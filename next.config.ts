@@ -43,7 +43,11 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    return securityHeaderRules({ dev: process.env.NODE_ENV !== "production" });
+    return [
+      ...securityHeaderRules({ dev: process.env.NODE_ENV !== "production" }),
+      // Built per request (see app/sitemap.ts): an hour on the CDN keeps crawls off Redis.
+      { source: "/sitemap.xml", headers: [{ key: "CDN-Cache-Control", value: "public, max-age=3600" }] },
+    ];
   },
   partialPrefetching: true,
   turbopack: {

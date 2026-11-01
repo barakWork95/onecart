@@ -622,7 +622,7 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
   reaches Redis, let alone a store. Products are picked by `createFeaturedLookup`, the same as
   homepage cards, and `CategoryProductCard` shows the full landed-price breakdown.
   - The warm-up revalidates each tag (`"max"`); the first visit after it may still get the
-    previous copy while it rebuilds, and so may `sitemap.xml` (E2E polls for the fresh ones).
+    previous copy while it rebuilds, and so may `sitemap.xml`, which reads these pages (E2E polls for the fresh ones).
   - Fewer than `MIN_INDEXABLE_PRODUCTS` (3) priced products → `noindex, follow` and left out of
     the sitemap. **Except after an outage:** the warm-up saves each indexable page to Supabase
     (`category_snapshots`, `createCategorySnapshots`, skipped while Redis is degraded), and a
@@ -740,6 +740,10 @@ strict-origin-when-cross-origin` (`no-referrer` on `/go/*`), `Permissions-Policy
 - `app/opengraph-image.tsx` and `app/twitter-image.tsx` render `_share-card.tsx` at build time
   (static). The logo is inlined there; a test keeps it equal to `app/icon.svg`.
 - `sitemap.ts` lists only static pages; never add `/search` URLs (they spend store quota).
+- `sitemap.ts` runs per request (`connection()`), reading the cached category pages, with
+  `CDN-Cache-Control: public, max-age=3600` from `next.config.ts`. Don't let it prerender: on
+  2026-11-01 a copy from the Redis outage listed no categories, ignored the warm-up's tag
+  revalidation and stayed until a deploy. So it can lag a warm-up by up to an hour.
 
 ## Operations: /internal/status and ops alerts
 

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { categoryList, categoryPageData } from "@/app/_composition";
 import { SITE_URL } from "@/config/site";
 import { hebrewEnabled } from "@/i18n/enabled";
@@ -11,8 +12,13 @@ type Entry = MetadataRoute.Sitemap[number];
  * live, quota-billed store query, and robots.txt keeps crawlers off them (see
  * robots.ts). A category page is listed once it's indexable (enough products).
  * With Hebrew live, every page is listed in each language, linked to the others.
+ *
+ * Built per request, never prerendered: a copy rendered during a Redis outage had
+ * no category pages and stayed that way until the next deploy (2026-11-01). The
+ * pages it reads stay cached, and the CDN keeps the XML for an hour (next.config.ts).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
   const pages = await Promise.all(categoryList().map(({ slug }) => categoryPageData(slug)));
   const paths: [string, Entry["changeFrequency"], number][] = [
     ["/", "daily", 1],

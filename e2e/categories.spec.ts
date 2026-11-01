@@ -74,7 +74,7 @@ test.describe("category pages", () => {
   });
 
   test("the sitemap lists indexable category pages only", async ({ request }) => {
-    // Cached like the pages: the fetch right after the warm-up may still get the old copy.
+    // It reads the cached pages: the fetch right after the warm-up may still get the old copy.
     let sitemap = "";
     await expect
       .poll(

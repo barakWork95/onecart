@@ -30,7 +30,9 @@ test.describe("share previews and sitemap", () => {
   });
 
   test("the sitemap lists the static pages and robots.txt points to it", async ({ request }) => {
-    const sitemap = await (await request.get("/sitemap.xml")).text();
+    const response = await request.get("/sitemap.xml");
+    expect(response.headers()["cdn-cache-control"]).toBe("public, max-age=3600");
+    const sitemap = await response.text();
     expect(sitemap).toContain("<loc>https://www.onecartapp.com/privacy</loc>");
     expect(sitemap).not.toContain("/search");
     expect(await (await request.get("/robots.txt")).text()).toContain(
