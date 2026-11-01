@@ -118,7 +118,8 @@ export function createRecordPriceHistory(deps: RecordPriceHistoryDeps) {
         productUrl: product.productUrl,
         query: observation.query,
         current: money(drop.currentMinor, "ILS"),
-        typical: money(drop.typicalMinor, "ILS"),
+        // A median of an even number of days can fall between two agorot.
+        typical: money(Math.round(drop.typicalMinor), "ILS"),
         dropShare: drop.dropShare,
         historyDays: drop.historyDays,
         observedAt: product.fetchedAt,

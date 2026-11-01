@@ -166,6 +166,23 @@ describe("recordPriceHistory", () => {
     ]);
   });
 
+  it("boards a drop whose typical price is a median between two prices, in whole agorot", async () => {
+    // An even number of days whose middle two prices are one agora apart: the median is 50,000.5.
+    const earlier = [22, 23, 24, 25, 26, 27, 28, 29].map((d, i) => ({
+      productId: "ebay:drop",
+      day: `2026-10-${d}`,
+      totalMinor: i < 4 ? 500_00 : 500_01,
+    }));
+    const board = fakeBoard();
+    const run = await createRecordPriceHistory({ history: fakeHistory(earlier), board })(
+      [observed("drop", 400)],
+      TODAY,
+    );
+
+    expect(run).toEqual({ recorded: 1, drops: 1 });
+    expect(board.cards()[0]?.typical).toEqual(money(500_01, "ILS"));
+  });
+
   it("records a product found by two searches once, and caps the board per query", async () => {
     const history = fakeHistory([...week("ebay:a", 500), ...week("ebay:b", 500), ...week("ebay:c", 500)]);
     const board = fakeBoard();
