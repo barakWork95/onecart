@@ -387,8 +387,8 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
     ("Replacement clip for …") still do; generic category queries ("wireless headphones") demote
     cases as before.
   - **Photo hashes (Phase 2).** The warm-up hashes generic searches' photos (`photoUrlsToHash`,
-    25 per store, ≤1,500 a run): dHash with `sharp` (borders trimmed, 9×8 greyscale), cached in
-    Redis 30 days (`img:dhash:v1:{sha256(url)}`; failures 1 day). Photos come only from the
+    25 per store, ≤1,500 a run): dHash with `sharp` (shrunk to fit 128 px, borders trimmed, 9×8
+    greyscale), cached in Redis 30 days (`img:dhash:v2:{sha256(url)}`; failures 1 day). Photos come only from the
     allowlisted store CDNs (`image-fetcher.ts`: https, no redirects, 5 s, 2 MB). **A search never
     computes a hash while rendering**: `photoHashesFor` reads cached ones, for generic intents only,
     and a failed read means "no photos".
@@ -419,17 +419,17 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
       list with no second read; the regroup reads photos from the hashes the check already holds
       (`SearchProductsOptions.photoHashes`). The allowance stays after the read, not in parallel:
       otherwise repeating a check on a hashed search would drain the shared daily cap.
-    - **Measured 2026-11-01 (b7beb22, function in `iad1`, Upstash region not yet matched):** seven
-      fresh checks took 3.65–6.83 s (median 4.32 s): `search` 0.20–0.46 s, `check` ~0.2 s, `photos`
-      2.6–5.4 s, slowest `download` 0.23–0.81 s, slowest `write` 0.10–0.20 s, `regroup` ~0.11 s
-      (was ~0.21 s). **Image processing is the bottleneck**, not Redis or downloads: `process`
-      summed 19–50 s, each photo waiting most of the step on the function's CPU. The cheaper
-      pipelines don't keep hashes: over 150 recorded photos, raw output after trim (16.5 vs
-      38.5 ms/photo locally) matched the stored hash exactly for 7, and shrinking first
-      (5.1 ms/photo) for 8, up to 14 and 21 bits away. Either needs a `v2` hash key and
-      recalibration.
-    - **Hash the 500px photos, never thumbnails.** Measured on 2026-11-01 over the 449 recorded
-      generic listings: eBay `s-l140` hashed a median ~5 bits (up to 21) from the 500px photo,
+    - **Hash v2 (2026-11-01): shrink first.** With v1 (no shrink), seven fresh checks took
+      3.65–6.83 s (median 4.32 s): `photos` 2.6–5.4 s, `process` summing 19–50 s, slowest
+      `download` 0.23–0.81 s, slowest `write` 0.10–0.20 s. Image processing on the function's CPU
+      was the bottleneck. v2 costs 4.9 vs 36.7 ms/photo locally. Over the 449 recorded photos it
+      separates better: real pairs 8 bits (clips) and 0 (live stretch lids; v1 9 and 7), different
+      products from 15 (v1 14), same-store collapses 0–4 then 8. The limits stay 10 and 6, and
+      the groups formed are unchanged. Edited copies within 10 bits, v1 → v2: resized 89 → 100%,
+      lossy 94 → 99%, padded 92 → 93%. Changing any step changes the hashes: bump the key's
+      version and re-record `generic-recorded.json` from its photos.
+    - **Hash the 500px photos, never store thumbnails.** Measured on 2026-11-01 (with v1) over the
+      449 recorded generic listings: eBay `s-l140` hashed a median ~5 bits (up to 21) from the 500px photo,
       AliExpress `_200x200` within 2 bits for only 81% (up to 20), so thumbnail hashes can't be
       compared with the stored ones; and they barely download faster (8 KB vs 55 KB, but latency,
       not bytes, dominates: eBay 241 vs 324 ms median, AliExpress 676 vs 646 ms).
@@ -443,8 +443,8 @@ locale)` writes the title, body and `/he/alerts` link in it. `Locale` itself liv
     pairs. Basis `visual_match` ("Looks identical"; compare-sheet caveat), joined by every
     member like `title_similarity`. No hashes → generic listings stay single cards.
   - `fixtures/generic-recorded.json` (10 queries, 449 eBay + AliExpress listings, hashed) and
-    `generic-recorded.test.ts` pin the calibration: no cross-store photo within 8 bits, the
-    only ≤ 12-bit pair is the same cable clip (9 bits), different products from 14; exactly one
+    `generic-recorded.test.ts` pin the calibration: no cross-store photo within 7 bits, the
+    only ≤ 12-bit pair is the same cable clip (8 bits), different products from 15; exactly one
     cross-store group (those clips) and 21 within-store collapses (reviewed by title, photo distance
     and price). Re-record and re-check when tuning.
   - **UI (Phase 4).** `ProductGroup.lookAlike` (any photo link, across stores or within one) →

@@ -1,22 +1,37 @@
 import "server-only";
 
-import sharp from "sharp";
+import sharp, { type OutputInfo } from "sharp";
 import type { ImageHash } from "@/domain/matching/image-hash";
 
+/** Photos are shrunk to fit this first: nearly all the cost of hashing is decoding the full image. */
+const SHRINK_TO_PX = 128;
+const trimmed = { threshold: 12 } as const;
+
 /**
- * dHash: shrink to 9×8 greyscale, then one bit per pixel for "brighter than
- * its right-hand neighbour". Robust to resizing, recompression and brightness:
- * what differs between two sellers' copies of one supplier photo. Uniform
- * borders are trimmed first (resellers pad photos onto white squares).
+ * dHash (v2 of `imageHashKey`): shrink to 9×8 greyscale, then one bit per pixel for
+ * "brighter than its right-hand neighbour". Robust to resizing, recompression
+ * and brightness: what differs between two sellers' copies of one supplier
+ * photo. Uniform borders are trimmed first (resellers pad photos onto white
+ * squares), after a first shrink that makes this about 7× cheaper: on a serverless
+ * CPU, 12 photos at once took seconds. Changing any step changes the hashes:
+ * bump the key's version and recalibrate (`generic-recorded.test.ts`).
  */
 export async function dHash(image: Buffer): Promise<ImageHash> {
-  let pipeline = sharp(image, { failOn: "error" }).flatten({ background: "#ffffff" });
+  const shrunk = await sharp(image, { failOn: "error" })
+    .flatten({ background: "#ffffff" })
+    .resize(SHRINK_TO_PX, SHRINK_TO_PX, { fit: "inside", withoutEnlargement: true })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const raw = (pixels: { data: Buffer; info: OutputInfo }) =>
+    sharp(pixels.data, {
+      raw: { width: pixels.info.width, height: pixels.info.height, channels: pixels.info.channels },
+    });
+  let pipeline = raw(shrunk);
   try {
     // trim() throws on a uniform image; then hash it as it is.
-    const trimmed = await pipeline.clone().trim({ threshold: 12 }).toBuffer();
-    pipeline = sharp(trimmed);
+    pipeline = raw(await raw(shrunk).trim(trimmed).raw().toBuffer({ resolveWithObject: true }));
   } catch {
-    // keep the untrimmed pipeline
+    // keep the untrimmed pixels
   }
   const { data } = await pipeline
     .greyscale()

@@ -4,9 +4,9 @@ import type { MatchCandidate, MatchResult } from "@/domain/matching/product-matc
 import { isGenericPair, tokenizeTitle } from "@/domain/matching/title-tokens";
 
 export interface GenericMatchingPolicy {
-  /** Across stores: the same item's re-rendered photos measured 9 bits; different items 14+. */
+  /** Across stores: the same item's re-rendered photos measured 0–8 bits; different items 15+. */
   readonly crossStoreMaxPhotoBits: number;
-  /** Within one store sellers reuse the very same photo, so the bar is tighter. */
+  /** Within one store sellers reuse the very same photo (0–4 bits; next pair 8), so the bar is tighter. */
   readonly sameStoreMaxPhotoBits: number;
   /** Share of the shorter title's core words found in the longer one. */
   readonly minCoreContainment: number;

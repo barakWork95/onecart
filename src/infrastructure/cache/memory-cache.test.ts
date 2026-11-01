@@ -39,18 +39,18 @@ describe("withMemoryCache", () => {
 
   it("asks Redis only for the keys it doesn't hold, in one MGET, and keeps the caller's order", async () => {
     const { redis, inner, mget } = setup();
-    await inner.set("img:dhash:v1:a", "aaaa", { ex: 60 });
-    await inner.set("img:dhash:v1:b", "bbbb", { ex: 60 });
-    await redis.get("img:dhash:v1:a");
-    expect(await redis.mget(["img:dhash:v1:b", "img:dhash:v1:a", "img:dhash:v1:missing"])).toEqual([
+    await inner.set("img:dhash:v2:a", "aaaa", { ex: 60 });
+    await inner.set("img:dhash:v2:b", "bbbb", { ex: 60 });
+    await redis.get("img:dhash:v2:a");
+    expect(await redis.mget(["img:dhash:v2:b", "img:dhash:v2:a", "img:dhash:v2:missing"])).toEqual([
       "bbbb",
       "aaaa",
       null,
     ]);
     expect(mget).toHaveBeenCalledTimes(1);
-    expect(mget).toHaveBeenCalledWith(["img:dhash:v1:b", "img:dhash:v1:missing"]);
+    expect(mget).toHaveBeenCalledWith(["img:dhash:v2:b", "img:dhash:v2:missing"]);
     mget.mockClear();
-    expect(await redis.mget(["img:dhash:v1:a", "img:dhash:v1:b"])).toEqual(["aaaa", "bbbb"]);
+    expect(await redis.mget(["img:dhash:v2:a", "img:dhash:v2:b"])).toEqual(["aaaa", "bbbb"]);
     expect(mget).not.toHaveBeenCalled();
   });
 

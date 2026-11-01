@@ -9,9 +9,9 @@ import {
 } from "@/domain/matching/image-hash";
 import type { RedisLike } from "@/infrastructure/cache/redis-client";
 
-/** Image URLs are long; the key holds a digest. Bump v1 if the hash algorithm changes. */
+/** Image URLs are long; the key holds a digest. Bump the version if the hash algorithm changes. */
 export const imageHashKey = (url: string) =>
-  `img:dhash:v1:${createHash("sha256").update(url).digest("base64url")}`;
+  `img:dhash:v2:${createHash("sha256").update(url).digest("base64url")}`;
 const HASH_TTL = 30 * 24 * 60 * 60;
 /** An image that couldn't be hashed is tried again tomorrow, not on every run. */
 const FAILED_TTL = 24 * 60 * 60;

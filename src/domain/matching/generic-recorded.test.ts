@@ -6,8 +6,8 @@ import { classifyOffers, searchIntent } from "@/domain/search/search-intent";
 import { makeProduct } from "@/test/product-factory";
 
 /**
- * Real eBay + AliExpress results for ten generic queries (recorded 2026-10-18),
- * photos hashed with infrastructure/images/dhash.ts: the calibration data for
+ * Real eBay + AliExpress results for ten generic queries (recorded 2026-10-18,
+ * re-hashed with v2 of infrastructure/images/dhash.ts): the calibration data for
  * generic (photo-based) matching. These tests pin what the data showed.
  */
 const queries = Object.entries(recorded.queries);
@@ -63,28 +63,59 @@ describe("recorded generic results", () => {
     }
   });
 
-  it("share no supplier photo across stores: sellers re-render, so no pair is within 8 bits", () => {
+  it("share no supplier photo across stores: sellers re-render, so no pair is within 7 bits", () => {
     const pairs = crossStorePairs();
     expect(pairs.length).toBeGreaterThan(4_000);
-    expect(pairs.filter((p) => p.distance <= 8)).toEqual([]);
+    expect(pairs.filter((p) => p.distance <= 7)).toEqual([]);
   });
 
-  it("put the same gadget's re-rendered photos within 10 bits, and different products from 14 up", () => {
+  it("put the same gadget's re-rendered photos within 10 bits, and different products from 15 up", () => {
     // Checked by eye: the same magnetic cable clips, photographed twice. eBay lands at ₪419
     // (₪12.40 item + ₪406.85 shipping to Israel); AliExpress sells it from ₪2.99.
     const near = crossStorePairs().filter((p) => p.distance <= 12);
     expect(near.map((p) => [p.query, p.distance, p.ebay.item, p.ali.item])).toEqual([
-      ["cable organizer clips", 9, 12.4, 2.99],
-      ["cable organizer clips", 9, 12.4, 5.09],
+      ["cable organizer clips", 8, 12.4, 2.99],
+      ["cable organizer clips", 8, 12.4, 5.09],
     ]);
-    // The next-closest pairs (14, 17, 18…) are different products.
+    // The next-closest pairs (15, 15, 15, 16…) are different products.
     expect(
       Math.min(
         ...crossStorePairs()
           .filter((p) => p.distance > 12)
           .map((p) => p.distance),
       ),
-    ).toBe(14);
+    ).toBe(15);
+  });
+
+  it("group the live stretch lids pair: one supplier photo, hashing identically in both stores", () => {
+    // Merged live on 2026-11-01 ("silicone stretch lids"); the sheet showed the same 6-piece set.
+    const photo = "c8d3da5868399e06";
+    const ali = makeProduct({
+      provider: "aliexpress",
+      sku: "a1",
+      title:
+        "6pcs Reusable Silicone Stretch Lids For Food Bowls - Multifunctional Fruit And Vegetable Fresh-Keeping Cover",
+      total: 9_19,
+      imageUrl: "https://ae-pic-a1.aliexpress-media.com/kf/S7fe30e9841b547d6962074af0d050be1N.jpg",
+      sellerName: null,
+    });
+    const ebay = makeProduct({
+      provider: "ebay",
+      sku: "e1",
+      title: "6PCS Silicone Stretch Lids Reusable Food Covers Bowl Container Covers Kitchen Se",
+      total: 27_13,
+      imageUrl: "https://i.ebayimg.com/images/g/GPMAAeSwWUhqWmi4/s-l500.jpg",
+      sellerName: null,
+    });
+    const groups = groupProducts([ali, ebay], {
+      classes: classifyOffers([ali, ebay], searchIntent("silicone stretch lids")),
+      imageHashes: new Map([
+        [ali.imageUrl!, photo],
+        [ebay.imageUrl!, photo],
+      ]),
+    });
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toMatchObject({ matchedBy: "visual_match", lookAlike: true });
   });
 
   it("group across stores only the photo-verified cable clips (10 bits, gates A, C, D, E)", () => {
