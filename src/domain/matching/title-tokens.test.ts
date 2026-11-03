@@ -11,6 +11,17 @@ const variants = (title: string) =>
   Object.fromEntries([...tokenizeTitle(title).variants].map(([unit, values]) => [unit, [...values]]));
 
 describe("tokenizeTitle", () => {
+  it("does not confuse explicit Bluetooth versions and spatial angles with model numbers", () => {
+    const connectivity = tokenizeTitle("QCY H3 Pro Headphones Bluetooth 5.4");
+    const spatial = tokenizeTitle("QCY H3 Pro Headphones 360° Spatial Sound");
+    expect([...connectivity.models]).toContain("h3");
+    expect([...spatial.models]).toContain("h3");
+    expect(connectivity.numbers.size).toBe(0);
+    expect(spatial.numbers.size).toBe(0);
+    expect(tokenizeTitle("JBL Flip 6").numbers.has("6")).toBe(true);
+    expect(tokenizeTitle("Xbox 360").numbers.has("360")).toBe(true);
+  });
+
   it.each([
     ["QCY H3 Pro Wireless Headphones", "qcy"],
     ["Edifier W800BT Pro Wireless Headphones", "edifier"],
@@ -78,7 +89,7 @@ describe("tokenizeTitle", () => {
     it("keeps letter-and-digit codes as models, spec codes out", () => {
       const tokens = tokenizeTitle("JBL Flip 6 IP67 Speaker USB-C Bluetooth 5.3 4K");
       expect([...tokens.models]).toEqual([]);
-      expect([...tokens.numbers]).toEqual(["6", "53"]);
+      expect([...tokens.numbers]).toEqual(["6"]);
     });
 
     it("splits a word glued to a series number but not short codes", () => {

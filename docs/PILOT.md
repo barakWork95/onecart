@@ -100,3 +100,18 @@ adding them restores branded matching and prevents X2s adapters/cables being tre
 Regression tests cover maker recognition and accessory-only result sets. Official-store names
 are only a matching heuristic, not proof of authenticity. Detailed live samples remain local
 and are not committed to the public repository.
+
+2026-11-03 (pair validation): owner-supplied AliExpress checkout screenshots confirmed
+QCY H3 Pro blue at ILS 170.98 including ILS 6.99 shipping, and Edifier W800BT Pro gray
+at ILS 146.39 with free shipping. These are observations for those checkouts only;
+no screenshot, address, payment data or fixed shipping override is stored in the repository.
+Official eBay item checks returned a gray W800BT Pro candidate, but its checkout taxes and
+bundle equivalence remain unverified. The blue QCY candidate has contradictory colour metadata.
+Neither pair is admitted to the staged catalog yet.
+
+A second matching defect was confirmed: explicit Bluetooth decimal versions and 360-degree
+spatial-audio copy became conflicting bare series numbers. The tokenizer now strips those
+specific spec contexts, with regression coverage preserving real series numbers and marketplace
+seller checks. Price-ratio and complete-group conflict gates remain intact. Full-sample grouping
+still does not yield a verified cross-store group; no launch claim is made. TypeScript, ESLint
+and all 1,367 tests in 165 suites passed after this change.
