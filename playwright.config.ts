@@ -26,6 +26,8 @@ export default defineConfig({
     // Deterministic data: the demo catalog, fixed FX, no DeepL (glossary translation), no Redis.
     env: {
       ONECART_DEMO_PROVIDERS: "true",
+      ONECART_HEADPHONES_PILOT: "false",
+      ONECART_AMAZON_LINK_ONLY: "false",
       // The Hebrew interface's routing, direction and hreflang are covered end to end
       // (e2e/i18n.spec.ts); its off state (production until translated) by unit tests.
       HEBREW_UI: "true",

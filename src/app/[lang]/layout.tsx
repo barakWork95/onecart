@@ -1,3 +1,4 @@
+import { amazonLinkOnly, env } from "@/config/env";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { categoryList } from "@/app/_composition";
@@ -73,6 +74,11 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[lang]">)
           ) : null
         }
       />
+      {amazonLinkOnly(env()) && (
+        <p role="status" className="mx-auto w-full max-w-6xl px-4 py-3 text-sm text-muted-foreground">
+          {(await getDictionary()).amazonInterim.notice}
+        </p>
+      )}
       {children}
       <SiteFooter categories={categoryList(locale)} locale={locale} />
       <BottomNav locale={locale} />

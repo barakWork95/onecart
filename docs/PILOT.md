@@ -12,18 +12,18 @@ bundle before an offer is admitted to the validation sheet. A catalog entry is n
 
 ## Board
 
-| ID  | Task                                                 | Status                                       | Done means                                                                                                      |
-| --- | ---------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| P01 | Candidate catalog and scope                          | Implemented, staged                          | 15 distinct model queries; headphones-only discovery behind `ONECART_HEADPHONES_PILOT`                          |
-| P02 | Partial-cost ranking and claims                      | Implemented, local checks passed             | Quoted shipping first; no best-price badge, premium or best-deal tracking when any compared shipping is unknown |
-| P03 | Preserve eBay variation                              | Implemented, local checks passed             | Same variation ID survives mapper and affiliate URL generation                                                  |
-| P04 | Nearby affiliate disclosure and estimate wording     | Implemented, local checks passed             | English/Hebrew disclosure by offer CTAs and in comparison sheet; estimate wording                               |
-| P05 | Automated quality gate                               | Local checks passed; GitHub run pending      | Types, lint, coverage, demo browser and throwaway SQL jobs pass                                                 |
-| P06 | Confirm two store accounts, rights and attribution   | Awaiting owner decision/account verification | Approved domains/methods, usable credentials, traceable test click, permitted data use                          |
-| P07 | Validate matching and landed costs                   | Pending P06                                  | 50 labelled pairs and 20 aligned Israel checkout comparisons, actual evidence recorded                          |
-| P08 | Strict provider spend control, freshness and privacy | Pending                                      | Monthly credit cap, shared-counter failure stops paid calls, stale quotes cannot win, analytics redaction       |
-| P09 | Preview, mobile/RTL review and production release    | Pending checks                               | Preview verified, no production demo data, deployment SHA known and rollback available                          |
-| P10 | Limited user test                                    | Not started                                  | 10–20 testers; at least 30 useful searches; funnel and attributed revenue measured                              |
+| ID  | Task                                                 | Status                                              | Done means                                                                                                      |
+| --- | ---------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| P01 | Candidate catalog and scope                          | Implemented, staged                                 | 15 distinct model queries; headphones-only discovery behind `ONECART_HEADPHONES_PILOT`                          |
+| P02 | Partial-cost ranking and claims                      | Implemented, local checks passed                    | Quoted shipping first; no best-price badge, premium or best-deal tracking when any compared shipping is unknown |
+| P03 | Preserve eBay variation                              | Implemented, local checks passed                    | Same variation ID survives mapper and affiliate URL generation                                                  |
+| P04 | Nearby affiliate disclosure and estimate wording     | Implemented, local checks passed                    | English/Hebrew disclosure by offer CTAs and in comparison sheet; estimate wording                               |
+| P05 | Automated quality gate                               | Passed locally and on GitHub (first commit)         | Types, lint, coverage, demo browser and throwaway SQL jobs pass                                                 |
+| P06 | Confirm two store accounts, rights and attribution   | Amazon interim approved; store verification pending | Approved domains/methods, usable credentials, traceable test click, permitted data use                          |
+| P07 | Validate matching and landed costs                   | Pending P06                                         | 50 labelled pairs and 20 aligned Israel checkout comparisons, actual evidence recorded                          |
+| P08 | Strict provider spend control, freshness and privacy | Pending                                             | Monthly credit cap, shared-counter failure stops paid calls, stale quotes cannot win, analytics redaction       |
+| P09 | Preview, mobile/RTL review and production release    | Pending checks                                      | Preview verified, no production demo data, deployment SHA known and rollback available                          |
+| P10 | Limited user test                                    | Not started                                         | 10–20 testers; at least 30 useful searches; funnel and attributed revenue measured                              |
 
 ## Release gates
 
@@ -38,13 +38,20 @@ Complete browser/SQL checks, verify mobile light/dark/RTL, test store attributio
 successful daily cron runs, and configure spending caps. Do not buy traffic or another data plan
 until these gates pass. Existing broad catalog remains available with the flag off.
 
-## Amazon decision under review
+## Approved Amazon interim decision
 
-The owner wants Amazon included and requested a cost/constraint comparison on 2026-11-03.
-Do not remove Amazon or switch live providers while this decision is pending. The earlier
-recommendation to launch with eBay/AliExpress was not approved. Prepare an official Creators API
-path, a temporary link-only path and the current SerpApi development-only cost comparison.
-The owner confirmed an existing Associates account; API eligibility is still unknown. No paid plan or production setting has changed.
+Approved by the owner on 2026-11-03: retain Amazon as a direct, clearly labelled check-price
+link without Amazon prices, images or ranking. Pause price alerts and price history site-wide;
+keep existing user data. Pursue final Associates approval and official Creators API eligibility.
+Do not purchase another SerpApi plan or send a support message without specific authorization.
+
+`ONECART_AMAZON_LINK_ONLY=true` enables this mode independently of the curated catalog.
+`ONECART_HEADPHONES_PILOT=true` also implies it. Both switches are off in the template until
+release gates pass. The server disables the Amazon provider even when live keys/recorded mode
+are configured, refuses alert creation/subscription, skips checks/sends/history, hides stale
+Amazon saved content and avoids category snapshots from the older broad catalog. Existing
+records are retained. New Amazon destinations are direct links, not signed `/go` redirects;
+they are measured as `amazon_price_check`, without a fabricated price.
 
 Amazon official policy was successfully retrieved on 2026-11-03 after the first audit:
 https://affiliate-program.amazon.com/help/operating/policies
@@ -69,3 +76,12 @@ All throwaway PostgreSQL migration/RLS tests passed. Remote main was fetched and
 Rollout note: existing cached eBay product URLs and already-signed links can omit a variation
 until refreshed. Refresh/expire the affected eBay cache before declaring the URL fix live; do
 not delete unrelated production data. This is not needed for the isolated demo preview.
+
+Interim-mode validation is isolated in `npm run test:e2e:interim` (demo data, English/Hebrew,
+desktop/mobile); the standard E2E suite explicitly disables both new switches to exercise the
+legacy mode. The rollout still requires a redeploy after changing flags because they affect
+prerendered pages. No production switch has been enabled yet.
+
+2026-11-03 (interim follow-up): typecheck/lint and 1,362 Jest tests passed. Four dedicated
+interim browser checks passed in English/Hebrew on desktop/mobile; all 146 legacy browser
+checks also passed. The official-approval support draft is prepared locally, not submitted.

@@ -53,3 +53,17 @@ The app deploys to Vercel. See `.env.example` for every setting. In production:
 - `OUTBOUND_LINK_SECRET` is required.
 - `ONECART_DEMO_PROVIDERS` must **not** be set.
 - The price-alert job is scheduled in `vercel.json` and needs `CRON_SECRET`.
+
+## Amazon interim mode
+
+Until official Amazon data access and program permissions are verified, set
+`ONECART_AMAZON_LINK_ONLY=true` and rebuild/redeploy. The headphones pilot flag
+also implies this mode. Amazon then appears as a direct, labelled check-price
+link; no Amazon provider, price, image or ranked offer is used. Price alerts,
+push subscriptions for new alerts, price checking/sending and price history are
+paused site-wide; existing records are retained. Saved Amazon content is hidden,
+and older category snapshots are not reused in this mode.
+
+`npm run test:e2e:interim` exercises this configuration with demo data. The normal
+E2E profile explicitly switches it off to keep coverage of the legacy behavior.
+See `docs/PILOT.md` for the rollout gates. Neither flag is enabled by default.

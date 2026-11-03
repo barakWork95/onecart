@@ -1,3 +1,4 @@
+import { AmazonCheckLink } from "@/components/features/amazon-check-link";
 import { AffiliateDisclosure } from "@/components/features/affiliate-disclosure";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -19,8 +20,12 @@ import { cn } from "@/lib/utils";
 export function CategoryProductCard({
   product,
   goHref,
+  amazonLinkOnly = false,
+  amazonTag,
   locale = "en",
 }: {
+  amazonLinkOnly?: boolean;
+  amazonTag?: string;
   product: CategoryProduct;
   goHref: string;
   locale?: Locale;
@@ -120,6 +125,9 @@ export function CategoryProductCard({
           </ul>
         )}
 
+        {amazonLinkOnly && (
+          <AmazonCheckLink disclose={false} query={product.query} tag={amazonTag} locale={locale} />
+        )}
         <AffiliateDisclosure locale={locale} />
         <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-center">
           {/* Live searches: never prefetched, so a crawler can't spend store quota through them. */}

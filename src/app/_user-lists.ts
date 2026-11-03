@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { getServices, findOffer, offersFor } from "@/app/_composition";
 import { createCheckPriceAlerts } from "@/application/user-lists/check-price-alerts";
 import { createNotifyTriggeredAlerts } from "@/application/user-lists/notify-triggered-alerts";
-import { env, webPushConfig } from "@/config/env";
+import { amazonLinkOnly, env, webPushConfig } from "@/config/env";
 import type { PushSubscriptionRepository } from "@/domain/notifications/ports";
 import { createUserListsService } from "@/application/user-lists/user-lists";
 import type { CurrentUser, UserListsRepository } from "@/domain/user-lists/ports";
@@ -79,6 +79,7 @@ export async function writeUserLists(): Promise<UserListsRepository | null> {
 
 /** The daily checker, or null when there's no cross-user access (no service key / no backend). */
 export function priceAlertChecker() {
+  if (amazonLinkOnly(env())) return null;
   const backend = getServices().userListsBackend;
   const alerts =
     backend.kind === "memory"
@@ -100,6 +101,7 @@ export function priceAlertChecker() {
  * notifications are off (keys not configured, or no backend for alerts).
  */
 export function pushPublicKey(): string | null {
+  if (amazonLinkOnly(env())) return null;
   const config = webPushConfig(env());
   return config && getServices().userListsBackend.kind !== "none" ? config.publicKey : null;
 }
@@ -133,6 +135,7 @@ function pushStores() {
 
 /** The daily notifier, or null when push is off or there's no cross-user access. */
 export function triggeredAlertNotifier() {
+  if (amazonLinkOnly(env())) return null;
   const stores = pushStores();
   return stores ? createNotifyTriggeredAlerts({ ...stores, logger: consoleLogger }) : null;
 }

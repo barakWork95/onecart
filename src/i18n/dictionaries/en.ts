@@ -35,6 +35,15 @@ export const en = {
     currencyTitle: "All prices are shown in Israeli shekels, delivered to Israel",
     theme: "Toggle dark mode",
   },
+  amazonInterim: {
+    notice: "Check Amazon prices directly at Amazon. Price alerts and price history are temporarily paused.",
+    checkPrice: "Check price on Amazon",
+    notCompared: "Amazon prices are not included in this comparison.",
+    alertsPaused:
+      "Price alerts are temporarily paused. Existing alerts are kept, but are not checked or sent.",
+    savedHidden:
+      "Saved Amazon products are kept, but their old prices and images are hidden during this period.",
+  },
   affiliateDisclosure:
     "We may earn a commission when you buy through these store links, at no extra cost to you.",
   footer: {

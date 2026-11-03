@@ -66,3 +66,24 @@ describe("savePushSubscriptionAction", () => {
     });
   });
 });
+
+describe("paused alerts", () => {
+  it("rejects both creation and push subscription before any repository write", async () => {
+    jest.resetModules();
+    process.env.ONECART_AMAZON_LINK_ONLY = "true";
+    try {
+      const pausedActions = await import("@/app/[lang]/alerts/actions");
+      const result = await pausedActions.createAlertAction({ ...alert, locale: "he" });
+      expect(result.ok).toBe(false);
+      expect(!result.ok && result.message).toContain("מושהות זמנית");
+      expect(createAlert).not.toHaveBeenCalled();
+      const subscription = await pausedActions.savePushSubscriptionAction({ locale: "en" });
+      expect(subscription.ok).toBe(false);
+      expect(!subscription.ok && subscription.message).toContain("temporarily paused");
+      expect(savePush).not.toHaveBeenCalled();
+    } finally {
+      delete process.env.ONECART_AMAZON_LINK_ONLY;
+      jest.resetModules();
+    }
+  });
+});

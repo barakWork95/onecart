@@ -91,7 +91,7 @@ import {
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
 import type { Category } from "@/config/categories";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
-import { amazonSource, ebayCredentials, env, type ServerEnv } from "@/config/env";
+import { amazonLinkOnly, amazonSource, ebayCredentials, env, type ServerEnv } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductSearchProvider } from "@/domain/search/product-search-provider";
@@ -227,6 +227,7 @@ function buildServices(): Services {
   if (demoMode) {
     logger.warn("composition: demo providers enabled — results are sample data");
     for (const provider of PROVIDER_IDS) {
+      if (amazonLinkOnly(config) && provider === "amazon") continue;
       providers.push(
         createDemoProvider({ provider, catalog: DEMO_CATALOG, policy: ISRAEL_IMPORT_POLICY, fx: DEMO_FX }),
       );
@@ -475,9 +476,10 @@ function buildServices(): Services {
     }),
     redisDegraded: () => failover?.degraded() ?? false,
     redisHealth,
-    categorySnapshots: serviceDb
-      ? createCategorySnapshots({ store: createSupabaseCategorySnapshots(serviceDb), logger })
-      : null,
+    categorySnapshots:
+      serviceDb && !amazonLinkOnly(config)
+        ? createCategorySnapshots({ store: createSupabaseCategorySnapshots(serviceDb), logger })
+        : null,
     trendingQueries: demoMode
       ? DEMO_TRENDING_QUERIES
       : config.ONECART_HEADPHONES_PILOT
@@ -864,6 +866,7 @@ async function recordPrices(
   observed: readonly Observed[],
   today: string,
 ): Promise<PriceHistoryRun | "not_configured" | "error"> {
+  if (amazonLinkOnly(env())) return "not_configured";
   const record = getServices().recordPriceHistory;
   if (!record) return "not_configured";
   try {
@@ -880,6 +883,7 @@ async function recordPrices(
 type PriceDropLink = { readonly drop: PriceDropCard; readonly href: string };
 
 export function priceDropCards(): Promise<PriceDropLink[]> {
+  if (amazonLinkOnly(env())) return Promise.resolve([]);
   return orUncached("home: price drops", cachedPriceDropCards, buildPriceDropCards, consoleLogger);
 }
 

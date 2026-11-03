@@ -1,3 +1,4 @@
+import { amazonLinkOnly, env } from "@/config/env";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -32,6 +33,8 @@ async function Results({ searchParams, locale }: { searchParams: SearchParams; l
       : { savedIds: state ? [...state.savedIds] : [], alertIds: state ? [...state.alertIds] : [] };
   return (
     <ResultsView
+      amazonLinkOnly={amazonLinkOnly(env())}
+      amazonTag={env().AFFILIATE_AMAZON_TAG}
       response={result.response}
       translation={result.translation}
       demoMode={result.demoMode}

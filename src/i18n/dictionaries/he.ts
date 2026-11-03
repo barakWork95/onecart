@@ -30,6 +30,13 @@ export const he: Dictionary = {
     currencyTitle: "כל המחירים בשקלים, כולל משלוח לישראל",
     theme: "מצב כהה",
   },
+  amazonInterim: {
+    notice: "מחירי Amazon נבדקים באתר Amazon עצמו. התראות והיסטוריית מחירים מושהות זמנית.",
+    checkPrice: "בדוק מחיר ב-Amazon",
+    notCompared: "מחירי Amazon אינם כלולים בהשוואה הזו.",
+    alertsPaused: "התראות המחיר מושהות זמנית. ההתראות הקיימות נשמרות, אך אינן נבדקות או נשלחות.",
+    savedHidden: "מוצרי Amazon ששמרתם נשמרים, אך המחירים והתמונות הישנים שלהם מוסתרים בתקופה זו.",
+  },
   affiliateDisclosure: "ייתכן שנקבל עמלה על קנייה דרך קישורי החנויות, ללא עלות נוספת עבורכם.",
   footer: {
     categories: "קטגוריות",

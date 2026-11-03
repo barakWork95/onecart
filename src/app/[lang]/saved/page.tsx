@@ -1,3 +1,4 @@
+import { amazonLinkOnly, env } from "@/config/env";
 import { withLocale } from "@/components/features/outbound-link";
 import { Bookmark, RefreshCw } from "lucide-react";
 import type { Metadata } from "next";
@@ -29,7 +30,9 @@ async function SavedList({ locale }: { locale: Locale }) {
   if (access.kind === "unavailable") {
     return <EmptyList icon={Bookmark} title={t.unavailableTitle} body={t.unavailableBody} locale={locale} />;
   }
-  const items = access.kind === "user" ? await access.repo.listSaved() : [];
+  const saved = access.kind === "user" ? await access.repo.listSaved() : [];
+  const interim = amazonLinkOnly(env());
+  const items = interim ? saved.filter((item) => item.provider !== "amazon") : saved;
   if (items.length === 0) {
     return <EmptyList icon={Bookmark} title={t.emptyTitle} body={t.emptyBody} locale={locale} />;
   }
@@ -99,6 +102,9 @@ export default async function SavedPage() {
   const t = dict(locale).saved;
   return (
     <ListPage title={t.title} intro={t.intro}>
+      {amazonLinkOnly(env()) && (
+        <p className="text-sm text-muted-foreground">{dict(locale).amazonInterim.savedHidden}</p>
+      )}
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-3xl" />}>
         <SavedList locale={locale} />
       </Suspense>

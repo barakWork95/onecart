@@ -1,3 +1,4 @@
+import { AmazonCheckLink } from "@/components/features/amazon-check-link";
 import {
   AlertTriangle,
   BadgeCheck,
@@ -181,6 +182,8 @@ export interface ResultsViewProps {
   readonly userLists?: { readonly savedIds: readonly string[]; readonly alertIds: readonly string[] } | null;
   /** Params for the client's photo check when look-alikes may still group (`PhotoMatchCheck`). */
   readonly photoCheck?: Readonly<Record<string, string>> | null;
+  readonly amazonLinkOnly?: boolean;
+  readonly amazonTag?: string;
   readonly locale?: Locale;
 }
 
@@ -194,6 +197,8 @@ export function ResultsView({
   storeSearches = [],
   userLists = null,
   photoCheck = null,
+  amazonLinkOnly = false,
+  amazonTag,
   locale = "en",
 }: ResultsViewProps) {
   const t = dict(locale).search.results;
@@ -235,6 +240,9 @@ export function ResultsView({
         </div>
       </div>
 
+      {amazonLinkOnly && groups.length === 0 && (
+        <AmazonCheckLink query={query.normalizedText} tag={amazonTag} locale={locale} />
+      )}
       <SortChips text={query.rawText} active={query.sort} locale={locale} />
 
       {dated.length > 0 && groups.length > 0 && <SnapshotNotice stores={dated} locale={locale} />}
@@ -292,6 +300,8 @@ export function ResultsView({
             {groups.map((group) => (
               <li key={group.id} className="min-w-0">
                 <ProductGroupCard
+                  amazonLinkOnly={amazonLinkOnly}
+                  amazonTag={amazonTag}
                   group={group}
                   links={outboundLinks}
                   findMatches={findMatchesLink(group, connectedStores, query.normalizedText, locale)}
@@ -302,6 +312,7 @@ export function ResultsView({
                       searchText: query.rawText,
                       saved: userLists.savedIds.includes(group.offers[0].id),
                       tracking: userLists.alertIds.includes(group.offers[0].id),
+                      alertsEnabled: !amazonLinkOnly,
                     }
                   }
                 />
