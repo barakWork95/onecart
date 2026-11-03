@@ -115,3 +115,20 @@ specific spec contexts, with regression coverage preserving real series numbers 
 seller checks. Price-ratio and complete-group conflict gates remain intact. Full-sample grouping
 still does not yield a verified cross-store group; no launch claim is made. TypeScript, ESLint
 and all 1,367 tests in 165 suites passed after this change.
+
+2026-11-03 (shipping and grouping): official Affiliate product-details retrieval succeeded
+for both candidates but supplied no freight quote. The documented buyer freight call returned
+MissingParameter for access_token; no AliExpress user access token is configured locally.
+Public documentation places that method in a deprecated Dropshipping category. No automatic
+shipping integration is enabled until a current supported API, authorization and SKU/destination
+semantics are verified. Screenshots never become fixed quotes.
+
+Identity clusters now form by item price, independently of shipping completeness, while output
+groups/offers retain shipping-aware ordering. Brand-store marketplace offers remain separate
+from unverified sellers before cross-store matching, preventing an unverified member vetoing an
+otherwise eligible comparison. Gift editions are separate. All member-conflict, price-ratio
+and seller checks remain. The captured sample yields one model-level cross-store group for
+each of QCY H3 Pro and Edifier W800BT Pro, without Gift listings. This is not exact colour/SKU
+validation and does not satisfy the landed-cost launch gate. Types, lint and 1,370 tests passed.
+Local demo desktop/mobile browser validation also passed: 146 tests. No production flag or
+provider credential was changed by this implementation.

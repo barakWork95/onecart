@@ -313,6 +313,7 @@ const QUALIFIERS: Readonly<Record<string, string>> = {
   openbox: "used",
   bundle: "bundle",
   kit: "bundle",
+  gift: "gift",
 };
 
 /**

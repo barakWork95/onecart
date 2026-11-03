@@ -6,6 +6,43 @@ import { makeProduct } from "@/test/product-factory";
 const ils = (agorot: number) => money(agorot, "ILS");
 
 describe("groupProducts", () => {
+  it("does not let an unverified marketplace seller contaminate a brand-store comparison", () => {
+    const title = "Edifier W800BT Pro Wireless Headphones Gray";
+    const unknown = makeProduct({
+      provider: "aliexpress",
+      sku: "unknown",
+      title,
+      total: 13839,
+      sellerName: "Audio Outlet Store",
+    });
+    const official = makeProduct({
+      provider: "aliexpress",
+      sku: "brand",
+      title,
+      total: 14639,
+      sellerName: "Edifier Official Store",
+    });
+    const ebay = makeProduct({ provider: "ebay", sku: "ebay", title, total: 26201 });
+    const groups = groupProducts([unknown, official, ebay]);
+    const paired = groups.find((g) => g.offers.length === 2);
+    expect(paired?.listings.map((p) => p.id)).toEqual([official.id, ebay.id]);
+    expect(groups.find((g) => g.listings.some((p) => p.id === unknown.id))?.offers).toHaveLength(1);
+  });
+
+  it("does not let an expensive known-shipping seller block a compatible partial offer", () => {
+    const title = "Edifier W800BT Pro Wireless Headphones Gray";
+    const cheap = makeProduct({ provider: "aliexpress", sku: "partial", title, total: 14639 });
+    const partial = { ...cheap, price: { ...cheap.price, shippingKnown: false } };
+    const normal = makeProduct({ provider: "ebay", sku: "normal", title, total: 26201 });
+    const expensive = makeProduct({ provider: "ebay", sku: "expensive", title, total: 39049 });
+    const groups = groupProducts([expensive, normal, partial]);
+    const paired = groups.find((g) => g.offers.length === 2);
+    expect(paired?.listings.map((p) => p.id)).toEqual([normal.id, partial.id]);
+    expect(paired?.listings.some((p) => p.id === expensive.id)).toBe(false);
+    expect(groups.flatMap((g) => g.listings)).toHaveLength(3);
+    expect(groupProducts([partial, normal, expensive])).toEqual(groups);
+  });
+
   const ali = makeProduct({
     provider: "aliexpress",
     sku: "a1",

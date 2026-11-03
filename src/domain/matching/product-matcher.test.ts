@@ -19,6 +19,15 @@ function pair(amazonTitle: string, ebayTitle: string, amazonPrice = 300, ebayPri
 }
 
 describe("matchProducts", () => {
+  it("keeps a gift edition separate from the standard headphone package", () => {
+    const [standard, gift] = pair(
+      "Edifier W800BT Pro Wireless Headphones",
+      "Edifier W800BT Pro Gift Edition Wireless Headphones",
+    );
+    expect(matchProducts(standard, gift)).toBeNull();
+    expect(blocksGrouping(standard, gift)).toBe(true);
+  });
+
   it("matches QCY's model despite different connectivity and spatial-audio copy", () => {
     const ebay = c({
       provider: "ebay",

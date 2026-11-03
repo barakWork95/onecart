@@ -319,7 +319,12 @@ export function groupProducts(
   const policy = options.policy ?? DEFAULT_MATCHING_POLICY;
   const clusters: Cluster[] = [];
 
-  for (const product of [...products].sort(compareOffers)) {
+  // Build identity clusters from item prices, independently of missing freight.
+  // Otherwise expensive known-shipping listings cluster first and can veto a
+  // compatible cheaper store through the all-member price-ratio check.
+  for (const product of [...products].sort(
+    (a, b) => compareMoney(a.price.item, b.price.item) || compareOffers(a, b),
+  )) {
     const candidate = candidateFor(product, options);
     const placement = findCluster(candidate, clusters, policy);
     if (placement) {
@@ -334,13 +339,15 @@ export function groupProducts(
   const listings = (options.unavailable ?? [])
     .map((listing) => ({ listing, tokens: tokenizeTitle(listing.title) }))
     .filter(({ tokens }) => tokens.accessorySignal === "none");
-  return clusters.map((cluster) => {
-    const isAccessory = cluster.members.every((m) => m.tokens.isAccessory);
-    return toGroup(
-      cluster,
-      isAccessory ? [] : unavailableFor(cluster, listings, policy),
-      options.classes,
-      options.rankOf,
-    );
-  });
+  return clusters
+    .map((cluster) => {
+      const isAccessory = cluster.members.every((m) => m.tokens.isAccessory);
+      return toGroup(
+        cluster,
+        isAccessory ? [] : unavailableFor(cluster, listings, policy),
+        options.classes,
+        options.rankOf,
+      );
+    })
+    .sort((a, b) => compareOffers(bestOffer(a), bestOffer(b)));
 }
