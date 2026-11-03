@@ -6,7 +6,7 @@ import type { IsoDateTime } from "@/domain/product/unified-product";
 import type { MatchBasis } from "@/domain/matching/product-matcher";
 import type { SearchResultCache } from "@/domain/search/ports";
 import type { SearchResponse } from "@/domain/search/search-response";
-import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import { bestOffer, hasConflictingColors, type ProductGroup } from "@/domain/search/product-group";
 import { intentTier } from "@/domain/search/result-ordering";
 import { searchIntent } from "@/domain/search/search-intent";
 import { rotationFor, rotationTtlSeconds } from "@/domain/deals/warm-rotation";
@@ -42,6 +42,8 @@ export interface TrendingCard {
   /** Stores that list the product but won't ship it to Israel. */
   readonly unshippedStores: readonly ProviderId[];
   readonly matchedBy: "single" | MatchBasis;
+  /** Different stated colours cannot support a same-variant saving claim. */
+  readonly hasColorConflict?: boolean;
   /** Unbranded look-alikes grouped by photo: "Looks identical · Best value". */
   readonly lookAlike: boolean;
   /** The best offer's price per piece when it's a stated multi-pack. */
@@ -150,6 +152,7 @@ export function toTrendingCard(label: string, { query, group, pricesAsOf }: Feat
     })),
     unshippedStores: group.unavailable.map((u) => u.provider),
     matchedBy: group.matchedBy,
+    hasColorConflict: hasConflictingColors(group),
     lookAlike: group.lookAlike,
     unitPrice: unitPrice(best.title, best.price.total),
     pricesAsOf,

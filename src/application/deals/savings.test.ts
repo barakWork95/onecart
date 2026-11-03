@@ -30,6 +30,12 @@ function card(
 }
 
 describe("selectSavings", () => {
+  it("does not advertise savings for a model containing different colours", () => {
+    expect(
+      selectSavings([{ ...card("headphones", { ebay: 300, amazon: 100 }), hasColorConflict: true }]),
+    ).toEqual([]);
+  });
+
   it("measures the cheapest store against the next one, biggest saving first", () => {
     const savings = selectSavings([
       card("small", { ebay: 100, amazon: 125 }),

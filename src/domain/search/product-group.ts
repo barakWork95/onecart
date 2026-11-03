@@ -1,4 +1,5 @@
 import { matchGeneric } from "@/domain/matching/generic-matcher";
+import { extractAttributes } from "@/domain/matching/item-attributes";
 import type { ImageHash } from "@/domain/matching/image-hash";
 import {
   blocksGrouping,
@@ -89,9 +90,21 @@ export function compareOffers(a: UnifiedProduct, b: UnifiedProduct): number {
   );
 }
 
-/** A price winner is meaningful only when every compared listing quotes shipping. */
+/** A model-level group can contain several colours; it is not an exact variant comparison. */
+export function hasConflictingColors(group: ProductGroup): boolean {
+  const colors = new Set(
+    group.listings.flatMap((listing) => [...(extractAttributes(listing.title).get("color") ?? [])]),
+  );
+  return colors.size > 1;
+}
+
+/** Do not claim a winner across different colours or missing freight. */
 export function isBestPriceOffer(group: ProductGroup, offer: UnifiedProduct): boolean {
-  return group.listings.every((listing) => listing.price.shippingKnown) && offer.id === bestOffer(group).id;
+  return (
+    !hasConflictingColors(group) &&
+    group.listings.every((listing) => listing.price.shippingKnown) &&
+    offer.id === bestOffer(group).id
+  );
 }
 
 interface Cluster {

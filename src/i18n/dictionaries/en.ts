@@ -193,6 +193,9 @@ export const en = {
       versus: " vs ",
     },
     caveat: {
+      colors:
+        " These offers include different colours. Prices are not an exact variant comparison; check colour, version and package at the store.",
+      model: " Matched by model. Confirm the colour, version and package at the store before buying.",
       photo: (sellers: string) =>
         ` Matched by product photo and specs, sold by different sellers${sellers ? ` (${sellers})` : ""}. Check the listing details before you buy.`,
       moreSellers: (names: string, more: number) => `${names} and ${more} more`,

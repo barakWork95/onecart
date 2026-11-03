@@ -132,3 +132,12 @@ each of QCY H3 Pro and Edifier W800BT Pro, without Gift listings. This is not ex
 validation and does not satisfy the landed-cost launch gate. Types, lint and 1,370 tests passed.
 Local demo desktop/mobile browser validation also passed: 146 tests. No production flag or
 provider credential was changed by this implementation.
+
+2026-11-03 (support and variant safety): owner confirmed the AliExpress shipping/SKU inquiry
+was submitted; status is awaiting processing. Receipt details stay in local project notes.
+While waiting, model-level groups now show an English/Hebrew reminder to check colour, version
+and package. Multiple stated colours suppress best-price badges, premium amounts and homepage
+savings claims without removing store links. A sole-shipping-store availability statement is
+retained because it is not a price-saving claim. Unknown colours are still unknown, not verified
+SKU matches. No live shipping capability or exact-variant approval is implied.
+Full local coverage check passed: 1,372 tests in 165 suites.

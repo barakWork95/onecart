@@ -253,6 +253,17 @@ describe("matchLabel and matchCaveat", () => {
 });
 
 describe("incomplete comparisons", () => {
+  it("does not claim a saving across different headphone colours even with known shipping", () => {
+    const black = makeProduct({ provider: "amazon", title: "Sony WH-1000XM5 Black", total: 10000 });
+    const silver = makeProduct({ provider: "ebay", title: "Sony WH-1000XM5 Silver", total: 14000 });
+    const [g] = groupProducts([black, silver]);
+    if (!g) throw new Error("expected group");
+    expect(storeComparison(g)?.bestDeal).toBeNull();
+    expect(premiumOverBest(g, silver)).toBeNull();
+    expect(matchCaveat(g)).toContain("different colours");
+    expect(matchCaveat(g, "he")).toContain("צבעים שונים");
+  });
+
   it("marks missing shipping and does not claim a winner or saving", () => {
     const base = makeProduct({ provider: "amazon", title: "Sony WH-1000XM5", total: 100_00 });
     const partial = { ...base, price: { ...base.price, shippingKnown: false } };
