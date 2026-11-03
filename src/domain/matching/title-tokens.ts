@@ -170,6 +170,8 @@ const BRANDS = new Set([
   "bose",
   "jbl",
   "anker",
+  "qcy",
+  "edifier",
   "skullcandy",
   "sennheiser",
   "audiotechnica",

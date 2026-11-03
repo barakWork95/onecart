@@ -38,6 +38,31 @@ describe("matchesIntent", () => {
 });
 
 describe("classifyOffers", () => {
+  it("keeps X2s chargers and cables as accessories when no earbuds are available", () => {
+    const products = [
+      makeProduct({
+        provider: "ebay",
+        sku: "charger",
+        title: "For Edifier X2s Wireless Earbuds 10W USB Power AC Adapter UK EU Plug",
+        total: 3751,
+      }),
+      makeProduct({
+        provider: "ebay",
+        sku: "cable",
+        title: "USB-C Charging Cable Fast Charge Type-C For Edifier X2s Wireless Earbuds",
+        total: 3245,
+      }),
+      makeProduct({
+        provider: "aliexpress",
+        sku: "case",
+        title: "for Edifier X1s X2S X1 Case Soft Silicone Protective Portable Shell",
+        total: 3739,
+      }),
+    ];
+    const classes = classifyOffers(products, searchIntent("edifier x2s"));
+    for (const product of products) expect(classes.get(product.id)?.isAccessory).toBe(true);
+  });
+
   const listing = (sku: string, title: string, shekels: number) =>
     makeProduct({ provider: "ebay", sku, title, total: shekels * 100 });
   const headphones = [

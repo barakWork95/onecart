@@ -11,6 +11,18 @@ const variants = (title: string) =>
   Object.fromEntries([...tokenizeTitle(title).variants].map(([unit, values]) => [unit, [...values]]));
 
 describe("tokenizeTitle", () => {
+  it.each([
+    ["QCY H3 Pro Wireless Headphones", "qcy"],
+    ["Edifier W800BT Pro Wireless Headphones", "edifier"],
+  ])("recognizes the maker of %s", (title, brand) => {
+    const tokens = tokenizeTitle(title);
+    expect(tokens.brands.has(brand)).toBe(true);
+    expect(tokens.makers.has(brand)).toBe(true);
+    const accessory = tokenizeTitle(`Case for ${title}`);
+    expect(accessory.makers.has(brand)).toBe(false);
+    expect(accessory.isAccessory).toBe(true);
+  });
+
   it("lower-cases, drops filler words and years, and joins hyphenated model numbers", () => {
     const tokens = tokenizeTitle("Sony WH-CH720N Wireless Headphones (2024) - NEW Original!");
     expect([...tokens.words]).toEqual(["sony", "whch720n", "wireless", "headphones"]);

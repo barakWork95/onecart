@@ -85,3 +85,18 @@ prerendered pages. No production switch has been enabled yet.
 2026-11-03 (interim follow-up): typecheck/lint and 1,362 Jest tests passed. Four dedicated
 interim browser checks passed in English/Hebrew on desktop/mobile; all 146 legacy browser
 checks also passed. The official-approval support draft is prepared locally, not submitted.
+
+2026-11-03 (live feasibility follow-up): eBay OAuth/search and AliExpress affiliate search
+were successfully exercised against their official APIs. AliExpress promotion-link generation
+also succeeded; a repeated request used an in-memory cache. This does not verify commission
+attribution, production Redis, checkout costs or seller authenticity. Amazon support inquiry
+was subsequently sent with the owner's explicit authorization; API approval remains pending.
+
+The owner approved evaluating QCY H3 Pro, Edifier W800BT Pro and Edifier X2s as alternatives.
+The first two have candidate headphone listings in both stores. X2s returned only accessories
+in the sampled eBay results. No alternative has passed the checkout/variant release gate, so
+the staged catalog has not been changed. QCY/Edifier were missing from brand recognition;
+adding them restores branded matching and prevents X2s adapters/cables being treated as earbuds.
+Regression tests cover maker recognition and accessory-only result sets. Official-store names
+are only a matching heuristic, not proof of authenticity. Detailed live samples remain local
+and are not committed to the public repository.
