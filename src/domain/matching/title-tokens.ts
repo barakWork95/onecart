@@ -170,6 +170,8 @@ const BRANDS = new Set([
   "bose",
   "jbl",
   "anker",
+  "qcy",
+  "edifier",
   "skullcandy",
   "sennheiser",
   "audiotechnica",
@@ -311,6 +313,7 @@ const QUALIFIERS: Readonly<Record<string, string>> = {
   openbox: "used",
   bundle: "bundle",
   kit: "bundle",
+  gift: "gift",
 };
 
 /**
@@ -369,6 +372,10 @@ function normalizePhrases(text: string): string {
       .replace(/[̀-ͯ]/g, "")
       .toLowerCase()
       .replace(/&/g, " and ")
+      // Connectivity versions and spatial-audio angles are specs, not series numbers.
+      // Keep the context explicit so product names such as "Flip 6" still distinguish models.
+      .replace(/\b(bluetooth|bt)\s*v?\s*\d+\.\d+\b/g, " bluetooth ")
+      .replace(/\b360\s*°\s*(?=spatial\b)/g, " ")
       // "7-in-1", "7 in 1", "7in1" → "7in1"
       .replace(/\b(\d+)\s*-?\s*in\s*-?\s*(?:1|one)\b/g, " $1in1 ")
       // "2nd gen", "2nd generation", "gen 2", "generation 2" → "gen2"

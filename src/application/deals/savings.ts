@@ -35,7 +35,7 @@ export function selectSavings(
   const seen = new Set<string>();
   const savings: SavingsCard[] = [];
   for (const card of cards) {
-    if (seen.has(card.query) || !SAVINGS_BASES.has(card.matchedBy)) continue;
+    if (seen.has(card.query) || card.hasColorConflict || !SAVINGS_BASES.has(card.matchedBy)) continue;
     seen.add(card.query);
     const [first, second] = [...card.stores].sort((a, b) => a.total.amountMinor - b.total.amountMinor);
     // A total without shipping isn't a landed price: no saving can be claimed from it.

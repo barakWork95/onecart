@@ -32,6 +32,10 @@ const serverEnvSchema = z.object({
    * The UI labels results as demo data whenever this is on.
    */
   ONECART_DEMO_PROVIDERS: flag(),
+  /** Staged headphones discovery catalog; enable only after the pilot launch gates pass. */
+  ONECART_HEADPHONES_PILOT: flag(),
+  /** Amazon links only, with price alerts/history paused site-wide. */
+  ONECART_AMAZON_LINK_ONLY: flag(),
   /**
    * Serve the Hebrew interface under /he, with hreflang links and sitemap entries.
    * Off: /he answers 404 and nothing links to it (until its text is translated).
@@ -164,6 +168,7 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>;
  * otherwise, so development never spends the 250-a-month SerpApi quota.
  */
 export function amazonSource(config: ServerEnv): "live" | "recorded" | "off" {
+  if (amazonLinkOnly(config)) return "off";
   const mode = config.SERPAPI_MODE ?? (config.VERCEL_ENV === "production" ? "live" : "recorded");
   if (mode === "recorded") return "recorded";
   return config.SERPAPI_API_KEY ? "live" : "off";
@@ -214,4 +219,9 @@ function withRedisFromVercelStorage(config: ServerEnv): ServerEnv {
 export function env(): ServerEnv {
   cached ??= parseServerEnv(process.env);
   return cached;
+}
+
+/** The approved interim mode also applies whenever the headphones pilot is enabled. */
+export function amazonLinkOnly(config: ServerEnv): boolean {
+  return config.ONECART_AMAZON_LINK_ONLY || config.ONECART_HEADPHONES_PILOT;
 }

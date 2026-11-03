@@ -124,3 +124,12 @@ describe("Amazon search links (“Check Amazon” while the API is down)", () =>
     );
   });
 });
+
+it("preserves the exact eBay variation when adding affiliate attribution", async () => {
+  const link = await createAffiliateLinkBuilder({ ebayCampaignId: "5338000000" }).build(
+    "ebay",
+    new URL("https://www.ebay.com/itm/395011112222?var=601234567890"),
+  );
+  expect(link.url.searchParams.get("var")).toBe("601234567890");
+  expect(link.url.searchParams.get("campid")).toBe("5338000000");
+});

@@ -172,3 +172,13 @@ describe("webPushConfig", () => {
     ).not.toBeNull();
   });
 });
+
+describe("Amazon interim mode", () => {
+  it("disables both live and recorded Amazon data even when credentials or an explicit source exist", () => {
+    for (const mode of ["live", "recorded"])
+      for (const flag of ["ONECART_AMAZON_LINK_ONLY", "ONECART_HEADPHONES_PILOT"])
+        expect(
+          amazonSource(parseServerEnv({ [flag]: "true", SERPAPI_MODE: mode, SERPAPI_API_KEY: "unused" })),
+        ).toBe("off");
+  });
+});

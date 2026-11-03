@@ -10,7 +10,7 @@ export const en = {
   meta: {
     title: "OneCart — Find the best price",
     description:
-      "Compare Amazon, eBay and AliExpress by the real landed price to Israel: shipping, import VAT and customs included.",
+      "Compare store prices with estimated shipping and import costs to Israel. Missing shipping is shown separately.",
     searchTitle: "Compare prices",
     savedTitle: "Saved",
     alertsTitle: "Price alerts",
@@ -35,6 +35,17 @@ export const en = {
     currencyTitle: "All prices are shown in Israeli shekels, delivered to Israel",
     theme: "Toggle dark mode",
   },
+  amazonInterim: {
+    notice: "Check Amazon prices directly at Amazon. Price alerts and price history are temporarily paused.",
+    checkPrice: "Check price on Amazon",
+    notCompared: "Amazon prices are not included in this comparison.",
+    alertsPaused:
+      "Price alerts are temporarily paused. Existing alerts are kept, but are not checked or sent.",
+    savedHidden:
+      "Saved Amazon products are kept, but their old prices and images are hidden during this period.",
+  },
+  affiliateDisclosure:
+    "We may earn a commission when you buy through these store links, at no extra cost to you.",
   footer: {
     categories: "Categories",
     legal: "Legal",
@@ -45,7 +56,7 @@ export const en = {
   },
   home: {
     title: "Find the best price.",
-    subtitle: "Compare Amazon, eBay and AliExpress by the price you'll actually pay in Israel.",
+    subtitle: "Compare store prices and estimated delivery and import costs to Israel.",
     trendingSearches: "Trending searches",
     valueProps: {
       stores: {
@@ -53,8 +64,8 @@ export const en = {
         body: "Amazon, eBay and AliExpress side by side, sellers grouped per product.",
       },
       landed: {
-        title: "The real price to Israel",
-        body: "Shipping, import VAT and duty added before we compare.",
+        title: "Estimated cost to Israel",
+        body: "Quoted shipping and estimated import taxes, with missing costs clearly marked.",
       },
       trust: { title: "Buy where you trust", body: "We send you to the store's own checkout." },
     },
@@ -150,7 +161,7 @@ export const en = {
     loadMore: { idle: "Load more", loading: "Loading more…" },
   },
   group: {
-    lookAlikeBadge: "Looks identical · Best value",
+    lookAlikeBadge: "Looks similar",
     sameItem: "Same item",
     similarItem: "Similar item",
     looksIdentical: "Looks identical",
@@ -158,7 +169,7 @@ export const en = {
     listings: (n: number) => plural(n, "listing", "listings"),
     shippingNotQuoted: "Shipping not quoted",
     freeDelivery: (days: number | null) => `Free${days !== null ? ` ${days}-day` : ""} delivery`,
-    totalLanded: "total landed",
+    totalLanded: "estimated total",
     plusShipping: "+ shipping",
     averageRating: "average rating",
     viewDeal: (price: string) => `View deal ${price}`,
@@ -182,6 +193,9 @@ export const en = {
       versus: " vs ",
     },
     caveat: {
+      colors:
+        " These offers include different colours. Prices are not an exact variant comparison; check colour, version and package at the store.",
+      model: " Matched by model. Confirm the colour, version and package at the store before buying.",
       photo: (sellers: string) =>
         ` Matched by product photo and specs, sold by different sellers${sellers ? ` (${sellers})` : ""}. Check the listing details before you buy.`,
       moreSellers: (names: string, more: number) => `${names} and ${more} more`,
@@ -207,7 +221,7 @@ export const en = {
     freeShipping: "Free shipping",
     shipping: (price: string) => `${price} shipping`,
     shippingNotQuoted: "Shipping not quoted",
-    totalLanded: "Total landed",
+    totalLanded: "Estimated total",
     plusShipping: "+ shipping",
     vsBest: (price: string) => `+${price} vs best`,
     goTo: (store: string, price: string) => `Go to ${store} — ${price}`,

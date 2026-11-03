@@ -3,7 +3,12 @@ import { withLocale } from "@/components/features/outbound-link";
 import { matchSearchText } from "@/domain/matching/match-query";
 import { unitPrice } from "@/domain/matching/unit-price";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
-import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import {
+  bestOffer,
+  hasConflictingColors,
+  isBestPriceOffer,
+  type ProductGroup,
+} from "@/domain/search/product-group";
 import { normalizeQueryText } from "@/domain/search/search-query";
 import { money, type Money } from "@/domain/shared/money";
 import type { ProviderId } from "@/domain/shared/provider";
@@ -32,7 +37,8 @@ export function fastestOfferId(group: ProductGroup): string | null {
 }
 
 /** How much more an offer costs than the group's best landed total. */
-export function premiumOverBest(group: ProductGroup, offer: UnifiedProduct): Money {
+export function premiumOverBest(group: ProductGroup, offer: UnifiedProduct): Money | null {
+  if (!isBestPriceOffer(group, bestOffer(group))) return null;
   return money(offer.price.total.amountMinor - bestOffer(group).price.total.amountMinor, "ILS");
 }
 
@@ -72,7 +78,9 @@ export function listingsPerStore(group: ProductGroup): ReadonlyMap<ProviderId, n
 function storePrice(offer: UnifiedProduct, listings: number, locale: Locale): string {
   const t = dict(locale).group.comparison;
   const name = STORE_META[offer.provider].name;
-  const price = formatMoney(offer.price.total, { locale });
+  const price =
+    formatMoney(offer.price.total, { locale }) +
+    (offer.price.shippingKnown ? "" : ` ${dict(locale).group.plusShipping}`);
   return listings > 1 ? t.storeFrom(name, price, listings) : t.storePrice(name, price);
 }
 
@@ -94,10 +102,9 @@ export function storeComparison(group: ProductGroup, locale: Locale = "en"): Sto
     const dearest = group.listings[listings - 1] ?? best;
     return {
       headline: t.listingsOn(listings, bestStore),
-      prices: t.fromTo(
-        formatMoney(best.price.total, { locale }),
-        formatMoney(dearest.price.total, { locale }),
-      ),
+      prices: group.listings.every((listing) => listing.price.shippingKnown)
+        ? t.fromTo(formatMoney(best.price.total, { locale }), formatMoney(dearest.price.total, { locale }))
+        : storePrice(best, listings, locale),
       bestDeal: null,
     };
   }
@@ -110,7 +117,14 @@ export function storeComparison(group: ProductGroup, locale: Locale = "en"): Sto
   return {
     headline: priced >= 2 ? t.availableOn(priced) : t.comparedOn(priced + group.unavailable.length),
     prices: [shown.join(t.versus) + (hidden > 0 ? t.more(hidden) : ""), ...unshipped].join(t.versus),
-    bestDeal: priced >= 2 ? t.bestDeal(bestStore) : t.onlyShips(bestStore),
+    bestDeal:
+      priced === 1 && best.price.shippingKnown
+        ? t.onlyShips(bestStore)
+        : !isBestPriceOffer(group, best)
+          ? null
+          : priced >= 2
+            ? t.bestDeal(bestStore)
+            : t.onlyShips(bestStore),
   };
 }
 
@@ -183,6 +197,7 @@ const CAVEAT_SELLER_LIMIT = 3;
  */
 export function matchCaveat(group: ProductGroup, locale: Locale = "en"): string | null {
   const t = dict(locale).group.caveat;
+  if (hasConflictingColors(group)) return t.colors;
   if (group.lookAlike) {
     const sellers = [...new Set(group.listings.flatMap((l) => (l.sellerName ? [l.sellerName] : [])))];
     const named = sellers.slice(0, CAVEAT_SELLER_LIMIT).join(", ");
@@ -190,7 +205,11 @@ export function matchCaveat(group: ProductGroup, locale: Locale = "en"): string 
     const by = sellers.length > 1 ? (more > 0 ? t.moreSellers(named, more) : named) : "";
     return t.photo(by);
   }
-  return group.matchedBy === "title_similarity" ? t.title : null;
+  return group.matchedBy === "title_similarity"
+    ? t.title
+    : group.matchedBy === "model_number"
+      ? t.model
+      : null;
 }
 
 /** "₪3.20 per piece" for a stated multi-pack; null otherwise. */

@@ -1,3 +1,4 @@
+import { amazonLinkOnly, env } from "@/config/env";
 import { withLocale } from "@/components/features/outbound-link";
 import { BellRing, TrendingDown } from "lucide-react";
 import type { Metadata } from "next";
@@ -43,6 +44,7 @@ function StatusChip({ alert, locale }: { alert: PriceAlert; locale: Locale }) {
 async function AlertList({ locale }: { locale: Locale }) {
   await connection();
   const t = dict(locale).alerts;
+  if (amazonLinkOnly(env())) return <p role="status">{dict(locale).amazonInterim.alertsPaused}</p>;
   const money = (m: PriceAlert["target"]) => formatMoney(m, { precise: true, locale });
   const access = await readUserLists();
   if (access.kind === "unavailable") {

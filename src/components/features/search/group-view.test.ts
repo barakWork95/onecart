@@ -251,3 +251,28 @@ describe("matchLabel and matchCaveat", () => {
     expect(unitPriceLabel(makeProduct({ sku: "q", title: "Cable Clip" }))).toBeNull();
   });
 });
+
+describe("incomplete comparisons", () => {
+  it("does not claim a saving across different headphone colours even with known shipping", () => {
+    const black = makeProduct({ provider: "amazon", title: "Sony WH-1000XM5 Black", total: 10000 });
+    const silver = makeProduct({ provider: "ebay", title: "Sony WH-1000XM5 Silver", total: 14000 });
+    const [g] = groupProducts([black, silver]);
+    if (!g) throw new Error("expected group");
+    expect(storeComparison(g)?.bestDeal).toBeNull();
+    expect(premiumOverBest(g, silver)).toBeNull();
+    expect(matchCaveat(g)).toContain("different colours");
+    expect(matchCaveat(g, "he")).toContain("צבעים שונים");
+  });
+
+  it("marks missing shipping and does not claim a winner or saving", () => {
+    const base = makeProduct({ provider: "amazon", title: "Sony WH-1000XM5", total: 100_00 });
+    const partial = { ...base, price: { ...base.price, shippingKnown: false } };
+    const complete = makeProduct({ provider: "ebay", title: "Sony WH-1000XM5", total: 110_00 });
+    const [g] = groupProducts([partial, complete]);
+    if (!g) throw new Error("expected group");
+    expect(storeComparison(g)?.bestDeal).toBeNull();
+    expect(storeComparison(g)?.prices).toContain("Amazon ₪100 + shipping");
+    expect(premiumOverBest(g, partial)).toBeNull();
+    expect(premiumOverBest(g, complete)).toBeNull();
+  });
+});

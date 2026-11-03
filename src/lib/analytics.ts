@@ -8,6 +8,7 @@ import type { ProviderId } from "@/domain/shared/provider";
  * person: product titles, prices, stores, the page's language, and the search text.
  */
 export interface AnalyticsEvents {
+  readonly amazon_price_check: { readonly query: string; readonly locale: Locale };
   /** A click through to a store (via /go): the conversion we're paid for. */
   readonly outbound_click: {
     readonly store: ProviderId;

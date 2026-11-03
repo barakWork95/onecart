@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_REALM, adminAccess } from "@/app/_admin-auth";
 import { adminLockout, clientIp, throttleBucket, throttleFor, type ThrottleBucket } from "@/app/_throttles";
-import { CATEGORIES, DEMO_CATEGORIES } from "@/config/categories";
+import { catalogCategories } from "@/config/pilot";
 import { env } from "@/config/env";
 import { splitLocale } from "@/i18n/locales";
 import { fetchWithTimeout, SUPABASE_TIMEOUT_MS } from "@/infrastructure/db/fetch-with-timeout";
@@ -36,7 +36,7 @@ function tooMany(kind: ThrottleBucket | "admin", retryAfterSeconds: number): Nex
 function unknownCategory(request: NextRequest): NextResponse | null {
   const slug = /^\/c\/([^/]+)\/?$/.exec(splitLocale(request.nextUrl.pathname).path)?.[1];
   if (slug === undefined) return null;
-  const categories = env().ONECART_DEMO_PROVIDERS ? DEMO_CATEGORIES : CATEGORIES;
+  const categories = catalogCategories(env());
   if (categories.some((c) => c.slug === slug)) return null;
   return notFound(request);
 }

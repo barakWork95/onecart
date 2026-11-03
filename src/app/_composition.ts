@@ -1,5 +1,8 @@
 import "server-only";
 
+import { catalogCategories, HEADPHONES_PILOT_PRODUCTS } from "@/config/pilot";
+import { isBestPriceOffer } from "@/domain/search/product-group";
+
 import { randomBytes } from "node:crypto";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { cacheLifeFor, LAST_GOOD_LIFE, orUncached } from "@/app/_last-good";
@@ -86,9 +89,9 @@ import {
   DEFAULT_PHOTO_HASH_SEARCHES_PER_DAY,
 } from "@/config/rate-limits";
 import { DEFAULT_TRENDING_WARM_STORES, DEMO_TRENDING_QUERIES, TRENDING_QUERIES } from "@/config/trending";
-import { CATEGORIES, DEMO_CATEGORIES, type Category } from "@/config/categories";
+import type { Category } from "@/config/categories";
 import type { TrendingQuery } from "@/domain/deals/trending-query";
-import { amazonSource, ebayCredentials, env, type ServerEnv } from "@/config/env";
+import { amazonLinkOnly, amazonSource, ebayCredentials, env, type ServerEnv } from "@/config/env";
 import type { OutboundLinkCodec } from "@/domain/affiliate/ports";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
 import type { ProductSearchProvider } from "@/domain/search/product-search-provider";
@@ -224,6 +227,7 @@ function buildServices(): Services {
   if (demoMode) {
     logger.warn("composition: demo providers enabled — results are sample data");
     for (const provider of PROVIDER_IDS) {
+      if (amazonLinkOnly(config) && provider === "amazon") continue;
       providers.push(
         createDemoProvider({ provider, catalog: DEMO_CATALOG, policy: ISRAEL_IMPORT_POLICY, fx: DEMO_FX }),
       );
@@ -472,11 +476,16 @@ function buildServices(): Services {
     }),
     redisDegraded: () => failover?.degraded() ?? false,
     redisHealth,
-    categorySnapshots: serviceDb
-      ? createCategorySnapshots({ store: createSupabaseCategorySnapshots(serviceDb), logger })
-      : null,
-    trendingQueries: demoMode ? DEMO_TRENDING_QUERIES : TRENDING_QUERIES,
-    categories: demoMode ? DEMO_CATEGORIES : CATEGORIES,
+    categorySnapshots:
+      serviceDb && !amazonLinkOnly(config)
+        ? createCategorySnapshots({ store: createSupabaseCategorySnapshots(serviceDb), logger })
+        : null,
+    trendingQueries: demoMode
+      ? DEMO_TRENDING_QUERIES
+      : config.ONECART_HEADPHONES_PILOT
+        ? HEADPHONES_PILOT_PRODUCTS.slice(0, 5)
+        : TRENDING_QUERIES,
+    categories: catalogCategories(config),
     // Demo stores are free to "call"; live ones follow TRENDING_WARM_STORES.
     trendingWarmStores: demoMode
       ? providers.map((p) => p.id)
@@ -647,7 +656,7 @@ export async function searchFromParams(params: RawSearchParams): Promise<SearchP
         context: {
           title: listing.title,
           priceAgorot: listing.price.total.amountMinor,
-          bestDeal: listing.id === group.listings[0].id,
+          bestDeal: isBestPriceOffer(group, listing),
         },
       });
     }
@@ -857,6 +866,7 @@ async function recordPrices(
   observed: readonly Observed[],
   today: string,
 ): Promise<PriceHistoryRun | "not_configured" | "error"> {
+  if (amazonLinkOnly(env())) return "not_configured";
   const record = getServices().recordPriceHistory;
   if (!record) return "not_configured";
   try {
@@ -873,6 +883,7 @@ async function recordPrices(
 type PriceDropLink = { readonly drop: PriceDropCard; readonly href: string };
 
 export function priceDropCards(): Promise<PriceDropLink[]> {
+  if (amazonLinkOnly(env())) return Promise.resolve([]);
   return orUncached("home: price drops", cachedPriceDropCards, buildPriceDropCards, consoleLogger);
 }
 

@@ -1,4 +1,5 @@
 import { matchGeneric } from "@/domain/matching/generic-matcher";
+import { extractAttributes } from "@/domain/matching/item-attributes";
 import type { ImageHash } from "@/domain/matching/image-hash";
 import {
   blocksGrouping,
@@ -19,25 +20,25 @@ import { heroImage, heroTitleListing, type ListingRank } from "@/domain/search/h
 import type { OfferClass } from "@/domain/search/search-intent";
 import { compareMoney, type Money } from "@/domain/shared/money";
 
-/** Non-empty list of offers, cheapest landed total first. */
+/** Non-empty offers: quoted shipping first, then ascending amount within each tier. */
 export type Offers = readonly [UnifiedProduct, ...UnifiedProduct[]];
 
 /**
  * The same product found in one or more stores — one card in the results list
  * and one row per store in the compare sheet. A store can have several
- * listings of it (sellers, colours); `offers` holds each store's cheapest and
+ * listings of it (sellers, colours); `offers` holds each store's preferred offer and
  * `listings` all of them.
  */
 export interface ProductGroup {
-  /** Stable for identical input: derived from the cheapest offer's id. */
+  /** Stable for identical input: derived from the preferred offer's id. */
   readonly id: string;
   /** From the most-reviewed listing (usually the canonical page), else the stores' best match. */
   readonly title: string;
   /** A catalog photo when a store has one (Amazon), else the best-ranked listing's; see `heroImage`. */
   readonly imageUrl: string | null;
-  /** Each store's cheapest listing, cheapest first: the per-store comparison. */
+  /** Each store's preferred listing, quoted shipping first: the per-store comparison. */
   readonly offers: Offers;
-  /** Every listing of the product, from every store, cheapest first. */
+  /** Every listing, quoted shipping first then price within each certainty tier. */
   readonly listings: Offers;
   readonly priceRange: { readonly min: Money; readonly max: Money };
   /** Review-count-weighted average across offers that have ratings. */
@@ -80,9 +81,30 @@ export function bestOffer(group: ProductGroup): UnifiedProduct {
   return group.offers[0];
 }
 
-/** Cheapest landed total first; id breaks ties so ordering is deterministic. */
+/** Quoted shipping first, then price within each certainty tier. Partial totals cannot win by omission. */
 export function compareOffers(a: UnifiedProduct, b: UnifiedProduct): number {
-  return compareMoney(a.price.total, b.price.total) || a.id.localeCompare(b.id);
+  return (
+    Number(b.price.shippingKnown) - Number(a.price.shippingKnown) ||
+    compareMoney(a.price.total, b.price.total) ||
+    a.id.localeCompare(b.id)
+  );
+}
+
+/** A model-level group can contain several colours; it is not an exact variant comparison. */
+export function hasConflictingColors(group: ProductGroup): boolean {
+  const colors = new Set(
+    group.listings.flatMap((listing) => [...(extractAttributes(listing.title).get("color") ?? [])]),
+  );
+  return colors.size > 1;
+}
+
+/** Do not claim a winner across different colours or missing freight. */
+export function isBestPriceOffer(group: ProductGroup, offer: UnifiedProduct): boolean {
+  return (
+    !hasConflictingColors(group) &&
+    group.listings.every((listing) => listing.price.shippingKnown) &&
+    offer.id === bestOffer(group).id
+  );
 }
 
 interface Cluster {
@@ -276,7 +298,9 @@ function toGroup(
   const listings: Offers = [first, ...rest];
   const stores = new Set([first.provider]);
   const offers: Offers = [first, ...rest.filter((o) => !stores.has(o.provider) && stores.add(o.provider))];
-  const last = listings[listings.length - 1] ?? first;
+  const amounts = listings.map((listing) => listing.price.total).sort(compareMoney);
+  const min = amounts[0] ?? first.price.total;
+  const max = amounts[amounts.length - 1] ?? first.price.total;
 
   const titleSource = heroTitleListing(listings, rankOf);
 
@@ -286,7 +310,7 @@ function toGroup(
     imageUrl: heroImage(listings, unavailable, rankOf),
     offers,
     listings,
-    priceRange: { min: first.price.total, max: last.price.total },
+    priceRange: { min, max },
     rating: aggregateRating(listings),
     matchedBy: offers.length > 1 ? (cluster.weakestBasis ?? "single") : "single",
     lookAlike: cluster.weakestBasis === "visual_match",
@@ -298,7 +322,7 @@ function toGroup(
 
 /**
  * Groups the same product across stores, and its several listings within a
- * store, into one card. Products are placed cheapest-first. Pure and
+ * store, into one card. Products with quoted shipping are placed first. Pure and
  * deterministic.
  */
 export function groupProducts(
@@ -308,7 +332,12 @@ export function groupProducts(
   const policy = options.policy ?? DEFAULT_MATCHING_POLICY;
   const clusters: Cluster[] = [];
 
-  for (const product of [...products].sort(compareOffers)) {
+  // Build identity clusters from item prices, independently of missing freight.
+  // Otherwise expensive known-shipping listings cluster first and can veto a
+  // compatible cheaper store through the all-member price-ratio check.
+  for (const product of [...products].sort(
+    (a, b) => compareMoney(a.price.item, b.price.item) || compareOffers(a, b),
+  )) {
     const candidate = candidateFor(product, options);
     const placement = findCluster(candidate, clusters, policy);
     if (placement) {
@@ -323,13 +352,15 @@ export function groupProducts(
   const listings = (options.unavailable ?? [])
     .map((listing) => ({ listing, tokens: tokenizeTitle(listing.title) }))
     .filter(({ tokens }) => tokens.accessorySignal === "none");
-  return clusters.map((cluster) => {
-    const isAccessory = cluster.members.every((m) => m.tokens.isAccessory);
-    return toGroup(
-      cluster,
-      isAccessory ? [] : unavailableFor(cluster, listings, policy),
-      options.classes,
-      options.rankOf,
-    );
-  });
+  return clusters
+    .map((cluster) => {
+      const isAccessory = cluster.members.every((m) => m.tokens.isAccessory);
+      return toGroup(
+        cluster,
+        isAccessory ? [] : unavailableFor(cluster, listings, policy),
+        options.classes,
+        options.rankOf,
+      );
+    })
+    .sort((a, b) => compareOffers(bestOffer(a), bestOffer(b)));
 }

@@ -40,7 +40,7 @@ describe("eBay adapter — recorded live response", () => {
       expect(product.price.listed.currency).toBe("ILS");
       expect(product.price.total.amountMinor).toBeGreaterThan(0);
       expect(product.price.shippingKnown).toBe(true);
-      expect(product.productUrl).toMatch(/^https:\/\/www\.ebay\.com\/itm\/\d+$/);
+      expect(product.productUrl).toMatch(/^https:\/\/www\.ebay\.com\/itm\/\d+(\?var=\d+)?$/);
       expect(product.imageUrl).toMatch(/^https:\/\/i\.ebayimg\.com\//);
       expect(product.title.length).toBeGreaterThan(0);
     }

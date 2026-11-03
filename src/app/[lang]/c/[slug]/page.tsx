@@ -1,3 +1,4 @@
+import { amazonLinkOnly, env } from "@/config/env";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { categoryList, categoryPageData } from "@/app/_composition";
@@ -118,6 +119,8 @@ export default async function CategoryPageRoute({ params }: PageProps<"/[lang]/c
           {products.map((product) => (
             <li key={product.query}>
               <CategoryProductCard
+                amazonLinkOnly={amazonLinkOnly(env())}
+                amazonTag={env().AFFILIATE_AMAZON_TAG}
                 product={product}
                 goHref={withLocale(goLinks[product.bestListing.id] ?? "/", locale)}
                 locale={locale}

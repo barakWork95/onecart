@@ -1,3 +1,5 @@
+import { AmazonCheckLink } from "@/components/features/amazon-check-link";
+import { AffiliateDisclosure } from "@/components/features/affiliate-disclosure";
 import { ArrowRight, ExternalLink, Search, Star, Truck } from "lucide-react";
 import Link from "next/link";
 import { CompareSheet } from "@/components/features/search/compare-sheet";
@@ -16,7 +18,7 @@ import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link
 import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
 import { buttonVariants } from "@/components/ui/button";
-import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import { bestOffer, isBestPriceOffer, type ProductGroup } from "@/domain/search/product-group";
 import type { ProviderId } from "@/domain/shared/provider";
 import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
@@ -46,6 +48,7 @@ export interface CardUserState {
   readonly searchText: string;
   readonly saved: boolean;
   readonly tracking: boolean;
+  readonly alertsEnabled?: boolean;
 }
 
 /** "Available on 2 stores: Amazon ₪244 vs eBay ₪276 — best deal on Amazon", over three lines. */
@@ -76,12 +79,16 @@ function StoreComparisonNote({ group, locale }: { group: ProductGroup; locale: L
 export function ProductGroupCard({
   group,
   links,
+  amazonLinkOnly = false,
+  amazonTag,
   user = null,
   findMatches = null,
   checkStore = null,
   locale = "en",
 }: {
   group: ProductGroup;
+  amazonLinkOnly?: boolean;
+  amazonTag?: string;
   locale?: Locale;
   links: Readonly<Record<string, string>>;
   user?: CardUserState | null;
@@ -131,15 +138,17 @@ export function ProductGroupCard({
               locale={locale}
               overlay
             />
-            <TrackPriceButton
-              productId={best.id}
-              searchText={user.searchText}
-              title={group.title}
-              currentAgorot={best.price.total.amountMinor}
-              initialTracking={user.tracking}
-              locale={locale}
-              overlay
-            />
+            {user.alertsEnabled !== false && (
+              <TrackPriceButton
+                productId={best.id}
+                searchText={user.searchText}
+                title={group.title}
+                currentAgorot={best.price.total.amountMinor}
+                initialTracking={user.tracking}
+                locale={locale}
+                overlay
+              />
+            )}
           </div>
         )}
       </div>
@@ -185,6 +194,10 @@ export function ProductGroupCard({
           <StoreComparisonNote group={group} locale={locale} />
         </div>
 
+        {amazonLinkOnly && (
+          <AmazonCheckLink disclose={false} query={group.title} tag={amazonTag} locale={locale} />
+        )}
+        <AffiliateDisclosure locale={locale} />
         <div className="pt-2 [&>*]:w-full">
           {comparisonScope(group).hasSheet ? (
             <CompareSheet group={group} links={links} locale={locale} />
@@ -195,7 +208,7 @@ export function ProductGroupCard({
                 store: best.provider,
                 product_title: best.title,
                 price_ils: priceIls(best.price.total),
-                is_best_deal: true,
+                is_best_deal: isBestPriceOffer(group, best),
                 locale,
               }}
               className={cn(

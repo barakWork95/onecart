@@ -157,7 +157,7 @@ describe("mapEbayItem", () => {
     );
     expect(variation).toMatchObject({
       id: "ebay:395011112222-601234567890",
-      productUrl: "https://www.ebay.com/itm/395011112222",
+      productUrl: "https://www.ebay.com/itm/395011112222?var=601234567890",
     });
   });
 
@@ -219,4 +219,8 @@ describe("mapEbayItem — images", () => {
     ).toBe("https://i.ebayimg.com/images/g/c/s-l500.jpg");
     expect(imageOf({ image: { imageUrl: "not a url" } })).toBeNull();
   });
+});
+
+it("rejects a malformed variation rather than creating a misleading product URL", () => {
+  expect(mapEbayItem(raw({ itemId: "v1|395011112222|wrong?var=other" }), ctx)).toBeNull();
 });

@@ -1,3 +1,4 @@
+import { amazonLinkOnly, env } from "@/config/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { checkOpsAlerts, recordCronRun } from "@/app/_composition";
 import { notifyTriggeredAlerts, priceAlertChecker } from "@/app/_user-lists";
@@ -9,6 +10,14 @@ export async function GET(request: NextRequest) {
   const rejected = rejectUnlessCron(request);
   if (rejected) return rejected;
 
+  if (amazonLinkOnly(env())) {
+    const paused = { checked: 0, failedSearches: 0, notifications: "paused" };
+    await recordCronRun("price-alerts", async () => paused, alertRunProblems);
+    return NextResponse.json(
+      { ok: true, paused: true, reason: "amazon_interim_mode" },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
   const check = priceAlertChecker();
   if (!check) return NextResponse.json({ error: "no alert storage configured" }, { status: 503 });
   const { result, run } = await recordCronRun(

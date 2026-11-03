@@ -1,3 +1,5 @@
+import { amazonLinkOnly, env } from "@/config/env";
+import { AmazonCheckLink } from "@/components/features/amazon-check-link";
 import { BadgeCheck, Globe2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { connection } from "next/server";
@@ -60,6 +62,9 @@ export default async function HomePage() {
             <p className="text-base text-muted-foreground">{t.subtitle}</p>
           </div>
           <SearchBox locale={locale} />
+          {amazonLinkOnly(env()) && (
+            <AmazonCheckLink query="wireless headphones" tag={env().AFFILIATE_AMAZON_TAG} locale={locale} />
+          )}
           <PopularSearches heading={t.trendingSearches} locale={locale} />
         </div>
       </section>

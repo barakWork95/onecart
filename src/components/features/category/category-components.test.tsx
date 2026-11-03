@@ -55,7 +55,7 @@ describe("CategoryProductCard", () => {
     };
     render(<CategoryProductCard product={clips} goHref="/go/x" />);
     const card = screen.getByRole("article", { name: "Magnetic cable clips" });
-    expect(within(card).getByText("Looks identical · Best value")).toBeInTheDocument();
+    expect(within(card).getByText("Looks similar")).toBeInTheDocument();
     expect(card).toHaveTextContent("₪3.20 per piece");
   });
 

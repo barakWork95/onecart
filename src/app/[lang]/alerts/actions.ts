@@ -1,5 +1,6 @@
 "use server";
 
+import { amazonLinkOnly, env } from "@/config/env";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/app/[lang]/saved/actions";
@@ -35,6 +36,7 @@ const createInput = z.object({
 export async function createAlertAction(input: unknown): Promise<ActionResult<{ target: string }>> {
   const locale = localeOf(input);
   const t = dict(locale).actions;
+  if (amazonLinkOnly(env())) return { ok: false, message: dict(locale).amazonInterim.alertsPaused };
   const parsed = createInput.safeParse(input);
   if (!parsed.success) return { ok: false, message: t.targetPositive };
   try {
@@ -91,6 +93,7 @@ const subscriptionInput = z.object({
 export async function savePushSubscriptionAction(input: unknown): Promise<ActionResult> {
   const locale = localeOf(input);
   const t = dict(locale).actions;
+  if (amazonLinkOnly(env())) return { ok: false, message: dict(locale).amazonInterim.alertsPaused };
   const parsed = subscriptionInput.safeParse(input);
   if (!parsed.success) return { ok: false, message: t.notifyUnsupported };
   try {

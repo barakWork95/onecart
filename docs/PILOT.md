@@ -1,0 +1,143 @@
+# Headphones pilot — working board
+
+Owner: Codex. Business scope approved by the product owner on 2026-11-03.
+No new paid service has been purchased.
+
+## Approved outcome
+
+15–20 named headphone models, two verified stores, transparent estimates for delivery to Israel.
+No Temu integration or additional category work during this pilot. Candidate models live in
+`src/config/pilot.ts`; new standalone pairs only. Match model, colour, generation, regional SKU and
+bundle before an offer is admitted to the validation sheet. A catalog entry is not a verified offer.
+
+## Board
+
+| ID  | Task                                                 | Status                                              | Done means                                                                                                      |
+| --- | ---------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| P01 | Candidate catalog and scope                          | Implemented, staged                                 | 15 distinct model queries; headphones-only discovery behind `ONECART_HEADPHONES_PILOT`                          |
+| P02 | Partial-cost ranking and claims                      | Implemented, local checks passed                    | Quoted shipping first; no best-price badge, premium or best-deal tracking when any compared shipping is unknown |
+| P03 | Preserve eBay variation                              | Implemented, local checks passed                    | Same variation ID survives mapper and affiliate URL generation                                                  |
+| P04 | Nearby affiliate disclosure and estimate wording     | Implemented, local checks passed                    | English/Hebrew disclosure by offer CTAs and in comparison sheet; estimate wording                               |
+| P05 | Automated quality gate                               | Passed locally and on GitHub (first commit)         | Types, lint, coverage, demo browser and throwaway SQL jobs pass                                                 |
+| P06 | Confirm two store accounts, rights and attribution   | Amazon interim approved; store verification pending | Approved domains/methods, usable credentials, traceable test click, permitted data use                          |
+| P07 | Validate matching and landed costs                   | Pending P06                                         | 50 labelled pairs and 20 aligned Israel checkout comparisons, actual evidence recorded                          |
+| P08 | Strict provider spend control, freshness and privacy | Pending                                             | Monthly credit cap, shared-counter failure stops paid calls, stale quotes cannot win, analytics redaction       |
+| P09 | Preview, mobile/RTL review and production release    | Pending checks                                      | Preview verified, no production demo data, deployment SHA known and rollback available                          |
+| P10 | Limited user test                                    | Not started                                         | 10–20 testers; at least 30 useful searches; funnel and attributed revenue measured                              |
+
+## Release gates
+
+Do not enable the pilot flag in production yet. It narrows discovery/categories/warming only;
+it does not restrict arbitrary search queries, validate store rights or ensure two-store coverage.
+The demo catalog takes precedence so routine E2E remains deterministic.
+
+Before external launch: at least 70% of models have comparable offers in two approved stores;
+zero critical false matches in a 50-pair labelled set; at least 90% of 20 checkout comparisons
+within max(5%, ₪10) for known costs; missing future carrier/import fees never count as verified.
+Complete browser/SQL checks, verify mobile light/dark/RTL, test store attribution, observe 3
+successful daily cron runs, and configure spending caps. Do not buy traffic or another data plan
+until these gates pass. Existing broad catalog remains available with the flag off.
+
+## Approved Amazon interim decision
+
+Approved by the owner on 2026-11-03: retain Amazon as a direct, clearly labelled check-price
+link without Amazon prices, images or ranking. Pause price alerts and price history site-wide;
+keep existing user data. Pursue final Associates approval and official Creators API eligibility.
+Do not purchase another SerpApi plan or send a support message without specific authorization.
+
+`ONECART_AMAZON_LINK_ONLY=true` enables this mode independently of the curated catalog.
+`ONECART_HEADPHONES_PILOT=true` also implies it. Both switches are off in the template until
+release gates pass. The server disables the Amazon provider even when live keys/recorded mode
+are configured, refuses alert creation/subscription, skips checks/sends/history, hides stale
+Amazon saved content and avoids category snapshots from the older broad catalog. Existing
+records are retained. New Amazon destinations are direct links, not signed `/go` redirects;
+they are measured as `amazon_price_check`, without a fabricated price.
+
+Amazon official policy was successfully retrieved on 2026-11-03 after the first audit:
+https://affiliate-program.amazon.com/help/operating/policies
+Participation Requirements section 2 requires prices from Amazon-served links or Creators/PA API;
+section 6(y) requires agreement for price tracking/alerts. License terms also restrict using Amazon
+content to promote other retailers. Current SerpApi, hero-image and alert paths require review.
+Creators API prerequisites currently include 10 qualifying sales in 30 days:
+https://affiliate-program.amazon.com/creatorsapi/docs/en-us/introduction
+No Amazon application or external message has been sent.
+
+## Work log
+
+2026-11-03: Created isolated branch `codex/headphones-pilot` from local commit `166fc9b`.
+No production secrets copied into the development checkout. Source desktop clone remains unchanged.
+Implementation and test results will be recorded here before the first review handoff.
+
+Local validation (2026-11-03): TypeScript and ESLint passed; 163 Jest suites / 1,357 tests passed
+with the coverage gate. Production demo build and 146 desktop/mobile Playwright checks passed.
+All throwaway PostgreSQL migration/RLS tests passed. Remote main was fetched and matches base
+166fc9b. No production deployment or live provider call has been performed.
+
+Rollout note: existing cached eBay product URLs and already-signed links can omit a variation
+until refreshed. Refresh/expire the affected eBay cache before declaring the URL fix live; do
+not delete unrelated production data. This is not needed for the isolated demo preview.
+
+Interim-mode validation is isolated in `npm run test:e2e:interim` (demo data, English/Hebrew,
+desktop/mobile); the standard E2E suite explicitly disables both new switches to exercise the
+legacy mode. The rollout still requires a redeploy after changing flags because they affect
+prerendered pages. No production switch has been enabled yet.
+
+2026-11-03 (interim follow-up): typecheck/lint and 1,362 Jest tests passed. Four dedicated
+interim browser checks passed in English/Hebrew on desktop/mobile; all 146 legacy browser
+checks also passed. The official-approval support draft is prepared locally, not submitted.
+
+2026-11-03 (live feasibility follow-up): eBay OAuth/search and AliExpress affiliate search
+were successfully exercised against their official APIs. AliExpress promotion-link generation
+also succeeded; a repeated request used an in-memory cache. This does not verify commission
+attribution, production Redis, checkout costs or seller authenticity. Amazon support inquiry
+was subsequently sent with the owner's explicit authorization; API approval remains pending.
+
+The owner approved evaluating QCY H3 Pro, Edifier W800BT Pro and Edifier X2s as alternatives.
+The first two have candidate headphone listings in both stores. X2s returned only accessories
+in the sampled eBay results. No alternative has passed the checkout/variant release gate, so
+the staged catalog has not been changed. QCY/Edifier were missing from brand recognition;
+adding them restores branded matching and prevents X2s adapters/cables being treated as earbuds.
+Regression tests cover maker recognition and accessory-only result sets. Official-store names
+are only a matching heuristic, not proof of authenticity. Detailed live samples remain local
+and are not committed to the public repository.
+
+2026-11-03 (pair validation): owner-supplied AliExpress checkout screenshots confirmed
+QCY H3 Pro blue at ILS 170.98 including ILS 6.99 shipping, and Edifier W800BT Pro gray
+at ILS 146.39 with free shipping. These are observations for those checkouts only;
+no screenshot, address, payment data or fixed shipping override is stored in the repository.
+Official eBay item checks returned a gray W800BT Pro candidate, but its checkout taxes and
+bundle equivalence remain unverified. The blue QCY candidate has contradictory colour metadata.
+Neither pair is admitted to the staged catalog yet.
+
+A second matching defect was confirmed: explicit Bluetooth decimal versions and 360-degree
+spatial-audio copy became conflicting bare series numbers. The tokenizer now strips those
+specific spec contexts, with regression coverage preserving real series numbers and marketplace
+seller checks. Price-ratio and complete-group conflict gates remain intact. Full-sample grouping
+still does not yield a verified cross-store group; no launch claim is made. TypeScript, ESLint
+and all 1,367 tests in 165 suites passed after this change.
+
+2026-11-03 (shipping and grouping): official Affiliate product-details retrieval succeeded
+for both candidates but supplied no freight quote. The documented buyer freight call returned
+MissingParameter for access_token; no AliExpress user access token is configured locally.
+Public documentation places that method in a deprecated Dropshipping category. No automatic
+shipping integration is enabled until a current supported API, authorization and SKU/destination
+semantics are verified. Screenshots never become fixed quotes.
+
+Identity clusters now form by item price, independently of shipping completeness, while output
+groups/offers retain shipping-aware ordering. Brand-store marketplace offers remain separate
+from unverified sellers before cross-store matching, preventing an unverified member vetoing an
+otherwise eligible comparison. Gift editions are separate. All member-conflict, price-ratio
+and seller checks remain. The captured sample yields one model-level cross-store group for
+each of QCY H3 Pro and Edifier W800BT Pro, without Gift listings. This is not exact colour/SKU
+validation and does not satisfy the landed-cost launch gate. Types, lint and 1,370 tests passed.
+Local demo desktop/mobile browser validation also passed: 146 tests. No production flag or
+provider credential was changed by this implementation.
+
+2026-11-03 (support and variant safety): owner confirmed the AliExpress shipping/SKU inquiry
+was submitted; status is awaiting processing. Receipt details stay in local project notes.
+While waiting, model-level groups now show an English/Hebrew reminder to check colour, version
+and package. Multiple stated colours suppress best-price badges, premium amounts and homepage
+savings claims without removing store links. A sole-shipping-store availability statement is
+retained because it is not a price-saving claim. Unknown colours are still unknown, not verified
+SKU matches. No live shipping capability or exact-variant approval is implied.
+Full local coverage check passed: 1,372 tests in 165 suites.

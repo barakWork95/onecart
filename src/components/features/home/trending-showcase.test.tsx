@@ -76,7 +76,7 @@ describe("TrendingShowcase", () => {
     };
     render(<TrendingShowcase cards={[clips]} />);
     const card = screen.getByRole("article", { name: "Cable clips" });
-    expect(within(card).getByText("Looks identical · Best value")).toBeInTheDocument();
+    expect(within(card).getByText("Looks similar")).toBeInTheDocument();
     expect(within(card).getByText("₪3.20 per piece")).toBeInTheDocument();
   });
 

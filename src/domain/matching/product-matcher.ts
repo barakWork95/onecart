@@ -281,6 +281,9 @@ export function blocksGrouping(
 ): boolean {
   if (a.tokens.isAccessory !== b.tokens.isAccessory) return true;
   const sameStore = a.product.provider === b.product.provider;
+  // Keep a brand-store offer separate from unverified sellers at that marketplace.
+  // Mixing them first would let an unverified member veto a later cross-store match.
+  if (sameStore && isUnverifiedBrandListing(a) !== isUnverifiedBrandListing(b)) return true;
   if (!sameStore && (isUnverifiedBrandListing(a) || isUnverifiedBrandListing(b))) return true;
   // Two unbranded listings: a stated quantity, pack size or colour that differs vetoes, and
   // commodity markups are wider (generic matching still needs a photo to match).

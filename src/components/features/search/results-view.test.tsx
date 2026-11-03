@@ -108,7 +108,7 @@ describe("ResultsView", () => {
     );
     expect(within(cards[0]!).getByText("₪89")).toBeInTheDocument();
     expect(within(cards[0]!).getByText("Same item · 3 stores")).toBeInTheDocument();
-    expect(within(cards[0]!).getByText("total landed")).toBeInTheDocument();
+    expect(within(cards[0]!).getByText("estimated total")).toBeInTheDocument();
   });
 
   it("offers Compare for multi-store groups and a direct deal link for single-store ones", () => {
@@ -140,7 +140,7 @@ describe("ResultsView", () => {
     expect(screen.getByText("Similar item · 2 stores")).toBeInTheDocument();
   });
 
-  it("badges a photo match 'Looks identical · Best value', prices packs per piece, and names its sellers", async () => {
+  it("badges a photo match 'Looks similar', prices packs per piece, and names its sellers", async () => {
     const user = userEvent.setup();
     const ebay = makeProduct({
       provider: "ebay",
@@ -164,7 +164,7 @@ describe("ResultsView", () => {
     });
     renderView({ response: response({ groups: clips }) });
     const card = screen.getByRole("article", { name: /Magnetic Cable/ });
-    expect(within(card).getByText("Looks identical · Best value")).toBeInTheDocument();
+    expect(within(card).getByText("Looks similar")).toBeInTheDocument();
     expect(within(card).getByText("Looks identical · 2 stores")).toBeInTheDocument();
     expect(within(card).getByText("₪3.20 per piece")).toBeInTheDocument();
 
@@ -645,7 +645,7 @@ describe("CompareSheet", () => {
       "Amazon offer",
     ]);
     expect(within(rows[0]!).getByText("Best price")).toBeInTheDocument();
-    expect(within(rows[0]!).getByText("Total landed")).toBeInTheDocument();
+    expect(within(rows[0]!).getByText("Estimated total")).toBeInTheDocument();
     expect(within(rows[1]!).getByText("+₪9 vs best")).toBeInTheDocument();
     expect(within(rows[2]!).getByText("Fastest")).toBeInTheDocument();
     expect(within(rows[0]!).getByRole("link", { name: /Go to AliExpress/ })).toHaveAttribute(
@@ -776,6 +776,27 @@ describe("ResultsView analytics", () => {
     expect(tracked).toHaveBeenCalledWith(
       "outbound_click",
       expect.objectContaining({ store: "ebay", price_ils: 310, is_best_deal: true, locale: "en" }),
+    );
+  });
+});
+
+describe("comparison with missing shipping", () => {
+  it("never badges or tracks a partial comparison as a best deal", async () => {
+    const user = userEvent.setup();
+    const base = makeProduct({ provider: "amazon", sku: "partial", title: "Sony WH-1000XM5", total: 100_00 });
+    const partial = { ...base, price: { ...base.price, shippingKnown: false } };
+    const complete = makeProduct({ provider: "ebay", sku: "known", title: "Sony WH-1000XM5", total: 110_00 });
+    renderView({ response: response({ groups: groupProducts([partial, complete]) }) });
+    expect(screen.queryByText(/Best deal on/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Compare 2 stores/ }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).queryByText("Best price")).not.toBeInTheDocument();
+    expect(within(dialog).queryByText(/vs best/)).not.toBeInTheDocument();
+    expect(within(dialog).getByText(/We may earn a commission/)).toBeVisible();
+    await user.click(within(dialog).getByRole("link", { name: /Go to Amazon/ }));
+    expect(track).toHaveBeenCalledWith(
+      "outbound_click",
+      expect.objectContaining({ store: "amazon", is_best_deal: false }),
     );
   });
 });
