@@ -1,3 +1,4 @@
+import { AffiliateDisclosure } from "@/components/features/affiliate-disclosure";
 import { withLocale } from "@/components/features/outbound-link";
 import { ExternalLink, TrendingDown } from "lucide-react";
 import Link from "next/link";
@@ -78,6 +79,7 @@ export function PriceDrops({ drops, locale = "en" }: { drops: readonly PriceDrop
                     {t.typically(formatMoney(drop.typical, { locale }), drop.historyDays)}
                   </p>
                   <div className="mt-auto flex flex-col gap-1.5 pt-1">
+                    <AffiliateDisclosure locale={locale} />
                     <TrackedOutboundLink
                       href={withLocale(href, locale)}
                       click={{

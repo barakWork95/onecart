@@ -32,6 +32,8 @@ const serverEnvSchema = z.object({
    * The UI labels results as demo data whenever this is on.
    */
   ONECART_DEMO_PROVIDERS: flag(),
+  /** Staged headphones discovery catalog; enable only after the pilot launch gates pass. */
+  ONECART_HEADPHONES_PILOT: flag(),
   /**
    * Serve the Hebrew interface under /he, with hreflang links and sitemap entries.
    * Off: /he answers 404 and nothing links to it (until its text is translated).

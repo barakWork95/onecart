@@ -7,7 +7,7 @@ const count = (n: number, one: string, many: string) => (n === 1 ? one : `${n} $
 export const he: Dictionary = {
   meta: {
     title: "OneCart — המחיר הטוב ביותר",
-    description: "השוואת מחירים בין Amazon, eBay ו-AliExpress לפי המחיר הסופי לישראל: כולל משלוח, מע״מ ומכס.",
+    description: "השוואת מחירי חנויות עם עלויות משלוח ויבוא משוערות לישראל. משלוח שאינו ידוע מסומן בנפרד.",
     searchTitle: "השוואת מחירים",
     savedTitle: "שמורים",
     alertsTitle: "התראות מחיר",
@@ -30,6 +30,7 @@ export const he: Dictionary = {
     currencyTitle: "כל המחירים בשקלים, כולל משלוח לישראל",
     theme: "מצב כהה",
   },
+  affiliateDisclosure: "ייתכן שנקבל עמלה על קנייה דרך קישורי החנויות, ללא עלות נוספת עבורכם.",
   footer: {
     categories: "קטגוריות",
     legal: "מידע משפטי",
@@ -40,14 +41,17 @@ export const he: Dictionary = {
   },
   home: {
     title: "המחיר הטוב ביותר.",
-    subtitle: "משווים את Amazon, eBay ו-AliExpress לפי המחיר שתשלמו בפועל בישראל.",
+    subtitle: "משווים מחירי חנויות ועלויות משלוח ויבוא משוערות לישראל.",
     trendingSearches: "חיפושים פופולריים",
     valueProps: {
       stores: {
         title: "כל החנויות בחיפוש אחד",
         body: "Amazon, eBay ו-AliExpress זו לצד זו, והמוכרים מקובצים לפי מוצר.",
       },
-      landed: { title: "המחיר האמיתי לישראל", body: "משלוח, מע״מ ומכס מחושבים לפני ההשוואה." },
+      landed: {
+        title: "העלות המשוערת לישראל",
+        body: "משלוח שצוין ומסי יבוא משוערים, עם סימון ברור של עלויות חסרות.",
+      },
       trust: { title: "קונים איפה שבוטחים", body: "הקנייה עצמה מתבצעת בקופה של החנות." },
     },
     trending: {
@@ -141,7 +145,7 @@ export const he: Dictionary = {
     loadMore: { idle: "עוד תוצאות", loading: "טוען עוד…" },
   },
   group: {
-    lookAlikeBadge: "נראה זהה · המחיר הטוב ביותר",
+    lookAlikeBadge: "נראה דומה",
     sameItem: "אותו מוצר",
     similarItem: "מוצר דומה",
     looksIdentical: "נראה זהה",
@@ -149,7 +153,7 @@ export const he: Dictionary = {
     listings: (n) => count(n, "הצעה אחת", "הצעות"),
     shippingNotQuoted: "עלות המשלוח לא צוינה",
     freeDelivery: (days) => (days !== null ? `משלוח חינם תוך ${days} ימים` : "משלוח חינם"),
-    totalLanded: "מחיר סופי",
+    totalLanded: "עלות כוללת משוערת",
     plusShipping: "+ משלוח",
     averageRating: "דירוג ממוצע",
     viewDeal: (price) => `לעסקה ב-${price}`,
@@ -197,7 +201,7 @@ export const he: Dictionary = {
     freeShipping: "משלוח חינם",
     shipping: (price) => `משלוח ${price}`,
     shippingNotQuoted: "עלות המשלוח לא צוינה",
-    totalLanded: "מחיר סופי",
+    totalLanded: "עלות כוללת משוערת",
     plusShipping: "+ משלוח",
     vsBest: (price) => `${price}+ לעומת הטוב ביותר`,
     goTo: (store, price) => `מעבר ל-${store} — ${price}`,

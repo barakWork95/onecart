@@ -1,3 +1,4 @@
+import { AffiliateDisclosure } from "@/components/features/affiliate-disclosure";
 import { ArrowRight, ExternalLink, Search, Star, Truck } from "lucide-react";
 import Link from "next/link";
 import { CompareSheet } from "@/components/features/search/compare-sheet";
@@ -16,7 +17,7 @@ import { TrackedOutboundLink } from "@/components/features/tracked-outbound-link
 import { SaveButton } from "@/components/features/user-lists/save-button";
 import { TrackPriceButton } from "@/components/features/user-lists/track-price-button";
 import { buttonVariants } from "@/components/ui/button";
-import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import { bestOffer, isBestPriceOffer, type ProductGroup } from "@/domain/search/product-group";
 import type { ProviderId } from "@/domain/shared/provider";
 import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
@@ -185,6 +186,7 @@ export function ProductGroupCard({
           <StoreComparisonNote group={group} locale={locale} />
         </div>
 
+        <AffiliateDisclosure locale={locale} />
         <div className="pt-2 [&>*]:w-full">
           {comparisonScope(group).hasSheet ? (
             <CompareSheet group={group} links={links} locale={locale} />
@@ -195,7 +197,7 @@ export function ProductGroupCard({
                 store: best.provider,
                 product_title: best.title,
                 price_ils: priceIls(best.price.total),
-                is_best_deal: true,
+                is_best_deal: isBestPriceOffer(group, best),
                 locale,
               }}
               className={cn(

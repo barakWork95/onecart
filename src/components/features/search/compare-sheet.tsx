@@ -1,5 +1,6 @@
 "use client";
 
+import { AffiliateDisclosure } from "@/components/features/affiliate-disclosure";
 import { ArrowRightLeft, ChevronDown, X } from "lucide-react";
 import { Fragment } from "react";
 import {
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/drawer";
 import type { UnavailableListing } from "@/domain/product/unavailable-listing";
 import type { UnifiedProduct } from "@/domain/product/unified-product";
-import { bestOffer, type ProductGroup } from "@/domain/search/product-group";
+import { bestOffer, isBestPriceOffer, type ProductGroup } from "@/domain/search/product-group";
 import { dict } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 import { formatDeliveryDays, formatMoney } from "@/lib/format";
@@ -62,20 +63,18 @@ function breakdown(offer: UnifiedProduct, locale: Locale): string {
 function OfferRow({
   group,
   offer,
-  index,
   fastestId,
   href,
   locale,
 }: {
   group: ProductGroup;
   offer: UnifiedProduct;
-  index: number;
   fastestId: string | null;
   href: string;
   locale: Locale;
 }) {
   const t = dict(locale).compare;
-  const isBest = index === 0;
+  const isBest = isBestPriceOffer(group, offer);
   const meta = STORE_META[offer.provider];
   const delivery = formatDeliveryDays(offer.delivery, locale);
   const premium = premiumOverBest(group, offer);
@@ -105,11 +104,11 @@ function OfferRow({
         <div className="text-end">
           <p className="text-lg font-bold text-foreground">{formatMoney(offer.price.total, { locale })}</p>
           <p className="text-[11px] whitespace-nowrap text-muted-foreground">
-            {isBest
-              ? offer.price.shippingKnown
-                ? t.totalLanded
-                : t.plusShipping
-              : t.vsBest(formatMoney(premium, { locale }))}
+            {!offer.price.shippingKnown
+              ? t.plusShipping
+              : premium !== null && !isBest
+                ? t.vsBest(formatMoney(premium, { locale }))
+                : t.totalLanded}
           </p>
         </div>
         <TrackedOutboundLink
@@ -190,7 +189,7 @@ function ListingsTray({
   links: Readonly<Record<string, string>>;
   locale: Locale;
   /** The group's cheapest listing: the one a click counts as the best deal. */
-  bestId: string;
+  bestId: string | null;
 }) {
   const t = dict(locale).compare;
   const name = STORE_META[provider].name;
@@ -318,15 +317,15 @@ export function CompareSheet({
               <X className="size-4" aria-hidden />
             </DrawerClose>
           </div>
+          <AffiliateDisclosure locale={locale} />
           <ul className="mt-3 divide-y divide-border">
-            {group.offers.map((offer, index) => {
+            {group.offers.map((offer) => {
               const listings = group.listings.filter((l) => l.provider === offer.provider);
               return (
                 <Fragment key={offer.id}>
                   <OfferRow
                     group={group}
                     offer={offer}
-                    index={index}
                     fastestId={fastestId}
                     href={outboundHref(links, offer, locale)}
                     locale={locale}
@@ -337,7 +336,7 @@ export function CompareSheet({
                       listings={listings}
                       links={links}
                       locale={locale}
-                      bestId={bestOffer(group).id}
+                      bestId={isBestPriceOffer(group, bestOffer(group)) ? bestOffer(group).id : null}
                     />
                   )}
                 </Fragment>

@@ -27,6 +27,7 @@ function fastestDeliveryDays(group: ProductGroup): number | null {
 }
 
 const byPrice = (a: ProductGroup, b: ProductGroup) =>
+  Number(bestOffer(b).price.shippingKnown) - Number(bestOffer(a).price.shippingKnown) ||
   compareMoney(bestOffer(a).price.total, bestOffer(b).price.total);
 const byId = (a: ProductGroup, b: ProductGroup) => a.id.localeCompare(b.id);
 

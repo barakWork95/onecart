@@ -23,6 +23,7 @@ function listingId(raw: EbayRawItem): string | null {
   const [, legacy, variation] = raw.itemId.split("|");
   const id = raw.legacyItemId ?? legacy;
   if (!id || !/^\d+$/.test(id)) return null;
+  if (variation && variation !== "0" && !/^\d+$/.test(variation)) return null;
   return variation && variation !== "0" ? `${id}-${variation}` : id;
 }
 
@@ -95,7 +96,7 @@ export function mapEbayItem(raw: EbayRawItem, ctx: EbayMapContext): UnifiedProdu
     title,
     imageUrl: imageOf(raw),
     // Canonical listing URL; tracking params from itemWebUrl are dropped.
-    productUrl: `https://www.ebay.com/itm/${id.split("-")[0]}`,
+    productUrl: `https://www.ebay.com/itm/${id.split("-")[0]}${id.includes("-") ? `?var=${id.split("-")[1]}` : ""}`,
     price: calculateLandedPrice({ item, shipping: shipping?.cost ?? null }, ctx.policy, ctx.fx),
     originalPrice:
       originalIls && originalIls.amountMinor > toIls(item, ctx.fx).amountMinor ? originalIls : null,

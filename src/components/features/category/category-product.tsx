@@ -1,3 +1,4 @@
+import { AffiliateDisclosure } from "@/components/features/affiliate-disclosure";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { CategoryProduct } from "@/application/deals/category-page";
@@ -119,6 +120,7 @@ export function CategoryProductCard({
           </ul>
         )}
 
+        <AffiliateDisclosure locale={locale} />
         <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-center">
           {/* Live searches: never prefetched, so a crawler can't spend store quota through them. */}
           <Link

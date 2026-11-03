@@ -179,7 +179,9 @@ describe("“instant pot duo” (both stores ship it)", () => {
   it("opens with an Amazon vs eBay comparison of the Duo 6 Qt", async () => {
     const { groups } = await search("instant pot duo");
     const [top] = groups;
-    expect(top?.offers.map((o) => o.provider)).toEqual(["amazon", "ebay"]);
+    expect(top?.offers.map((o) => o.provider)).toEqual(["ebay", "amazon"]);
+    expect(top?.offers[0]?.price.shippingKnown).toBe(true);
+    expect(top?.offers[1]?.price.shippingKnown).toBe(false);
     expect(top?.title).toMatch(/Duo 6 Qt 7-in-1/);
   });
 

@@ -172,7 +172,9 @@ describe("eBay adapter — results", () => {
     expect(a40?.price.shippingKnown).toBe(false);
     expect(
       result.value.products.every(
-        (p) => p.productUrl.startsWith("https://www.ebay.com/itm/") && !p.productUrl.includes("?"),
+        (p) =>
+          p.productUrl.startsWith("https://www.ebay.com/itm/") &&
+          (!p.productUrl.includes("?") || /^var=\d+$/.test(new URL(p.productUrl).search.slice(1))),
       ),
     ).toBe(true);
   });

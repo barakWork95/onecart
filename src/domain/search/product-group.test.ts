@@ -250,3 +250,24 @@ describe("groupProducts — stores that won't ship", () => {
     expect(group).toMatchObject({ onIntent: false, isAccessory: true });
   });
 });
+
+describe("partial shipping prices", () => {
+  it("prefers quoted shipping without losing the numeric price range", () => {
+    const partialBase = makeProduct({
+      provider: "amazon",
+      sku: "partial",
+      title: "Sony WH-1000XM5",
+      total: 100_00,
+    });
+    const partial = { ...partialBase, price: { ...partialBase.price, shippingKnown: false } };
+    const complete = makeProduct({
+      provider: "ebay",
+      sku: "complete",
+      title: "Sony WH-1000XM5",
+      total: 110_00,
+    });
+    const [group] = groupProducts([partial, complete]);
+    expect(group?.offers.map((offer) => offer.id)).toEqual([complete.id, partial.id]);
+    expect(group?.priceRange).toEqual({ min: money(100_00, "ILS"), max: money(110_00, "ILS") });
+  });
+});
